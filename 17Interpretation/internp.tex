@@ -1,0 +1,495 @@
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, April 2017}
+  \vfill
+  \centerline{\bf Interpreting Deep Networks}
+  \vfill
+  \centerline{\bf The Black Box Problem}
+  \vfill  
+  \vfill
+
+\slide{The Human Black Box --- Perception}
+
+Introspection is notoriously inadequate for AI.
+
+\vfill
+Explain how you know there are upside down glasses in this picture.
+\vfill
+\centerline{\includegraphics[height = 3.5in]{../images/table-setting}}
+
+\slide{The Human Black Box --- Inference}
+
+Certain facts are obvious.
+
+\vfill
+A king on empty chess board can reach every square (obvious).
+
+\vfill
+A knight on an empty chess board can reach every square (true but not obvious).
+
+\slide{The Human Black Box --- Inference}
+
+Consider a graph with colored nodes.
+
+\vfill
+If every edge is between nodes of the same color, then any path connects nodes of the same color.
+
+\vfill
+Consider a swiss chocolate bar of $3 \times 5$ little squares.
+
+\vfill
+How many breaks does it take to reduce this to fifteen unconnected squares?
+
+\slide{Why Open the Box?}
+
+Insight for improving system design.
+
+  \vfill
+Insight into the reasons for system decisions.
+
+  \vfill
+Convincing people to accept system decisions.
+
+\slide{Dimensionality Reduction}
+
+\centerline{\includegraphics[width = 9.5in]{../images/t-SNE}}
+\centerline{[Stanford CS231]}
+
+\slide{t-SNE}
+
+Consider high dimensional points $x_1$, $\ldots$, $x_N$.
+
+\vfill
+$$P(j|i) = \frac{1}{Z_i} \exp\left(\frac{-||x_i -x_j||^2}{2\sigma_i^2}\right)$$
+
+\vfill
+Set $\sigma_i$ such that $H(P_i(:|i)) = H(P(:|j))$ for all $i$, $j$.
+
+\vfill
+$$P(\{i,j\}) = \frac{P(i|j) +P(j|i)}{2N}$$
+
+\vfill
+$$\mbox{we have}\;\; \sum_j P(\{i,j\}) \geq \sum_j \frac{P(j|i)}{2N} = \frac{1}{2N}$$
+
+\slide{t-SNE}
+
+Consider low dimensional points $y_1$, $\ldots$, $y_N$.
+
+\vfill
+$$Q(\{i,j\}) = \frac{1}{Z} \left(\frac{1}{1 + ||y_i -y_j||^2}\right)$$
+
+\vfill
+$$Y^* = \argmin_Y H(P,Q)$$
+
+\slide{t-SNE vs. Projection Modeling}
+
+t-SNE --- $y(x)$ is defined by a table on the data points.
+
+\vfill
+In PCA or Isomap we have $y_\Phi(x) \in \mathbb{R}^2$ for a parameterized function $y_\Phi$.
+
+\vfill
+Assume a (nearest neighbor) distribution on pairs $(x_1,x_2)$ and consider random variables $y_1 = y_\Phi(x_1)$ and $y_2 = y_\Phi(x_2)$.
+
+\vfill
+An idea (not PCA or Isomap) :
+
+\vfill
+$$\Phi^* = \argmax_\Phi I(y_1,y_2)$$
+\slide{Visualizing the Filters}
+
+\centerline{\includegraphics[width = 9.5in]{../images/Filters}}
+\centerline{[Stanford CS231]}
+
+\slide{}
+
+\centerline{\includegraphics[width = 9.5in]{../images/Occlusion}}
+\centerline{[Stanford CS231]}
+
+\slide{Backpropagation from Individual Neurons}
+
+\centerline{\includegraphics[width = 9.5in]{../images/DeconvAnalysis}}
+\centerline{[Stanford CS231]}
+
+\slide{Guided Backpropagation}
+
+Rather than $\partial \ell/ \partial x$ we are interested in $\partial \mathrm{neuron}/\partial x$.
+
+\vfill
+We are interested in $\partial \mathrm{neuron}/\partial x$ where $x$ in one color channel of one input pixel.
+
+\vfill
+It turns out that $\partial \mathrm{neuron}/\partial x$ looks like image noise.
+
+\vfill
+Instead we compute $x$.ggrad  --- a {\bf guided} version of $\partial \mathrm{neuron}/\partial x$.
+
+\slide{Guided Backpropagation}
+
+\vfill
+Guided backpropagation only considers computation paths that activate (as opposed to suppress) the neuron all along the activation path.
+
+\vfill
+The backpropagation at activation functions is modified.
+
+\vfill
+For a neuron $y$ with $y = s(x)$ for activation function $s$:
+
+$$x.\mathrm{ggrad} = I[y.\mathrm{ggrad} > 0] \;y.\mathrm{ggrad}\; ds/dx$$
+
+
+\slide{Guided Backpropagation}
+
+\centerline{\includegraphics[width = 6in]{../images/DeconvKitten}}
+
+\slide{Guided Backpropagation}
+
+\centerline{\includegraphics[width = 4in]{../images/DeconvUnguided} \hfill \includegraphics[width=4in]{../images/DeconvGuided}}
+
+\centerline{[Zeigler and Fergus 2013]}
+
+
+\slide{Guided Backpropagation Layer 2}
+
+\centerline{\includegraphics[width = 8in]{../images/Deconv2IM}}
+
+\centerline{\includegraphics[width = 8in]{../images/Deconv2}}
+
+\centerline{[Zeigler and Fergus 2013]}
+
+\slide{Guided Backpropagation Layer 3}
+
+\centerline{\includegraphics[width = 8in]{../images/Deconv3IM}}
+
+\centerline{\includegraphics[width = 8in]{../images/Deconv3}}
+
+\centerline{[Zeigler and Fergus 2013]}
+
+\slide{Guided Backpropagation Layer 4}
+
+\centerline{\includegraphics[width = 8in]{../images/Deconv4a}}
+
+\centerline{\includegraphics[width = 8in]{../images/Deconv4b}}
+
+\centerline{[Zeigler and Fergus 2013]}
+
+
+\slide{Guided Backpropagation Layer 5}
+
+\centerline{\includegraphics[width = 8in]{../images/Deconv5a}}
+
+\centerline{\includegraphics[width = 8in]{../images/Deconv5b}}
+
+\centerline{[Zeigler and Fergus 2013]}
+
+\slide{A Wheel or Face Detector}
+
+The nine strongest stimulators of the ``wheel or face cell'' are the following.
+
+\vfill
+\centerline{\includegraphics[width = 4.0in]{../images/Deconv6a} \hfill \includegraphics[width=4.0in]{../images/Deconv6b}}
+
+\vfill
+\centerline{[Zeigler and Fergus 2013]}
+
+\slide{}
+\centerline{\includegraphics[width = 7.5in]{../images/Potato}}
+
+\centerline{[Alyosho Efros]}
+
+\slideplain{The Kaurnaugh Model of DNNs}
+
+The Karnaugh map, also known as the K-map, is a method to simplify boolean algebra expressions.
+
+\vfil
+\centerline{\includegraphics[width = 1.5in]{../images/Kmap1} \hspace{1.0in} \includegraphics[width=3.0in]{../images/Kmap2}}
+
+\begin{eqnarray*}
+  F(A,B,C,D) & = & AC' + AB' + BCD' + AD' \\
+  & = & (A+B)(A+C)(B' + C' + D')(A+D')
+\end{eqnarray*}
+
+\slideplain{A Kaurnaugh Person Detector}
+
+{\color{red}
+  
+\centerline{Wheel or Face}
+
+\vfill
+\centerline{Hand or Flower \hspace{1in} Hand or Flower}
+
+\vfill
+\centerline{Leg or Tree \hspace{1in} Leg or Tree}
+}
+
+\vfill
+The set of locally minimal models (circuits) could be vast (exponential) without damaging performance.
+
+\vfill
+Is a Boolean circuit a distributed representation?
+
+\slide{The Glass Model of SGD}
+
+Pysical glass (ordinary silica glass) is a metastable state  --- the ground state is quartz crystal.
+
+\vfill
+As molten glass cools there is a temperature $T_g$ ($\pm 1$ degrees C) at which it ``solidifies'' (the viscosity becomes huge).
+
+\vfill
+This soldification process is very repeatable with a well defined final energy.
+
+\vfill
+However, the local optimum achieved is presumably very different for each instance of cooling.
+
+\slide{Identifying Channel Correspondences}
+
+Convergent Learning: Do Different Neural
+Networks Learn The Same Representations?, Li eta al., ICLR 2016.
+
+\vfill
+Train Alexnet twice with different initializations to get net1 and net2.
+
+\vfill
+For each convolution layer, each channel $i$ of net1, and each channel $j$ of net2, compute their correlation.
+
+\vfill
+$$\rho_{i,j} = \expect{\frac{(u_i - \mu_i)(u_j- \mu_j)}{\sigma_i \sigma_j}}$$
+
+\slide{Semi-matching and Bipartite matching}
+
+{\bf Semi-matching}: for each $i$ in net1 find the best $j$ in net2:
+
+$$\hat{j}(i) = \argmax_j \rho_{i,j}$$
+
+\vfill
+{\bf Biparetitie Matching:} Find the best one-to-one correspondence.
+
+$$\hat{j} = \argmax_{\hat{j}\;\mbox{a bijection}}\;\sum_i \rho_{i,\hat{j}(i)}$$
+
+\vfill
+Bipartite matching can be solved by a classical algorithm [Hopcroft and Karp, 1973].  John Hopcroft (age 77) is an author on this ICLR paper.
+
+\slide{Correlations at Layer 1 (Wavelet Layer)}
+
+\centerline{\includegraphics[width = 9in]{../images/Correlations1}}
+
+
+\slide{Alexnet Layer 1}
+
+\centerline{\includegraphics[width = 9.5in]{../images/AlexnetL1}}
+\centerline{[Krizhevsky et al.]}
+
+\slide{Best Matches in Layer 1 semi-matching}
+
+\centerline{\includegraphics[width = 8in]{../images/Correlations2}}
+\centerline{[Li et al.]}
+
+\slide{Worst Matches in Layer 1 semi-matching}
+
+\centerline{\includegraphics[width = 8in]{../images/Correlations3}}
+\centerline{[Li et al.]}
+
+\slide{Layer 1 in Other Networks}
+
+\centerline{\includegraphics[width = 9.5in]{../images/Filters}}
+\centerline{[Stanford CS231]}
+
+\slide{Regression Between Networks at Layer 1}
+
+Model each channel of net1 as a linear combination of channels of net2 using least squares regression.
+
+\vfill
+Before the regression each channel is normalized to have zero mean and channel variance.
+
+\vfill
+No correlation would yield a {\color{red} square loss of 1.000}.
+
+\vfill
+No regularization gives a {\color{red} square loss of 0.170} and uses {\color{red} 96 channels} in each prediction.
+
+\vfill
+L1 regularization gives a {\color{red} square loss of 0.235} and uses {\color{red} 4.7 channels} in each prediction.
+
+\slide{Deeper Layers}
+
+\centerline{\includegraphics[width = 7.5in]{../images/Correlations4}}
+
+\vfill
+In the regression experiment squared error was not significantly reduced at layers 3 through 5 even without regularization. 
+
+\slide{Model Compression}
+
+Deep Compression: Compressing Deep Neural
+Networks With Pruning, Trained Quantization
+and Huffman Coding, Han et al., ICLR 2016.
+
+\vfill
+\begin{itemize}
+\item Compressed Models can be downloaded to mobile devices faster and fit in lower-power CPU memory.  (The motivation of this paper).
+
+\vfill
+\item Sparse models may be more interpretable than dense models.
+
+\vfill
+\item Model size is a measure of model complexity and can be viewed as a form of regularization.
+\end{itemize}
+
+\vfill
+VGG-16 is reduced by $49 \times$ from 552MB to 11.3MB with no loss of accuracy.
+
+\slide{Three Stages}
+
+\begin{itemize}
+\item Sparsification by simple weight thresholding.  ($10 \times$ reduction).
+
+  \vfill
+\item Trained Quantization ($6\times$ reduction).
+
+  \vfill
+\item Huffman coding ($40\%$ reduction).
+\end{itemize}
+
+\slide{Quantization}
+
+They use 5 bits of numerical precision for the weights.
+
+\vfill
+This is done by having a table of the 32 possible weight values.
+
+\vfill
+We have to cluster the weights into 32 groups and decide on a {\bf centroid value} for each weight.
+
+\vfill
+This is done with K-means clustering.
+
+\slide{Initialization of Centroids}
+
+\centerline{\includegraphics[width = 7in]{../images/Compression1}}
+
+\slide{After Running K-means}
+
+\centerline{\includegraphics[width = 7in]{../images/Compression2}}
+
+\slide{Retrain to Adjust Centroids}
+
+Run over the data again doing backpropagation to adjust the table of the 32 possible weights.
+
+\vfill
+This leaves the 5-bit code of each weight in the model unchanged.
+
+\slide{Huffman Coding}
+
+Different 5-bit numerical codes have different frequencies.
+
+\vfill
+This can be viewed as distribution over the 32 code words.
+
+\vfill
+We can reduce the average number of bits per weight using fewer bits to code the more common weight values.
+
+\vfill
+Huffman coding is applied to both the 5 bit weight coding and a three bit code used in the sparse representation of the weight matrices.
+
+\vfill
+This results in about 5 bits  per {\bf nonzero} weight in a {\bf sparse} coding of the weight matrices.
+
+\slide{Dense-Sparse-Dense}
+
+DSD: Dense-Sparse-Dense Training for Deep
+Neural Networks, Han et al., ICLR 2017
+
+\vfill
+\begin{enumerate}
+\item Train a model.
+
+  \vfill
+\item Make the model sparse by weight thresholding.
+
+  \vfill
+\item Retrain the model holding the sparsity pattern fixed (still 32 bits per weight).
+
+  \vfill
+\item Go back to a dense model with all pruned weights initialized to zero.
+
+  \vfill
+\item  Retrain the dense model.
+\end{enumerate}
+
+Results in significant performance improvements in a wide variety of models.
+
+\slide{Step 1}
+
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/DSD1}}
+
+\slide{Step 2}
+
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/DSD2}}
+
+\slide{Step 3}
+
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/DSD3}}
+
+\slide{Step 4}
+
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/DSD4}}
+
+\slide{Step 5}
+
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/DSD5}}
+
+\slide{Results}
+
+\vfill
+\centerline{\includegraphics[width = 9.5in]{../images/DSDtable}}
+
+\slide{Attention as Explanation}
+
+\centerline{\includegraphics[width = 4in]{../images/AttentionInCaptioning1}}
+\centerline{Xu et al. ICML 2015}
+
+\slideplain{Interpretation from Domain Correspondence}
+
+Kushner verliert den Zugang zu streng geheimen Informationen.
+$$\Rightarrow$$
+Kushner loses access to top-secret intelligence.
+
+\vfill
+\centerline{\includegraphics[width = 6.0in]{../images/Cycle2}}
+
+\slide{Causal Models are Explicitly Interpretable}
+
+Flu causes symptoms $x$, $y$ $z$.
+
+\vfill
+Strep causes symptoms $x$, $y$, $u$.
+
+\vfill
+For the given information on the patient, the prior probability for flu is $\ldots$
+
+\slide{Can Alpha Zero Explain Chess Moves?}
+
+I did $x$ because if I did $y$ they would do $z$ and, in that case, $\ldots$.
+
+
+
+
+
+\slide{END}
+
+
+
+
+
+}
+\end{document}

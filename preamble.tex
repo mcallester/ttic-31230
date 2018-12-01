@@ -1,0 +1,159 @@
+\documentclass[landscape]{article}
+
+\usepackage{amsmath,amssymb,amsthm,graphicx,color,bbm}
+
+\pagestyle{empty}
+\headsep=0in
+\parindent=0ex
+\textwidth=8.5in
+\textheight=6.0in
+
+\oddsidemargin=0in
+
+
+\newcommand{\slidetwo}[2]{\vfill
+\eject
+\centerline{\bf #1}
+\bigskip
+\centerline{\bf #2}
+\vfill}
+
+\newcommand{\slidethree}[3]{\vfill
+\eject
+\centerline{\bf #1}
+\centerline{\bf #2}
+\centerline{\bf #3}
+\vfill}
+
+\newcommand{\slide}[1]{
+  \vfill
+  \centerline{\Large\thepage}
+  \eject
+  \centerline{\bf #1}
+  \vfill}
+
+\newcommand{\slideplain}[1]{
+  \vfill
+  \eject
+  \centerline{\bf #1}
+  \vfill}
+
+\newcommand{\anaslide}[1]{
+  \vfill
+  \centerline{\Large\thepage}
+  \eject \centerline{\bf #1}}
+
+\newcommand{\anaslideplain}[1]{
+  \vfill
+  \eject
+  \centerline{\bf #1}}
+
+\newcommand{\bigsum}[2]{\mathop{{\huge \Sigma}}_{#1}^{#2}\;}
+
+\newcommand{\tail}[1]{\Phi\left(#1\right)}
+
+\newcommand{\Rmax}{R_{\max}}
+\newcommand{\dmax}{d_{\max}}
+\newcommand{\emax}{e_{\max}}
+\newcommand{\domx}{{\cal X}}
+\newcommand{\domy}{{\cal Y}}
+\newcommand{\domr}{{\cal R}}
+
+\newcommand{\var}[1]{\mbox{\tt{"}}#1\mbox{\tt{"}}}
+\newcommand{\phrase}[1]{{\mathrm Phrase}(#1)}
+\newcommand{\branch}[1]{{\mathrm Branch}(#1)}
+\newcommand{\terminal}[1]{{\mathrm Terminal}(#1)}
+
+\newcommand{\mtt}[1]{\mbox{\tt #1}}
+\newtheorem{theorem}{\noindent Theorem}
+\newtheorem{lemma}[theorem]{\noindent Lemma}
+\newtheorem{observation}[theorem]{\noindent Observation}
+\newtheorem{corollary}[theorem]{\noindent Corollary}
+\newtheorem{conjecture}[theorem]{\noindent Conjecture}
+\newtheorem{proposition}[theorem]{\noindent Proposition}
+\newtheorem{example}{\noindent Example}
+\newtheorem{definition}{\noindent Definition}
+\newtheorem{claim}[theorem]{\noindent Claim}
+\newtheorem{fact}[theorem]{\noindent Fact}
+
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\kbest}{kbest}
+\DeclareMathOperator*{\softmax}{softmax}
+
+\DeclareMathOperator*{\locmax}{locmax}
+\DeclareMathOperator*{\locmin}{locmin}
+
+\newcommand{\parens}[1]{\left(#1\right)}
+\newcommand{\brackets}[1]{\left[#1\right]}
+\newcommand{\nn}{\nonumber \\}
+
+\newcommand{\expect}[1]{\mathrm{E}\left[#1\right]}
+\newcommand{\expectsub}[2]{E_{#1}\;#2}
+\newcommand{\probsub}[2]{\mathrm{P}_{#1}\left[#2\right]}
+
+\newcommand{\tuple}[1]{{\mbox{$\langle#1\rangle$}}}
+
+
+\newcommand{\xmean}{\expect{X}}
+\newcommand{\xxmean}{\overline{x}}
+\newcommand{\sbound}{\tilde{\sigma}}
+\newcommand{\betamin}{\beta_{\min}}
+\newcommand{\betamax}{\beta_{\max}}
+\newcommand{\xmin}{x_{\min}}
+\newcommand{\xmax}{x_{\max}}
+\newcommand{\expectbeta}[1]{\expectsub{\beta}{#1}}
+
+\newcommand{\calx}{{\cal X}}
+\newcommand{\caly}{{\cal Y}}
+
+\newcommand{\dint}{\int\!\!\!\!\int}
+\newcommand{\classcount}[1]{\mathrm{c}(#1)}
+\newcommand{\smallprod}{{\prod}}
+
+\newcommand{\ignore}[1]{}
+
+\newcommand{\weight}[1]{{\mathrm Weight}(#1)}
+\newcommand{\context}[1]{{\mathrm Context}(#1)}
+\newcommand{\econtext}[1]{{\mathrm EContext}(#1)}
+\newcommand{\sstop}{{\mathrm stop}}
+\newcommand{\sstart}{{\mathrm start}}
+
+\newcommand{\sidebyside}[2]{\parbox[t]{2.0in}{#1}\hspace{1.0in}
+                            \parbox[t]{2.0in}{#2}}
+
+\newcommand{\tightsidebyside}[2]{\parbox[t]{2.0in}{#1}\hspace{.3in}
+                            \parbox[t]{2.0in}{#2}}
+
+\newcommand{\subproves}[1]{\,\;\vdash\!\!_{#1}\;\,}
+
+\def\irule#1#2#3#4{
+\begin{tabbing}
+#2 \parbox{.75in}{\noindent \hrule ~} $#3$ \\ #4
+\end{tabbing}}
+
+\def\ant#1{$#1$ \\}
+
+\newcommand{\abs}{\text{\emph{abs}}}
+
+\newcommand{\reals}{\mathbb{R}}
+\newcommand{\complex}{\mathbb{C}}
+
+\newcommand{\grad}{\mathrm{grad}}
+\newcommand{\pop}{\mathrm{Pop}}
+\newcommand{\rmvalue}{\mathrm{value}}
+
+\newcommand{\pluseq}{\mbox{\tt +=}}
+
+\newcommand{\minuseq}{\mbox{\tt -=}}
+
+\newcommand{\cev}[1]{\reflectbox{\ensuremath{\vec{\reflectbox{\ensuremath{#1}}}}}}
+\newcommand{\dvec}[1]{\stackrel{\leftrightarrow}{#1}}
+\newcommand{\lmax}{L_{\max}}
+
+\newcommand{\bbone}{\mathbbm{1}}
+
+\newcommand{\intype}[2]{#1\!:\!#2}
+\def\dcolon{\mathrel{:}\joinrel\mathrel{\mkern+5mu}\joinrel\mathrel{:}}
+\newcommand{\inntype}[2]{#1\dcolon#2}
+\newcommand{\bool}{\mathrm{\bf Bool}}
