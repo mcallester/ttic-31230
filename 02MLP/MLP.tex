@@ -1,3 +1,4 @@
+\input ../SlidePreamble
 \input ../preamble
 
 \begin{document}
@@ -64,13 +65,13 @@ We consider the problem of taking an input $x$ (such as an image of a hand writt
   
 \slide{Multiclass Classification}
 
-Assume a population distribution on pairs $(x,y)$ for $x \in \reals^d$ and $y \in \{y_0,\ldots, y_k\}$.
+Assume a population distribution on pairs $(x,y)$ for $x \in \reals^d$ and $y \in \{y_1,\ldots, y_k\}$.
 
 \vfill
 For MNIST $x$ is a $28 \times 28$ image which we take to be a 784 dimensional vector giving $x \in \reals^{784}$.
 
 \vfill
-For MNIST $k = 9$ giving ten digits to be recognized.
+For MNIST $k = 10$.
 
 \vfill
 Let $\mathrm{Train}$ be a sample $(x_0,y_0),\;\ldots,\;(x_{N-1},y_{N-1})$ drawn IID from the population.
