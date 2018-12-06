@@ -651,6 +651,31 @@ In practice we can estimate this prior from the training data.
 \end{eqnarray*}
 }
 
+\slideplain{Loss Vs. Error Rate}
+While training (gradient descent) is generally done on log loss, performance is often judged by other measures such as error rate.
+
+\vfill
+The ``loss'' is often used as a synonym for log loss (or whatever loss defined the gradient descent training).
+
+\vfill
+Hence one often reports both ``loss'' and ``error rate''.
+
+\vfill
+Note that error rate is not differentiable.
+
+\slide{Train Data, Development Data and Test Data}
+
+Data is typically divided into {\bf a training set}, {\bf a development set} and {\bf a test set} each drawn IID from the population.
+
+\vfill
+A learning algorithm optimizes training loss.
+
+\vfill
+One then optimizes algorithm design (and hyper-parameters) on the development set. (graduate student descent).
+
+\vfill
+Ultimate performance should be done on a test set not used for development.  Test data is often withheld from developers.
+
 \slide{END}
 
 }
