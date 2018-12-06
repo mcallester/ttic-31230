@@ -14,6 +14,24 @@
   \vfill
   \vfill
 
+  
+\slide{The Core of EDF}
+
+\begin{verbatim}
+def Forward():
+    for c in CompNodes: c.forward()
+
+def Backward(loss):
+    for c in CompNodes + Parameters: c.grad = 0
+    loss.grad = 1/nBatch
+    for c in CompNodes[::-1]: c.backward()
+
+def SGD():
+    for p in Parameters:
+        p.SGD()
+\end{verbatim}
+\vfill
+
 \slide{EDF}
 
 The educational frameword (EDF) is a simple Python-NumPy implementation of a deep learning framework.
@@ -31,7 +49,7 @@ In EDF we write
 \medskip
 
 \vfill
-This is Python code where variables are bound to objects.
+This is Python code where variables are bound to objects (inputs, parameters and compnodes).
 
 \anaslide{The EDF Framework}
 
@@ -49,13 +67,13 @@ This is Python code where variables are bound to objects.
 $x$ is an object in the class {\tt Input}.
 
 \vfill
-$y$ is an object in the class $F$.
+$y$ is an object in the class $F$ (subclass of {\tt CompNode}).
 
 \vfill
-$z$ is an object in the class $G$.
+$z$ is an object in the class $G$ (subclass of {\tt CompNode}).
 
 \medskip
-$u$ and ${\cal L}$ are the same object in the class $H$.
+$u$ and ${\cal L}$ are the same object in the class $H$ (suclass of {\tt CompNode}).
 
 \anaslideplain{$y = F(x)$}
 
@@ -159,23 +177,6 @@ class Affine(CompNode):
         self.Phi.w.addgrad(self.x.value[:,:,np.newaxis]
                            * self.grad[:,np.newaxis,:])
 \end{verbatim}
-
-\slide{The Core of EDF}
-
-\begin{verbatim}
-def Forward():
-    for c in CompNodes: c.forward()
-
-def Backward(loss):
-    for c in CompNodes + Parameters: c.grad = 0
-    loss.grad = 1/nBatch
-    for c in CompNodes[::-1]: c.backward()
-
-def SGD():
-    for p in Parameters:
-        p.SGD()
-\end{verbatim}
-\vfill
 
 \slide{forward and backward must handle minibatching}
 
