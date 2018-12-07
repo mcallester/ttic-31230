@@ -324,6 +324,61 @@ Consider
 If $Q_\Phi$ is not universally expressive we have that (1) still forces $Q_\Phi$ to cover all of $P$ (or else the KL divergence is infinite)
 while (2) allows $Q_\Phi$ to be restricted to a single mode of $P$ (a common outcome).
 
+\slideplain{Density Estimation}
+
+Anything that can be done conditionally $P_\Phi(y|x)$ can also be done unconditionally $P_\Phi(y)$.
+
+\vfill
+We have unconditional cross-entropy training.
+
+\begin{eqnarray*}
+  \Phi^* & = & \argmin_\Phi \;\;E_{y \sim \mathrm{Pop}}  -\log P_\Phi(y)
+\end{eqnarray*}
+
+\vfill
+This is {\bf distribution modeling} or {\bf density estimation}.
+
+\vfill
+Density estimation is sometimes equated with {\bf unsupervised learning}.  A primary example is {\bf language modeling}.
+
+\slide{Unsupervised Learning}
+
+\centerline{\includegraphics[width = 8in]{../images/cake}}
+
+
+\slide{Unsupervised Learning}
+
+By ``unsupervised learning'' we will mean learning from {\bf massively available} data.  This is not a mathematical definition.
+
+\vfill
+{\bf Massive}: images, audio, text, video, click-through data.
+
+\vfill
+{\bf Less Massive}: car control data, stereo image pairs, closed captioned video, captioned images.
+
+\vfill
+{\bf Big}: Manually annotated images or audio.
+
+\vfill
+{\bf Small}: manually annotated text --- parse trees, named entities, semantic roles, coreference, entailment.
+
+\vfill
+{\bf Smallest:} Manually annotated text in an obscure language.
+
+\slide{Colorization}
+
+$$\Phi^* = \argmin_\Phi \expectsub{(x,y) \sim \mathrm{Pop}}{-\log P_\Phi(y|x)}$$
+
+\vfill
+\centerline{\includegraphics[height=2in]{../images/Colorization}}
+
+\vfill
+We have massive data for colorization.
+
+\vfill
+Colorization is unsupervised structured labeling.
+
+
 \slide{END}
 
 }
