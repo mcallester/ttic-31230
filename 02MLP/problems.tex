@@ -23,13 +23,13 @@ Give a back-propagation $\pluseq$ update based on the second equation for adding
 (and using the forward-computed tensors $s$ and $Z$).
 
 \medskip
-Give a back-propagation $\pluseq$ update based on the first equation for adding to $s.\grad$ using $Z.grad$
+Give a back-propagation $\pluseq$ update based on the first equation for adding to $s.\grad$ using $Z.\grad$
 (and using the forward-computed tensor $s$).
 
 \bigskip
 {\bf Problem 2:} For the softmax in problem 1 show that we can instead use
 \begin{eqnarray*}
-  e[b] & = & \sum_j p[b,j]p.grad[b,j] \\
+  e[b] & = & \sum_j p[b,j]p.\grad[b,j] \\
   s.\grad[b,j] & = & p[b,j](p.\grad[b,j] - e[b])
 \end{eqnarray*}
 
