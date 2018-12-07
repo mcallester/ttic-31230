@@ -1,3 +1,4 @@
+\input ../SlidePreamble
 \input ../preamble
 
 \begin{document}
@@ -6,99 +7,13 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2018}
+  \centerline{David McAllester, Winter 2019}
 
   \vfill
   \centerline{\bf Information Theory} 
   \vfill
 \vfill
 \vfill
-
-\slide{Logistic Regression as a Major Advance}
-
-
-$$\Phi^* = \argmin_\Phi \;E_{(x,y) \sim \mathrm{Train}} \;(y-f_\Phi(x))^2$$
-
-\vfill
-Switched to
-
-\vfill
-\begin{eqnarray*}
-  Q_\Phi(y|x) & = & \softmax_{\hat{y}}\;f_\Phi(\hat{y}|x) \\
-  \\
-  \Phi^* & = & \argmin_\Phi\;E_{(x,y) \sim \mathrm{Train}}\;\; - \log\;Q_\Phi(y|x)
-\end{eqnarray*}
-
-
-\slide{Binary Classification}
-
-We have a population distribution over $(x,y)$ with $y \in \{-1,1\}$.
-
-\vfill
-We compute a single number $f_\Phi(x)$ where
-
-\vfill
-for $f_\Phi(x) \geq 0$ predict $y = 1$
-
-\vfill
-for $f_\Phi(x) < 0$ predict $y = -1$
-
-\slide{Softmax for Binary Classification}
-
-\begin{eqnarray*}
-  Q_\Phi(y|x) & = & \frac{1}{Z} \;e^{yf(x)} \\
-  \\
-  & = & \frac{e^{yf(x)}}{e^{yf(x)} + e^{-yf(x)}} \\
-  \\
-  \\
-  & = & \frac{1}{1 + e^{-2yf(x)}} \\
-  \\
-  \\
-    & = & {\color{red} \frac{1}{1 + e^{-m(y)}}} \;\;\;\;\;\;m(y|x) = 2yf(x)\;\mbox{is the margin}
-\end{eqnarray*}
-
-\slide{Logistic Regression for Binary Classification}
-
-\begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi\;E_{(x,y) \sim \mathrm{Train}}\;\ln 1/Q_\Phi(y|x) \\
-  \\
-  & = & \argmin_\Phi\;E_{(x,y) \sim \mathrm{Train}}\;{\color{red} \ln \left(1 + e^{-m(y|x)}\right)} \\
-  \\
-  \ln \left(1 + e^{-m(y|x)}\right) & \approx & 0 \;\;\;\mbox{for $m(y|x) >> 1$} \\
-  \\
-  \ln \left(1 + e^{-m(y|x)}\right) & \approx & -m(y|x) \;\;\;\mbox{for $m(y|x) << -1$} \\
-\end{eqnarray*}
-
-\slide{Log Loss vs. Hinge Loss}
-Log loss:
-\begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi\;E_{(x,y) \sim \mathrm{Train}}\;- \ln Q_\Phi(y|x) \\
-  \\
-  & = & \argmin_\Phi\;E_{(x,y) \sim \mathrm{Train}}\;\ln \left(1 + e^{-m(y|x)}\right)\;\;\;\;\;\mbox{binary case}
-\end{eqnarray*}
-
-\vfill
-Hinge Loss:
-\begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi\;E_{(x,y) \sim \mathrm{Train}}\;\max(0,1-m(y|x)) \\
-  \\
-  m(y|x) & = & \min_{\hat{y} \not = y} \;f(y|x) - f(\hat{y}|x)
-\end{eqnarray*}
-
-\slide{Log Loss vs. Hinge Loss}
-
-We will show that log loss is a consistent probability estimator.
-
-\vfill
-For log loss, and for infinite training data, $Q^*(y|x)$ is the true population conditional probability.
-
-\vfill
-Hinge loss is a consistent classifier but not a consistent probability estimator.
-\begin{eqnarray*}
-  f^*(y^*|x) & = & 1 \\
-  f^*(\hat{y}|x) & = & 0 \;\;\;\mbox{for $\hat{y} \not = y^*$}
-\end{eqnarray*}
-
 
 \slide{Entropy}
 
@@ -136,7 +51,7 @@ The leaves of this tree are labeled with the elements of $S$.
 The code defines a probability distribution on $S$ by randomly selecting branches.
 
 \vfill
-We have $Q_C(y) = 2^{-|C(y)|}$.
+We have $P_C(y) = 2^{-|C(y)|}$.
 
 \slide{The Source Coding Theorem}
 
@@ -213,129 +128,25 @@ Swapping the sibling of $T_i$ for $T_j$ brings $T_i$ and $T_j$ together and can 
 
 Why the swap operation cannot increase entropy. ...
 
-\slide{Back to Log Loss}
+\slide{Cross Entropy Loss}
 
-Log loss has both a conditional and an unconditional version.
+Cross entropy loss has both a conditional and an unconditional version.
 
 \vfill
 \begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi \;\;E_{(x,y) \sim \mathrm{Pop}}  -\log Q_\Phi(y|x) \\
+  \Phi^* & = & \argmin_\Phi \;\;E_{(x,y) \sim \mathrm{Pop}}  -\log P_\Phi(y|x) \\
   \\
   \\
-  \Phi^* & = & \argmin_\Phi \;\;E_{y \sim \mathrm{Pop}}  -\log Q_\Phi(y)
+  \Phi^* & = & \argmin_\Phi \;\;E_{y \sim \mathrm{Pop}}  -\log P_\Phi(y)
 \end{eqnarray*}
-
-Conditional test loss can often be made small (MNIST, speech recognition) but can also be inherently large (image colorization).
-
-\vfill
-Unconditional log loss is typically inherently large (language modeling).
-
-\vfill
-\slide{Log Loss is Cross Entropy}
-
-
-\begin{eqnarray*}
-  H(\mathrm{Pop}) & \doteq & E_{y \sim \mathrm{Pop}}\;- \log \mathrm{Pop}(y) \\
-  \\
-  H(\mathrm{Pop},Q) & \doteq & E_{y \sim \mathrm{Pop}}\; -\log\; Q(y) \\
-  \\
-  \\
-  E_{y \sim \mathrm{Pop}} -\log Q_\Phi(y)  & = & H(\mathrm{Pop},Q_\Phi) \\
-  \\
-  \\
-  E_{(x,y) \sim \mathrm{Pop}} -\log Q_\Phi(y|x)  & = & E_{x \sim \mathrm{Pop}} \; H(\mathrm{Pop}(y|x),Q_\Phi(y|x)) \\
-\end{eqnarray*}
-
-
-\slide{KL Divergence}
-
-\begin{eqnarray*}
-  KL(\mathrm{Pop},Q) & \doteq & E_{y \sim \mathrm{Pop}} \;\log_2 \frac{\mathrm{Pop}(y)}{Q(y)} \\
-  \\
-  & = & E_{y \sim \mathrm{Pop}} \;\log \mathrm{Pop}(y) - \log Q(y) \\
-  \\
-  & = & \left(E_{y \sim \mathrm{Pop}} \; - \log Q(y)\right) - \left(E_{y \sim \mathrm{Pop}} \; - \log \mathrm{Pop}(y)\right) \\
-  \\
-  & = & H(\mathrm{Pop},Q) - H(P)
-\end{eqnarray*}
-
-\slide{Jensen's Inequality}
-
-\centerline{\includegraphics[height = 3.0in]{../images/Jensen}}
-
-\vfill
-For $f$ convex (upward curving) we have
-
-\vfill
-$$E[f(x)] \geq f(E[x])$$
-
-\slide{KL Divergence}
-
-\begin{eqnarray*}
-  KL(P,Q) & = & \expectsub{y \sim P}{- \log \frac{Q(y)}{P(y)}} \\
-  \\
-  & \geq & - \log \expectsub{x\sim P}{\frac{Q(y)}{P(y)}} \\
-  \\
-  & = & - \log \sum_y\; P(y) \frac{Q(y)}{P(y)}  \\
-  \\
-  & = & - \log \sum_y Q(y) \\
-  \\
-  & = & 0
-\end{eqnarray*}
-
-\slide{Fundamentals}
-
-\begin{eqnarray*}
-  KL(\mathrm{Pop},Q) & \geq & 0 \\
-  \\
-  H(\mathrm{Pop},Q) & = & H(\mathrm{Pop}) + KL(\mathrm{Pop},Q) \\
-  \\
-  & \geq & H(\mathrm{Pop}) \\
-  \\
-  \argmin_Q H(\mathrm{Pop},Q) & = & \mathrm{Pop} \\
-  \\
-  \argmin_{Q(y|x)}\;E_{x \sim \mathrm{Pop}}\; H(\mathrm{Pop(y|x)}, Q(y|x)) & = & \mathrm{Pop}(y|x) \\
-\end{eqnarray*}
-    
-\slide{Asymmetry of Cross Entropy}
-Consider 
-
-
-$$\Phi^* = \argmin_\Phi \;H(P,Q_\Phi)\;\;\;\;\;(1)$$
-
-\vfill
-$$\Phi^* = \argmin_\Phi \;H(Q_\Phi,P)\;\;\;\;\;(2)$$
-
-\vfill
-For (1) $Q_\Phi$ must cover all of the support of $P$.
-
-\vfill
-For (2) $Q_\Phi$ concentrates all mass on the point maximizing $P$.
-
-    
-\slide{Asymmetry of KL Divergence}
-Consider 
-
-
-\begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi \;KL(P,Q_\Phi) \\
-  & = & \argmin_\Phi\; H(P,Q_\Phi)\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;(1) \\
-  \\
-  \Phi^* & = & \argmin_\Phi \;KL(Q_\Phi,P) \\
-  & = & \argmin_\Phi H(Q_\Phi,P) - H(Q_\Phi)\;\;\;(2)
-  \end{eqnarray*}
-
-\vfill
-If $Q_\Phi$ is not universally expressive we have that (1) still forces $Q_\Phi$ to cover all of $P$ (or else the KL divergence is infinite)
-while (2) allows $Q_\Phi$ to be restricted to a single mode of $P$ (a common outcome).
 
 \slideplain{Unsupervised Learning}
 
-Unsupervised learning is sometimes equated with unconditional log loss (density estimation).
+Unsupervised learning is sometimes equated with unconditional cross entropy loss (density estimation).
 
 \vfill
 \begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi \;\;E_{y \sim \mathrm{Pop}}  -\log Q_\Phi(y)
+  \Phi^* & = & \argmin_\Phi \;\;E_{y \sim \mathrm{Pop}}  -\log P_\Phi(y)
 \end{eqnarray*}
 
 \slide{Unsupervised Learning}
@@ -364,7 +175,7 @@ By ``unsupervised learning'' we will mean learning from {\bf massively available
 
 \slide{Colorization}
 
-$$\Phi^* = \argmin_\Phi \expectsub{(x,y) \sim \mathrm{Pop}}{-\log Q_\Phi(y|x)}$$
+$$\Phi^* = \argmin_\Phi \expectsub{(x,y) \sim \mathrm{Pop}}{-\log P_\Phi(y|x)}$$
 
 \vfill
 \centerline{\includegraphics[height=2in]{../images/Colorization}}

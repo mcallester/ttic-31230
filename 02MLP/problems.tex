@@ -1,0 +1,41 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning, winter 2019}
+\centerline{\bf Framework Problems}
+
+\bigskip
+{\bf Problem 1:} Consider the following softmax.
+\begin{eqnarray*}
+  Z[b] & = & \sum_j\;\exp(s[b,j]) \\
+  p[b,j] & = & \exp(s[b,j])/Z[b]
+\end{eqnarray*}
+
+Give a back-propagation $\pluseq$ update based on the second equation for adding to $s.\grad$ using $p.\grad$
+(and using the forward-computed tensors $Z$ and $s$).
+
+\medskip
+Give a back-propagation $\pluseq$ update based on the second equation for adding to $Z.\grad$ using $p.\grad$
+(and using the forward-computed tensors $s$ and $Z$).
+
+\medskip
+Give a back-propagation $\pluseq$ update based on the first equation for adding to $s.\grad$ using $Z.grad$
+(and using the forward-computed tensor $s$).
+
+\bigskip
+{\bf Problem 2:} For the softmax in problem 1 show that we can instead use
+\begin{eqnarray*}
+  e[b] & = & \sum_j p[b,j]p.grad[b,j] \\
+  s.\grad[b,j] & = & p[b,j](p.\grad[b,j] - e[b])
+\end{eqnarray*}
+
+This formula shows how hand-written back-propagation methods for ``layers'' such as softmax
+can be more efficient than compiler-generated back-propagation code.
+While optimizing compilers can of course be written, one must keep in mind the trade-off
+between the abstraction level of the programming language and the efficiency of the generated code.
+
+\end{document}
