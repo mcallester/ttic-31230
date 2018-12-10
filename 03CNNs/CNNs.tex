@@ -1,3 +1,4 @@
+\input ../SlidePreamble
 \input ../preamble
 
 \begin{document}
@@ -6,67 +7,32 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2018}
+  \centerline{David McAllester, Winter 2019}
 
     \vfill
-  \centerline{\bf Convolutional Neural Networks --- CNNs}
-\ignore{
-  \vfill
-  \centerline{\bf Review of EDF and Explicit Index Notation}
-  \vfill
-  \centerline{\bf Convolutional Neural Networks --- CNNs}
-  \vfill
-  \centerline{\bf Initialization and Batch Normalization}
-  \vfill
-  \centerline{\bf Skip Connections (Resnet)}
-}
+  \centerline{\bf Convolutional Neural Networks (CNNs)}
   \vfill
   \vfill
 
 
-\slide{CNNs}
+\slidetwo{What is a CNN?}
+{VGG, Zisserman, 2014}
 
-Imagenet Classification. 1000 kinds of objects.
+\centerline{\includegraphics[width = 8.0in]{../images/VGG}}
+\centerline{\large Davi Frossard}
 
-\vfill
-\centerline{\includegraphics[height=4.5in]{../images/IVLSRC}}
-2016 error rate is 3.0\% \hspace{1.0in} 2017 error rate is 2.25\%
+\slideplain{A Convolution Layer}
 
-
-\slideplain{A CNN}
-
-A convolution slides a filter (a kernel) across an image.
-
-\centerline{\includegraphics[width = 3.5in]{../images/Convolution}}
-\centerline{$W$\hspace{6ex}$x$\hspace{6ex}$y$}
+\centerline{\includegraphics[width = 2.5in]{../images/Convolution}}
+\centerline{$W[\Delta x,\Delta y,i,j]$\hspace{6ex}$L_{\mathrm{IN}}[b,x,y,i]$\hspace{6ex}$L_{\mathrm{out}}[b,x,y,j]$}
 \centerline{\large River Trail Documentation}
 
-\begin{eqnarray*}
-  y[b,i,j,c_y] & = &   W[\Delta i, \Delta j, c_x, c_y] x[b,i + \Delta i, j + \Delta j, c_x] \\
-  \\
-  y[b,i,j,c_y] & \pluseq & B[c_y]
-  %W.\mathrm{grad}[\Delta i, \Delta j,c_x,c_y] & \pluseq & y.\mathrm{grad}[b,i,j,c_y]x[b,i + \Delta i,j+ \Delta_j,c_x]
-\end{eqnarray*}
-
-\slide{Use Swap Rule to get Backward Method}
-
-\begin{eqnarray*}
-  y[b,i,j,c_y] & = &   W[\Delta i, \Delta j, c_x, c_y] x[b,i + \Delta i, j + \Delta j, c_x] \\
-  \\
-  W.\mathrm{grad}[\Delta i, \Delta j,c_x,c_y] & \pluseq & y.\mathrm{grad}[b,i,j,c_y]x[b,i + \Delta i,j+ \Delta_j,c_x]
-\end{eqnarray*}
-
-$$x.\mathrm{grad}[b,i+\Delta i,j+\Delta j,c_x] \;\pluseq \; W[\Delta i, \Delta j, c_x, c_y] y.\mathrm{grad}[b,i,j,c_y]$$
-
-\slide{A Convolution Class in EDF}
-
-In EDF we would define a class for convolution parameter packages.
-
 \vfill
-We would then construct the computation node for the output using Python code.
-
-\vfill
-\centerline{\tt Y = Relu(Conv(Phi,X)).}
+{\tt Procedure CONV}$(W[\Delta x, \Delta y, i, y,], B[j], L_{\mathrm{in}}[b,x,,y,i])$
+\begin{eqnarray*}
+ & &  \mbox{Return}\;\;L_{\mathrm{out}}[b,x,y,j] \\
+ & = &   \left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{\mathrm{in}}[b,x + \Delta x, y + \Delta y, i]\right) + B[j]
+\end{eqnarray*}
 
 \slide{Padding}
 
@@ -89,18 +55,17 @@ padded[p:W+p, p:H+p] = x
 
 \slide{Padding}
 
-\centerline{\includegraphics[height = 2.0in]{../images/padding2}}
-\centerline{\large Jonathan Hui}
-
-Let $x'$ (full square) be the padding of $x$ (blue square).  $y$ also has the blue shape.
+{\tt Procedure CONV}$(\Phi,\; L_{\mathrm{in}}[b,x,,y,i],\;\mathrm{padding}\;p)$
+\vfill
+\begin{eqnarray*}
+ L'_{\mathrm{in}} & = & \mathrm{Padd}(L_{\mathrm{in}},\;p) \\
+ \\
+L_{\mathrm{out}}[b,x,y,j] & = &   \left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L'_{\mathrm{in}}[b,x + \Delta x, y + \Delta y, i]\right) \\
+& & + B[j]
+\end{eqnarray*}
 
 \vfill
-$$y[b,i,j,c_y]  =   W[\Delta i, \Delta j, c_x, c_y] x'[b,i + \Delta i, j + \Delta j, c_x] + B[c_y]$$
-
-\vfill
-\vfill
-For padding $p$ and a filter of width $2p+1$, we get that $y$ has the same spatial dimensions as $x$.
-
+Return $L_{\mathrm{out}}[b,x,y,j]$
 
 \slide{Strides}
 
@@ -108,12 +73,12 @@ We can move the filter by a ``stride'' $s$ for each spatial step.
 
 \vfill
 \begin{eqnarray*}
-  y[b,i,j,c_y] & = &  W[\Delta i, \Delta j, c_x, c_y] x[b,s*i + \Delta i, s*j + \Delta j, c_x] + B[c_y]
+  L_{\mathrm{out}}[b,x,y,j] & = &  W[\Delta x, \Delta y, i, j] L_{\mathrm{in}}[b,s*x + \Delta x, s*y + \Delta y, i] + B[j]
 \end{eqnarray*}
 
 \slide{Max Pooling}
 
-$$y[b,i,j,c] = \max_{\Delta i, \Delta j}\; x[b,s*i + \Delta i,\; s*j + \Delta j,\; c]$$
+$$L_{\mathrm{out}}[b,x,y,c] = \max_{\Delta x, \Delta y}\; L_{\mathrm{in}}[b,s*x + \Delta x,\; s*y + \Delta y,\; c]$$
 
 \vfill
 This is typically done with a stride greater than one so that the image dimension is reduced.
@@ -122,15 +87,17 @@ This is typically done with a stride greater than one so that the image dimensio
 
 \slide{Fully Connected (FC) Layers}
 
-We reshape $x[b,x,y,c]$ to $x[b,(x,y,c)]$ and convert to using an MLP.
+We reshape $L_{\mathrm{in}}[b,x,y,c]$ to $L_{\mathrm{in}}[b,(x,y,c)]$ and then
 
+\vfill
+$$L_{\mathrm{out}}[b,j] = \left(\sum_i \;W[i,j]\;L_{\mathrm{in}}[b,i]\right) + B[j]$$
 \slide{Basics}
 
 \begin{itemize}
-\item Padding
-
-  \vfill
 \item Convolution
+
+\vfill
+\item Padding
 
   \vfill
 \item Stides
@@ -142,16 +109,26 @@ We reshape $x[b,x,y,c]$ to $x[b,(x,y,c)]$ and convert to using an MLP.
 \item Fully Connected Layers
 \end{itemize}
 
-\slide{A Sequence of ``Images''}
-
-\centerline{\includegraphics[width= 8.5in]{../images/Stack}}
-\centerline{\large Jonathan Hui}
-
 \slide{Alexnet}
-\centerline{\includegraphics[height=4.5in]{../images/AlexnetStack}}
-\centerline{\large Stanford CS231}
+{\huge
+\centerline{Given Input$[227,227,3]$}
 
-\slide{VGG, Zisserman, 2014}
+\begin{eqnarray*}
+L_1[55 \times 55 \times 96] & = & \relu(\conv(\mathrm{Input},\Phi_1,\mathrm{width}\;11,\pad\;0,\stride\;4)) \\
+L_2[27 \times 27 \times 96] & = & \mathrm{MaxPool}(L_1,\mathrm{width}\;3,\stride\;2))  \\
+L_3[27 \times 27 \times 256] & = & \relu(\conv(L_2,\Phi_3,\mathrm{width}\;5,\pad\;2,\stride\;1))  \\
+L_4[13 \times 13 \times 256] & = & \mathrm{MaxPool}(L_3,\mathrm{width}\;3,\stride\;2))  \\
+L_5[13 \times 13 \times 384] & = & \relu(\conv(L_4,\Phi_5,\mathrm{width}\;3,\pad\;1,\stride\;1))  \\
+L_6[13 \times 13 \times 384] & = & \relu(\conv(L_5,\Phi_6,\mathrm{width}\;3,\pad\;1,\stride\;1))  \\
+L_7[13 \times 13 \times 256] & = & \relu(\conv(L_6,\Phi_7,\mathrm{width}\;3,\pad\;1,\stride\;1))  \\
+L_8[6 \times 6 \times 256] & = & \mathrm{MaxPool}(L_7,\mathrm{width}\;3,\stride\;2)) \\
+L_9[4096] & = & \relu(\mathrm{FC}(L_8,\Phi_9)) \\
+L_{10}[4096] & = & \relu(\mathrm{FC}(L_9,\Phi_{10})) \\
+s[1000] & = & \relu(\mathrm{FC}(L_{10},\Phi_s)) \;\;\mbox{class scores}
+\end{eqnarray*}
+}
+
+\slideplain{VGG, Zisserman, 2014}
 
 \centerline{\includegraphics[width = 9.0in]{../images/VGG}}
 \centerline{\large Davi Frossard}
@@ -174,38 +151,53 @@ We reshape $x[b,x,y,c]$ to $x[b,(x,y,c)]$ and convert to using an MLP.
 \centerline{\includegraphics[height=4.5in]{../images/IVLSRC}}
 2016 error rate is 3.0\% \hspace{1.0in} 2017 error rate is 2.25\%
 
-\slideplain{Appendix: Image to Column (Im2C)}
+\slideplain{Use Swap Rule to get Backward Method}
+
+\begin{eqnarray*}
+  L_{\mathrm{out}}[b,x,y,j] & \pluseq &   W[\Delta x, \Delta y, i, j]\;L_{\mathrm{in}}[b,x + \Delta x, y + \Delta y, i] \\
+  \\
+  W.\mathrm{grad}[\Delta x, \Delta y,i,j] & \pluseq & \frac{1}{B}\; L_{\mathrm{out}}.\grad[b,x,y,j]\;L_{\mathrm{in}}[b,x + \Delta x,y+ \Delta_y,i]
+\end{eqnarray*}
+
+$$L_{\mathrm{in}}.\grad[b,x+\Delta x,y+\Delta y,i,j] \;\pluseq \; L_{\mathrm{out}}.\grad[b,x,y,j]\;W[\Delta x, \Delta y, i, j]$$
+
+\slide{Image to Column (Im2C)}
 
 Reduce convolution to matrix multiplication ---  more space but faster.
 {\huge
-  $$x'[b,i,j,\Delta i,\Delta j,c_x] = x[b,i+\Delta i,j+\Delta j,c_x]$$
+  $$L_{\mathrm{in}}[b,x,y,\Delta x,\Delta y,i] = L_{\mathrm{in}}[b,x+\Delta x,y+\Delta y,i]$$
 
 \begin{eqnarray*}
-  & & y[b,i,j,c_y] \\
+  & & L_{\mathrm{out}}[b,x,y,j] \\
   \\
-  & = & \left(\sum_{\Delta i, \Delta j, c_x} W[\Delta i, \Delta j, c_x, c_y] *x[b,i + \Delta i,\; j + \Delta j,\; c_x]\right) + B[c_y] \\
+  & = & \left(\sum_{\Delta x, \Delta y, i} W[\Delta x, \Delta y, i, j] *L_{\mathrm{in}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[j] \\
   \\
-      & = & \left(\sum_{\Delta i, \Delta j, c_x} \begin{array}{l}
-                                              x'[b,i,j,\Delta i,\Delta j,c_x]
-                                              * W[\Delta i, \Delta j, c_x, c_y] \\
-  \end{array}\right) + B[c_y] \\
+      & = & \left(\sum_{\Delta x, \Delta y, i} \begin{array}{l}
+                                              L_{\mathrm{in}}[b,x,y,\Delta x,\Delta y,i]
+                                              * W[\Delta x, \Delta y, i, j] \\
+  \end{array}\right) + B[j] \\
   \\
-    & = & \left(\sum_{(\Delta i, \Delta j, c_x)} \begin{array}{l}
-                                              x'[(b,i,j),(\Delta i,\Delta j,c_x)]
-                                              * W[(\Delta i, \Delta j, c_x), c_y] \\
-                                           \end{array}\right) + B[c_y]
+    & = & \left(\sum_{(\Delta x, \Delta y, i)} \begin{array}{l}
+                                              L_{\mathrm{in}}[(b,x,j),(\Delta x,\Delta y,i)]
+                                              * W[(\Delta x, \Delta y, i), j] \\
+                                           \end{array}\right) + B[j]
 \end{eqnarray*}
 }
 
-\slideplain{Appendix: Dilation}
+\slideplain{Fully Convolutional Networks}
+
+\centerline{\includegraphics[height=4.5in]{../images/dilation}}
+
+\slide{Dilation}
 
 We can ``dilate'' the filter by introducing an image step size $d$ for each step in the filter coordinates.
 
 \vfill
 \begin{eqnarray*}
-  y[b,i,j,c_y] & = &  W[\Delta i, \Delta j, c_x, c_y] x[b,i + d*\Delta i, j + d*\Delta j, c_x] + B[c_y]
+L_{\mathrm{out}}[b,x,y,j] & = &  W[\Delta x, \Delta y, i, j] L_{\mathrm{in}}[b,x + d*\Delta x, y + d*\Delta y, i] + B[j]
 \end{eqnarray*}
 
+This is used for ``fully convolutional'' CNNs.
 
 
 
