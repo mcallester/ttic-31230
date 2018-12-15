@@ -2,6 +2,9 @@
 \input ../preamble
 \parindent = 0em
 
+\newcommand{\solution}[1]{}
+%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
 \begin{document}
 
 
@@ -9,8 +12,15 @@
 \centerline{\bf CNN Problems}
 
 \bigskip
-{\bf Problem 1:} Write a 3D CNN procedure for video. Details coming soon.
+{\bf Problem 1.}  Consider convolving an $N \times N$ filter over a $D\times D$ input image $x$ (with $\lfloor N/2\rfloor$ padding) stride 1 to produce a $D \times D$ output image $y$.  Assume the input image has $C_x$ channels and the output image image has $C_y$ channels and we have batch size $B$.
+How many floating point multiplies are required
+in computing the convolution on the batch (without any activation function)?
+
+\solution{$$BD^2N^2C_xC_y$$}
 
 \bigskip
-{\bf Problem 2:} Write a scale-invariant CNN.  Details coming soon.
+{\bf Problem 2:} Write a 3D CNN procedure for video. Details coming soon.
+
+\bigskip
+{\bf Problem 3:} Write a scale-invariant CNN.  Details coming soon.
 \end{document}

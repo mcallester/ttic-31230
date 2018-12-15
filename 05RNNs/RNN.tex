@@ -1,3 +1,4 @@
+\input ../SlidePreamble
 \input ../preamble
 
 \begin{document}
@@ -6,7 +7,7 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2018}
+  \centerline{David McAllester, Winter 2019}
   \vfill
   \centerline{\bf Language Modeling}
   \vfill
@@ -17,36 +18,174 @@
   \centerline{\bf Beam Search}
   \vfill
   \centerline{\bf Error-Based Training}
-  
 
-\slide{Language Modeling}
+\slide{Digression on Tensor Notation}
 
-We are given a sequence $x^1$, $\ldots$, $x^T$ and we want to compute a model probability.
-
-\vfill
-$$Q_\Phi(x_1,\ldots,x^T)$$
+We will assume a high level RNN procedure $\mathrm{RNN}_\Phi$ which takes a sequence of input vectors and returns
+a sequence of hidden state vectors.
 
 \vfill
-Here $x^t$ can be either characters or words.
+$$h[T,J] = \mathrm{RNN}_\Phi(x[T,I])$$
 
 \vfill
-We represent the probability as a product of conditionals.
+Here, and in the future, we use capital letter indeces to denote tensors and lower case indeces to denote particular values from tensors.
 
 \vfill
-$$Q_\Phi(x_1,\ldots,x^T) = \prod_t Q_\Phi(x^t \;|\; x^1,\ldots,x^{t-1})$$
+We will also omit the batch index.  Minibatching can be viewed as an efficiency optimization.
+
+\slide{Digression on Tensor Notation}
+
+We use capital letter indeces to denote tensors and lower case indeces to denote particular values from tensors.
 
 \vfill
-A model of this form is called {\bf Autoregressive} --- a model (regression) is used to predict the next element from the previous elements.
+The equation
+$$\tilde{L}[\ell+1,j] = \left(\sum_i\;W[\ell,i,j]L[\ell,i]\right) + \beta[\ell,j]$$
+stands for a set of assignments --- one for each value $\ell$ and $j$
 
-\slide{RNN Language Modeling}
+\slide{Slicing Notation}
+
+A mixture of upper and lower case indeces denotes a slice.
+
+\vfill
+$h[t,J]$ denotes the vector whose $j$th component is $h[t,j]$.
+
+\vfill
+$L[X,Y,j]$ denotes the matrix (image) determined by the $j$th channel.
+
+\slide{}
+
+
+\centerline{\bf Different Forms of RNN}
+\vfill
+\vfill
+
+
+\slide{Basic RNN}
 
 \centerline{\includegraphics[width=3.5in]{../images/RNN}}
 \centerline{{\large [Christopher Olah]}}
-
-$$Q_\Phi(x^{t+1} \;|\; x^1,\ldots,x^t) = \mathrm{Softmax}(W^o\;h^t)$$
+\vfill
+Procedure $\mathrm{RNN}_\Phi(x(T,I))$
 
 \vfill
-For word language models this softmax is the computation bottleneck in training.
+\begin{eqnarray*}
+h[t,J] & = & \mathrm{CELL}_{\Phi.\mathrm{cell}}(\mathrm{if}(t=0,\Phi.\mathrm{init}[J],h[t-1,J]),\;x[t,I]) \\
+\end{eqnarray*}
+
+\vfill
+Return $h[T,J]$
+
+
+
+\slide{bi-directional RNNS}
+
+\centerline{\includegraphics[width = 3in]{../images/biRNN}}
+
+\begin{eqnarray*}
+\vec{h}[T,\vec{J}] & = & \vec{\mathrm{RNN}}_{\Phi.LR}(x[T,I]) \\
+\\
+\cev{h}[T,\cev{J}] & = & \cev{\mathrm{RNN}}_{\Phi.RL}(x[T,I]) \\
+\\
+h[t,J] & = & [\vec{h}[T,\vec{J}],\;\cev{h}[t,\cev{J}]]\;\;\mbox{where $[x,y]$ is vector concatenation}
+\end{eqnarray*}
+
+
+\slide{Multi-Layer RNNs}
+
+\centerline{\includegraphics[width = 2in]{../images/RNNstack}}
+\centerline{\large [Figure by Leonardo Araujo dos Santos]}
+
+\begin{eqnarray*}
+h[0,T,J] & = & \mathrm{RNN}_{\Phi.0}(x[T,I]) \\
+\\
+h[\ell+1,T,J] & = & \mathrm{RNN}_{\Phi.\ell+1}(h[\ell,T,J])
+\end{eqnarray*}
+
+Each layer can be bidirectional.
+
+\anaslide{Residual Multi-Layer RNNs}
+
+\begin{eqnarray*}
+h[0,T,J] & = & \mathrm{RNN}_{\Phi.0}(x[T,I]) \\
+\\
+h[\ell+1,T,J] & = & h[\ell,T,J] + \mathrm{RNN}_{\Phi.\ell+1}(h[\ell,T,J])
+\end{eqnarray*}
+
+\vfill
+Each layer can be bidirectional.
+
+\vfill
+This is used in Google translation.
+
+\slide{ Language Modeling}
+
+Let $W$ be some finite vocabulary of tokens (words).
+
+\vfill
+Let $\mathrm{Pop}$ be a population distribution over $W^*$ (sentences).
+
+\vfill
+We will write a sequence $w[1],\ldots,w[t]$ as $w[T]$.
+
+\vfill
+We want to train a model $P_\Phi(w[T])$.
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \; E_{\mathrm{Pop}}\;-\ln P_\Phi(w[T])
+\end{eqnarray*}
+
+\slide{The End of Sentence Token}
+
+\vfill
+We assume a special toeken {\tt <EOS>} called the end of sentence token.
+
+\vfill
+Let $t_{\mathrm{final}}$ be the last time index allowed for $T$.
+
+\vfill
+We requite $w[t_{\mathrm{final}}] = \mbox{\tt <EOS>}$ and $w[t] \not = \mbox{\tt <EOS>}$ for $t < t_{\mathrm{final}}$.
+
+\vfill
+This gives:
+
+$$P(w[T]) = \prod_t\;P(w[t]\;|\;w[1],\ldots,w[t-1])$$
+
+
+\slide{Word Embeddings}
+
+We will use a word embedding tensor $e[W,I]$ which should be interpreted as assigning a vector $e[w,I]$ to each word $w$.
+
+\vfill
+The word embedding tensor $e[W,I]$ is a parameter of language models (and many other kinds of NLP models).
+
+\slide{Autoregressive Language Modeling}
+
+Procedure $P_\Phi(w[T])$
+
+\vfill
+{\huge \begin{eqnarray*}
+x[t,I] & = & (\Phi.\mathrm{embed})[w[t],I] \\
+\\
+h[T,J] & = & \mathrm{RNN}_{\Phi.\mathrm{RNN}}(x[T,I]) \\
+\\
+s[t,w] & = & \sum_{i,j} (\Phi.\mathrm{embed})[w,i]\;\;(\Phi.\mathrm{score})[i,j]\;\;\mathrm{if}(t=0,\Phi.\mathrm{init}[j],h[t-1,j]) \\
+\\
+p[t,w] & = & \softmax_w\;s[t,w]
+\end{eqnarray*}
+}
+
+\vfill
+Return $\prod_t p[t,w[t]]$
+
+\slide{Language Model Loss Decomposition}
+
+\begin{eqnarray*}
+\Phi^* &  = & \argmin_\Phi\; E_{\mathrm{Pop}} \;-\ln\;P_\Phi(w[T]) \\
+\\
+\\
+\\
+& = & \argmin_\Phi\;E_{\mathrm{Pop}}\;\sum_t\; -\ln\;p[t,w[t]]
+\end{eqnarray*}
 
 \slide{Standard Measures of Performance}
 
@@ -56,7 +195,7 @@ For character language models performance is measured in bits per character.  Ty
 \vfill
 {\bf Perplexity:}
 It would be natural to measure word language models in bits per word.  However, it is traditional to measure then in perplexity which is defined to be
-$2^b$ where $b$ is bits per world.  Perplexities of about 60 are typical.
+$2^b$ where $b$ is bits per word.  Perplexities of about 60 are typical.
 
 \vfill
 According to Quora there are 4.79 letters per word.  1 bit per character (including space characters) gives a perplexity of $2^{5.79}$ or $55.3$.
@@ -65,323 +204,251 @@ According to Quora there are 4.79 letters per word.  1 bit per character (includ
 
 To sample a sentence
 \vfill
-$$x^1,\ldots, x^T, \mbox{\tt <eos>}$$
+$$w_1,\ldots, w_T, \mbox{\tt <eos>}$$
 \vfill
-we sample $x^t$ from
+we sample $w_t$ from
 \vfill
-$$Q_\Phi(x^t|x^1,\ldots,x^{t-1})$$
+$$P_\Phi(w_t|w_1,\ldots,w_{t-1})$$
 
 \vfill
 until we get {\tt <eos>}.
 
-\anaslide{Machine Translation}
 
-\centerline{\includegraphics[width = 4in]{../images/SeqToSeq}}
+\slide{Machine Translation}
 
-\centerline{\large [Figure from Luong et al.]}
+%\centerline{\includegraphics[width = 4in]{../images/SeqToSeq}}
 
-$$DCBA \Rightarrow XYX$$
+%\centerline{\large [Figure from Luong et al.]}
 
+$$w^{\mathrm{in}}_1,\ldots,w^{\mathrm{in}}_{t_{\mathrm{in}}} \Rightarrow w^{\mathrm{out}}_1,\ldots,w^{\mathrm{out}}_{t_{\mathrm{out}}}$$
+
+$$w_{\mathrm{in}}[T_{\mathrm{in}}] \Rightarrow w_{\mathrm{out}}[T_{\mathrm{out}}]$$
 \vfill
 Translation is a {\bf sequence to sequence} (seq2seq) task.
 
 \vfill
 {\bf Sequence to Sequence Learning with Neural Networks}, Sutskever, Vinyals and Le, NIPS 2014, arXiv Sept 10, 2014.
 
-\anaslideplain{Machine Translation}
+\slide{Machine Translation}
 
-\centerline{\includegraphics[width = 4in]{../images/SeqToSeq}}
+%\centerline{\includegraphics[width = 4in]{../images/SeqToSeq}}
 
-\centerline{\large [Figure from Luong et al.]}
+%\centerline{\large [Figure from Luong et al.]}
 
-\vfill
-The input sentence is represented by a ``thought vector'' produced by an RNN.
-
-\anaslide{Machine Translation}
-
-\centerline{\includegraphics[width = 4in]{../images/SeqToSeq}}
-
-\centerline{\large [Figure from Luong et al.]}
+$$w_{\mathrm{in}}[T_{\mathrm{in}}] \Rightarrow w_{\mathrm{out}}[T_{\mathrm{out}}]$$
 
 \vfill
-The thought vector is the initial state vector used in ``sampling'' a translation.
-
-\anaslide{Machine Translation}
-
-\centerline{\includegraphics[width = 4in]{../images/SeqToSeq}}
-
-\centerline{\large [Figure from Luong et al.]}
+We define a model
 
 \vfill
-For the training pair $DCBA \Rightarrow XYX$ the training loss is
+$$P_\Phi\left(w_{\mathrm{out}}[T_{\mathrm{out}}]\;|\; w_{\mathrm{in}}[T_\mathrm{in}]\right)$$
 
 \vfill
-$$- \log\;Q_\Phi(XYZ\;|\;DCBA)$$
+\begin{eqnarray*}
+\Phi^*  & = & \argmin_\Phi\; E_{\mathrm{Pop}} \;-\ln\;P_\Phi(w_{\mathrm{out}}[T_{\mathrm{out}}] \;|\; w_{\mathrm{in}}[T_{\mathrm{in}}]) \\
+\\
+& = & \argmin_\Phi \; E_{\mathrm{Pop}} \; -\ln P_\Phi(y|x)
+\end{eqnarray*}
 
 
-\anaslide{Machine Translation}
-
-\centerline{\includegraphics[width = 4in]{../images/SeqToSeq}}
-
-\centerline{\large [Figure from Luong et al.]}
-
-\vfill
-In Sutskever et al. (2014) the LSTMs are layered 4 deep.
-
-\ignore{
-\slide{Training Details (Sutskever et al. (2014))}
-
-We used deep LSTMs with 4 layers, with 1000 cells at each layer and 1000 dimensional word embeddings, with an input vocabulary
-of 160,000 and an output vocabulary of 80,000.
+\slide{A Simple RNN Translation Model}
 
 \vfill
-We used a naive softmax over 80,000 words at each output.
+We construct a conditional languge model
+
+$$P_\Phi(w_{\mathrm{out}}[T_{\mathrm{out}}]\; | \; w_{\mathrm{in}}[T_{\mathrm{in}}]) = P_{\Phi.\mathrm{out}}(w_{\mathrm{out}}[T_{\mathrm{out}}] \;|\; H_{\Phi.\mathrm{in}}(w_{\mathrm{in}}[T_{\mathrm{in}}]))$$
 
 \vfill
-We used batches of 128 sequences.
+Here $H_{\Phi.\mathrm{in}}(w_{\mathrm{in}}[T_{\mathrm{in}}])$ is used as the initial hidden state of an RNN lnguage model.
 
 \vfill
-We used stochastic gradient descent without momentum, with a fixed learning rate of 0.7.
+The initial hidden state $H_{\Phi.\mathrm{in}}(w_{\mathrm{in}}[T_{\mathrm{in}}])$ is a ``thought vector'' representation of the input sentence.
+
+\slide{Computing a Thought Vector}
+
+The thought vector for a sentence can be taken to be the final hidden state of a right-to-left RRN run on the sentence.
 
 \vfill
-After 5 epochs, we begun halving the learning rate every half epoch. We trained our models
-for a total of 7.5 epochs.
+Procedure $H_\Phi(w[T])$
 
-\slide{Training Details}
+\bigskip
+$~\hspace{2em}\cev{h}[T,J] = \cev{\mathrm{RNN}}_\Phi\left(w[T]\right)$
 
-[We clipped gradients] by scaling [the gradient] when its norm exceeded 5.
-
-\vfill
-Different sentences have different lengths. ... To address this problem, we made
-sure that all sentences within a minibatch were roughly of the same length. [This gave] a 2x
-speedup.
-
-\slide{Training Details}
-
-We parallelized our [C++] model using an 8-GPU machine.
+\bigskip
+Return $\cev{h}[t_{\mathrm{init}},J]$
 
 \vfill
-Each layer of the LSTM was executed on a different GPU and communicated its activations to the next GPU (or layer) as soon
-as they were computed.
+For a bidirectional RNN the thought vector is typically
+\bigskip
+$$\left[\cev{h}_{\mathrm{in}}[t_{\mathrm{init}},\cev{J}],\;\vec{h}_{\mathrm{in}}[t_{\mathrm{final}},\vec{J}]\right]$$
+
+\slide{A Conditional RNN Language Modeling}
+
+Procedure $P_\Phi(w[T] \;|\; {\color{red} H[J]})$
 
 \vfill
-Our models have 4 layers of LSTMs, each of which resides on a separate
-GPU.
-
-\centerline{\includegraphics[width = 4.0in]{../images/SeqToSeq}}
-
-\slide{Training Details}
-
-\vfill
-The remaining 4 GPUs were used to parallelize the softmax, so each GPU was responsible
-for multiplying by a 1000 × 20,000 matrix. [20,000 is 1/4 of the output vocabulary]
-
-\vfill
-Training took about ten days with this implementation [on a training set of 348M French words and 304M English words].
+{\huge \begin{eqnarray*}
+x[t,I] & = & (\Phi.\mathrm{embed})[w[t],I] \\
+\\
+h[T,J] & = & \mathrm{RNN}_{\Phi.\mathrm{RNN}}(x[T,I] \;|\;{\color{red} H[J]}) \\
+\\
+s[t,w] & = & \sum_{i,j} (\Phi.\mathrm{embed})[w,i]\;\;(\Phi.\mathrm{score})[i,j]\;\;\mathrm{if}(t=0, {\color{red} H[j]},h[t-1,j]) \\
+\\
+p[t,w] & = & \softmax_w\;s[t,w]
+\end{eqnarray*}
 }
 
-\slide{Attention-Based Translation}
+\vfill
+Return $\prod_t p[t,w[t]]$
 
-Translation is improved by aligning input words with output words.
+\slide{A Conditional RNN}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+\vfill
+Procedure $\mathrm{RNN}_\Phi(x(T,I)\;|\;{\color{red}H[J]})$
 
 \vfill
-This is done with ``Attention''.
+\begin{eqnarray*}
+h[t,J] & = & \mathrm{CELL}_\Phi(\mathrm{if}(t=0,{\color{red}H[J]},h[t-1,J]),\;x[t,I]) \\
+\end{eqnarray*}
+
+\vfill
+Return $h[T,J]$
+
+\slide{Machine Translation Decoding}
+
+We can sample from $P_{\Phi.\mathrm{out}}(w[T]\;|\;H[J])$.
+
+\vfill
+But we might prefer
+
+\begin{eqnarray*}
+w_{\mathrm{out}}[T_{\mathrm{out}}]
+& = & \argmax_{w_{\mathrm{out}}[T_{\mathrm{out}}]} \;P_\Phi\left(w_{\mathrm{out}}[T_{\mathrm{out}}] \;|\; w_{\mathrm{in}}[T_{\mathrm{in}}] \right)
+\end{eqnarray*}
+
+\vfill
+This is typically approximated with greedy decoding:
+
+\vfill
+$$w_{\mathrm{out}}[t+1] = \argmax_w\; p_{\mathrm{out}}[t+1,w]$$
+
+\vfill
+These are not the same.
+
+
+
+\slide{Attention-Based Translation}
 
 \vfill
 {\bf Neural Machine Translation by Jointly Learning to Align and Translate}
 Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio, ICLR 2015 (arXiv Sept. 1, 2014)
 
-\slide{Attention}
+\slide{Thought Vectors Augmented by Structed Memory}
 
-The input sentence is no longer represented by just one thought vector.
-
-\vfill
-Instead the entire sequence of hidden vectors produced by the RNN is used during generation of the translation.
-
-\slide{Attention}
-
-\centerline{\includegraphics[height=4.5in]{../images/attention}}
-\centerline{[Bahdanau, Cho, Bengio (2014)]}
-
-\slide{A first step: BiRNNs}
-
-\begin{eqnarray*}
-  \vec{h}^{t+1} & =  & \mathrm{RNNCELL}_\Phi(\vec{h}^t,x^t) \\
-  \\
-  \\
-  \cev{h}^{t-1} & =  & \mathrm{RNNCELL}_\Psi(\cev{h}^t,x^t) \\
-  \\
-  \\
-  \dvec{h}^t & = & \left[\vec{h}^t,\cev{h}^t\right]\;\;\;\;\;\;\left([x,y]\;\mbox{denotes vector concatenation}\right)
-\end{eqnarray*}
+The input sentence is now represented by both a thought vector and structured memory (a sequence of vectors).
 
 \vfill
-\anaslide{Basic Sequence to Sequence Model}
-
 \begin{eqnarray*}
-  \\
-  s^0 & = & \vec{h}^T \\
-  y^0 & = & <\!\!\mathrm{eos}\!\!> \\
-  \\
-  Q^\Phi(:\;| {\bf x},\;y^1,\ldots,y^i) & = & \softmax_{\hat{y}} \;W^y \;s^{i+1}\;\;\;\;\;\;\;\;\mbox{~} \\
-  s^{i+1} & = & \mathrm{RNNCELL}_\Phi(s^i,\;e(y^i)))
+ & & P_\Phi(w_{\mathrm{out}}[T_{\mathrm{out}}] \;|\; w_{\mathrm{in}}[T_{\mathrm{in}}]) \\
+ \\
+& = & P_{\Phi.\mathrm{out}}(w_{\mathrm{out}}[T_{\mathrm{out}}]\;|\;
+{\color{red} H_{\Phi.H}(w_{\mathrm{in}}[T_{\mathrm{in}}]),\;\mathrm{RNN}_{\Phi.\mathrm{RNN}}(w_{\mathrm{in}}[T_{\mathrm{in}}])})
 \end{eqnarray*}
 
-\anaslide{Adding Attention}
+\slide{Attention-Based Translation}
 
+Procedure $P_\Phi(w[T] \;|\; H[J],\;{\color{red} M[T_M,J]})$
+
+\vfill
+{\huge \begin{eqnarray*}
+x[t,I] & = & (\Phi.\mathrm{embed})[w[t],I] \\
+\\
+h[T,J] & = & \mathrm{RNN}_{\Phi.\mathrm{RNN}}(x[T,I] \;|\;H[J],\;{\color{red} M[T_M,J]}) \\        
+\\
+s[t,w] & = & \sum_{i,j} (\Phi.\mathrm{embed})[w,i]\;\;(\Phi.\mathrm{score})[i,j]\;\;\mathrm{if}(t=0,\;H[j],\;h[t-1,j]) \\
+\\
+p[t,w] & = & \softmax_w\;s[t,w]
+\end{eqnarray*}
+}
+
+\vfill
+Return $\prod_t\;p[t,w[t]]$
+
+\slide{Attention-Based Conditional RNN}
+
+Procedure $\mathrm{RNN}_\Phi(x[T_x,I] \;|\; H[J],\; {\color{red} M[T_M,J]})$
+
+\vfill
 \begin{eqnarray*}
-  {\color{red} c^0} & = & \dvec{h}^T \\
-  s^0 & = & \vec{h}^T \\
-  y^0 & = & <\!\!\mathrm{eos}\!\!> \\
-  \\
-  Q_\Phi(:\;| {\bf x},\;y^1,\ldots,y^i) & = & \softmax_{\hat{y}} \;W^y \;s^{i+1} \\
-  s^{i+1} & = & \mathrm{RNNCELL}_\Phi(s^i,\;[e(y^i),\;{\color{red} c^i}]) \\
-  \\
-  {\color{red} c^i} & = & \sum_t {\color{red} \alpha^{i,t}} \dvec{h}^t  \\
-  {\color{red} \alpha^{i,t}} & = & \softmax_t\; \mathrm{tanh}(W^a\;[s^i,\;\dvec{h}^t])
+h[t,J] & = & \left\{\begin{array}{l}
+\mathrm{CELL}_\Phi(H[J],[x[t,I],{\color{red}\mathrm{Val}(H[J],M[T,J])}]) \;\mbox{if $t = t_{\mathrm{init}}$} \\
+\\
+\mathrm{CELL}_\Phi(h[t-1,J],[x[t,I],{\color{red}\mathrm{Val}(h[t-1,J],M[T,J])}])\;\mbox{o.w.} \\
+\end{array}\right.
 \end{eqnarray*}
 
-\slideplain{Attention}
+\vfill
+Return $h[T,J]$
 
-\centerline{\includegraphics[height=4.5in]{../images/attention}}
-\centerline{[Bahdanau, Cho, Bengio (2014)]}
+\slide{Attention as a Key-Value Memory Mechanism}
 
-\anaslide{Bilinear Attention is More Popular Today}
+Procedure $\mathrm{Val}(\mathrm{key}[J],\;M[T,J])$
 
+\bigskip
 \begin{eqnarray*}
-  {\color{red} c^0} & = & \dvec{h}^T \\
-  s^0 & = & \vec{h}^T \\
-  y^0 & = & <\!\!\mathrm{eos}\!\!> \\
-  \\
-  Q_\Phi(:\;| {\bf x},\;y^1,\ldots,y^i) & = & \softmax_{\hat{y}} \;W^y \;s^{i+1} \\
-  s^{i+1} & = & \mathrm{RNNCELL}_\Phi(s^i,\;[e(y^i),\;{\color{red} c^i}]) \\
-  \\
-  {\color{red} c^i} & = & \sum^t {\color{red} \alpha^{i,t}} \dvec{h}^t  \\
-  {\color{red} \alpha^{i,t}} & = & \softmax_t\; {\color{red} (s^i)^\top W^a \dvec{h}^t}
+s[t] & = &\mathrm{key}[J]^\top M[t,J] \\
+\\
+{\color{red} \alpha[t]} & {\color{red} =} & {\color{red} \softmax_t \;s[t]\;\mbox{; the attention}} \\
+\\
+V[J] &= & \sum_t\;\alpha[t]M[t,J]
 \end{eqnarray*}
+
+\bigskip
+Return $V[J]$
+
+
 
 \slideplain{Attention in Image Captioning}
 
 \centerline{\includegraphics[width = 4in]{../images/AttentionInCaptioning1}}
 \centerline{Xu et al. ICML 2015}
 
-\slide{Greedy Decoding vs. Beam Search}
+\slideplain{Greedy Decoding vs. Beam Search}
 
 We would like
 
 \vfill
-$${\bf y}^* = \argmax_{\bf y} Q_\Phi({\bf y}|{\bf x})$$
+$$W_{\mathrm{out}}[T_{\mathrm{out}}]^* = \argmax_{W_{\mathrm{out}}[T_{\mathrm{out}}]}
+P_\Phi(W_{\mathrm{out}}[T_{\mathrm{out}}] \;|\;W_{\mathrm{in}}[T_{\mathrm{in}}])$$
 
 \vfill
-A {\bf greedy algorithm} may do well
+But a greedy algorithm may do well
 
 \vfill
-$$y^{t+1} = \argmax_{\hat{y}}\; Q_\Phi(\hat{y}\;|\;{\bf x},\;y^1,\ldots,y^t)$$
+$$w_t = \argmax_w\; P_\Phi(w\;|\;W_{\mathrm{in}}[T_{\mathrm{in}}],\;w_1,\ldots,w_{t-1})$$
 
 \vfill
 But these are not the same.
 
 \slide{Example}
 
-$${\bf y}^* = \argmax_{\bf y} Q_\Phi({\bf y}|{\bf x})$$
-
-$$y^{t+1} = \argmax_{\hat{y}}\; Q_\Phi(\hat{y}\;|\;{\bf x},\;y^1,\ldots,y^t)$$
-
-\vfill
-\vfill
 ``Those apples are good'' vs. ``Apples are good''
 
 \vfill
-$$Q_\Phi(\mbox{Apples are Good {\tt <eos>}}) > Q_\Phi(\mbox{Those apples are good {\tt <eos>}})$$
+$$P_\Phi(\mbox{Apples are Good {\tt <eos>}}) > P_\Phi(\mbox{Those apples are good {\tt <eos>}})$$
 
 \vfill
-$$Q_\Phi(\mbox{Those}|\varepsilon) > Q_\Phi(\mbox{Apples}|\varepsilon)$$
+$$P_\Phi(\mbox{Those}|\varepsilon) > P_\Phi(\mbox{Apples}|\varepsilon)$$
     
 \slide{Beam Search}
 
-At each time step we maintain a list of $k$ word-vector pairs:
+At each time step we maintain a list the $K$ best words and their associated hidden vectors.
 
 \vfill
-\begin{eqnarray*}
-  Y^t & = & ((y^{t,1},h^{t,1}),\ldots,(y^{t,k},h^{t,k}) \\
-  \\
-  \\
-  Y^{t+1} & = & \kbest_{(\hat{y},\hat{h})\in C^t} \; Q_\Phi(y\; |\; {\bf x},\;Y^1,\ldots,Y^t) \\
-  \\
-  \\
-  C^t & = & \left\{(y^{t+1,i,j},h^{t+1,i}):\;\;\begin{array}{rcl}
-  y^{t+1,i,j} & \in & \kbest_{\hat{y}}\;Q_\Phi(\hat{y}|(y^{t,i},h^{t,i})) \\
-  \\
-  h^{t+1,i,j} & = & \mathrm{RNNCELL}(h^{t,i},e(y^{t,i,j}))
-  \end{array}\right\}
-  \end{eqnarray*}
-
-\slideplain{Error-Based Training}
-
-Systems are often evaluated by error rather than loss (log loss).
-
-\vfill
-Should we train directly to minimize error?
-
-\vfill
-Should translation be trained directly on BLEU score?
-
-\vfill
-Should segmentation be trained on intersection over union?
-
-\vfill
-Should cancer screening be trained on  recall?
-
-\vfill
-If the model provides probabilities we can do Bayesian inference.  But the model might not be sufficiently expressive.
-
-\anaslide{Label Adjustment}
-We can consider an arbitrary error function $\mathrm{Err}(y,\hat{y})$ assigning an error value the true label is $y$ and the system guesses $\hat{y}$.
-
-\begin{eqnarray*}
-  f(\hat{y}) & = & \sum_\alpha\; f[\alpha,\hat{y}[\alpha]] \\
-  \\
-  \hat{y}^*(f) & = & \argmax_{\hat{y}} \; f(\hat{y}) \\
-  \\
-  \breve{y}^*(f) & = & \argmax_{\breve{y}} \;f(\breve{y}) - \epsilon \mathrm{Err}(y,\breve{y}) \;\;\;\;\mbox{\bf (adjusted label)} \\
-  \\
-  \mathrm{error}(y,f) & = & \mathrm{Err}(y,\hat{y}^*(f)) \\
-  \\
-  f_\Phi(x).\mathrm{grad}[\alpha,\tilde{y}] & \minuseq & \eta\left(\mathbbm{1}[\hat{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}]
-  - \mathbbm{1}[\breve{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}]\right) 
-\end{eqnarray*}
-
-\anaslideplain{Label Adjustment Theorem}
-\begin{eqnarray*}
-    f_\Phi(x).\mathrm{grad}[\alpha,\tilde{y}] & \minuseq & \eta\left(\mathbbm{1}[\hat{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}]
-  - \mathbbm{1}[\breve{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}]\right) 
-\end{eqnarray*}
-
-\vfill
-{\bf Theorem}: For a continuous and smooth population distribution
-\begin{eqnarray*}
-  & & \nabla_\Phi  \;E_{(x,y) \sim \mathrm{Pop}}\;\mathrm{Err}(y,\hat{y}^*(f_\Phi(x))) \\
-  \\
-  & = & \lim_{\epsilon \rightarrow 0} \;\frac{1}{\epsilon}\; E_{(x,y) \sim \mathrm{Pop}} \\
-  \\
-  & & \;\;\;\;\;\;\sum_{\alpha,\tilde{y}} \left(\;\mathbbm{1}[\hat{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}]
-  - \mathbbm{1}[\breve{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}] \right) \nabla_\Phi f_\Phi(x)[\alpha,\tilde{y}]
-\end{eqnarray*}
-
-
-
-\slide{Intersection over Union}
-
-In visual detection problems one is typically evaluated by {\bf intersection over union}.
-
-$$\mathbf{IOU} = \frac{|\mbox{true positives} \cap \mbox{false positives}|}{|\mbox{true positives} \cup\mbox{false positives}|} = \frac{P - FN}{P + FP}$$
-
-\vfill
-\begin{eqnarray*}
-    \frac{\partial \mathrm{}IOU}{\partial \mathrm{FP}} & =  & \frac{-(P - FN)}{(P + FP)^2} = \frac{-\mathrm{IOU}}{P+ FP} \\
-    \\ \\
-    \frac{\partial \mathrm{}IOU}{\partial \mathrm{FN}} & =  & \frac{-1}{P + FP}
-\end{eqnarray*}
+This can be used to produce a list of $k$ ``best'' decodings which can then be compared to select
+the most likely one.
 
 \slideplain{Phrase Based Statistical Machine Translation (SMT)}
 
@@ -397,10 +464,10 @@ Step I:   Learn a phrase table --- a set of triples $(p,q,s)$ where
 \end{itemize}
 
 \vfill
-(``au'', ``to the'', .5) \hfill (``au banque'', ``the the bank'', .01)
+(``au'', ``to the'', .5) \hfill (``au banque'', ``for the bank'', .01)
 
 \vfill
-For a phrase $P$ we will write $P.\mathrm{source}$ for the source phrase, $P.\mathrm{target}$ for the target phrase, and $P.\mathrm{score}$ for the score.
+For a phrase triple $P$ we will write $P.\mathrm{source}$ for the source phrase, $P.\mathrm{target}$ for the target phrase, and $P.\mathrm{score}$ for the score.
 
 \slide{Derivations}
 
@@ -448,4 +515,5 @@ the indeces $(s_1,t_1)$, $\ldots$, $(s_K,t_K)$.
 \end{eqnarray*}
 
 \slide{END}
+}
 \end{document}

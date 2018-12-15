@@ -2,6 +2,9 @@
 \input ../preamble
 \parindent = 0em
 
+\newcommand{\solution}[1]{}
+%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
 \begin{document}
 
 
@@ -90,6 +93,61 @@ This can be used in cases where we can sample from $P$ and $Q$ but cannot comput
 Instead we can use a model score $s_\Phi(x)$ where $s_\Phi(x)$ can be computed.
 
 
+{\bf Problem 3.}
+
+a) Calculate the differential entropy of a Gaussian distribution
+$$p(x) = \frac{1}{\sigma\sqrt{2\pi}}e^{\frac{-x^2}{2\sigma^2}}.$$
+Use the natural logarithm in your definition of entropy.
+
+\solution{
+\begin{eqnarray*}
+H(p) & = & E_{x \sim P} -\ln p(x) \\
+\\
+& = & E_{x \sim P}\; \frac{x^2}{2 \sigma^2} + \ln \sigma + \ln \sqrt{2\pi} \\
+\\
+& = & \frac{\sigma^2}{2\sigma^2} + \ln \sigma + \frac{1}{2}\ln 2\pi \\
+\\
+& = & \ln \sigma + \frac{1}{2}(1 + \ln 2\pi)
+\end{eqnarray*}
+}
+
+b) Let the ``signal'' $x$ be a Gaussian random variable with variance $\sigma_x$ and let the ``noise'' $\epsilon$ be an independent Gaussian random variable with
+variance $\sigma_\epsilon$.  Let $z = x + \epsilon$.  Use the fact that a sum of independent Gaussians is Gaussian with $\sigma^2_z = \sigma^2_x + \sigma^2_\epsilon$
+to compute the differential mutual information $I(x,z)$.  Express your answer in terms of the signal to noise ratio $\sigma^2_x/\sigma^2_\epsilon$.
+Hint: select a convenient expression for mutual information and use part (a).
+
+\solution{
+\begin{eqnarray*}
+I(z,x) & = & H(z) - H(z|x) \\
+\\
+& = & \ln (\sigma^2_x + \sigma^2_\epsilon) - \ln \sigma^2_\epsilon \\
+\\
+& = & \ln \left(\frac{\sigma^2_x + \sigma^2_\epsilon}{\sigma^2_\epsilon}\right) \\
+\\
+& = & \ln \left(1 + \frac{\sigma^2_x}{\sigma^2_\epsilon} \right)
+\end{eqnarray*}
+}
+
+c)  For both the differential entropy in (a) and the mutual information in (b) say whether the numerical value depends on the choice of units.
+
+\solution{
+          The numerical value of differential entropy is sensitive to the units we choose for $\sigma$.  As long as $\sigma_x$ and $\sigma_\epsilon$
+          are measured in the same units, the numerical value of the mutual information is units-independent. This is consistent with the fact
+          that differential entropy is not directly meaningful while mutual information can be written as a KL-divergence and differential KL-divergence
+          is meaningful.
+          }
+
+\bigskip
+{\bf Problem:} Calculate the KL divergence between Gaussians
+
+\bigskip
+{\bf Problem:} Calculate mutual information between gaussian x and x plus noise.
+
+\bigskip
+{\bf Problem:} Prove the data processing inequality.
+
+\bigskip
+{\bf Problem:} Show the various definitions of mutual inforamtion are equivalent.
 
   
 \end{document}
