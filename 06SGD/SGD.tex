@@ -1,3 +1,4 @@
+\input ../SlidePreamble
 \input ../preamble
 
 \begin{document}
@@ -13,12 +14,10 @@
   \vfill
   \centerline{RMSProp, Momentum and Adam}
   \vfill
-  \centerline{Scaling Learnng Rates with Batch Size}
+  \centerline{Scaling Learning Rates with Batch Size}
   \vfill
-  \centerline{SGD as MCMC and MCMC as SGD}
-  \vfill
-  \centerline{An Original SGD Algorithm}
-
+  \centerline{Gradient Flow and Langevin Dynamics}
+  
 \slide{Vanilla SGD}
 
 $$\Phi \;\minuseq\; \eta \hat{g}$$
@@ -28,349 +27,10 @@ $$\Phi \;\minuseq\; \eta \hat{g}$$
   \hat{g} & = & E_{(x,y) \sim \mathrm{Batch}}\;\nabla_\Phi\;\mathrm{loss}(\Phi,x,y) \\
   \\
   \\
-  g & = & E_{(x,y) \sim \mathrm{Train}}\;\nabla_\Phi\;\mathrm{loss}(\Phi,x,y) \\
+  g & = & E_{(x,y) \sim \mathrm{Pop}}\;\nabla_\Phi\;\mathrm{loss}(\Phi,x,y) \\
 \end{eqnarray*}
-
-\vfill
-For theoretical analysis we will focus on the case where the training data is very large --- essentially infinite.
 
 \slide{Issues}
-
-\vfill
-\begin{itemize}
-\item {\bf Gradient Estimation.} The accuracy of $\hat{g}$ as an estimate of $g$.
-
-  \vfill
-\item {\bf Gradient Drift (second order structure).} The fact that $g$ changes as the parameters change.
-\end{itemize}
-
-\slide{A One Dimensional Example}
-
-Suppose that $y$ is a scalar, and consider
-
-\vfill
-$$\mathrm{loss}(\beta,x,y) = \frac{1}{2}(\beta - y)^2$$
-
-\vfill
-\begin{eqnarray*}
-  g & = & E_{(x,y) \sim \mathrm{Train}}\; d\;\mathrm{loss}(\beta,x,y)/d \beta \;\;=\;\;\beta - E_{\mathrm{Train}}[y] \\
-  \\
-  \\
-  \hat{g} & = & E_{(x,y) \sim \mathrm{Batch}} \; d\;\mathrm{loss}(\beta,x,y)/d \beta \;\;=\;\;\beta - E_{\mathrm{Batch}}[y]
-\end{eqnarray*}
-
-\slide{SGD as MCMC --- The SGD Stationary Distribution}
-
-For small batches we have that each step of SGD makes a random move in parameter space.
-
-\vfill
-Even if we start at the training loss optimum, an SGD step will move away from the optimum.
-
-\vfill
-SGD defines an MCMC process with a stationary distribution.
-
-\vfill
-To converge to a local optimum the learning rate must be gradually reduced to zero.
-
-
-\slide{The Classical Convergence Theorem}
-
-$$\Phi \;\minuseq \; \eta^t \nabla_\Phi\;\mathrm{loss}(\Phi,x_t,y_t)$$
-
-\vfill
-For ``sufficiently smooth'' non-negative loss with
-
-\vfill
-$$\eta^t > 0\;\;\;\;\mbox{and}\;\;\;\;\lim_{t \rightarrow 0} \;\eta^t = 0\;\;\;\;\mbox{and}\;\;\;\;\sum_t \eta^t = \infty,$$
-
-\vfill
-we have that the training loss of $\Phi$ converges (in practice $\Phi$ converges to a local optimum of training loss).
-
-\vfill
-{\Large {\bf Rigor Police:} One can construct cases where $\Phi$ converges to a saddle point or even a limit cycle.}
-
-\vfill
-{\Large See ``Neuro-Dynamic Programming'' by Bertsekas and Tsitsiklis proposition 3.5.}
-
-\slide{Physicist's Proof of the Convergence Theorem}
-
-Since $\lim_{t \rightarrow 0} \;\eta^t = 0$ we will eventually get to arbitrarilly small learning rates.
-
-\vfill
-For sufficiently small learning rates any meaningful update of the parameters will be based on an arbitrarily large sample
-of gradients at essentially the same parameter value.
-
-\vfill
-An arbitrarily large sample will become arbitrarily accurate as an estimate of the full gradient.
-
-\vfill
-But since $\sum_t \eta^t = \infty$, no matter how small the learning rate gets, we still can make arbitrarily large motions in parameter space.
-
-\slide{Statistical Intuitions for Learning Rates}
-
-For intuition consider the one dimensional case.
-
-\vfill
-At a fixed parameter setting we can sample gradients.
-
-\vfill
-Averaging together $N$ sample gradients produces a confidence interval on the true gradient.
-
-$$g = \hat{g} \pm \frac{2\sigma}{\sqrt{N}}$$
-
-To have the right direction of motion this interval should not contain zero.  This gives.
-
-$$N \geq \frac{2\sigma^2}{\hat{g}^2}$$
-
-\slide{Statistical Intuitions for Learning Rates}
-
-$$N \geq \frac{2\sigma^2}{\hat{g}^2}$$
-
-\vfill
-To average $N$ gradients we need that $N$ gradient updates have a limited influence on the gradient.  
-
-\vfill
-This suggests
-$$\eta^t \propto \frac{1}{N} \propto \frac{(g^t)^2}{(\sigma^t)^2}$$
-
-\vfill
-The constant of proportionality will depend on the rate of change of the gradient (the second derivative of loss).
-
-\slide{Statistical Intuitions for Learning Rates}
-
-$$\eta^t \propto \frac{(g^t)^2}{(\sigma^t)^2}$$
-
-\vfill
-This is written in terms of the true (average) gradient $g^t$ at time $t$ and the true standard deviation $\sigma^t$ at time $t$.
-
-\vfill
-This formulation is of conceptual interest but is not (yet) directly implementable (more later).
-
-\vfill
-As $g^t \rightarrow 0$ we expect $\sigma^t \rightarrow \sigma > 0$ and hence $\eta^t \rightarrow 0$.
-
-
-\slide{Running Averages}
-
-We can try to estimate $g^t$ and $\sigma^t$ with a running average.
-
-\vfill
-It is useful to review general running averages.
-
-\vfill
-Consider a time series $x_1$, $x_2$, $x_3$, $\ldots$.
-
-\vfill
-Suppose that we want to approximate a running average
-
-$$\hat{\mu}_{t} \approx \frac{1}{N} \sum_{s=t-N+1}^t x_s$$
-
-\vfill
-This can be done efficiently with the update
-
-\vfill
-$$\hat{\mu}_{t+1} = \left(1-\frac{1}{N}\right)\hat{\mu}_t + \left(\frac{1}{N}\right)x_{t+1}$$
-
-\slide{Running Averages}
-
-More explicitly, for $\hat{\mu}_0 = 0$, the update
-
-$$\hat{\mu}_{t+1} = \left(1-\frac{1}{N}\right)\hat{\mu}_t + \left(\frac{1}{N}\right)x_{t+1}$$
-
-\vfill
-gives
-
-$$\hat{\mu}_t = \frac{1}{N} \sum_{1 \leq s \leq t} \left(1-\frac{1}{N}\right)^{-(t-s)} x_s$$
-
-\vfill
-where we have
-
-$$\sum_{n\geq 0} \left(1-\frac{1}{N}\right)^{-n} = N$$
-
-
-\slide{Back to Learning Rates}
-
-In high dimension we can apply the statistical learning rate argument to each dimension (parameter) $\Phi[c]$ of the parameter vector $\Phi$ giving a separate learning rate for each dimension.
-
-\vfill
-$$\eta^t[c] \propto \frac{g^t[c]^2}{\sigma^t[c]^2}$$
-
-\vfill
-\begin{eqnarray*}
-  \Phi^{t+1}[c] & = & \Phi^t[c] - \eta^t[c]\Phi^t[c]
-\end{eqnarray*}
-
-
-\slide{RMSProp}
-
-RMS --- Root Mean Square --- was introduced by Hinton and proved effective in practice. We start by computing a running average of $\hat{g}[c]^2$.
-
-$$s^{t+1}[c] = \beta s^t[c] + \left(1-\beta\right) \hat{g}[c]^2$$
-
-\vfill
-The PyTorch Default for $\beta$ is .99 which corresponds to a running average of 100 values of $\hat{g}[c]^2$.
-
-\vfill
-If $g^t[c] << \sigma^t[c]$ then $s^t[c] \approx \sigma^t[c]^2$.
-
-\vfill
-RMSProp:
-
-$$\eta^t[c] \propto 1/\sqrt{s^t[c] + \epsilon}$$
-
-\slide{RMSProp}
-
-\vfill
-RMSProp
-
-\vfill
-$$\eta^t[c] \propto 1/\sqrt{s^t[c] + \epsilon}$$
-
-\vfill
-bears some similarity to
-
-\vfill
-$$\eta^t[c] \propto g^t[c]^2/\sigma^t[c]^2$$
-
-\vfill
-but there is no attempt to estimate $g^t[c]$.
-
-\slide{Momentum}
-
-\centerline{\includegraphics[width = 6in]{../images/momentum}}
-\centerline{\Large Rudin's blog}
-
-\vfill
-The theory of momentum is generally given in terms of {\bf gradient drift} (the second order structure of total training loss).
-
-\vfill
-I will instead analyze momentum as a running average of $\hat{g}$.
-
-\slide{Momentum, Nonstandard Parameterization}
-
-\begin{eqnarray*}
-  \tilde{g}^{t+1} & = & \mu \tilde{g}^t + (1-\mu)\hat{g}  \;\;\;\;\;\;\;\mu\in (0,1)\;\;\;\mbox{Typically}\;\mu \approx .9 \\
-  \\
-  \Phi^{t+1} & = & \Phi^t - \eta\tilde{g}^{t+1} \\
-\end{eqnarray*}
-
-\vfill
-For $\mu = .9$ we have that $\tilde{g}^t$ approximates a running average of 10 values of $\hat{g}$.
-
-\slide{Running Averages Revisited}
-
-Consider any sequence $y_t$ derived from $x_t$ by
-
-$$y_{t+1} = \left(1-\frac{1}{N}\right) y_t + f(x_t)\;\;\;\;\mbox{for any function $f$}$$
-
-\vfill
-We note that any such equation defines a running average of $Nf(x_t)$.
-
-$$y_{t+1} = \left(1-\frac{1}{N}\right)y_t + \left(\frac{1}{N}\right)(N f(x_t))$$
-
-\slide{Momentum, Standard Parameterization}
-
-\begin{eqnarray*}
-  v^{t+1} & = & \mu v^t + \eta * \hat{g}  \;\;\;\;\;\;\;\;\mu \in (0,1) \\
-  \\
-  \Phi^{t+1} & = & \Phi^t -  v^{t+1} \\
-\end{eqnarray*}
-
-
-\vfill
-By the preceding slide $v^t$ is a running average of $(\eta/(1-\mu))\hat{g}$ and hence the above definition is equivalent to
-
-\begin{eqnarray*}
-  \tilde{g}^{t+1} & = & \mu \tilde{g}^t + (1-\mu) \hat{g}  \;\;\;\;\;\;\;\;\mu \in (0,1) \\
-  \\
-  \Phi^{t+1} & = & \Phi^t -  \left(\frac{\eta}{1-\mu}\right)\tilde{g}^{t+1} \\
-\end{eqnarray*}
-
-\slideplain{Momentum}
-
-\begin{eqnarray*}
-  \tilde{g}^{t+1} & = & \mu \tilde{g}^t + (1-\mu) \hat{g}  \;\;\;\;\;\;\;\;\mu \in (0,1),\;\mbox{typically .9} \\
-  \\
-  \Phi^{t+1} & = & \Phi^t -  \left(\frac{\eta}{1-\mu}\right)\tilde{g}^{t+1} \;\;\;\mbox{standard parameterization}\\
-  \\
-  \Phi^{t+1} & = & \Phi^t -  \eta'\tilde{g}^{t+1} \;\;\;\;\;\;\;\;\;\;\mbox{nonstandard parameterization}\\
-\end{eqnarray*}
-
-\vfill
-The total contribution of a gradient value $\hat{g}^t$ is $\eta/(1-\mu)$ in the standard parameterization
-and is $\eta'$ in the nonstandard parameterization (independent of $\mu$).
-This suggests that the optimal value of $\eta'$ is independent of $\mu$ and that the $\mu$ does nothing.
-
-\slideplain{Adam --- Adaptive Momentum}
-
-\begin{eqnarray*}
-  \tilde{g}^{t+1}[c] & = & \beta_1\tilde{g}^t[c] + (1-\beta_1) \hat{g}[c] \;\;\;  {\Large \mbox{PyTorch Default:}\;\beta_1 = .9} \\
-  \\
-  s^{t+1}[c] & = & \beta_2 s^t[c] + (1-\beta_2) \hat{g}[c]^2 \;\;\;{\Large \mbox{PyTorch Default:}\;\beta_2 = .999}\\
-  \\
-\Phi^{t+1}[c] & \minuseq & \frac{l_r}{\sqrt{(1-\beta_2^t)s^{t+1}[c]} + \epsilon}\;\; (1-\beta_1^t)\tilde{g}^{t+1}[c]
-\end{eqnarray*}
-
-\vfill
-Given the argument that momentum does nothing, this should be
-equivalent to RMSProp.  However, implementations of RMSProp and Adam differ in details such as default parameter values
-and, perhaps most importantly, RMSProp lacks the ``initial bias correction terms'' $(1-\beta^t)$ (see the next slide).
-
-\slideplain{Bias Correction in Adam}
-
-Adam takes $\tilde{g}^0 = s^0 = 0$.
-
-\vfill
-For $\beta_2 = .999$ we have that $s^t$ is very small for $t << 1000$.
-
-\vfill
-To make $s^t[c]$ a better average of $g^t[c]^2$ we replace $s^t[c]$ by $(1-\beta_2^t)s^t[c]$.
-
-\vfill
-For $\beta_2 = .999$ we have $\beta_2^t \approx \exp(-t/1000)$ and for $t >> 1000$ we have $(1-\beta_2^t) \approx 1$.
-
-\vfill
-Similar comments apply to replacing $g^t[c]$ by $(1-\beta_1^t)g^t[c]$.
-
-\slide{Learning Rate Scaling}
-
-Recent work has show that by scaling the learning rate with the batch size very large batch size can lead to very fast (highly parallel)
-training.
-
-\vfill
-{\bf Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour}, Goyal et al., 2017.
-
-\slide{Learning Rate Scaling}
-
-Consider two consecutive updates for a batch size of 1 with learning rate $\eta_1$.
-
-\begin{eqnarray*}
-  \Phi^{t+1} & = & \Phi^t - \eta_1 \nabla_\Phi \mathrm{loss}(\Phi^t,x^t,y^t) \\
-  \\
-  \Phi^{t+2} & = & \Phi^{t+1} - \eta_1 \nabla_\Phi \mathrm{loss}(\Phi^{t+1},x^{t+1},y^{t+1}) \\\
-  \\
-  & \approx & \Phi^{t+1} - \eta_1 \nabla_\Phi \mathrm{loss}(\Phi^t,x^{t+1},y^{t+1}) \\
-  \\
-  & = & \Phi^t - \eta_1((\nabla_\Phi \mathrm{loss}(\Phi^t,x^t,y^t)) + (\nabla_\Phi \mathrm{loss}(\Phi^t,x^{t+1},y^{t+1})))
-\end{eqnarray*}
-
-\slide{Learning Rate Scaling}
-
-Let $\eta_B$ be the learning rate for batch size $B$.
-
-\vfill
-\begin{eqnarray*}
-  \Phi^{t+2} & \approx & \Phi^t - \eta_1((\nabla_\Phi \mathrm{loss}(\Phi^t,x^t,y^t)) + (\nabla_\Phi \mathrm{loss}(\Phi^t,x^{t+1},y^{t+1}))) \\
-  \\
-  & = & \Phi^t - 2\eta_1\;\hat{g}\;\;\;\mathrm{for}\;\;B=2
-\end{eqnarray*}
-
-\vfill
-Hence two updates with $B=1$ at learning rate $\eta_1$ is the same as one update at $B=2$ and learning rate $2\eta_1$.
-
-\vfill
-$$\eta_2 = 2\eta_1,\;\;\;\;\;\;{\color{red} \eta_B = B\eta_1}$$
-\slide{SGD as MCMC and MCMC as SGD}
 
 \vfill
 \begin{itemize}
@@ -386,13 +46,293 @@ $$\eta_2 = 2\eta_1,\;\;\;\;\;\;{\color{red} \eta_B = B\eta_1}$$
   \item {\bf Exploration.} Since deep models are non-convex we need to search over the parameter space.  SGD can behave like MCMC.
 \end{itemize}
 
-\slide{Learning Rate as a Temperature Parameter}
+\slide{A One Dimensional Example}
+
+Suppose that $y$ is a scalar, and consider
+
+\begin{eqnarray*}
+ \mathrm{loss}(\beta,y) & = & \frac{1}{2}(\beta - y)^2 \\
+ \\
+  g & = & E_{y \sim \mathrm{Pop}}\; \nabla_\beta\;\frac{1}{2}(\beta - y)^2 \\
+  \\
+  & = & \beta - E_{y \sim \mathrm{Pop}} \; y \\
+  \\
+  \hat{g} & = &\beta - E_{y \sim \mathrm{Batch}} \;y
+\end{eqnarray*}
+
+\vfill
+Even if $\beta$ is optimal, for a finite batch we will have $\hat{g} \not = 0$.
+
+\slide{The Classical Convergence Theorem}
+
+$$\Phi \;\minuseq \; \eta_t \nabla_\Phi\;\mathrm{loss}(\Phi,x_t,y_t)$$
+
+\vfill
+For ``sufficiently smooth'' non-negative loss with
+
+\vfill
+$$\eta_t > 0\;\;\;\;\mbox{and}\;\;\;\;\lim_{t \rightarrow 0} \;\eta_t = 0\;\;\;\;\mbox{and}\;\;\;\;\sum_t \eta_t = \infty,$$
+
+\vfill
+we have that the training loss of $\Phi$ converges (in practice $\Phi$ converges to a local optimum of training loss).
+
+\vfill
+{\Large {\bf Rigor Police:} One can construct cases where $\Phi$ converges to a saddle point or even a limit cycle.}
+
+\vfill
+{\Large See ``Neuro-Dynamic Programming'' by Bertsekas and Tsitsiklis proposition 3.5.}
+
+\slide{Physicist's Proof of the Convergence Theorem}
+
+Since $\lim_{t \rightarrow 0} \;\eta_t = 0$ we will eventually get to arbitrarilly small learning rates.
+
+\vfill
+For sufficiently small learning rates any meaningful update of the parameters will be based on an arbitrarily large sample
+of gradients at essentially the same parameter value.
+
+\vfill
+An arbitrarily large sample will become arbitrarily accurate as an estimate of the full gradient.
+
+\vfill
+But since $\sum_t \eta_t = \infty$, no matter how small the learning rate gets, we still can make arbitrarily large motions in parameter space.
+
+\slidetwo{SGD as a form of MCMC}{Learning Rate as a Temperature Parameter}
 
 \centerline{\includegraphics[height= 4in]{../images/AnnealingSGD}}
 \centerline{\Large Gao Huang et. al., ICLR 2017}
 
+\slide{}
+\centerline{\bf Standard Non-Vanilla SGD Algorithms}
+\vfill
+\vfill
 
-\slide{Gradient Flow}
+\slideplain{Digression on Running Averages}
+Consider a sequence $x_1$, $x_2$, $x_3$, $\ldots$.
+\vfill
+For $t \geq N$, consider the average of the $N$ most recent values.
+$$\tilde{\mu} = \frac{1}{N} \sum_{s=t-N+1}^t x_s$$
+
+\vfill
+This can be approximated more efficiently with
+\begin{eqnarray*}
+\hat{\mu}_0 & = & 0 \\
+\\
+\hat{\mu}_t & = & \left(1-\frac{1}{N}\right)\hat{\mu}_{t-1} + \left(\frac{1}{N}\right)x_t\;\;\;t \geq 1 \\
+\\
+\hat{\mu}_t & \approx & \tilde{\mu}_t \;\;\; t >N
+\end{eqnarray*}
+
+\slide{Running Averages}
+
+More explicitly, for $\hat{\mu}_0 = 0$, the update
+
+$$\hat{\mu}_t = \left(1-\frac{1}{N}\right)\hat{\mu}_{t-1} + \left(\frac{1}{N}\right)x_t$$
+
+\vfill
+gives
+
+$$\hat{\mu}_t = \frac{1}{N} \sum_{1 \leq s \leq t} \left(1-\frac{1}{N}\right)^{-(t-s)} x_s$$
+
+\vfill
+where we have
+
+$$\sum_{n\geq 0} \left(1-\frac{1}{N}\right)^{-n} = N$$
+
+\slide{RMSProp}
+
+RMSProp is based on a running average of $\hat{g}[i]^2$ for each real-valued model parameter $i$.
+
+\begin{eqnarray*}
+{\color{red} s_t[i]} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
+\\
+{\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i] + \epsilon}}\;\; \hat{g}_t[i]} \\
+\\
+\\
+s[i] & \approx & E\;\hat{g}[i]^2  =  g[i]^2 + \sigma[i]^2
+\end{eqnarray*}
+
+\vfill
+We should expect $\sigma[i] >> g[i]$.
+
+\slide{Momentum}
+
+\begin{eqnarray*}
+  {\color{red} v_t} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N}\right) v_{t-1} + \eta * \hat{g}_t} \\
+  \\
+  {\color{red} \Phi_{t+1}} & {\color{red} =} & {\color{red} \Phi_t -  v_t} \\
+\end{eqnarray*}
+
+The theory of momentum is generally given in terms of second order structure.
+
+
+\centerline{\includegraphics[width = 4in]{../images/momentum}}
+\centerline{\Large Rudin's blog}
+
+\slideplain{Momentum}
+
+However, second order analyses are controversial in Deep Learning.
+
+\vfill
+We can perhaps get insight by reparameterizing the momentum equations.
+
+\slide{A Reparameterization}
+
+\begin{eqnarray*}
+v_t & = & \left(1-\frac{1}{N}\right) v_{t-1} + \eta \hat{g}_t \\
+\\
+& = & \left(1-\frac{1}{N}\right) v_{t-1} + \frac{1}{N}(N\eta \hat{g}_t) \\
+\\
+& = & N\eta\mu_t\;\;\mbox{for}\;{\color{red} \mu_t = \left(1-\frac{1}{N}\right)\mu_{t-1} + \frac{1}{N} \hat{g}_t} \\
+\\
+\Phi_{t+1} & = & \Phi_t - v_t \\
+\\
+& = & \Phi_t - {\color{red} N\eta\mu_t} 
+\end{eqnarray*}
+
+\slide{A Reparameterization}
+
+\begin{eqnarray}
+{\color{red} \mu_t} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_{\mu}}\right)\mu_{t-1} + \frac{1}{N_{\mu}} \hat{g}_t}\;\;N_{\mu}\;\mbox{typically 10 or 100} \nonumber \\
+\nonumber \\
+\label{eq:momentum1}
+\Phi_{t+1} & = & \Phi_t - N\eta\mu_t \\
+\nonumber\\
+ \label{eq:momentum2}
+ & = & {\color{red} \Phi_t - \eta'\mu_t}
+\end{eqnarray}
+
+My intuition: For the parameterization $N$ and $\eta'$ defined by (\ref{eq:momentum2}) it should be possible to optimize $N$ and $\eta'$ largely independently.
+I would not expect this to be true for the $N$ and $\eta$ defined by (\ref{eq:momentum1}).
+
+\slide{Adam --- Adaptive Momentum}
+
+Adam combines momentum and RMSProp.
+
+\vfill
+It also uses ``bias correction'' of running averages.
+
+\slide{A Digression on Bias Correction of Running Averages}
+
+Consider a sequence $x_1,\;x_2,\;x_3,\ldots$ and consider the following for $N$ large.
+
+\begin{eqnarray*}
+\hat{\mu}_0 & = & 0 \\
+\\
+\hat{\mu}_t & = & \left(1-\frac{1}{N}\right)\hat{\mu}_{t-1} + \left(\frac{1}{N}\right)x_t
+\end{eqnarray*}
+
+\vfill
+For $\mu \doteq E\;x$ we have $E\;\hat{\mu}_1 = \mu/N$.
+
+\vfill
+For $t << N$ we have $E\;\hat{\mu}_t \approx (t/N)\mu$.
+
+\slide{Bias Correction of Running Averages}
+
+The following running average maintains the invariant that $\hat{\mu}_t$ is exactly the average of $x_1,\ldots,x_t$.
+
+\begin{eqnarray*}
+\hat{\mu}_0 & = & 0 \\
+\\
+\hat{\mu}_t & = & \left(1-\frac{1}{t}\right)\hat{\mu}_{t-1} + \left(\frac{1}{t}\right)x_t
+\end{eqnarray*}
+
+\vfill
+But this fails to track a moving average for $t >> N$.
+
+\slide{Bias Correction of Running Averages}
+
+The following avoids the initial bias toward zero while still tracking a moving average.
+
+\begin{eqnarray*}
+\hat{\mu}_0 & = & 0 \\
+\\
+\hat{\mu}_t & = & \left(1-\frac{1}{\min(N,t)}\right)\hat{\mu}_{t-1} + \left(\frac{1}{\min(N,t)}\right)x_t
+\end{eqnarray*}
+
+\vfill
+The published version of Adam has a more obscure form of bias correction which yields essentially the same effect.
+
+\slide{Adam (simplified)}
+
+\begin{eqnarray*}
+  \mu_0[i] & = & s_0[i] = 0 \\
+  \\
+  \mu_{t}[i] & = & \left(1-\frac{1}{\min(t,N_g)}\right)\mu_{t-1}[i] + \frac{1}{\min(t,N_g)} \hat{g}_t[i] \\
+  \\
+  s_{t}[i] & = & \left(1-\frac{1}{\min(t,N_s)}\right)s_{t-1}[i] + \frac{1}{\min(t,N_s)} \hat{g}_t[i]^2 \\
+  \\
+\Phi_{t+1}[i] & =  & \Phi_t - \frac{\eta}{\sqrt{s_{t}[i] + \epsilon}}\;\;\mu_{t}[i]
+\end{eqnarray*}
+
+\slide{Scaling $\eta$, $N_{\mu}$ and $N_s$ Batch Size}
+
+Recent work has show that scaling hyper-parameters with the batch size can lead to effective learning with very large (highly parallel)
+batches.
+
+\vfill
+{\bf Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour}, Goyal et al., 2017.
+
+\vfill
+{\bf Don't Decay the Learning Rate, Increase the Batch Size}, Smith et al., 2018
+
+\slide{Scaling $\eta$}
+
+Consider two consecutive updates for a batch size of 1 with learning rate $\eta_1$.
+
+\begin{eqnarray*}
+  \Phi_{t+1} & = & \Phi_t - \eta_1 \nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t) \\
+  \\
+  \Phi_{t+2} & = & \Phi_{t+1} - \eta_1 \nabla_\Phi \mathrm{loss}(\Phi_{t+1},x_{t+1},y_{t+1}) \\\
+  \\
+  & \approx & \Phi_{t+1} - \eta_1 \nabla_\Phi \mathrm{loss}(\Phi_t,x_{t+1},y_{t+1}) \\
+  \\
+  & = & \Phi_t - \eta_1((\nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t)) + (\nabla_\Phi \mathrm{loss}(\Phi_t,x_{t+1},y_{t+1})))
+\end{eqnarray*}
+
+\slide{Scaling $\eta$}
+
+Let $\eta_B$ be the learning rate for batch size $B$.
+
+\vfill
+\begin{eqnarray*}
+  \Phi_{t+2} & \approx & \Phi_t - \eta_1((\nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t)) + (\nabla_\Phi \mathrm{loss}(\Phi_t,x_{t+1},y_{t+1}))) \\
+  \\
+  & = & \Phi_t - 2\eta_1\;\hat{g}\;\;\;\mathrm{for}\;\;B=2
+\end{eqnarray*}
+
+\vfill
+Hence two updates with $B=1$ at learning rate $\eta_1$ is the same as one update at $B=2$ and learning rate $2\eta_1$.
+
+\vfill
+$$\eta_2 = 2\eta_1,\;\;\;\;\;\;{\color{red} \eta_B = B\eta_1}$$
+
+\slide{Scaling $N_\mu$}
+
+Let $N_{\mu,B}$ be the momentum parameter to be used with batch size $B$.
+
+\vfill
+For batch size $B$, $\hat{\mu}_t$ is averaging over $N_{\mu,B}B$ gradient values.
+
+\vfill
+Holding the number of included gradients constant gives
+
+\vfill
+$${\color{red} N_{\mu,B}B = N_{\mu,1}\;\;\;\mbox{or}\;\;\;N_{\mu,B} = N_{\mu,1}/B}$$
+
+\slide{Scaling $N_s$}
+
+The simple analysis for $N_{\mu}$ fails for $N_s$.
+
+\vfill
+To estimate $E\;g[i]^2$ we should average $\hat{g}_t[i]^2$ over batch elements rather than batch averages.
+
+\vfill
+The parameter $N_s$ should be a number of gradients (batch elements) rather than a number of batches,
+
+\vfill Under this semantics, $N_s$ should be constant independent of batch size.
+
+\slide{Gradient Flow and Langevin Dynamics}
 
 $$\mbox{Total Gradient Descent:} \;\;\Phi \;\minuseq\; \eta g$$
 
@@ -573,34 +513,34 @@ $\eta^t \rightarrow 0$.
 So far we have been considering just one dimension.
 
 \vfill
-We now propose treating each dimension $\Phi[c]$ of a high dimensional parameter vector $\Phi$ independently using the one dimensional analysis.
+We now propose treating each dimension $\Phi[i]$ of a high dimensional parameter vector $\Phi$ independently using the one dimensional analysis.
 
 \vfill
-We can calculate $B^*[c]$ and $\eta^*[c]$ {\bf for each individual parameter} $\Phi[c]$.
+We can calculate $B^*[i]$ and $\eta^*[i]$ {\bf for each individual parameter} $\Phi[i]$.
 
 \vfill
 Of course the actual batch size $B$ will be the same for all parameters.
 
 \slide{A Complete Algorithm}
 \begin{eqnarray*}
-  \tilde{g}^{t+1}[c] & = & \left(1-\frac{B}{B^*(t)[c]}\right)\tilde{g}^t[c] + \frac{B}{B^*(t)[c]} \hat{g}^{t+1}[c] \\
+  \tilde{g}^{t+1}[i] & = & \left(1-\frac{B}{B^*(t)[i]}\right)\tilde{g}^t[i] + \frac{B}{B^*(t)[i]} \hat{g}^{t+1}[i] \\
   \\
-  \tilde{s}^{t+1}[c] & = & \left(1-\frac{B}{B^*(t)[c]}\right)\tilde{s}^t[c] + \frac{B}{B^*(t)[c]} \hat{g}^{t+1}[c]^2 \\
+  \tilde{s}^{t+1}[i] & = & \left(1-\frac{B}{B^*(t)[i]}\right)\tilde{s}^t[i] + \frac{B}{B^*(t)[i]} \hat{g}^{t+1}[i]^2 \\
   \\
-  \tilde{\sigma}^t[c] & = & \sqrt{\tilde{s}^t[c] - \tilde{g}^t[c]^2} \\
+  \tilde{\sigma}^t[i] & = & \sqrt{\tilde{s}^t[i] - \tilde{g}^t[i]^2} \\
   \\
-  B^*(t)[c] &= & \left\{\begin{array}{ll} K & \mbox{for}\;\; t \leq K \\
-  \lambda_B\tilde{\sigma}^t[c]^2/(\tilde{g}^t[c]^2 + \epsilon) & \mbox{otherwise} \end{array}\right.
+  B^*(t)[i] &= & \left\{\begin{array}{ll} K & \mbox{for}\;\; t \leq K \\
+  \lambda_B\tilde{\sigma}^t[i]^2/(\tilde{g}^t[i]^2 + \epsilon) & \mbox{otherwise} \end{array}\right.
 \end{eqnarray*}
 
 \slide{A Complete Algorithm}
 
-$$\eta^t[c] = \left\{\begin{array}{ll} 0 & \mbox{for}\;\;t \leq K \\
-        \frac{\lambda_\eta\tilde{g}^t[c]^2}{\tilde{\sigma}^t[c]^2} & \mbox{otherwise}
+$$\eta^t[i] = \left\{\begin{array}{ll} 0 & \mbox{for}\;\;t \leq K \\
+        \frac{\lambda_\eta\tilde{g}^t[i]^2}{\tilde{\sigma}^t[i]^2} & \mbox{otherwise}
 \end{array}\right.$$
 
 \vfill
-$$\Phi^{t+1}[c] = \Phi^t[c] - \eta^t[c] \hat{g}^t[c]$$
+$$\Phi^{t+1}[i] = \Phi^t[i] - \eta^t[i] \hat{g}^t[i]$$
 
 \vfill
 Here we have meta-parameters $K$, $\lambda_B$, $\epsilon$ and $\lambda_\eta$.
