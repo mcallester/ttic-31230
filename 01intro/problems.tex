@@ -13,7 +13,10 @@
 
 \bigskip
 \bigskip
-In all problems we assume that all probability distributions $P(x)$ are discrete so that we have $\sum_x\;P(x) = 1$.
+The first exam will include a couple problems from problems 1 through 5.
+
+\bigskip
+For problems 1 through 5 assume that probability distributions $P(x)$ are discrete so that we have $\sum_x\;P(x) = 1$.
 
 \bigskip
 {\bf Problem 1:} The problem of population density estimation is defined by the following equation.
@@ -91,11 +94,17 @@ $$KL(P,Q) =  \sup_s \;E_{x \sim P}\; s(x) - \log E_{x \sim Q} \;e^{s(x)}$$
 This is the Donsker-Varadhan variational representation of KL-divergence.
 This can be used in cases where we can sample from $P$ and $Q$ but cannot compute $P(x)$ or $Q(x)$.
 Instead we can use a model score $s_\Phi(x)$ where $s_\Phi(x)$ can be computed.
+    
+\bigskip
+{\bf Problem 5.} Prove the mutual information form of the data processing inequality --- that for any function $f$ we have $I(x,f(y)) \leq I(x,y)$.  Assume
+discrete distributions.
 
+\bigskip
+Problems in continuous information theory.
 
-{\bf Problem 3.}
-
-a) Calculate the differential entropy of a Gaussian distribution
+\bigskip
+{\bf Problem 6.}
+Calculate the differential entropy of a Gaussian distribution
 $$p(x) = \frac{1}{\sigma\sqrt{2\pi}}e^{\frac{-x^2}{2\sigma^2}}.$$
 Use the natural logarithm in your definition of entropy.
 
@@ -111,10 +120,11 @@ H(p) & = & E_{x \sim P} -\ln p(x) \\
 \end{eqnarray*}
 }
 
-b) Let the ``signal'' $x$ be a Gaussian random variable with variance $\sigma_x$ and let the ``noise'' $\epsilon$ be an independent Gaussian random variable with
+\bigskip
+{\bf Problem 7.} Let the ``signal'' $x$ be a Gaussian random variable with variance $\sigma_x$ and let the ``noise'' $\epsilon$ be an independent Gaussian random variable with
 variance $\sigma_\epsilon$.  Let $z = x + \epsilon$.  Use the fact that a sum of independent Gaussians is Gaussian with $\sigma^2_z = \sigma^2_x + \sigma^2_\epsilon$
 to compute the differential mutual information $I(x,z)$.  Express your answer in terms of the signal to noise ratio $\sigma^2_x/\sigma^2_\epsilon$.
-Hint: select a convenient expression for mutual information and use part (a).
+Hint: select a convenient expression for mutual information and use the answer to problem 5.
 
 \solution{
 \begin{eqnarray*}
@@ -128,7 +138,8 @@ I(z,x) & = & H(z) - H(z|x) \\
 \end{eqnarray*}
 }
 
-c)  For both the differential entropy in (a) and the mutual information in (b) say whether the numerical value depends on the choice of units.
+\bigskip
+{\bf Problem 8.} For both the differential entropy in problem 5,  and the mutual information in problem 6, say whether the numerical value depends on the choice of units.
 
 \solution{
           The numerical value of differential entropy is sensitive to the units we choose for $\sigma$.  As long as $\sigma_x$ and $\sigma_\epsilon$
@@ -138,16 +149,7 @@ c)  For both the differential entropy in (a) and the mutual information in (b) s
           }
 
 \bigskip
-{\bf Problem:} Calculate the KL divergence between Gaussians
-
-\bigskip
-{\bf Problem:} Calculate mutual information between gaussian x and x plus noise.
-
-\bigskip
-{\bf Problem:} Prove the data processing inequality.
-
-\bigskip
-{\bf Problem:} Show the various definitions of mutual inforamtion are equivalent.
+{\bf Problem 9.} Calculate the KL divergence between one dimensional Gaussians with the same variance but different means.
 
   
 \end{document}
