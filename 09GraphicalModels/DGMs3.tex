@@ -1,4 +1,6 @@
+\input ../SlidePreamble
 \input ../preamble
+
 
 \begin{document}
 
@@ -8,167 +10,46 @@
   \bigskip
   \centerline{David McAllester, Winter 2018}
   \vfill
-  \centerline{\bf Deep Graphical Models III}
   \vfill
+  \centerline{\bf Connectionist Temporal Classification (CTC)}
   \vfill
-  \centerline{Expectation Maximization (EM)}
+  \centerline{\bf A Latent Variable Deep Graphical Model}
   \vfill
-  \centerline{Expected Gradient (EG)}
-  \vfill
-  \centerline{CTC}
-  \vfill
+  \centerline{\bf The General Expectation Gradient (EG) Algorithm}
 \vfill
-\slide{Latent Variable Models}
+\slide{The Big Picture I}
 
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi E_{(x,y) \sim \pop} - \ln Q_\Phi(y|x)
-\end{eqnarray*}
+Conditional vs. Unconditional
 
 \vfill
-$y$ ranges over a structured set such as sentences or images.
+$$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Pop}}\;-\ln \;P(y|x)$$
 
 \vfill
-$$Q_\Phi(y|x) = \sum_{\hat{z}} Q_\Phi(\hat{z},y\;|\;x)$$
+$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Pop}}\;-\ln \;P(y)$$
 
 \vfill
-$\hat{z}$ ranges over latent labels such as a word sense for each word or a semantic label for each pixel.
+This is a non-distinction: the issues in the to the conditional case
+are exactly the same as in the unconditional case.
 
-\slide{The Expected Gradient (EG) Identity}
+\slide{The Big Picture II}
 
-\begin{eqnarray*}
-{\color{red} \nabla_\Phi \; \ln Q(y)} & = &  \frac{\nabla_\Phi\; Q(y)}{Q(y)} \\
-\\
-\\
- & = &  \sum_{\hat{z}}\; \frac{\nabla_\Phi\;Q(\hat{z},y)}{Q(y)} \\
- \\
- \\
-  & = &  \sum_{\hat{z}}\; \frac{Q(\hat{z},y)\;  \nabla_\Phi \; \ln Q(\hat{z},y)}{Q(y)} \\
-\\
- & = & {\color{red} E_{\hat{z} \sim Q(\hat{z}|y)} \nabla_\Phi \ln Q(\hat{z},y)} \\
-\end{eqnarray*}
-
-
-\slideplain{The EG Identity}
-
-
-$${\color{red} \nabla_\Phi \; \ln Q_\Phi(y|x) = E_{\hat{z} \sim Q_\Phi(\hat{z}|x,y)} \nabla_\Phi \ln Q_\Phi(\hat{z},y|x)}$$
+The binary case: $y \in \{-1,1\}$ (cancer screening).
 
 \vfill
-It is important to note that the gradient operation only appears inside the expectation.
+The multiclass case: $y \in {\cal Y}$ where iteration over $\hat{y} \in {\cal Y}$ is feasible (MNIST, CFAR, ImageNet).
 
 \vfill
-This is an {\bf expected gradient}.
+{\color{red} The structured case: $y \in {\cal Y}$ where ${\cal Y}$ is discrete but iteration over $\hat{y} \in {\cal Y}$ is infeasible} (language modeling, speech recognition).
 
-\slide{Sufficient Statistics}
+\slide{Big Picuture III}
 
-Consider a model $Q_\Phi(\hat{z},\hat{y}|x)$ and a tensor $S$ computed from $x$, $y$ and $\hat{z}$ such that
-
-\vfill
-$${\color{red} E_{\hat{z} \sim Q_\Phi(\hat{z}|x,y)}\;\nabla_\Phi \ln Q_\Phi(\hat{z},y|x) = f\left(E_{\hat{z} \sim Q_\Phi(\hat{z}|x,y)}\;S(x,y,\hat{z})\right)}$$
+Graphical models (such as CTC) rely on assumptions about the structure of $P_\Phi(y)$.
 
 \vfill
-When this equation holds we say that $E_{\hat{z} \sim Q_\Phi(\hat{z}|x,y)}\;S(x,y,\hat{z})$ is a {\bf sufficient statistic} for the model
-$Q_\Phi(\hat{z},\hat{y}|x)$.
+The {\color{red} expectation gradient (EG)} algorithm applies when $P_\Phi(y)$ can be computed exactly using dynamic programming.
 
 \vfill
-Even when $\hat{z}$ is a structured object (with exponentially many possible values) it is often possible to find a tractable-sized
-sufficient statistic that can be computed or estimated efficiently.
-
-
-\slide{Example: Latent Variable Directed Graphical Models}
-
-\centerline{\includegraphics[height=1.5in]{../images/DAG} \hspace{1in} \includegraphics[height=1.5in]{../images/SortedDAG}}
-
-\vfill
-We assume a population of pairs $(x,y)$ and a model $Q_\Phi(y|x)$ to be trained by cross-entropy.
-
-\vfill
-$$\Phi^* = \argmin_\Phi \;- \ln Q_\Phi(y|x)$$
-
-\vfill
-Here $y$ is an assignment values to {\bf observed} nodes.
-
-\vfill
-We must marginalize over assignments to {\bf unobserved} nodes.
-
-\slide{Latent Variable Directed Graphical Models}
-
-\centerline{\includegraphics[height=1.5in]{../images/DAG} \hspace{1in} \includegraphics[height=1.5in]{../images/SortedDAG}}
-
-\vfill
-Let $\hat{v}$ denote an assignment to all nodes --- both observed and unobserved (latent).
-
-\vfill
-Here we consider only directed models --- models satisfying
-
-\vfill
-\begin{eqnarray*}
-  Q_\Phi(\hat{v}|x) & = & \prod_{i} \; Q_\Phi(x)(\hat{v}[i]\;| \hat{v}[\mathrm{Parents}(i)])
-\end{eqnarray*}
-
-\vfill
-Here $Q_\Phi(x)$ is a tensor giving the conditional probability tables $Q[\hat{v}[i]\;| \hat{v}[\mathrm{Parents}(i)]]$.
-
-\slide{Observed and Latent Variables}
-
-Let $\hat{v}_y$ be the assignment $\hat{v}$ makes to the observed variables.
-
-\vfill
-Let $\hat{v}_z$ be the assignment $\hat{v}$ makes to the unobserved variables.
-
-\vfill
-Let $Q$ abbreviate the tensor $Q_\Phi(x)$.
-\vfill
-$$Q(\hat{v}) = Q(\hat{v}_z,\hat{v}_y)$$
-
-\vfill
-$$Q(\hat{v}_y) = \sum_{\hat{v}_z}\;Q(\hat{v}_z,\hat{v}_y)$$
-
-\slide{The Sufficient Statistics}
-
-For each node $i$ the tensor $Q_\Phi(x)$ specifies the conditional probability table $Q[\tilde{v}_i|\tilde{v}_p]$ where $\tilde{v}_i$ ranges over the possible values of node $i$
-and $\tilde{v}_p$ ranges over the possible assignments of values to the parents of $i$.
-
-\vfill
-$$Q.\grad = \nabla_Q \;- \ln \sum_{\tilde{v}_z} Q(\tilde{v}_z,\tilde{v}_y)$$
-
-\vfill
-$$Q.\grad[\tilde{v}_i|\tilde{v}_p] = \frac{- \partial \ln \sum_{\tilde{v}_z} Q(\tilde{v}_z,\tilde{v}_y)}{\partial Q[\tilde{v}_i|\tilde{v}_p]}$$
-
-\slide{The Sufficient Statistics}
-
-\begin{eqnarray*}
-\nabla_Q \; \ln \; Q(y) & = & E_{\hat{z} \sim Q(\hat{z}|y)} \nabla_Q \ln Q(\hat{z},y) \\
-\\
-& = & E_{\hat{z} \sim Q(\hat{z}|y)} \sum_i \nabla_Q \ln Q((\hat{z},y)[i]\;|\; (\hat{z},y)[\mathrm{parents}(i)]) \\
-\\
-Q.\mathrm{grad}[\tilde{v}_i,\tilde{v}_p]& = & E_{\hat{z} \sim Q(\hat{z}|y)} \frac{1}{Q[\tilde{v}_i,\tilde{v}_p]} \bbone[(\hat{z},y)(i,\mathrm{Parents}(i)) = (\tilde{v}_i,\tilde{v}_p)] \\
-\\
-& = & \frac{1}{Q[\tilde{v}_i|\tilde{v}_p]} E_{\hat{z} \sim Q(\hat{z}|y)} \bbone[(\hat{z},y)(i,\mathrm{Parents}(i)) = (\tilde{v}_i,\tilde{v}_p)]
-\end{eqnarray*}
-
-\vfill
-The quantities ${\color{red} E_{\hat{z} \sim Q(\hat{z}|y)} \bbone[(\hat{z},y)(i,\mathrm{Parents}(i)) = (\tilde{v}_i,\tilde{v}_p)]}$ are the {\bf sufficient statistics}.
-
-\slide{Trees are Tractable}
-
-For tree models the sufficient statics can be computed efficiently by message passing (belief propagation).
-
-\vfill
-Loopy BP can be used for non-tree models.
-
-\slidetwo{Expected Gradient (EG)}{and Expectation Maximization (EM)}
-
-EG: \hspace{3ex} $\nabla_Q \ln Q(y) = \expectsub{\hat{z} \sim Q(\hat{z}|y)}{\nabla_Q \;\ln Q(\hat{z},y)}$.
-
-\vfill
-EM: \hspace{3ex} ${\color{red} Q^{ t+1}} = \argmax_Q \;\expectsub{\hat{z} \sim {\color{red} Q^t}(\hat{z}|y)}{\ln Q(\hat{z},y)}$.
-
-\vfill
-EG = $\nabla_Q \ln Q(y)$ equals is the gradient of the EM objective.
-
-\vfill
-EG and EM have {\bf the same sufficient statistics} (E-step).
+{\color{red} Requiring that $P_\Phi(y)$ is computable restricts the model but is justified in some cases (such as CTC).}
 
 \slidetwo{Connectionist Temporal Classification (CTC)}
 {Phonetic Transcription}
@@ -183,7 +64,7 @@ with $N << T$ and with $y_n \in {\cal Y}$ for a set of phonemes ${\cal Y}$.
 The length $N$ of $y$ is not determined by $x$ and the alignment between $x$ and $y$ is not given.
 
 \slide{CTC}
-The model defines $Q_\Phi(\hat{z}|x,y)$ where $\hat{z}$ is latent.
+The model defines $P_\Phi(\hat{z}|x)$ where $\hat{z}$ is latent and where $y$ is determined by $\hat{z}$.
 
 \vfill
 $$\hat{z} = \hat{z}_1,\;\ldots,\;\hat{z}_T,\;\;\;\hat{z}_t \in {\cal Y} \cup \{\bot\}$$
@@ -205,107 +86,97 @@ $$\bot,a_1,\bot,\bot,\bot,a_2,\bot,\bot,a_3,\bot \Rightarrow a_1,a_2,a_3$$
   h_1,\;\ldots,\;h_T & = & \mathrm{RNN}_\Phi(x_1,\;\ldots,\;x_T) \\
   \\
   \\
-  Q_\Phi(\hat{z}_t|x_1,\ldots,x_T) & = & \softmax_{\hat{z}} \;e(\hat{z})^\top h_t
+  P_\Phi(\hat{z}_t|x_1,\ldots,x_T) & = & \softmax_{\hat{z}_t} \;e(\hat{z}_t)^\top h_t
 \end{eqnarray*}
 
 \vfill
-This is a locally normalized (directed) graphical model where $\hat{z}_t$ does not have any parent nodes.
-
-\slide{The Sufficient Statistics}
-
-Since each node has no parents the sufficient statistics are
+Where $e(\hat{z}_t)$ is a vector embedding of the phoneme $\hat{z}_t$.  The embedding is a parameter of the model.
 
 \vfill
-$${\color{red}P_{\hat{z} \sim Q(\hat{z}|y)}(z_t = \tilde{z})}$$
+Note that $\hat{z}_1$, $\ldots$ $\hat{z}_T$ are all independent given $x$.
+
+\slide{The Expectation Gradient (EG) Algorithm}
+
+CTC is a special case of a latent variable graphical model.
+
+\vfill
+In cases where $P_\Phi(y|x)$ can be computed from dynamic programming
+we can backpropagate through the dynamic programming algorithm to get the gradient of cross-entropy loss.
+
+\vfill
+This general technique is the {\bf expectation gradient} (EG) algorithm.
+
+\vfill
+We will first show that for the CTC model we can compute $P_\Phi(y|x)$ by
+dynamic programming.
+
+\vfill
+We will then note that it is not necessary to backpropagate through the dynamic programming algorithm.
 
 \slideplain{Dynamic Programming (Forward-Backward)}
-
 \begin{eqnarray*}
   x & = & x_1,\;\ldots,\; x_T \\
   \hat{z} & = & \hat{z}_1, \;\ldots,\;\hat{z}_T,\;\;\;\hat{z}_t \in {\cal Y}\cup \{\bot\} \\
   y & = & y_1,\;\ldots,\;y_N,\;\;\;\;y_n \in {\cal Y},\;\;\;N << T \\
-  y & = & (\hat{z}_1,\;\ldots,\;\hat{z}_T) - \bot
+  y(\hat{z}) & = & (\hat{z}_1,\;\ldots,\;\hat{z}_T) - \bot
 \end{eqnarray*}
+
 \vfill
 
 Forward-Backward
-
 \begin{eqnarray*}
   \vec{y}_t & = & (\hat{z}_1,\;\ldots,\;\hat{z}_t)-\bot \\
-  F[n,t] & = & Q(\vec{y}_t = y_1,\;\ldots,\;y_n) \\
-  B[n,t] & = & Q(y_{n+1},\;\ldots,y_N | \vec{y}_t = y_1,\;\ldots,\;y_n)
+  F[n,t] & = & P(\vec{y}_t = y_1,\;\ldots,\;y_n) \\
+  B[n,t] & = & P(y_{n+1},\;\ldots,y_N | \vec{y}_t = y_1,\;\ldots,\;y_n) \\
+  P(y) & = & F[N,T] = B[0,0]
 \end{eqnarray*}
+
+
 
 \slide{Dynamic Programming (Forward-Backward)}
 
 \begin{eqnarray*}
   \vec{y}_t & = & (\hat{z}_1,\;\ldots,\;\hat{z}_t)-\bot \\
-  F[n,t] & = & Q(\vec{y}_t = y_1,\;\ldots,\;y_n) \\
-  B[n,t] & = & Q(y_{n+1},\;\ldots,y_N | \vec{y}_t = y_1,\;\ldots,\;y_n)
+  F[n,t] & = & P(\vec{y}_t = y_1,\;\ldots,\;y_n) \\
+  B[n,t] & = & P(y_{n+1},\;\ldots,y_N | \vec{y}_t = y_1,\;\ldots,\;y_n)
 \end{eqnarray*}
 
 \begin{eqnarray*}
   F[0,0] & = & 1 \\
   F[n,0] & = & 0 \;\;\;\mbox{for $n > 0$} \\
-  F[n+1,t+1] & = & Q(\hat{z}_{t+1} = \bot) F[n+1,t] + Q(\hat{z}_{t+1} = y_{n+1})F[n,t] \\
+  F[n+1,t+1] & = & P(\hat{z}_{t+1} = \bot) F[n+1,t] + P(\hat{z}_{t+1} = y_{n+1})F[n,t] \\
   \\
   B[N,T] & = & 1 \\
   B[n,T] & = & 0,\;\;\;\mbox{for $n < N$} \\
-  B[n-1,t-1] & = & Q(\hat{z}_{t-1} = \bot)B[n-1,t] +  Q(\hat{z}_{t-1} = y_{n-1})B[n,t]
+  B[n-1,t-1] & = & P(\hat{z}_t = \bot)B[n-1,t] +  P(\hat{z}_t = y_n)B[n,t]
 \end{eqnarray*}
 
-\slideplain{Latent Variable MRFs}
+\slideplain{The Big Picture I}
 
-\begin{eqnarray*}
-  Q_f(\hat{z},\hat{y}) & = & \frac{1}{Z} \; e^{f(\hat{z},\hat{y})}  \\
-  \\
-  Q_f(\hat{y}) & = & \sum_{\hat{z}}\;Q_f(\hat{z},\hat{y}) \;\; =\;\; \frac{\sum_{\hat{z}} e^{f(\hat{z},\hat{y})}}{Z} \\
-  \\
-  \\
-  Q_f(\hat{y})& = & \frac{Z(\hat{y})}{Z} \\
-  \\
-  \mathrm{loss}(y) & = & \ln Z - \ln Z(y)
-\end{eqnarray*}
-
-\slideplain{The Sufficient Statistics}
-
-\begin{eqnarray*}
-  & & {\color{red} P_{\hat{z} \sim Q(\hat{z}|y)}(\hat{z}_t = \tilde{z})} \\
-  \\
-  \\
-  \\
-  & = & \frac{1}{Q(y)}\;\sum_n \left\{\begin{array}{ll} F[n,t-1]\;Q(\hat{z}_t)\;B[n,t] & \mbox{for $\hat{z}_t = \bot$} \\
-                                            \\
-                                            F[n,t-1]\;Q(\hat{z}_t)\;B[n+1,t] & \mbox{for $\hat{z}_t = y_{n+1}$} \\
-                                            \\
-                                            0 & \mbox{otherwise} \end{array} \right.
-\end{eqnarray*}
-
-
-\slide{Undirected Latent Variable MRFs}
-\bigskip
-$${\color{red} \Phi^* = \argmin_\Phi \;\;E_{(x,y) \sim \mathrm{Pop}}  -\ln Q_{f_\Phi(x)}(y)}$$
-\bigskip
-$${\color{red} Q_f(\hat{z},\hat{y})  = \softmax_{\hat{z}, \hat{y}}\;f(\hat{z}, \hat{y})}$$
-\bigskip
-$${\color{red} f(\hat{z},\hat{y}) = \sum_\alpha  \; f[\alpha,\hat{z}[\alpha],\hat{y}[\alpha]]}$$
-\bigskip
-$${\color{red} Q_f(\hat{y}) = \sum_{\hat{z}} Q_f(\hat{z},\hat{y})}$$
-
-\slide{Latent Variable MRFs}
-
-\begin{eqnarray*}
-  \mathrm{loss}(y,f) & = & \ln Z - \ln Z(y) \\
-  \\
-  \\
-  f.\mathrm{grad}[\alpha,\tilde{y},\tilde{z}]
-  & = & {\color{red} P_{\hat{z},\hat{y} \sim Q_f} (\hat{y}[\alpha] = \tilde{y},\hat{z}[\alpha] = \tilde{z})} \\
-  \\
-  & & - {\color{red} P_{\hat{z} \sim Q_f(\hat{z}|y)} (y[\alpha] = \tilde{y},\hat{z}[\alpha] = \tilde{z})}
-\end{eqnarray*}
+Conditional vs. Unconditional
 
 \vfill
-These are the {\bf sufficient statistics} for latent variable MRFs.
+$$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Pop}}\;-\ln \;P(y|x)$$
+
+\vfill
+$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Pop}}\;-\ln \;P(y)$$
+
+\vfill
+This is a non-distinction: the issues in the to the conditional case
+are exactly the same as in the unconditional case.
+
+\slide{The Big Picture II}
+
+The binary case: $y \in \{-1,1\}$ (cancer screening).
+
+\vfill
+The multiclass case: $y \in {\cal Y}$ where iteration over $\hat{y} \in {\cal Y}$ is feasible (MNIST, CFAR, ImageNet).
+
+\vfill
+{\color{red} The structured case: $y \in {\cal Y}$ where ${\cal Y}$ is discrete but iteration over $\hat{y} \in {\cal Y}$ is infeasible} (language modeling, speech recognition).
+
+\vfill
+{\color{red} Graphical models (such as CTC) rely on assumptions about the structure of $P_\Phi(y)$.}
 
 \slide{END}
 

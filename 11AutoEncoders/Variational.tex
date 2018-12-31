@@ -1,4 +1,6 @@
+\input ../SlidePreamble
 \input ../preamble
+
 
 \begin{document}
 
@@ -8,134 +10,215 @@
   \bigskip
   \centerline{David McAllester, Winter 2018}
   \vfill
-  \centerline{\bf Variational Autoencoders}
+  \centerline{The Evidence Lower Bound (the ELBO)}
+  \vfill
+  \centerline{Variational Autoencoders}
   \vfill
   \vfill
 
+\slide{{\color{red} Big Picture}: Latent Variables}
 
-%these slides need more detail.  Every slide should be at least doubled.
-% it also needs more material.  A theorem on noise in latent variables would be nice.
-
-
-
-\slide{The Latent Variable Cross-Entropy Objective}
-
-We will now drop the negation and switch to argmax.
+We are often interested in models of the form
 
 \vfill
-$${\color{red} \Phi^* = \argmax_\Phi \;\;E_{y \sim \mathrm{Pop}}  \ln Q_\Phi(y)}$$
+$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$
 
 \vfill
-$${\color{red}Q_\Phi(y) = \sum_{\hat{z}} \; Q_\Phi(\hat{z},y)}$$
+Note that CTC has this form.
 
 \vfill
-EG Identity: \hspace{1em} ${\color{red} \nabla_\Phi \ln Q_\Phi(y) = \expectsub{\hat{z} \sim Q_\Phi(\hat{z}|y)}{\nabla_\Phi \;\ln Q_\Phi(\hat{z},y)}}$
-
-\anaslide{Variational Autoencoders}
-\bigskip
-$${\color{red} \nabla_\Phi \ln Q_\Phi(y) = \expectsub{\hat{z} \sim Q_\Phi(\hat{z}|y)}{\nabla_\Phi \;\ln Q_\Phi(\hat{z},y)}}$$
+Probabilistic grammar models also have this form where $y$ is a sentence and $z$ is a parse tree.
 
 \vfill
-Except for directed tree models, this gradient must be approximated --- exact computation is \#-P hard.
+Rate-Distortion Autoencoders also have this form where $z$ is the compression of $y$.
 
 \vfill
-Variational autoencoders approximate $Q_\Phi(\hat{z}|y)$ with a model supporting easy sampling of $\hat{z}$.
+In these cases the sum over $z$ can be computed exactly.
 
-\slide{Generative Models}
+\slide{{\color{red} Big Picture}: Friendly Distributions}
 
-A model for which sampling is easy will be called {\bf generative}.
-
-\vfill
-In Variational autoencoders we assume that $Q_\Phi(y|\hat{z})$ is generative but that $Q_\Phi(\hat{z}|y)$ is not --- that sampling from
-$Q_\Phi(\hat{z}|y)$ is hard.
+A distribution $P(u)$ will be called {\bf friendly} if we can both draw samples from it and compute $P(u)$ for any value $u$.
 
 \vfill
-We approximate $Q_\Phi(\hat{z}|y)$ with a generative model.
-
-\slide{Generation Replaces Search}
-
-``Generation replaces search'' can be viewed as a general principle of Deep leaning.
+$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$
 
 \vfill
-Rather than search for a $\hat{z}$ that generates $y$ we strive to directly calculate --- to generate --- a $\hat{z}$ that generates $y$.
+It is often the case that $P_\Phi(z)$ is friendly, and $P_\Phi(y|z)$ is friendly, but $P_\Phi(y)$ is not friendly (the sum over $z$ is intractible).
 
 \vfill
-``Generation replaces search'' is exemplified in current parsing architectures.
+For example $z$ might be an assignment of truth values to Boolean variables and $y$ might be the value of a fixed Boolean formula $\Phi$.  In this case
+determining if $P_\Phi(y) > 0$ is the SAT problem which is NP hard.
 
-\anaslide{Variational Autoencoders}
-\bigskip
-$$\nabla_\Phi \ln Q_\Phi(y) = \expectsub{\hat{z} \sim Q_\Phi(\hat{z}|y)}{\nabla_\Phi \;\ln Q_\Phi(\hat{z},y)}$$
+\slide{Superpixel Colorization}
+
+\centerline{\includegraphics[height = 2in]{../images/SLIC} \hspace{.5in} \includegraphics[height = 2in]{../images/SLICcolor}}
+\centerline{\huge SLIC superpixels, Achanta et al.}
+
+$x$ is black and white, $y$ color, $z$ a segmentation.
+
+\vfill
+$$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z,x).$$
+
+\slide{Superpixel Colorization}
+
+$P_\Phi(z|x)$ is defined by a deep network computing a friendly graphical model on segmentations -- perhaps a independent distribution over segment
+indeces for each superpixel.
+
+\vfill
+$P_\Phi(y|z,x)$ is a deep network taking a particular segmentation (a segment index at each pixel) and computing
+a distribution over colors for each segment.
+
+\vfill
+Although $P(z|x)$ is friendly, and $P_\Phi(y|z,x)$ is friendly, $P(y|x)$ not friendly (similar to the SAT example).
+
+\slide{{\color{red} Big Picuture}: ELBO Replaces Search with Generation}
+
+\vfill
+
 \begin{eqnarray*}
-\Phi^*,\Psi^* & = & \argmax_{\Phi,\Psi}\;  E_{y \sim \pop}\;\expectsub{\hat{z} \sim {\color{red} P_\Psi(\hat{z}|y)}}{\ln Q_\Phi(\hat{z},y)} + {\color{red} H(P_\Psi(\hat{z}|y))}
-\end{eqnarray*}
-
-\vfill
-Here $P_\Psi(\hat{z}|y)$ is a generative approximation of $Q_\Phi(\hat{z}|y)$.
-
-\vfill
-The quantity being optimized is called the evidence lower bound (ELBO).
-
-\anaslide{Variational Autoencoders}
-\bigskip
-$$\nabla_\Phi \ln Q_\Phi(y) = \expectsub{\hat{z} \sim Q_\Phi(\hat{z}|y)}{\nabla_\Phi \;\ln Q_\Phi(\hat{z},y)}$$
-\begin{eqnarray*}
-\Phi^*,\Psi^* & = & \argmax_{\Phi,\Psi}\; E_{y \sim \pop}\;  \expectsub{\hat{z} \sim {\color{red} P_\Psi(\hat{z}|y)}}{\ln Q_\Phi(\hat{z},y)} + {\color{red} H( P_\Psi(\hat{z}|y))} \\
+P_\Phi(y) & = & E_{\color{red} z \sim P_\Phi(z)}P_\Phi(y|z) \;\;\;\mbox{\color{red} sampling $z$ is ineffective}\\
 \\
-& = & \argmax_{\Phi,\Psi}\;E_{y \sim \pop}\;\ln Q_\Phi(y) - {\color{red} KL(P_\Psi(\hat{z}|y),\;Q_\Phi(\hat{z}|y))}
+\ln P_\Phi(y) & = & E_{\color{red} z \sim P_\Psi(z|y)} \ln P_\Phi(y) \;\;\;\mbox{\color{red} introduce $z$ generator using $y$}\\
+\\
+ & = & E_{z \sim P_\Psi(z|y)} \left(\ln P_\Phi(y)P_\Phi(z|y) + \ln \frac{P_\Psi(z|y)}{P_\Phi(z|x)} + \ln\frac{1}{P_\Psi(z|y)}\right) \\
+ \\
+ \\
+ & = & E_{z \sim P_\Psi(z|y)} P_\Phi(z,y) + H(P_\Psi(z|y)) + KL(P_\Psi(z|y),P_\Phi(z|y)) \\
+ \\
+ & \geq & E_{\color{red} z \sim P_\Psi(z|y)}P_\Phi(z)P_\Phi(y|z) + - \ln P_\Psi(z|y)
 \end{eqnarray*}
 
-\vfill
-The equivalence of the two ELBO expressions is proved below.
+\slide{Superpixel Colorization}
+
+\centerline{\includegraphics[height = 2in]{../images/SLIC} \hspace{.5in} \includegraphics[height = 2in]{../images/SLICcolor}}
+\centerline{\huge SLIC superpixels, Achanta et al.}
+
+$x$ is black and white, $y$ color, $z$ a segmentation.
 
 \vfill
-The first expression supports SGD training through sampling.
+$P_\Phi(z|x)$ is friendly and $P_\Phi(y|z,x)$ is friendly but $P(y|x)$ is not friendly.
 
 \vfill
-The second expression establishes that the ELBO is a lower bound on the ``evidence'' $\ln Q_\Phi(y)$ and that $P_\Psi(\hat{z}|y)$ should approximate $Q_\Phi(\hat{z}|y)$.
+$P_\Psi(z|y,x)$ computes a friendly graphical model for $z$ given $y$.
 
-\slide{Derivation of Equivalence I}
+\slide{Measuring ELBO Loss}
 
+\vfill
+$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi)  = E_{z\sim P_\Psi(y)} \; \ln P_\Psi(y) - \ln P_\Phi(z)P_\Phi(y|z)$$
+
+\vfill
+If $P_\Phi(z)$, $P_\Phi(y|z)$, and $P_\Psi(z|y)$ are friendly (even whwn when $P_\Phi(y)$ is not friendly) we can
+measure ELBO loss through sampling.
+
+\vfill
+If we can measure it, we can do gradient descent on it (but perhaps with difficulty).
+
+\slide{A General ELBO Architecture}
+\centerline{$P_\Phi(y|x)$ \hspace{10em} $P_\Psi(z|y,x)$}
+
+\parbox{3.5in}{
 \begin{eqnarray*}
-  & & E_{\hat{z} \sim P_\Psi(\hat{z}|y)} \;\ln Q_\Phi(\hat{z},y) \\
-  \\
-  & = & E_{\hat{z} \sim P_\Psi(\hat{z}|y)} \;\left(\;\ln Q_\Phi(y) + \ln Q_\Phi(\hat{z}|y)\;\right) \\
-  \\
-  & = & \ln Q_\Phi(y) + \;E_{\hat{z} \sim P_\Psi(\hat{z}|y)}\;\ln Q_\Phi(\hat{z}|y) \\
-  \\
-  & = & \ln Q_\Phi(y) - H(P_\Psi(\hat{z}|y), Q_\Phi(\hat{z}|y))
+& & \mbox{intput}\; x \\
+\vdots \\
+z & = & \expsoftmax_z \ldots \\
+\\
+& & \mbox{input}\; z \\
+\vdots \\
+y & = & \expsoftmax_y\;\ldots
 \end{eqnarray*}
-
-\slide{Derivation of Equivalence II}
+}
+\hfill
+\parbox{3.5in}{
 \begin{eqnarray*}
-  & & \expectsub{\hat{z} \sim P_\Psi(\hat{z}|y)}{\ln Q_\Phi(\hat{z},y)} + H(P_\Psi(\hat{z}|y))\\
-  \\
-  & = & \ln Q_\Phi(y) - H(P_\Psi(\hat{z}|y), Q_\Phi(\hat{z}|y)) + H(P_\Psi(\hat{z}|y)) \\
-  \\
-  & = & \ln Q_\Phi(y) - KL(P_\Psi(\hat{z}|y),Q_\Phi(\hat{z}|y)) \\
+& & \mbox{intput}\; x,y \\
+\vdots \\
+z & = & \expsoftmax_z \ldots \\
 \end{eqnarray*}
+}
 
-\slide{EM is Alternating Optimization of the ELBO}
+The exponential softmaxes are friendly (they produce a friendly graphical model).
 
+\slide{EM is Alternating Maximization of the ELBO}
+Forward-backward EM for HMMs and inside-outside EM for PCFGs (or any EM) can be written as
+
+\vfill
 \begin{eqnarray*}
-& & E_{\hat{z} \sim P_\Psi(\hat{z}|y)}\; \ln Q_\Phi(\hat{z},y) + H(P_\Psi(\hat{z}|y))\;\;\;(1) \\
+\mathrm{\color{red} ELBO}& = & E_{z \sim P_\Psi(z|y)}\; \ln P_\Phi(z,y) + H(P_\Psi(z|y))\;\;\;(1) \\
  \\      
-  & = & \ln\;Q_{\Phi}(y) - KL(P_\Psi(\hat{z}|y),Q_{\Phi}(\hat{z}|y))\;\;\;\;\;\;(2)
+  & = & \ln\;P_{\Phi}(y) - KL(P_\Psi(z|y),P_{\Phi}(z|y))\;\;\;\;\;\;(2)
 \end{eqnarray*}
 
 \vfill
-$$\mbox{by (2)}\;\;\;\Psi^* = \argmin_\Psi E_{y \sim \pop} \; KL(P_\Psi(\hat{z}|y),Q_\Phi(\hat{z}|y))$$
+\begin{eqnarray*}
+\mbox{by (2)}\;\;\;\Psi^{t+1} & = & \argmin_\Psi \;E_{y \sim \mathrm{Train}} \; KL(P_{\Psi}(z|y),P_{\Phi^t}(z|y)) {\color{red} = \Phi^t} \\
+\\
+\mbox{by (1)}\;\;\;{\color{red} \Phi^{t+1}} & = & \argmax_{\color{red} \Phi} E_{y \sim \mathrm{Train}} \;E_{z \sim P_{\color{red} {\Phi^t}}(z|y)}\; \ln P_{\color{red} \Phi}(z,y)
+\end{eqnarray*}
 
-$$\mbox{by (1)}\;\;\;\Phi^* = \argmax_\Phi E_{y \sim \pop} \;E_{\hat{z} \sim P_\Psi(\hat{z}|y)}\; \ln Q_\Phi(\hat{z},y)$$
+\slide{ELBO Loss Consistency}
+
+$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) = E_{z\sim P_\Psi(y)} \; \ln P_\Psi(y) - \ln P_\Phi(z)P_\Phi(y|z)$$
 
 \vfill
-EM: $\Phi^{\color{red} t+1} = \argmax_{\color{red} \Phi} \; E_{y \sim \pop}\; E_{\hat{z} \sim Q_{\Phi^{\color{red} t}}(\hat{z}|y)}\; \;\log Q_{\color{red} \Phi}(\hat{z},y)$
+$$\min_Q E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{ELBO}}(y,\Phi,Q) = H(\mathrm{Pop},P_\Phi)$$
+
+
+\slide{Hard ELBO}
+
+Hard ELBO is to ELBO as hard EM is to EM.
 
 \vfill
+$${\cal L}_{\mathrm{HELBO}}(y,\Phi,\Psi)  = E_{z \sim P_\Phi(z|y)} - \ln P_\Phi(z,y)$$
+
+\vfill
+$$\min_{P,Q} E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{RELBO}}(y,P,Q) \leq H(\mathrm{Pop}) + \ln 2$$
+
+\vfill
+This can be proved from Shannon's source coding theorem where $z$ is the code for $y$.
+
+\slide{Variational Auto Encoders (VAEs)}
+
+In these slides I am reserving the term VAE for applications of the ELBO where $p_\Phi(z)$ a continuous Gaussian density
+and the ELBO expression is used directly on continuous densities with differential entropy.
+
+\vfill
+Working with continuous densities greatly simplifies gradient descent.
+
+\vfill
+I will describe the architecture and discuss possible problems with continuous distributions later.
+
+\slide{A VAE for Images}
+
+Auto-Encoding Variational Bayes, Diederik P Kingma, Max Welling, 2013.
+
+\vfill
+$${\color{red}y \hspace{5em}  z_\Psi(y,\epsilon) \hspace{4em} z\;p_\Phi(z) \hspace{3em} \hat{y}_\Phi(z) \hspace{3em}||y - \hat{y}||^2}$$
+\centerline{\includegraphics[width=9in]{../images/Deconv}}
+
+\centerline{\Large [Hyeonwoo Noh et al.]}
+
+\slide{Distortion as Probability Density}
+
+We will assume that we have a function (deconvolution) mapping $z$ to $\hat{y}_\Phi(z)$.
+
+\vfill
+For rate-distortion autoencoders we assume a distortion function $D(y,\;\hat{y}_\Phi(z(y)))$.
+
+\vfill
+$L_1$ or $L_2$ distortion can be converted to a continuous probability density.
+
+\vfill
+$$p(y|\hat{y}) = \frac{1}{Z} \; e^{- D(y,\hat{y})}$$
+
+\vfill
+This gives a density $p_\Phi(y|z) = p(y|\hat{y}_\Phi(z))$.
+
 \anaslide{The Reparameterization Trick}
 \bigskip
-\begin{eqnarray*}
-\Psi^* & = & \argmax_\Psi \; E_{y \sim \pop}\;\expectsub{\color{red} \hat{z} \sim P_\Psi(\hat{z}|y)}{\ln Q_\Phi(\hat{z},y)} + H(P_\Psi(\hat{z}|y))
-\end{eqnarray*}
+$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi)  = \expectsub{\color{red} z \sim p_\Psi(z|y)}\;\ln\;p_\Psi(z|y) - \ln p_\Phi(z) + \lambda||y-\hat{y}_\Phi(z)||^2$$
+
+\vfill
+All variables are now continuous.
 
 \vfill
 How do we differentiate the sampling?
@@ -143,9 +226,7 @@ How do we differentiate the sampling?
 \vfill
 \anaslide{The Reparameterization Trick}
 \bigskip
-\begin{eqnarray*}
-\Psi^* & = & \argmax_\Psi \; E_{y \sim \pop}\;\expectsub{\color{red} \hat{z} \sim P_\Psi(\hat{z}|y)}{\ln Q_\Phi(\hat{z},y)} + H(P_\Psi(\hat{z}|y))
-\end{eqnarray*}
+$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi)  = \expectsub{\color{red} z \sim p_\Psi(z|y)} \;\ln\;p_\Psi(z|y) - \ln p_\Phi(z) + \lambda||y-\hat{y}_\Phi(z)||^2$$
 
 \vfill
 We note that in practice all sampling is computed by a deterministic function of (pseudo) random numbers.
@@ -154,125 +235,42 @@ We note that in practice all sampling is computed by a deterministic function of
 We can make this explicit.
 
 \vfill
-Model $P_\Psi(\hat{z}|y)$ by $\epsilon \sim \mathrm{noise}$, $\hat{z} = \hat{z}_\Psi(y,\epsilon)$
+Model $P_\Psi(z|y)$ by $\epsilon \sim \mathrm{noise}$, $z = z_\Psi(y,\epsilon)$
 
 \vfill
 \anaslide{The Reparameterization Trick}
 \bigskip
-\begin{eqnarray*}
-\Psi^* & = & \argmax_\Psi \; E_{y \sim \pop}\;\expectsub{\color{red} \epsilon \sim \mathrm{noise}}{\ln Q_\Phi({\color{red} \hat{z}_\Psi(y,\epsilon)},y)} +  H(P_\Psi(\hat{z}|y)) \\
-\\
-H(P_\Psi(\hat{z}|y)) & = & \expectsub{\color{red} \epsilon \sim \mathrm{noise}} {\ln P_\Psi({\color{red} \hat{z}_\Psi(y,\epsilon)}|y)}
-\end{eqnarray*}
+$$~\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\expectsub{\color{red} z \sim p_\Psi(z|y)} \;\ln\;p_\Psi(z|y) - \ln p_\Phi(z) + \lambda||y-\hat{y}_\Phi(z)||^2$$
 
-\vfill
-For VAEs we typically we have $\hat{z}(y,\epsilon) \in \mathbb{R}^d$ with
-\begin{eqnarray*}
-\hat{z}(y,\epsilon)[i] & = & \mu_\Psi(y)[i] + \sigma_\Psi(y)[i]\;\epsilon[i] \\
-\epsilon[i] & \sim & {\cal N}(0,1)
-\end{eqnarray*}
-
-\vfill
-This supports easy calculation of $P_\Psi(\hat{z}_\Psi(y,\epsilon)|y)$.
-
-\slide{Decoding with $L_2$ Distortion}
-
-An autoencoder {\bf encodes} and {\bf decodes}.
-
-\vfill
-We can view $\hat{z}_\Psi(y,\epsilon)$ as the encoding of $y$.
-
-\vfill
-We now consider a deterministic decoder $\hat{y}_\Phi(\hat{z})$ and define a model
-
-$${\color{red} Q_\Phi(y|\hat{z}) \propto \exp\left(\frac{- ||y - \hat{y}_\Phi(\hat{z})||^2}{2\sigma^2}\right)}$$
-
-\slideplain{A VAE for Images}
-
-Auto-Encoding Variational Bayes, Diederik P Kingma, Max Welling, 2013.
-
-\vfill
-$${\color{red}y \hspace{5em}  \hat{z}_\Psi(y,\epsilon) \hspace{4em} \hat{z} \hspace{6em} \hat{y}_\Phi(\hat{z}) \hspace{4em}||y - \hat{y}||^2}$$
-\centerline{\includegraphics[width=9in]{../images/Deconv}}
-
-\centerline{\Large [Hyeonwoo Noh et al.]}
-
-
-
-\slide{Deconvoution: Increasing Spatial Dimension}
-
-Consider a stride 2 convolution
-\begin{eqnarray*}
-  y[i,j,c_y] & = &   W[\Delta i, \Delta j, c_x, c_y] x[2i + \Delta i, 2j + \Delta j, c_x] \\
-  y[i,j,c_y] & \pluseq & B[c_y]
-\end{eqnarray*}
-
-\vfill
-For deconvolution we use stride 1 with 4 times the channels.
-\begin{eqnarray*}
-  \hat{x}[i,j,c_{\hat{x}}] & = &   W'[\Delta i, \Delta j, c_{\hat{y}}, c_{\hat{x}}] \hat{y}[i + \Delta i, j + \Delta j, c_{\hat{x}}] \\
-  \hat{x}[i,j,c_{\hat{x}}] & \pluseq & B[c_{\hat{x}}]
-\end{eqnarray*}
-
-\vfill
-The channels at each lower resolution pixel $\hat{x}[i,j]$ are divided among four higher resolution pixels.
-
-\vfill
-This is done by a simple reshaping of $\hat{x}$.
-
-\slide{Decoding with $L_2$ Distortion}
-
-\begin{eqnarray*}
-\Phi^*,\Psi^* & = & \argmax_{\Phi,\Psi}\; E_{y \sim \pop}\; \expectsub{\hat{z} \sim P_\Psi(\hat{z}|y)}{\ln Q_\Phi(\hat{z},y)} + H(P_\Psi(\hat{z}|y))
-\end{eqnarray*}
-
-\vfill
-The objective now becomes
-
-\vfill
-$$E_{y \sim \pop}\;\expectsub{\hat{z}\sim P_\Psi(\hat{z}|y)} \left(\ln P_\Phi(\hat{z}) - \frac{1}{2\sigma^2}\left|\left|y - \hat{y}_\Phi(\hat{z})\right|\right|^2\right) + H(P_\Psi(\hat{z}|y))$$
+\bigskip
+becomes
+$$\expectsub{\color{red} \epsilon \sim {\cal N}(0,I)} \;{\color{red} z := z_\Psi(y)+ \sigma \odot\epsilon;}\;\ln\;p_\Psi(z|y) - \ln p_\Phi(z) + \lambda||y-\hat{y}_\Phi(z)||^2$$
 
 \slide{Decoding with $L_2$ Distortion}
 
 Switching back to minimization, we can now rewrite the objective as
 
 \vfill
-$$\min \; \expectsub{y,\epsilon} \;\left(|\hat{z}_\Psi(y,\epsilon)|_\Phi +  \frac{1}{2}\lambda||y - \hat{y}_\Phi(\hat{z}_\Psi(y,\epsilon))||^2\right) - |\hat{z}_\Psi(y,\epsilon)|_{\Psi,y}$$
+$$\min \; \expectsub{y,\epsilon} \;\left(|z_\Psi(y,\epsilon)|_\Phi +  \frac{1}{2}\lambda||y - \hat{y}_\Phi(z_\Psi(y,\epsilon))||^2\right) - |z_\Psi(y,\epsilon)|_{\Psi,y}$$
 
 \vfill
-$$|\hat{z}|_\Phi  = - \log_2 P_\Phi(\hat{z})\hspace{5em} |\hat{z}|_{\Psi,y}  = - \log_2 P_\Psi(\hat{z}|y)$$
+$$|z|_\Phi  = - \log_2 P_\Phi(z)\hspace{5em} |z|_{\Psi,y}  = - \log_2 P_\Psi(z|y)$$
 
 \vfill
-For $\hat{z}$ discrete, $|\hat{z}|_\Phi$ is the code length of $\hat{z}(y,\epsilon)$ under an optimal code for $P_\Phi$.
+For $z$ discrete, $|z|_\Phi$ is the code length of $z(y,\epsilon)$ under an optimal code for $P_\Phi$.
 
 \vfill
-$|\hat{z}|_{\Psi,y}$ is the code length for $\hat{z}$ under the code for $P_\Psi(\hat{z}|y)$.
-
-\slide{Soft EM is to Hard EM as VAE is to Rate-Distortion}
-
-(Soft) EM: $\Phi^{\color{red} t+1} = \argmax_{\color{red} \Phi} E_{y \sim \pop}\;\;\;E_{\hat{z} \sim Q_{\Phi^{\color{red} t}}(\hat{z}|y)}\; \;\log Q_{\color{red} \Phi}(\hat{z},y)$
-
-\vfill
-Hard EM: $\Phi^{\color{red} t+1} = \argmax_{\color{red} \Phi}\; E_{y \sim \pop}\;Q_{\color{red} \Phi}(\hat{z}(y),y)$
-$$\hspace{17em} \hat{z}(y) = \argmax_{\hat{z}}\;Q_{\Phi^{\color{red} t}}(\hat{z}|y)$$
-
-\vfill
-VAE: $\min \expectsub{y,\epsilon} |\hat{z}_\Psi(y,\epsilon)|_\Phi +  \frac{1}{2}\lambda||y - \hat{y}_\Phi(\hat{z}_\Psi(y,\epsilon))||^2 - |\hat{z}_\Psi(y,\epsilon)|_{\Psi,y}$
-
-\vfill
-RD:  $\min \expectsub{y} |\hat{z}_\Psi(y)|_\Phi +  \frac{1}{2}\lambda||y - \hat{y}_\Phi(\hat{z}_\Psi(y))||^2$
-
-
+$|z|_{\Psi,y}$ is the code length for $z$ under the code for $P_\Psi(z|y)$.
 
 \slideplain{Sampling}
 
-$$P_\Psi(\hat{z}|y) \hspace{3ex} \hat{z} \hspace{3ex}  Q_\Phi(\hat{z},y)$$
+$$P_\Psi(z|y) \hspace{3ex} z \hspace{3ex}  P_\Phi(z,y)$$
 
 \centerline{\includegraphics[width=6in]{../images/Deconv}}
 \centerline{\large [Hyeonwoo Noh et al.]}
 
 \vfill
-Sampling uses just the second half ${\color{red} Q_\Phi(\hat{z},y)}$.
+Sampling uses just the second half ${\color{red} P_\Phi(z,y)}$.
 
 \slide{Sampling from Gaussian Variational Autoencoders}
 
@@ -289,6 +287,7 @@ It does seem that $L_1$ works better (see the slides on image-to-image GANs).
 
 \vfill
 However, training on $L_2$ distortion can produce sharp images in rate-distortion autoencoders (see the slides on rate-distortion autoencoders).
+
 \slide{END}
 
 }

@@ -1,4 +1,6 @@
+\input ../SlidePreamble
 \input ../preamble
+
 
 \begin{document}
 
@@ -10,13 +12,19 @@
   \vfill
   \centerline{\bf Deep Graphical Models II}
   \vfill
-    \centerline{\bf Algorithms for Approximate SGD}
+  \centerline{\bf Algorithms for Approximate SGD}
+  \vfill
+  \centerline{MCMC Sampling}
+  \vfill
+  \centerline{Pseudo-Likelihood}
+  \vfill
+  \centerline{Contrastive Divergence}
 \vfill
 
+\slide{Superpixel Colorization}
 
-\slide{Consider Colorization}
-
-\centerline{\includegraphics[height = 2in]{../images/colorization}}
+\centerline{\includegraphics[height = 3in]{../images/SLIC} \hspace{.5in} \includegraphics[height = 3in]{../images/SLICcolor}}
+\centerline{\huge SLIC superpixels, Achanta et al.}
 
 $x$ is a black and white image.
 
@@ -27,34 +35,47 @@ $y$ is a color image drawn from $\pop(y|x)$.
 $\hat{y}$ is an arbitrary color image.
 
 \vfill
-$Q_\Phi(\hat{y}|x)$ is the probability that model $\Phi$ assigns to the color image $y$ given black and white image $x$.
+$P_\Phi(\hat{y}|x)$ is the probability that model $\Phi$ assigns to the color image $y$ given black and white image $x$.
 
-\slide{Exponential Softmax}
+\slideplain{Exponential Softmax}
 
-$$f(\hat{y}) = \sum_{\alpha \in \mathrm{HyperEdges}}  \; f[\alpha,\hat{y}[\alpha]]$$
+The tensor $s_e[\tilde{y}]$ is computed from $x$ and $\Phi$.
 
+\vfill
 \begin{eqnarray*}
-\Phi^* & = &  \argmin_\Phi \;\;E_{(x,y) \sim \mathrm{Pop}}  -\log Q_{f_\Phi(x)}(y) \\
- \\
- \\
-    f.\mathrm{grad}[\alpha,\tilde{y}]
-    & = &  {\color{red} P_{\hat{y} \sim Q_f}(\hat{y}[\alpha] = \tilde{y})} - \bbone[y[\alpha] = \tilde{y}] \\
+P_s(\hat{y}) & = &\softmax_{\hat{y}}\;s(\hat{y}) \\
+\\
+s(\hat{y}) & = & \sum_{e \in \mathrm{HyperEdges}}  \; s_e[\hat{y}[e]]
 \end{eqnarray*}
 
+\slide{Backpropagation}
+
+The input is the image $x$ and the parameter package $\Phi$
+
+\begin{eqnarray*}
+ & \vdots & \\
+s_e[\hat{y}] & = & \ldots \\
+{\cal L} & = & - \ln\; P(y\;|\;s_{\cal E}[{\cal Y}])
+\end{eqnarray*}
+
+\vfill We abbreviate $P(\hat{y}\;|\;s_{\cal E}[{\cal Y}])$ as {\color{red} $P_s(\hat{y})$} --- the distribution on $\hat{y}$ defined by the tensor $s$.
 \vfill
-The quantities ${\color{red} P_{\hat{y} \sim Q_f}(\hat{y}[\alpha] = \tilde{y})}$ are {\bf sufficient statistics}.
+We need to compute {\color{red} $\nabla_s -\ln P_s(y)$}, or equivalently, {\color{red} $s_e.\grad[\tilde{y}]$}.
 
-\slide{Estimation by Sampling}
+\begin{eqnarray*}
+s_e.\mathrm{grad}[\tilde{y}] & = &  {\color{red} P_e(\tilde{y})} - \bbone[\tilde{y} = y[e]]
+\end{eqnarray*}
 
-We can estimate $P_{\hat{y} \sim Q_f}(\hat{y}[\alpha] = \tilde{y})$ by sampling $\hat{y}$
+
+\slide{Sampling}
+The quantities ${\color{red} P_e(\tilde{e})}$ are {\bf hyperedge marginals}.
 
 \vfill
-Hinton has proposed that this is the function of dreaming.
+We can estimate the hyperedge marginals by sampling $\hat{y}$ from $P_s(\hat{y})$.
 
 \slide{Monte Carlo Markov Chain (MCMC) Sampling}
 
 \centerline{\bf Metropolis Algorithm}
-
 
 \vfill
 Pick an initial graph label $\hat{y}$ and then repeat:
@@ -63,10 +84,10 @@ Pick an initial graph label $\hat{y}$ and then repeat:
 \item Pick a ``neighbor'' $\hat{y}'$ of $\hat{y}$ uniformly at random.  The neighbor relation must be symmetric.  Perhaps Hamming distance one.
 
   \vfill
-\item If $f(\hat{y}') > f(\hat{y})$ update $\hat{y} = \hat{y}'$
+\item If $s(\hat{y}') > s(\hat{y})$ update $\hat{y} = \hat{y}'$
 
   \vfill
-\item If $f(\hat{y}') \leq f(\hat{y})$ then update $\hat{y} = \hat{y}'$ with probability $e^{-(f(\hat{y}) - f(\hat{y}'))}$
+\item If $s(\hat{y}') \leq s(\hat{y})$ then update $\hat{y} = \hat{y}'$ with probability $e^{-(s(\hat{y}) - s(\hat{y}'))}$
   \end{enumerate}  
 
 \slide{Markov Processes and Stationary Distributions}
@@ -96,13 +117,13 @@ equals the flow from $\hat{y}'$ to $\hat{y}$ ({\bf detailed balance}).
 
 \slide{Metropolis Correctness}
 
-For $f(\hat{y}) \geq f(\hat{y}')$
+For $s(\hat{y}) \geq s(\hat{y}')$
 
 \vfill
 \begin{eqnarray*}
-  \mathrm{flow}(\hat{y}' \rightarrow \hat{y}) &  = & \frac{1}{Z}e^{f(\hat{y}')} \frac{1}{N} \\
+  \mathrm{flow}(\hat{y}' \rightarrow \hat{y}) &  = & \frac{1}{Z}e^{s(\hat{y}')} \frac{1}{N} \\
   \\
-\mathrm{flow}(\hat{y} \rightarrow \hat{y}') & = & \frac{1}{Z}e^{f(\hat{y})} \frac{1}{N} e^{-\Delta f} = \frac{1}{Z} e^{f(\hat{y}')} \frac{1}{N}
+\mathrm{flow}(\hat{y} \rightarrow \hat{y}') & = & \frac{1}{Z}e^{s(\hat{y})} \frac{1}{N} e^{-\Delta f} = \frac{1}{Z} e^{s(\hat{y}')} \frac{1}{N}
 \end{eqnarray*}
 
 \vfill
@@ -121,12 +142,12 @@ In Gibbs sampling we select a node $i$ at random and change that node by drawing
 \slide{Gibbs Sampling}
 
 \begin{eqnarray*}
-  Q_f(i=\tilde{y} \;|\;\hat{y}) & \doteq & Q_f(\hat{y}[i] = \tilde{y}\;|\;\hat{y}[1],\ldots,\hat{y}[i-1],\hat{y}[i+1],\ldots,\hat{y}[I])
+  P_s(i=\tilde{y} \;|\;\hat{y}) & \doteq & P_s(\hat{y}[i] = \tilde{y}\;|\;\hat{y}[1],\ldots,\hat{y}[i-1],\hat{y}[i+1],\ldots,\hat{y}[I])
 \end{eqnarray*}
 
 \vfill
 Markov Blanket Property:
-$$Q_f(i=\tilde{y} \;|\;\hat{y}) = Q_f(i=\tilde{y} \;|\;\hat{y}[N(i)])$$
+$$P_s(i=\tilde{y} \;|\;\hat{y}) = P_s(i=\tilde{y} \;|\;\hat{y}[N(i)])$$
   
 \vfill
 Gibbs Sampling, Repeat:
@@ -134,7 +155,7 @@ Gibbs Sampling, Repeat:
 \begin{itemize}
 \item   Select $i$ at random
 
-\item draw $\tilde{y}$ from $Q_f(i = \tilde{y} \;|\;\hat{y})$
+\item draw $\tilde{y}$ from $P_s(i = \tilde{y} \;|\;\hat{y})$
 
 \item $\hat{y}[i] = \tilde{y}$
 \end{itemize}
@@ -145,21 +166,21 @@ Let $\hat{y}[i = \tilde{y}]$ be the assignment $\hat{y}'$ equal to $\hat{y}$ exc
 
 \vfill
 \begin{eqnarray*}
- Q_f(i = \tilde{y} \;|\; \hat{y})  & = & \frac{Q_f(\hat{y}[i] = \tilde{y})}{\sum_{\tilde{y}} Q_f(\hat{y}[i] = \tilde{y})} \\
+ P_s(i = \tilde{y} \;|\; \hat{y})  & = & \frac{P_s(\hat{y}[i] = \tilde{y})}{\sum_{\tilde{y}} P_s(\hat{y}[i] = \tilde{y})} \\
   \\
   \\
-  & = & \frac{e^{f(\hat{y}[i = \tilde{y}])}}{\sum_{\tilde{y}} e^{f(\hat{y}[i = \tilde{y}])}}
+  & = & \frac{e^{s(\hat{y}[i = \tilde{y}])}}{\sum_{\tilde{y}} e^{s(\hat{y}[i = \tilde{y}])}}
 \end{eqnarray*}
 
 \slide{Correctness Proof}
 
-$Q_f(\hat{y})$ is a stationary distribution of Gibbs Sampling.
+$P_s(\hat{y})$ is a stationary distribution of Gibbs Sampling.
 
 \vfill
 \begin{itemize}
 \item   Select $i$ at random
 
-\item draw $\tilde{y}$ from $Q_f(i = \tilde{y} \;|\;\hat{y})$
+\item draw $\tilde{y}$ from $P_s(i = \tilde{y} \;|\;\hat{y})$
 
 \item $\hat{y}[i] = \tilde{y}$
 \end{itemize}
@@ -170,15 +191,15 @@ The distribution before the update equals the distribution after the update.
 
 \slide{Pseudolikelihood}
 
-In Pseudolikelihood we replace the objective $- \log Q_f(\hat{y})$ with the objective $- \log \tilde{Q}_f(\hat{y})$ where
+In Pseudolikelihood we replace the objective $- \log P_s(\hat{y})$ with the objective $- \log \tilde{Q}_s(\hat{y})$ where
 
 \vfill
 \begin{eqnarray*}
-  \tilde{Q}_f(\hat{y}) & \doteq & \prod_i \;Q_f(i = \hat{y}[i] \;|\;\hat{y}) \\
+  \tilde{Q}_s(\hat{y}) & \doteq & \prod_i \;P_s(i = \hat{y}[i] \;|\;\hat{y}) \\
   \\
   \mathrm{loss}(f) & \doteq & - \log \tilde{Q}(y) \\
   \\
-  f.\mathrm{grad}[\alpha,\tilde{y}] & = & \sum_i - \partial \log Q_f[i = \hat{y}[i] \;|\;\hat{y}] /\partial f[\alpha,\tilde{y}]
+  s.\mathrm{grad}[e,\tilde{y}] & = & \sum_i - \partial \log P_s[i = \hat{y}[i] \;|\;\hat{y}] /\partial s[e,\tilde{y}]
 \end{eqnarray*}
 
 
@@ -209,9 +230,9 @@ We will prove the case of two nodes.
 \begin{eqnarray*}
   & & \min_Q \;E_{y\sim \mathrm{Pop}}{-\log Q(y[1]|y[2])\;Q(y[2]|y[1])} \\
   \\
-  & \geq & \min_{Q_1,Q_2} E_{y \sim \mathrm{Pop}}{-\log Q_1(y[1]|y[2])\;Q_2(y[2]|y[1])} \\
+  & \geq & \min_{P_1,P_2} E_{y \sim \mathrm{Pop}}{-\log P_1(y[1]|y[2])\;P_2(y[2]|y[1])} \\
   \\
-  & = & \min_{Q_1} E_{y \sim \mathrm{Pop}}{-\log Q_1(y[1]|y[2])} + \min_{Q_2} E_{y \sim \mathrm{Pop}}{-\log Q_2(y[2]|y[1])} \\
+  & = & \min_{P_1} E_{y \sim \mathrm{Pop}}{-\log P_1(y[1]|y[2])} + \min_{P_2} E_{y \sim \mathrm{Pop}}{-\log P_2(y[2]|y[1])} \\
   \\
   & = & E_{y \sim \mathrm{Pop}}{-\log \mathrm{Pop}(y[1]|y[2])} + E_{y \sim \mathrm{Pop}}{-\log \mathrm{Pop}(y[2]|y[1])} \\
   \\
@@ -220,16 +241,16 @@ We will prove the case of two nodes.
 
   
 \slideplain{Contrastive Divergence}
-{\bf Algorithm (CDk)}: Run $k$ steps of MCMC for $Q_f(\hat{y})$ {\bf starting from $y$} to get $\hat{y}$.
+{\bf Algorithm (CDk)}: Run $k$ steps of MCMC for $P_s(\hat{y})$ {\bf starting from $y$} to get $\hat{y}$.
 
 \vfill
 Then set
-$$f.\mathrm{grad}[\alpha,\tilde{y}] = \mathbbm{1}[\hat{y}[\alpha] = \tilde{y}] - \mathbbm{1}[y[\alpha]= \tilde{y}]$$
+$$s.\mathrm{grad}[e,\tilde{y}] = \mathbbm{1}[\hat{y}[e] = \tilde{y}] - \mathbbm{1}[y[e]= \tilde{y}]$$
 
 \vfill
-    {\bf Theorem}: If $Q_f(\hat{y}) = \mathrm{Pop}$ then
+    {\bf Theorem}: If $P_s(\hat{y}) = \mathrm{Pop}$ then
     
-    $$E_{y \sim \mathrm{Pop}}\; \mathbbm{1}[\hat{y}[\alpha] = \tilde{y}] - \mathbbm{1}[y[\alpha]= \tilde{y}] = 0$$
+    $$E_{y \sim \mathrm{Pop}}\; \mathbbm{1}[\hat{y}[e] = \tilde{y}] - \mathbbm{1}[y[e]= \tilde{y}] = 0$$
 
 \vfill
 {\bf Here we can take $k=1$ --- \bf no mixing time required}.

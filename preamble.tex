@@ -1,6 +1,15 @@
 \usepackage{amsmath,amssymb,amsthm,graphicx,color,bbm}
 
 \newcommand{\slidetwo}[2]{\vfill
+\vfill
+\centerline{\Large\thepage}
+\eject
+\centerline{\bf #1}
+\bigskip
+\centerline{\bf #2}
+\vfill}
+
+\newcommand{\slidetwoplain}[2]{\vfill
 \eject
 \centerline{\bf #1}
 \bigskip
@@ -69,6 +78,7 @@
 \DeclareMathOperator*{\argmin}{argmin}
 \DeclareMathOperator*{\kbest}{kbest}
 \DeclareMathOperator*{\softmax}{softmax}
+\DeclareMathOperator*{\expsoftmax}{expsoftmax}
 
 \DeclareMathOperator*{\locmax}{locmax}
 \DeclareMathOperator*{\locmin}{locmin}

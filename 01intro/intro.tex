@@ -229,6 +229,34 @@ $V_x$ and $V_y$ are source and target vocabularies respectively.
   & = & {\color{red} \argmin_\Phi \;E_{(x,y) \sim \mathrm{Pop}} \;-\ln \;P_\Phi(y|x)}
 \end{eqnarray*}
 
+\slide{Shannon's Source Coding Theorem}
+
+Consider a population probability distribution $\mathrm{Pop}$ on a discrete variable $y$.
+
+\vfill
+Define
+$$H_2(y) = E_y \;- \log_2 P(y) = H(y)/(\ln 2)$$
+
+\vfill
+For any bit string $c$ let $|c|$ be the number of bits in (the length of) $c$.
+\vfill
+Theorem: There exists a coding function $c(y)$ such that for all $y$
+$$|c(y)| \leq (- \log_2\;P(y)) + 1$$
+and therefore
+$$E_y\;|c(y)| \leq H_2(y)+1$$
+
+\vfill
+Theorem: For any coding scheme $c$
+$$E_y |c(y)| \geq H_2(y)$$
+
+\slide{Cross Entropy Coding Theorem}
+
+Consider \
+$$H_2(P,Q) = E_y \;-\log_2\;Q(y) = H(P,Q)/(\ln 2)$$
+
+\vfill
+This can be interpreted as the number of bits used to code draws from $P$ when using the optimal for distribution $Q$.
+
 \slide{Entropy, Cross Entropy and KL Divergence}
 
 Let $P$ and $Q$ be two probability distributions on the same set ${\cal Y}$.
