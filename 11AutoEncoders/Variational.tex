@@ -8,7 +8,7 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2018}
+  \centerline{David McAllester, Winter 2019}
   \vfill
   \centerline{The Evidence Lower Bound (the ELBO)}
   \vfill
@@ -33,7 +33,7 @@ Probabilistic grammar models also have this form where $y$ is a sentence and $z$
 Rate-Distortion Autoencoders also have this form where $z$ is the compression of $y$.
 
 \vfill
-In these cases the sum over $z$ can be computed exactly.
+In the first two cases, and for lossless compression, the sum over $z$ can be computed exactly.
 
 \slide{{\color{red} Big Picture}: Friendly Distributions}
 
@@ -49,62 +49,48 @@ It is often the case that $P_\Phi(z)$ is friendly, and $P_\Phi(y|z)$ is friendly
 For example $z$ might be an assignment of truth values to Boolean variables and $y$ might be the value of a fixed Boolean formula $\Phi$.  In this case
 determining if $P_\Phi(y) > 0$ is the SAT problem which is NP hard.
 
-\slide{Superpixel Colorization}
+\slide{Colorization}
 
-\centerline{\includegraphics[height = 2in]{../images/SLIC} \hspace{.5in} \includegraphics[height = 2in]{../images/SLICcolor}}
-\centerline{\huge SLIC superpixels, Achanta et al.}
+\centerline{\includegraphics[height = 2in]{../images/Colorization}}
 
-$x$ is black and white, $y$ color, $z$ a segmentation.
+$x$ is a black and white image, $y$ a color image, and $z$ a semantic segmentation.
 
 \vfill
 $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z,x).$$
 
-\slide{Superpixel Colorization}
+\slide{Colorization}
 
-$P_\Phi(z|x)$ is defined by a deep network computing a friendly graphical model on segmentations -- perhaps a independent distribution over segment
-indeces for each superpixel.
+$P_\Phi(z|x)$ is defined by a deep network computing a friendly graphical model on semantic segmentations --
+perhaps each pixel is assigned a distribution over material categories such as ``face'', ``shirt'', ``shirt-color1'' or ``shirt-color2''.
 
 \vfill
-$P_\Phi(y|z,x)$ is a deep network taking a particular segmentation (a segment index at each pixel) and computing
-a distribution over colors for each segment.
+$P_\Phi(y|z,x)$ is a deep network taking a particular semantic segmentation (a particular semantic material label at each pixel) and computing
+a distribution on a discrete color space for each material label.
 
 \vfill
 Although $P(z|x)$ is friendly, and $P_\Phi(y|z,x)$ is friendly, $P(y|x)$ not friendly (similar to the SAT example).
 
-\slide{{\color{red} Big Picuture}: ELBO Replaces Search with Generation}
+\slide{{\color{red} Big Picture}: ELBO Replaces Search with Generation}
 
 \vfill
-
+{\huge
 \begin{eqnarray*}
 P_\Phi(y) & = & E_{\color{red} z \sim P_\Phi(z)}P_\Phi(y|z) \;\;\;\mbox{\color{red} sampling $z$ is ineffective}\\
 \\
 \ln P_\Phi(y) & = & E_{\color{red} z \sim P_\Psi(z|y)} \ln P_\Phi(y) \;\;\;\mbox{\color{red} introduce $z$ generator using $y$}\\
 \\
- & = & E_{z \sim P_\Psi(z|y)} \left(\ln P_\Phi(y)P_\Phi(z|y) + \ln \frac{P_\Psi(z|y)}{P_\Phi(z|x)} + \ln\frac{1}{P_\Psi(z|y)}\right) \\
+ & = & E_{z \sim P_\Psi(z|y)} \left(\ln P_\Phi(y)P_\Phi(z|y) + \ln \frac{P_\Psi(z|y)}{P_\Phi(z|y)} + \ln\frac{1}{P_\Psi(z|y)}\right) \\
  \\
+ & = & \left(E_{z \sim P_\Psi(z|y)} \;\ln\;P_\Phi(z,y)\right) + KL(P_\Psi(z|y),P_\Phi(z|y)) + H(P_\Psi(z|y)) \\
  \\
- & = & E_{z \sim P_\Psi(z|y)} P_\Phi(z,y) + H(P_\Psi(z|y)) + KL(P_\Psi(z|y),P_\Phi(z|y)) \\
- \\
- & \geq & E_{\color{red} z \sim P_\Psi(z|y)}P_\Phi(z)P_\Phi(y|z) + - \ln P_\Psi(z|y)
+ & \geq & E_{\color{red} z \sim P_\Psi(z|y)}\;\left(\;\ln\;P_\Phi(z)P_\Phi(y|z) - \ln P_\Psi(z|y)\;\right) \;\;\;\mbox{\color{red} ELBO}
 \end{eqnarray*}
+}
 
-\slide{Superpixel Colorization}
-
-\centerline{\includegraphics[height = 2in]{../images/SLIC} \hspace{.5in} \includegraphics[height = 2in]{../images/SLICcolor}}
-\centerline{\huge SLIC superpixels, Achanta et al.}
-
-$x$ is black and white, $y$ color, $z$ a segmentation.
+\slide{Measuring the ELBO}
 
 \vfill
-$P_\Phi(z|x)$ is friendly and $P_\Phi(y|z,x)$ is friendly but $P(y|x)$ is not friendly.
-
-\vfill
-$P_\Psi(z|y,x)$ computes a friendly graphical model for $z$ given $y$.
-
-\slide{Measuring ELBO Loss}
-
-\vfill
-$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi)  = E_{z\sim P_\Psi(y)} \; \ln P_\Psi(y) - \ln P_\Phi(z)P_\Phi(y|z)$$
+{\color{red} $$\mathrm{ELBO}(y,\Phi,\Psi)  = E_{z\sim P_\Psi(y)} \; \ln P_\Phi(z)P_\Phi(y|z) - \ln P_\Psi(z)$$}
 
 \vfill
 If $P_\Phi(z)$, $P_\Phi(y|z)$, and $P_\Psi(z|y)$ are friendly (even whwn when $P_\Phi(y)$ is not friendly) we can
@@ -113,10 +99,24 @@ measure ELBO loss through sampling.
 \vfill
 If we can measure it, we can do gradient descent on it (but perhaps with difficulty).
 
+\slide{Colorization}
+
+\centerline{\includegraphics[height = 2in]{../images/Colorization}}
+
+$x$ is a black and white image, $y$ a color image, and $z$ a semantic segmentation.
+
+\vfill
+$P_\Phi(z|x)$ is friendly and $P_\Phi(y|z,x)$ is friendly but $P(y|x)$ is not friendly.
+
+\vfill
+$P_\Psi(z|y,x)$ computes a friendly graphical model for $z$ given $y$.
+
 \slide{A General ELBO Architecture}
 \centerline{$P_\Phi(y|x)$ \hspace{10em} $P_\Psi(z|y,x)$}
 
-\parbox{3.5in}{
+\vfill
+{\huge \color{red}
+\parbox{4.0in}{
 \begin{eqnarray*}
 & & \mbox{intput}\; x \\
 \vdots \\
@@ -128,15 +128,26 @@ y & = & \expsoftmax_y\;\ldots
 \end{eqnarray*}
 }
 \hfill
-\parbox{3.5in}{
+\parbox{4.0in}{
 \begin{eqnarray*}
 & & \mbox{intput}\; x,y \\
 \vdots \\
 z & = & \expsoftmax_z \ldots \\
 \end{eqnarray*}
 }
-
+}
+\vfill
 The exponential softmaxes are friendly (they produce a friendly graphical model).
+
+\slide{Two Expressions for the ELBO}
+
+\begin{eqnarray*}
+\ln P_\Phi(y) & = & ELBO(y,\Phi,\Psi) + KL(P_\Psi(z|y),P_\Phi(z|y)) \\
+\\
+ ELBO & = & E_{z \sim P_\Psi(z|y)}\; \ln P_\Phi(z,y) + H(P_\Psi(z|y))\;\;\;(1) \\
+ \\      
+  & = &{\color{red} \ln\;P_{\Phi}(y) - KL(P_\Psi(z|y),P_{\Phi}(z|y))\;\;\;\;\;\;(2)}
+\end{eqnarray*}
 
 \slide{EM is Alternating Maximization of the ELBO}
 Forward-backward EM for HMMs and inside-outside EM for PCFGs (or any EM) can be written as
@@ -155,37 +166,55 @@ Forward-backward EM for HMMs and inside-outside EM for PCFGs (or any EM) can be 
 \mbox{by (1)}\;\;\;{\color{red} \Phi^{t+1}} & = & \argmax_{\color{red} \Phi} E_{y \sim \mathrm{Train}} \;E_{z \sim P_{\color{red} {\Phi^t}}(z|y)}\; \ln P_{\color{red} \Phi}(z,y)
 \end{eqnarray*}
 
-\slide{ELBO Loss Consistency}
+\slide{We want $\Psi$ to adapt to $\Phi$}
 
-$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) = E_{z\sim P_\Psi(y)} \; \ln P_\Psi(y) - \ln P_\Phi(z)P_\Phi(y|z)$$
+$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) = KL(P_\Psi(z|y),P_{\Phi}(z|y)) - \ln\;P_{\Phi}(y)$$
 
 \vfill
-$$\min_Q E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{ELBO}}(y,\Phi,Q) = H(\mathrm{Pop},P_\Phi)$$
+$${\color{red} Q^*(z|y) = P_\Phi(z|y)}$$
 
+\vfill
+$$E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{ELBO}}(y,\Phi,Q^*) = H(\mathrm{Pop},P_\Phi)$$
+
+\slide{However, $\Phi$ can ignore $\Psi$}
+
+$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) = KL(P_\Psi(z|y),P_{\Phi}(z|y)) - \ln\;P_{\Phi}(y)$$
+
+$${\color{red} P^*(z) = P_\Psi(z)}$$
+$${\color{red} P^*(y|z) = P_\Phi(y)}$$
+
+$$E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{ELBO}}(y,P^*,\Psi) = H(\mathrm{Pop},P_\Phi)$$
+
+\vfill
+It seems important that $P_\Phi(y|z)$ have limited expressive power.
 
 \slide{Hard ELBO}
 
 Hard ELBO is to ELBO as hard EM is to EM.
 
-\vfill
-$${\cal L}_{\mathrm{HELBO}}(y,\Phi,\Psi)  = E_{z \sim P_\Phi(z|y)} - \ln P_\Phi(z,y)$$
 
 \vfill
-$$\min_{P,Q} E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{RELBO}}(y,P,Q) \leq H(\mathrm{Pop}) + \ln 2$$
+\begin{eqnarray*}
+{\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) &  =  & KL(P_\Psi(z|y),P_\Phi(z|y)) - \ln P_\Phi(y) \\
+\\
+{\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) &  =  & E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y) + \ln P_\Psi(z|y) \\
+\\
+{\color{red} {\cal L}_{\mathrm{HELBO}}(y,\Phi,\Psi)} & {\color{red}  =} & {\color{red}  E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y)}
+\end{eqnarray*}
+
+
+\slide{Hard ELBO and Rate-Distortion Autoencoding}
+
+\begin{eqnarray*}
+{\cal L}_{\mathrm{HELBO}}(y,\Phi,\Psi) &  = &  E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y)
+\end{eqnarray*}
+
+
+\vfill
+{\color{red} $$\min_{P,Q} E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{HELBO}}(y,P,Q) \leq H(\mathrm{Pop}) + \ln 2$$}
 
 \vfill
 This can be proved from Shannon's source coding theorem where $z$ is the code for $y$.
-
-\slide{Variational Auto Encoders (VAEs)}
-
-In these slides I am reserving the term VAE for applications of the ELBO where $p_\Phi(z)$ a continuous Gaussian density
-and the ELBO expression is used directly on continuous densities with differential entropy.
-
-\vfill
-Working with continuous densities greatly simplifies gradient descent.
-
-\vfill
-I will describe the architecture and discuss possible problems with continuous distributions later.
 
 \slide{A VAE for Images}
 
@@ -197,74 +226,87 @@ $${\color{red}y \hspace{5em}  z_\Psi(y,\epsilon) \hspace{4em} z\;p_\Phi(z) \hspa
 
 \centerline{\Large [Hyeonwoo Noh et al.]}
 
-\slide{Distortion as Probability Density}
+\slide{Gaussian Distributions}
 
-We will assume that we have a function (deconvolution) mapping $z$ to $\hat{y}_\Phi(z)$.
+\begin{eqnarray*}
+p_\Phi(z) & \propto & \exp\left(\sum_i \;(z[i] - {\color{red} \mu[i]})^2/(2{\color{red} \sigma[i]}^2)\right) \\
+\\
+p_\Phi(y|z) & \propto & \exp\left(\sum_j\;(y[j] - {\color{red} y_\Phi(z)[j]})^2/(2{\color{red} \gamma[j]}^2)\right) \\
+\\
+p_\Psi(z|y) & \propto & \exp\left(\sum_i (z[i] - {\color{red} z_\Psi(y)[i]})^2/(2{\color{red} \sigma_\Psi(y)[i]}^2)\right)
+\end{eqnarray*}
 
-\vfill
-For rate-distortion autoencoders we assume a distortion function $D(y,\;\hat{y}_\Phi(z(y)))$.
+\slide{KL-Divergence Form for the ELBO}
 
-\vfill
-$L_1$ or $L_2$ distortion can be converted to a continuous probability density.
-
-\vfill
-$$p(y|\hat{y}) = \frac{1}{Z} \; e^{- D(y,\hat{y})}$$
-
-\vfill
-This gives a density $p_\Phi(y|z) = p(y|\hat{y}_\Phi(z))$.
-
-\anaslide{The Reparameterization Trick}
-\bigskip
-$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi)  = \expectsub{\color{red} z \sim p_\Psi(z|y)}\;\ln\;p_\Psi(z|y) - \ln p_\Phi(z) + \lambda||y-\hat{y}_\Phi(z)||^2$$
+\begin{eqnarray*}
+&  & E_{z \in p_\Psi(z|y)}\;\ln\;p_\Psi(z|y) - \ln\;p_\Phi(z)p_\Phi(y|z) \;\;\;\;{\color{red} {\cal L}_{\mathrm{ELBO}}} \\
+\\
+& = & {\color{red}  KL(p_\Psi(z|y),p_\Phi(z)) + E_{z \in P_\Psi(z|y)} - \ln p_\Phi(y|z)}
+\end{eqnarray*}
 
 \vfill
-All variables are now continuous.
+The ELBO is a KL-divergence + a cross entropy
 
 \vfill
-How do we differentiate the sampling?
+Continuous KL-divergence is ok.
 
 \vfill
-\anaslide{The Reparameterization Trick}
-\bigskip
-$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi)  = \expectsub{\color{red} z \sim p_\Psi(z|y)} \;\ln\;p_\Psi(z|y) - \ln p_\Phi(z) + \lambda||y-\hat{y}_\Phi(z)||^2$$
+Continuous cross-entropy has issues --- we will come back to that
+later.
+
+\slide{Closed Form KL-Divergence}
+
+\begin{eqnarray*}
+& & KL(p_\Psi(z|y),p_\Phi(z)) \\
+\\
+\\
+& = & \sum_i \;\frac{\sigma_\Psi(y)[i]^2 + (z_\Psi(y)[i]-\mu[i])^2}{2 \sigma[i]^2}
++ \ln\frac{\sigma[i]}{\sigma_\Psi(y)[i]} - \frac{1}{2}
+\end{eqnarray*}
+
+
+\slide{Standardizing $p_\Phi(z)$}
+
+The KL-divergence term is
+    
+$$\sum_i \;\frac{{\color{red} \sigma}_\Psi(y)[i]^2 +({\color{red} z}_\Psi(y)[i] - {\color{red} \mu}[i])^2}{2 {\color{red} \sigma}[i]^2} + \ln\frac{{\color{red} \sigma}[i]}{{\color{red} \sigma}_\Psi(y)[i]} - \frac{1}{2}$$
 
 \vfill
-We note that in practice all sampling is computed by a deterministic function of (pseudo) random numbers.
+We can adjust $\Psi$ to $\Psi'$ such that
+\begin{eqnarray*}
+z_{\Psi'}(y)[i] & = & z_\Psi(y)[i]/\sigma[i] + \mu[i] \\
+\sigma_{\Psi'}(y)[i] & = & \sigma_\Psi(y)/\sigma[i]
+\end{eqnarray*}
 
 \vfill
-We can make this explicit.
+We then get {\color{red} $KL(p_{\Psi}(z|y),p_\Phi(z)) = KL(p_{\Psi'}(z|y),{\cal N}(0,I))$}.
+
+\slide{Standardizing $p_\Phi(z)$}
 
 \vfill
-Model $P_\Psi(z|y)$ by $\epsilon \sim \mathrm{noise}$, $z = z_\Psi(y,\epsilon)$
+Without loss of generality the VAE becomes.
+
+{\color{red} $$\min_{\Phi,\Psi}\; E_y\;KL(P_\Psi(z|y),{\cal N}(0,I)) + E_{z \in P_\Psi(z|y)} - \ln p_\Phi(y|z) $$}
+\slide{Reparameterization Trick for the Cross-Entropy}
+
+\begin{eqnarray*}
+p_\Psi(z|y) & \propto & \exp\left(\sum_i (z[i] - {\color{red}
+z_\Psi(y)[i]})^2/(2{\color{red} \sigma_\Psi(y)[i]}^2)\right)
+\end{eqnarray*}
 
 \vfill
-\anaslide{The Reparameterization Trick}
-\bigskip
-$$~\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\expectsub{\color{red} z \sim p_\Psi(z|y)} \;\ln\;p_\Psi(z|y) - \ln p_\Phi(z) + \lambda||y-\hat{y}_\Phi(z)||^2$$
+\begin{eqnarray*}
+& & E_{z \in p_\Psi(z|y)} \;\ln p_\Phi(y|z)\\
+\\
+\\
+& = & E_{\epsilon \sim {\cal N}(0,I)} \;z[i] = {\color{red}
+z_\Psi(y)[i]} + {\color{red} \sigma_\Psi(y)[i]}\epsilon[i];\;\; \;\ln
+p_\Phi(y|z)
+\end{eqnarray*}
 
-\bigskip
-becomes
-$$\expectsub{\color{red} \epsilon \sim {\cal N}(0,I)} \;{\color{red} z := z_\Psi(y)+ \sigma \odot\epsilon;}\;\ln\;p_\Psi(z|y) - \ln p_\Phi(z) + \lambda||y-\hat{y}_\Phi(z)||^2$$
+\slide{Sampling}
 
-\slide{Decoding with $L_2$ Distortion}
-
-Switching back to minimization, we can now rewrite the objective as
-
-\vfill
-$$\min \; \expectsub{y,\epsilon} \;\left(|z_\Psi(y,\epsilon)|_\Phi +  \frac{1}{2}\lambda||y - \hat{y}_\Phi(z_\Psi(y,\epsilon))||^2\right) - |z_\Psi(y,\epsilon)|_{\Psi,y}$$
-
-\vfill
-$$|z|_\Phi  = - \log_2 P_\Phi(z)\hspace{5em} |z|_{\Psi,y}  = - \log_2 P_\Psi(z|y)$$
-
-\vfill
-For $z$ discrete, $|z|_\Phi$ is the code length of $z(y,\epsilon)$ under an optimal code for $P_\Phi$.
-
-\vfill
-$|z|_{\Psi,y}$ is the code length for $z$ under the code for $P_\Psi(z|y)$.
-
-\slideplain{Sampling}
-
-$$P_\Psi(z|y) \hspace{3ex} z \hspace{3ex}  P_\Phi(z,y)$$
+$$P_\Psi(z|y) \hspace{3ex} z \hspace{3ex} P_\Phi(z,y)$$
 
 \centerline{\includegraphics[width=6in]{../images/Deconv}}
 \centerline{\large [Hyeonwoo Noh et al.]}
@@ -272,7 +314,7 @@ $$P_\Psi(z|y) \hspace{3ex} z \hspace{3ex}  P_\Phi(z,y)$$
 \vfill
 Sampling uses just the second half ${\color{red} P_\Phi(z,y)}$.
 
-\slide{Sampling from Gaussian Variational Autoencoders}
+\slide{Sampling}
 
 \vfill
 \centerline{\includegraphics[width = 4in]{../images/VariationalFaces}}
@@ -280,13 +322,146 @@ Sampling uses just the second half ${\color{red} P_\Phi(z,y)}$.
 
 \slide{Why Blurry?}
 
-A common explanation for the blurryness of images generated from VAEs is the use of $L_2$ as the distortion measure.
+A common explanation for the blurryness of images generated from VAEs
+is the use of $L_2$ as the distortion measure.
 
 \vfill
-It does seem that $L_1$ works better (see the slides on image-to-image GANs).
+It does seem that $L_1$ works better.
 
 \vfill
-However, training on $L_2$ distortion can produce sharp images in rate-distortion autoencoders (see the slides on rate-distortion autoencoders).
+However, training on $L_2$ distortion can produce sharp images in
+rate-distortion autoencoders.
+
+\slide{Noisy-Channel Rate-Distortion Autoencoders}
+
+\centerline{\includegraphics[width = 6in]{../images/Twilight}}
+
+\vfill
+The twilight zone is material for which I do not know of a reference. 
+
+\slide{Differential Entropy and Cross-Entropy are Ill-Defined}
+
+\bigskip
+\begin{eqnarray*}
+{\cal L}_{\mathrm{VAE}} & = & \sum_j\;\frac{E_{z \sim P_\Psi(z|y)}\;
+({\color{red}y}[j] - {\color{red} \hat{y}}_\Phi(z)[j])^2}{2{\color{red} \gamma}[j]^2}
++ \ln {\color{red} \gamma}[j] \\
+\\
+& & + KL(p_\Psi(z|y),p_\Phi(z))
+\end{eqnarray*}
+
+\vfill Consider a probability density on light intensity.
+
+\vfill
+While the first term is dimensionless, ${\color{red} \gamma}[j]$ is an intensity.
+
+\vfill
+{\color{red} The cross-entropy term can be assigned any numerical value depending on the choice units (metric, English, or martian).}
+
+\slide{Differential Entropy and Cross-Entropy are Ill-Defined}
+
+There are also other problems with continuous entropy and cross-entropy.
+
+\vfill
+\begin{itemize}
+\item Finite continuous entropy violates the source coding theorem --- it takes an infinite number of bits to code a real number.
+
+\vfill
+\item Finite continuous entropy violates the data processing inequality that $H(f(x)) \leq H(x)$.  For a continuous random variable $x$ under finite continuous entropy we can have $H(f(x)) > H(x)$.
+\end{itemize}
+
+\vfill
+For these reasons it seems best to avoid using finite continuous entropy and finite continuous cross entropy.
+
+\slide{Distortion}
+
+A stochastic encoder $p_\Phi(z|y)$, a decoder $y_\Phi(z)$, and distortion function $D$ define a quantity of distortion.
+
+$${\color{red} E_{y \sim \pop,\;z \sim p_\Phi(z|y)}\;D(y,y_\Phi(z))}$$
+
+\vfill
+For $L_2$ distortion we can use
+
+$$D(y,y') = ||y - y'||_2$$
+
+\vfill
+Distortion can typically be given the same units as $y$.
+
+\slide{Rate}
+
+A stochastic encoder defines a rate.
+
+\vfill
+{\
+\begin{eqnarray*}
+p_\Phi(z) & \doteq & \sum_y\; \pop(y)p_\Phi(z|y) \\
+\\
+I_\Phi(y,z) & = &  E_y \;KL(p_\Phi(z|y),p_\Phi(z))
+\end{eqnarray*}
+
+
+\vfill
+By Shannon's channel capacity theorem, $I_\Phi(y,z)$ is the channel capacity when sending $y$ across the noisy channel $z$.
+
+\vfill
+For $z$ continuous, a deterministic encoder has an infinite rate.
+
+\vfill
+{\color{red}  Here $p_\Phi(z)$ is not friendly.}
+
+\slide{Bounding the Rate}
+
+\begin{eqnarray*}
+I_\Phi(y,z) & = & E_{y \sim \pop}\; KL(p_\Phi(z|y),p_\Phi(z)) \\
+\\
+& = & E_{y,z} \ln p_\Phi(z|y) - \ln p_\Psi(z) + \ln p_\Psi(z) - \ln p_\Phi(z) \\
+\\
+& = & E_y\;KL(p_\Phi(z|y),p_\Psi(z)) - KL(p_\Phi(z),p_\Psi(z)) \\
+\\
+& \leq & E_y\;KL(p_\Phi(z|y),p_\Psi(z))
+\end{eqnarray*}
+
+\vfill
+{\color{red} We can take $p_\Psi(z)$ to be friendly, and WLOG, fixed at ${\cal N}(0,I)$.}
+
+\slide{The Noisy-Channel Rate-Distortion Autoencoder}
+
+{\color{red} {\Huge $$\Phi^* = \argmin_{\Phi}\;E_y \;KL(p_\Phi(z|y),{\cal N}(0,I)) \;+\; \frac{1}{\gamma} \; E_{z\sim p_\Phi(z|y)}\;D(y,\;y_\Phi(z))$$}}
+
+\vfill
+Here $\gamma$ has the same units as distortion and controls the trade-off between rate and distortion.
+
+\slide{Summary: Rate-Distortion}
+
+
+Rate-Distortion: $y$, continuous, $\tilde{z}$ a bit string,
+
+{\color{red}
+\begin{eqnarray*}
+\Phi^* &  = &  \argmin_\Phi E_y \;|\tilde{z}_\Phi(y)| + \lambda D(y,y_\Phi(\tilde{z}_\Phi(y)))
+\end{eqnarray*}
+}
+
+\vfill
+Noisy Channel: {\color{red} $\tilde{z} = z_\Phi(y) + \sigma_\Phi(y) \odot \epsilon$,\hspace{2em} $\epsilon \sim {\cal N}(0,I)$}
+
+{\color{red}
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi E_y\; \;KL(p_\Phi(\tilde{z}|y),{\cal N}(0,I)) + E_{\tilde{z}\sim p_\Phi(\tilde{z}|y)}\;\lambda D(y,y_\Phi(\tilde{z}))
+\end{eqnarray*}
+}
+
+\slide{Summary: ELBO and VAE}
+
+
+ELBO: {\color{red} $P_\Phi(z)$, $P_\Phi(y|z)$, $P_\Psi(z|y)$} friendly graphical models:
+
+{\color{red} $$\Phi^*,\Psi^*  =  \argmin_{\Phi,\Psi}\; E_{y \sim \mathrm{Pop},\;z \sim P_\Psi(z|y)} \;\ln P_\Psi(z|y) - \ln P_\Phi(z)P_\Phi(y|z)$$}
+
+\vfill
+VAE: {\color{red} $p_\Phi(z|y)$, $p_\Phi(y|z)$} Gaussian:
+
+{\color{red} $$\Phi^* =  \argmin_\Phi E_{y \sim \mathrm{Pop}}\; \;KL(p_\Phi(z|y),{\cal N}(0,I))  - E_{z\sim p_\Phi(z|y)}\;\ln p_\Phi(y|z)$$}
 
 \slide{END}
 

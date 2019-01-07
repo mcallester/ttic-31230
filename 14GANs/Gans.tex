@@ -1,4 +1,6 @@
+\input ../SlidePreamble
 \input ../preamble
+
 
 \begin{document}
 
@@ -6,76 +8,112 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, April 2017}
+  \centerline{David McAllester, Winter 2019}
+  \vfill
+  \centerline{\bf Discrimination and Constrastive Estimation}
   \vfill
   \centerline{\bf Generative Adversarial Networks (GANs)}
   \vfill
 \vfill
 \vfill
 
-\slide{Modeling Distributions (Cross Entropy)}
+\slide{Modeling Distributions: Discrimination}
 
-{\color{red}
+Consider a friendly negative sampling distribution $Q$.
+
+\vfill
+Draw $i$ from the uniform distribution on $\{-1,1\}$.
+
+\vfill
+For $i = 1$ draw $y$ from $\pop$ and otherwise draw $y$ from $Q$.
+
+\vfill
+I will write this as {\color{red} $(i,y) \sim (\pop \uplus Q)$}.
+
+\vfill
+{\color{red} $$\Phi^* = \argmin_\Phi E_{(i,y) \sim (\pop \uplus Q)}\;-\ln D_\Phi(i|y)$$}
+
+\slide{Discrimination}
+
+{\color{red} $$\Phi^* = \argmin_\Phi E_{(i,y) \sim (\pop \uplus Q)}\;-\ln D_\Phi(i|y)$$}
+
+Assuming Universality
+$$D_{\Phi^*}(1|y) = P(1|y) = \frac{P(1\;\mathrm{and}\; y)}{P(y)} = \frac{\frac{1}{2}\mathrm{Pop}(y)}{\frac{1}{2}\mathrm{Pop}(y) + \frac{1}{2}Q(y)}$$
+
+\vfill
+\vfill
+{\color{red} $$ \pop(y) = \frac{D_{\Phi^*}(1|y)Q(y)}{1-D_{\Phi^*}(1|y)}$$}
+
+\slide{Descrimination}
+
+The discrimination estimate of $\pop$ is poor when the discrimination problem is easy --- when the discrimination loss can be driven close to zero.
+
+\slide{Modeling Distributions: Contrastive Estimation}
+
+Consider a friendly negative sampling distribution $Q$.
+
+\vfill
+Draw one ``positive'' from $\pop$ and $k$ ``negatives'' from $Q$.
+
+\vfill
+Shuffle the drawn values into a sequence $y_1,\ldots,y_{k+1}$.
+
+\vfill
+Let $i$ be the index of the positive example $y_i$.
+
+\vfill
+I will write this as $(i,y_1,\ldots,y_{k+1}) \sim (\pop \uplus Q^k)$.
+
+{\color{red} $$\Phi^* = \argmin_\Phi\; E_{(i,y_1,\ldots,y_{k+1})\sim (\pop\uplus Q^k)} \;- \ln D_\Phi(i|y_1,\ldots,y_{k+1})$$}
+
+\slide{Constrastive Estimation}
+{\huge
 \begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi E_{y \sim \mathrm{Pop}} \;- \log Q_\Phi(y) \\
-  \\
-  \\
-  \\
-  \Phi^* & = & \argmin_\Phi E_{(x,y) \sim \mathrm{Pop}} \;- \log Q_\Phi(y|x)
+{\color{red} P(i \;\mathrm{and}\;y_1,\ldots,y_{k+1})} & = & \frac{1}{k+1}\;\pop(y_i)\prod_{j \not = i}Q(y_j) \\
+\\
+& = & {\color{red} \alpha \frac{\pop(y_i)}{Q(y_i)}},\;\;\;\alpha = \frac{1}{k+1} \prod_i Q(y_i) \\
+\\
+\\
+{\color{red} P(i|y_1,\ldots,y_k)} & = & \frac{P(i\;\mathrm{and}\;y_1,\ldots,y_{k+1})}{\sum_i\; P(i\;\mathrm{and}\;y_1,\ldots,y_{k+1})} \\
+\\
+\\
+& = & {\color{red}  \frac{1}{Z}\;\;\frac{\pop(y_i)}{Q(y_i)}\;\;\;Z = \sum_i \frac{\pop(y_i)}{Q(y_i)}}
 \end{eqnarray*}
 }
 
-\anaslide{Variational AutoEncoders}
+\slide{Constrastive Estimation}
 
-\bigskip
+{\color{red} $$\Phi^* = \argmin_\Phi E_{(i,y_1,\ldots,y_{k+1}) \sim (\pop\uplus Q^k)} \;- \ln D_\Phi(i|y_1,\ldots,y_{k+1})$$}
+{\color{red} $$D_\Phi(i|y_1,\ldots,y_{k+1}) \doteq \softmax_i s_\Phi(y_i)$$}
+{\color{red} $$P(i|y_1,\ldots,y_k) \propto \frac{\pop(y_i)}{Q(y_i)}$$}
 
-$$Q_\Psi(\hat{z}|y) \hspace{4ex}  Q_\Phi(\hat{z}) \hspace{7ex} \;\hat{y}_\Phi(\hat{z})$$
-
-\bigskip
-\centerline{\includegraphics[width=6in]{../images/Deconv}}
-\centerline{\large [Hyeonwoo Noh et al.]}
-\bigskip
+Assuming universality:
 \begin{eqnarray*}
-  \Phi^* & = & \argmax_\Phi E_{y \sim \mathrm{Pop}} \;\log Q_\Phi(y) \;\; \mbox{(Cross Entropy)}\\
-  \\
-  \log Q_\Phi(y) & \geq & \expectsub{\hat{z} \sim {\color{red} P_\Psi(\hat{z}|y)}}{\ln Q_\Phi(\hat{z},y)} + H({\color{red} P_\Psi(\hat{z}|y)})
-  \;\;\;\mbox{(ELBO)}
+s_{\Phi^*}(y) & = & \ln \frac{\pop(y)}{Q(y)} + C \;\;\;\mbox{for arbitrary $C$}\\
+\\
+{\color{red} \pop(y)} & {\color{red} =} & {\color{red} \softmax_y\;\;\; s_{\Phi^*}(y) - \ln Q(y)}
 \end{eqnarray*}
 
-\anaslideplain{Generative Adversarial Networks (GANs)}
+\slide{Constrastive Estimation}
 
-\bigskip
-$$\epsilon \sim \mathrm{noise} \hspace{22ex} \;\hat{y}_\Phi(\epsilon)$$
-
-\bigskip
-\centerline{\includegraphics[width=4in]{../images/halfdeconv}}
-\centerline{\large [Hyeonwoo Noh et al.]}
-
-\bigskip
-In a GAN a distribution is modeled by a {\bf generator} --- there is no encoder.
+The contrastor estimate of $\pop$ is poor when the contrastive problem is easy --- when the contrastive loss can be driven near zero.
 
 \slide{GANs, Goodfellow et al., 2014 (also Schmidhuber 1992)}
 
-Cross entropy loss on $Q_\Phi$ is replaced by
-
-$${\color{red} \Phi^* = \argmax_\Phi \; \min_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;Q_\Phi)}{-\log Q_\Psi(s|y)}}$$
-
-\vfill
-$\Phi$ is the generator.
+Discriminator GAN:
+{\color{red} $$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y) \sim (\pop \uplus P_\Phi)} - \ln D_\Psi(i|y)$$}
 
 \vfill
-$y$ is either drawn from $Q_\Phi$ or from $\pop$ (with equal probabiity) and $s$ is a flag telling which.
+Contrastive GAN:
+{\color{red} $$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y_1,\ldots,y_{k+1}) \sim (\pop \uplus P_\Phi^k)} - \ln D_\Psi(i|y_1,\ldots,y_{k+1})$$}
 
 \vfill
-$\Psi$ is the discriminator --- the descriminator must predict $s$ from $y$.
+Assuming Universality:
+{\color{red} $$P_{\Phi^*} = \pop$$}
 
-\slide{The Theorem}
-
-$${\color{red} \Phi^* = \argmax_\Phi \; \min_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;Q_\Phi)}{-\log Q_\Psi(s|y)}}$$
-
-\vfill
-{\bf Theorem:} If $Q_\Phi(y)$ and $Q_\Psi(s|y)$ are universally expressive (can represent any distribution) then
-$Q_{\Phi^*} = \mathrm{Pop}.$
+\slide{Sampling}
+\centerline{$z\sim {\cal N}(0,I)$ \hspace{7em} $y\sim P_\Phi$}
+\centerline{\includegraphics[width=6in]{../images/halfdeconv}}
 
 \slide{Generated Bedrooms(DC GANS, Radford et al., ICLR 2016)}
 
@@ -100,8 +138,8 @@ $Q_{\Phi^*} = \mathrm{Pop}.$
 
 All distribution modeling methods apply to conditional distributions.
 
-$${\color{red} \Phi^* = \argmax_\Phi \; \min_\Psi \;\expectsub{(x,y,s) \sim (\mathrm{Pop}\; \uplus \;\mathrm{Pop}(x)Q_\Phi(y|x))}
-  {-\log Q_\Psi(s|x,y)}}$$
+$${\color{red} \Phi^* = \argmax_\Phi \; \min_\Psi \;\expectsub{(x,y,s) \sim (\mathrm{Pop}\; \uplus \;\mathrm{Pop}(x)P_\Phi(y|x))}
+  {-\log P_\Psi(s|x,y)}}$$
 
 \slide{Image-to-Image Translation (Isola et al., 2016)}
 
@@ -177,44 +215,33 @@ feature vector of the original.
 \vfill
 \centerline{Measuring Perfomance}
 
-\slide{Jensen-Shannon Divergence}
 
-$${\color{red} \Phi^* = \argmax_\Phi \; \min_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;Q_\Phi)}{- \log Q_\Psi(s|y)}}$$
 
-\vfill
+\slide{Discrimination: Jensen-Shannon Divergence}
+
+Assuming Universality:
 \begin{eqnarray*}
-\Psi^*(\Phi) & = & \argmin_\Psi \; \expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;Q_\Phi)}{- \log Q_\Psi(s|y)}
-\end{eqnarray*}
-
-\vfill
-$$Q_{\Psi^*(\Phi)}(s=1|y) = \frac{P(y,s=1)}{P(y)} = \frac{\mathrm{Pop}(y)}{\mathrm{Pop}(y) + Q_\Phi(y)}$$
-
-\eject
-
-\begin{eqnarray*}
-\Phi^*  & = & \argmax_\Phi \; \expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;Q_\Phi)}{- \log Q_{\Psi^*(\Phi)}(s|y)} \\
+& & {\color{red} E_{(i,y) \sim (\pop\uplus Q)}\;-\ln D_{\Phi^*}(i|y)} \\
 \\
-  \\
-  & = & \argmax_\Phi\; \frac{1}{2}  \expectsub{(y,1) \sim \mathrm{Pop}}{- \log \frac{\mathrm{Pop}(y)}{\mathrm{Pop}(y) + \pi(y|\Phi)}} \\
-  & & \;\;\;\;\;\;\; + \frac{1}{2}  \expectsub{(y,-1) \sim Q_\Phi}{- \log \frac{Q_\Phi(y)}{\mathrm{Pop}(y) + Q_\Phi(y)}} \\
-  \\
-  \\
-  & = & \argmax_\Phi \;1 -\frac{1}{2} KL(\mathrm{Pop},A) - \frac{1}{2} KL(Q_\Phi,A)
+& = & E_{(i,y) \sim (\pop\uplus Q)}\;-\ln P(i|y) \\
+\\
+& = & \frac{1}{2}E_{y \sim \pop} -\ln\;\frac{\pop(y)}{\pop(y) + Q(y)}+ \frac{1}{2} E_{y \sim Q}\; -\ln\;\frac{Q(y)}{\pop(y) + Q(y)} \\
+\\
+\\
+& = & {\color{red} (\ln 2) - \frac{1}{2} \left(\;KL\left(\pop,\frac{\pop+Q}{2}\right),\;KL\left(Q,\frac{\pop+Q}{2}\right)\right)}
 \end{eqnarray*}
 
-$$A(y)  =  \frac{1}{2}(\mathrm{Pop}(y) + Q_\Phi(y))$$
+\slide{Discrimination: Jensen-Shannon Divergence}
 
-\slide{Jensen-Shannon Divergence (JSD)}
+\begin{eqnarray*}
+& & {\color{red} E_{(i,y) \sim (\pop\uplus Q)}\;-\ln D_{\Phi^*}(i|y)} \\
+\\
+& = & (\ln 2) - \frac{1}{2} \left(\;KL\left(\pop,\frac{\pop+Q}{2}\right),\;KL\left(Q,\frac{\pop+Q}{2}\right)\right) \\
+\\
+& = & {\color{red} (\ln 2) - JSD(\pop,Q)}
+\end{eqnarray*}
 
-We have arrived at the Jensen-Shannon divergence.
-
-$${\color{red} \Phi^* = \argmin_\Phi \;\;\mathrm{JSD}(\mathrm{Pop},Q_\Phi)}$$
-
-\vfill
-$${\color{red} \mathrm{JSD}(P,Q) = \frac{1}{2} KL\left(P,\frac{P + Q}{2}\right) + \frac{1}{2} KL\left(Q, \frac{P + Q}{2}\right)}$$
-
-\vfill
-$$0 \leq \mathrm{JSD}(P,Q) = \mathrm{JSD}(Q,P) \leq 1\ \;\mbox{(in bits)}$$
+{\color{red} $$0 \leq JSD(P,Q) \leq \ln 2$$}
 
 \slide{Vanishing Gradients}
 
@@ -224,50 +251,50 @@ The discriminator typically ``wins''.
 The log loss goes to zero (becomes exponentially small) and there is no gradient to guide the generator.
 
 \vfill
-In this case the learning stops and the generator is blocked from minimizing $\mathrm{JSD}(\mathrm{Pop},Q_\Phi)$.
+In this case the learning stops and the generator is blocked from minimizing $\mathrm{JSD}(\mathrm{Pop},P_\Phi)$.
 
 \slide{A Heuristic Fix}
 
 We continue to use
 
-$$\Psi^*(\Phi) = \argmin_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;Q_\Phi)}{- \log Q_\Psi(s|y)}$$
+$$\Psi^*(\Phi) = \argmin_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;P_\Phi)}{- \log P_\Psi(s|y)}$$
 
 \vfill
 But switch the optimization for $\Phi$ from
-$$\Phi^* = \argmax_\Phi E_{y \sim Q_\Phi}\; - \log Q_\Psi(-1|y)$$
+$$\Phi^* = \argmax_\Phi E_{y \sim P_\Phi}\; - \log P_\Psi(-1|y)$$
 
 to
-$$\Phi^* = \argmin_\Phi E_{y \sim Q_\Phi}\;- \log Q_\Psi(1|y)$$
+$$\Phi^* = \argmin_\Phi E_{y \sim P_\Phi}\;- \log P_\Psi(1|y)$$
 
 \vfill
-It can be shown that $- \log Q_\Psi(1|y)$ is essentially the margin of the binary classifier $\Psi$.
+It can be shown that $- \log P_\Psi(1|y)$ is essentially the margin of the binary classifier $\Psi$.
 
 \slide{Converting to Cross Entropy (Goodfellow)}
 
-$$\Psi^*(\Phi) = \argmin_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;Q_\Phi)}{- \log Q_\Psi(s|y)}$$
+$$\Psi^*(\Phi) = \argmin_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;P_\Phi)}{- \log P_\Psi(s|y)}$$
 
 \vfill
-$$\mbox{Assume:}\;\;\; Q_{\Psi^*}(1|y) = \frac{\mathrm{Pop}(y)}{\mathrm{Pop}(y) + Q_\Phi(y)}$$
+$$\mbox{Assume:}\;\;\; P_{\Psi^*}(1|y) = \frac{\mathrm{Pop}(y)}{\mathrm{Pop}(y) + P_\Phi(y)}$$
 
 \vfill
 \begin{eqnarray*}
-  \mbox{Define:}\;\;\; f_{\Psi^*}(y) & \doteq & \frac{Q_{\Psi^*}(1|y)}{Q_{\Psi^*}(-1|y)} \\
+  \mbox{Define:}\;\;\; f_{\Psi^*}(y) & \doteq & \frac{P_{\Psi^*}(1|y)}{P_{\Psi^*}(-1|y)} \\
 \\
-& = & \frac{\mathrm{Pop}(y)}{Q_\Phi(y)}
+& = & \frac{\mathrm{Pop}(y)}{P_\Phi(y)}
 \end{eqnarray*}
 
 \slide{Converting to Cross Entropy}
 
 \begin{eqnarray*}
- \nabla_\Phi \; E_{y \sim Q_\Phi}\;  f_\Psi(y)  & = & \nabla _\Phi \sum_y\; Q_\Phi(y) f_\Psi(y) \\
+ \nabla_\Phi \; E_{y \sim P_\Phi}\;  f_\Psi(y)  & = & \nabla _\Phi \sum_y\; P_\Phi(y) f_\Psi(y) \\
   \\
-  & = & \sum_y \; Q_\Phi(y) f_\Psi(y) \nabla_\Phi \ln Q_\Phi(y) \\
+  & = & \sum_y \; P_\Phi(y) f_\Psi(y) \nabla_\Phi \ln P_\Phi(y) \\
   \\
-  & = & \sum_y \;\mathrm{Pop}(y) \nabla_\Phi \ln Q_\Phi(y) \\
+  & = & \sum_y \;\mathrm{Pop}(y) \nabla_\Phi \ln P_\Phi(y) \\
   \\
-  & = & E_{y \sim \mathrm{Pop}} \; \nabla_\Phi \ln Q_\Phi(y) \\
+  & = & E_{y \sim \mathrm{Pop}} \; \nabla_\Phi \ln P_\Phi(y) \\
   \\
-  & = & \nabla_\Phi \; E_{y \sim \mathrm{Pop}} \;\ln Q_\Phi(y)
+  & = & \nabla_\Phi \; E_{y \sim \mathrm{Pop}} \;\ln P_\Phi(y)
 \end{eqnarray*}
 
 \slide{Unstable Training}
@@ -275,13 +302,13 @@ $$\mbox{Assume:}\;\;\; Q_{\Psi^*}(1|y) = \frac{\mathrm{Pop}(y)}{\mathrm{Pop}(y) 
 Simultaneous gradient descent is not the same as nested max-min.
 
 \vfill
-$$\max_\Phi \min_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;Q_\Phi)}{- \log Q_\Psi(s|y)}$$
+$$\max_\Phi \min_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;P_\Phi)}{- \log P_\Psi(s|y)}$$
 
 \vfill
 vs.
 
 \vfill
-$$\min_\Psi \max_\Phi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;Q_\Phi)}{- \log Q_\Psi(s|y)}$$
+$$\min_\Psi \max_\Phi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;P_\Phi)}{- \log P_\Psi(s|y)}$$
 
 \slide{A Synthetic Example}
 
