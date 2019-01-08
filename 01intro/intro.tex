@@ -147,6 +147,19 @@ We start from a ``score'' function $s_\Phi(y|x) \in \reals$.
 \centerline{\includegraphics[width = 8.0in]{../images/VGG}}
 \centerline{\large Davi Frossard}
 
+\slide{How Many Possibilities}
+
+We have {\color{red} $y \in {\cal Y}$} where {\color{red} ${\cal Y}$} is some set of ``possibilities''.
+
+\vfill
+Binary: {\color{red} $Y = \{-1,1\}$}
+
+\vfill
+Multiclass: {\color{red} $Y = \{y_1,\ldots y_k\}$} $k$ manageable.
+
+\vfill
+Structured: {\color{red} $y$} is a ``structured object'' like a sentence.  Here {\color{red} $|Y|$} is unmanageable.
+
 \slide{Binary Classification}
 
 We have a population distribution over $(x,y)$ with $y \in \{-1,1\}$.
@@ -171,7 +184,7 @@ for $s_\Phi(x) < 0$ predict $y = -1$
   & = & \frac{1}{1 + e^{-2ys(x)}} \\
   \\
   \\
-    & = & {\color{red} \frac{1}{1 + e^{-m(y)}}} \;\;\;\;\;\;m(y|x) = 2ys(x)\;\mbox{is the margin}
+    & = & {\color{red} \frac{1}{1 + e^{-m(y)}} \;\;\;\;\;\;m(y|x) = 2ys(x)\;\mbox{is the margin}}
 \end{eqnarray*}
 
 \slide{Logistic Regression for Binary Classification}
@@ -362,7 +375,7 @@ For $f$ convex (upward curving) we have
 \vfill
 $$E[f(x)] \geq f(E[x])$$
 
-\slide{Proving $KL(P,q) \geq 0$}
+\slide{Proving $KL(P,Q) \geq 0$}
 
 \begin{eqnarray*}
   KL(P,Q) & = & \expectsub{y \sim P}{- \log \frac{Q(y)}{P(y)}} \\
