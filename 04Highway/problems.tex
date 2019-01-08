@@ -1,0 +1,172 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+\newcommand{\solution}[1]{}
+%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning, winter 2019}
+
+\bigskip
+\centerline{\bf Highways Problems}
+
+
+{\bf Problem 1.}  This problem is on initialization (slide 23 of lecture 4).  Consider a single unit defined by $u = Wx + b$ where $u$ and $v$ are vectors, $W$ is a $d_u \times d_x$ matrix and $b$ is a bias vector initialized to zero.  Assume that each component of $x$ has zero mean and unit variance.   Suppose that we initialize each weight in $W$ from a zero mean Gaussian distribution with variannce $\sigma$. Consider $u$ as a random variable defined by the distribution on $x$ and the independent random distribution on $W$.
+
+a) What value of the initialization variance
+$\sigma$ gives zero mean and unit variance for each component of $u$?  Show your derivation.
+
+b) Consider $u' = \mathrm{relu}(Wx+ b) - b'$ .  If we want $u'$ to have zero mean and unit variance will this increase or decrease the variance of the random distribution used to initialize $W$?  Explain your answer.
+
+\bigskip
+{\bf Problem 2.} The equations defining a UGRNN are given below.
+\begin{eqnarray*}
+h^{t+1} & = & f^t\odot h^t + (1-f^t)\odot d^t \\
+\\
+f^t & = & \sigma(W^f[x^t,h^t] + b^b) \\
+\\
+d^t & = & \mathrm{tanh}(W^d[x^t,h^t] + b^d)
+\end{eqnarray*}
+
+a) Rewrite these as an equivalent set of equations with the vector concatenations replaced with a pair of matrix multiplications
+where $W^f$ is replaced by two matrices $W^{f,x}$ and $W^{f,h}$ and similarly for $W^d$.
+
+\solution{
+$$h^{t+1} = f^t\odot h^t + (1-f^t)\odot d^t$$
+
+$$f^t = \sigma(W^{f,x}x^t + W^{f,h}h^t + b^f)$$
+
+$$d^t =  \mathrm{tanh}(W^{d,x}x^t + W^{d,h}h^t + b^d)$$
+
+}
+
+b) Translate the equations from part (a) into explicit index notation with explicit summations including the batch index.
+
+\solution{
+\begin{eqnarray*}
+h^{t+1}[b,c] & =  & f^t[b,c]h^t[b,c] + (1-f^t[b,c])d^t[b,c] \\
+\\
+f^t[b,c] & = & \sigma\left(\left(\sum_{c'} W^{f,x}[c,c']x[b,c']\right) + \left(\sum_{c'} W^{f,h}[c,c']h^t[b,c']\right) + b^h[c]\right) \\
+\\
+d^t[b,c] & = & \sigma\left(\left(\sum_{c'} W^{d,x}[c,c']x[b,c']\right) + \left(\sum_{c'} W^{d,h}[c,c']h^t[b,c']\right) + b^d[c]\right)
+\end{eqnarray*}
+}
+
+c) Give explicit index expression for the backward method for $h^{t+1}$.  Your equations should
+compute additions to $f^t.\mathrm{grad}$, $h^t.\mathrm{grad}$ and $d^t.\mathrm{grad}$. 
+
+\solution{
+\begin{eqnarray*}
+f^t.\mathrm{grad}[b,c] \;\pluseq\; f^{t+1}.\mathrm{grad}[b,c](h^t[b,c] - d^t[b,c]) \\
+\\
+h^t.\mathrm{grad}[b,c] \;\pluseq\; f^{t+1}.\mathrm{grad}[b,c]f^t[b,c] \\
+\\
+d^t.\mathrm{grad}[b,c] \;\pluseq\; f^{t+1}.\mathrm{grad}[b,c](1-f^t[b,c])
+\end{eqnarray*}
+}
+
+\bigskip
+{\bf Problem 3.} This problem is on the initialization of Resnet filters.
+Consider the following residual skip connection where the diversion is a convolution with an $N \times N$ filter.
+
+$$x^{\ell+1} = x^\ell + \mathrm{Conv}(W^\ell,x^\ell)$$
+
+Here we have omitted an activation function that would be present in practice.  This omission allows an analysis that seems to provide insight
+into the more complex case of adding a relu activation around the convolution.
+
+Consider a network of $L$ layers of this equation, all of which are done stride 1 so that the image dimensions are preserved and
+with a different weight matrix $W^\ell$ at each layer.  Assume that each image $x^\ell$ has $C$ channels
+(ignore the fact that input images have only three channels). Assume that each channel of each pixel of each image is independent of the other channels
+and assume that each channel value of each pixel of the input image is drawn independently with zero mean and unit variance.
+Also suppose that the weights of the matrices $W^\ell$ are each drawn at random
+from a Gaussian distribution
+with zero mean and variance $\sigma_W$. Also assume that the the two terms
+in the sum of the residual skip equation above are independent (although they aren't).  Just assume everything is independent and recall that the variance $\sigma^2$ of
+a sum of independent random is the sum of the variances and the variance of a product of independent random variables is the product of the variances.
+
+a) Give an expression for
+the variance $\sigma^2_{\ell+1}$ of each channel value at layer $\ell+1$ as a function of the variance $\sigma^2_\ell$ at layer $\ell$ and
+the weight variance $\sigma_W$.
+
+\solution{
+Assuming everything is independent we have
+
+\begin{eqnarray*}
+\sigma^2_{\ell+1} & = & \sigma^2_{\ell} + N^2C\sigma^2_w\sigma^2_{\ell} \\
+\\
+& = & \sigma^2_\ell(1 + N^2C\sigma^2_w)
+\end{eqnarray*}
+}
+
+b) Assume that the input layer $x^0$ has independent channel values each with variance 1.
+Give an expresison for the variance $\sigma^2_\ell$ directly as a function of $\sigma_w$ and $\ell$.
+
+\solution{
+$$\sigma^2_\ell = (1 + N^2C\sigma^2_w)^\ell$$
+} 
+
+c) Using $(1+\epsilon)^N \approx e^{\epsilon N}$ solve for the value of $\sigma_W$ such that $\sigma^2_L = 2$.
+
+\solution{
+
+\begin{eqnarray*}
+\sigma^2_L & = & (1 + N^2C\sigma^2_w)^L \\
+\\
+& \approx & e^{LN^2C\sigma_W^2}
+\end{eqnarray*}
+
+setting
+$$e^{LN^2C\sigma_W^2} = 2$$
+gives
+$$\sigma_w \approx \sqrt{\frac{\ln 2}{LN^2C}}$$
+}
+
+\ignore{
+d) Assume
+you are given the appropriate padding $\tilde{x}$ of $x$.
+Give explicit index expression for the backward method for computing $\tilde{x}^\ell.\mathrm{grad}$ from $x^{\ell+1}.\mathrm{grad}$.
+We have that $x^{\ell}.\mathrm{grad}$ is just the central part of $\tilde{x}^\ell.\mathrm{grad}$.
+
+\solution{
+We can rewrite the residual skip connection as
+\begin{eqnarray*}
+x^{\ell+1}[i,j,c] & = & x^\ell[i,j,c] \\
+\\
+x^{\ell+1}[i,j,c] & \pluseq & W[\Delta i, \Delta j,c',c]\tilde{x}^\ell[i+\Delta i,j+\Delta_j,c']
+\end{eqnarray*}
+
+Applying the swap rule we get.
+
+\begin{eqnarray*}
+x^{\ell}.\mathrm{grad}[i,j,c] & = & x^{\ell+1}.\mathrm{grad}[i,j,c] \\
+\\
+\tilde{x}^\ell.\mathrm{grad}[i+\Delta i,j+\Delta_j,c'] & \pluseq & W[\Delta i, \Delta j,c',c]x^{\ell +1}.\mathrm{grad}[i,j,c]
+\end{eqnarray*}
+
+}
+}
+d) Assuming top level gradient $x^L.\mathrm{grad}$ has zero mean and unit variance, and that all components of $x^{\ell+1}.\mathrm{grad}$ are independent,
+give an expression for the variance
+$\sigma^2_{\ell,\mathrm{grad}}$ of the components of $x^\ell.\mathrm{grad}$ as a function of $\ell$ and $\sigma_W$.
+
+\solution{
+$$\sigma^2_{\ell,\mathrm{grad}} = (1 + N^2C\sigma^2_W)^{L-\ell}$$
+}
+
+e) Consider the limit of $\sigma_W \rightarrow 0$.  Give an explicit index expression for the limit as $\sigma_W \rightarrow 0$ of $W^\ell.\mathrm{grad}$.
+Your expression should be in terms of $x^L.\mathrm{grad}$.  If we add an activation function,
+does $W^\ell.\mathrm{grad}$ have a well defined limit as $\sigma_W \rightarrow 0$?
+
+\solution{
+ In the limit of $\sigma^2_W \rightarrow 0$ we have $x^\ell = x^0$ for all $\ell$.  By the swap rule for $W^\ell.\mathrm{grad}$ we have
+ $$W^\ell.\mathrm{grad}[\Delta i, \Delta j,c',c] \;\pluseq\; x^L.\mathrm{grad}[i,j,c]x^\ell[i+\Delta i, j+ \Delta j,c']$$
+
+Hence in the limit as $\sigma^2_W \rightarrow 0$ we have that  $W^\ell.\mathrm{grad} = W^0.\mathrm{grad}$ for all $\ell$.  This last equations holds
+for any activation function and the limits still exist when we add an activation function.
+}
+
+
+\end{document}

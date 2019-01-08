@@ -1,0 +1,65 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2019}
+  \vfill
+  \centerline{\bf Miscellaneous Slides}
+  
+\anaslide{Label Adjustment}
+We can consider an arbitrary error function $\mathrm{Err}(y,\hat{y})$ assigning an error value the true label is $y$ and the system guesses $\hat{y}$.
+
+\begin{eqnarray*}
+  f(\hat{y}) & = & \sum_\alpha\; f[\alpha,\hat{y}[\alpha]] \\
+  \\
+  \hat{y}^*(f) & = & \argmax_{\hat{y}} \; f(\hat{y}) \\
+  \\
+  \breve{y}^*(f) & = & \argmax_{\breve{y}} \;f(\breve{y}) - \epsilon \mathrm{Err}(y,\breve{y}) \;\;\;\;\mbox{\bf (adjusted label)} \\
+  \\
+  \mathrm{error}(y,f) & = & \mathrm{Err}(y,\hat{y}^*(f)) \\
+  \\
+  f_\Phi(x).\mathrm{grad}[\alpha,\tilde{y}] & \minuseq & \eta\left(\mathbbm{1}[\hat{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}]
+  - \mathbbm{1}[\breve{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}]\right) 
+\end{eqnarray*}
+
+\anaslideplain{Label Adjustment Theorem}
+\begin{eqnarray*}
+    f_\Phi(x).\mathrm{grad}[\alpha,\tilde{y}] & \minuseq & \eta\left(\mathbbm{1}[\hat{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}]
+  - \mathbbm{1}[\breve{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}]\right) 
+\end{eqnarray*}
+
+\vfill
+{\bf Theorem}: For a continuous and smooth population distribution
+\begin{eqnarray*}
+  & & \nabla_\Phi  \;E_{(x,y) \sim \mathrm{Pop}}\;\mathrm{Err}(y,\hat{y}^*(f_\Phi(x))) \\
+  \\
+  & = & \lim_{\epsilon \rightarrow 0} \;\frac{1}{\epsilon}\; E_{(x,y) \sim \mathrm{Pop}} \\
+  \\
+  & & \;\;\;\;\;\;\sum_{\alpha,\tilde{y}} \left(\;\mathbbm{1}[\hat{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}]
+  - \mathbbm{1}[\breve{y}^*_{f_\Phi(x)}[\alpha] = \tilde{y}] \right) \nabla_\Phi f_\Phi(x)[\alpha,\tilde{y}]
+\end{eqnarray*}
+
+
+
+\slide{Intersection over Union}
+
+In visual detection problems one is typically evaluated by {\bf intersection over union}.
+
+$$\mathbf{IOU} = \frac{|\mbox{true positives} \cap \mbox{false positives}|}{|\mbox{true positives} \cup\mbox{false positives}|} = \frac{P - FN}{P + FP}$$
+
+\vfill
+\begin{eqnarray*}
+    \frac{\partial \mathrm{}IOU}{\partial \mathrm{FP}} & =  & \frac{-(P - FN)}{(P + FP)_2} = \frac{-\mathrm{IOU}}{P+ FP} \\
+    \\ \\
+    \frac{\partial \mathrm{}IOU}{\partial \mathrm{FN}} & =  & \frac{-1}{P + FP}
+\end{eqnarray*}
+
+\slide{END}
+
+}
+\end{document}

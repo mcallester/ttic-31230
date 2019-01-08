@@ -1,0 +1,130 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+\bigskip
+\centerline{\bf Problems For Fundamental Equations.}
+
+\bigskip
+\bigskip
+{\bf Problem 4. (10 points)} Suppose that we adjust the learning rates so that the update of SGD and RMSprop have the same norm --- so that
+$$||\Phi_{t+1} - \Phi_t||$$ is the same in both cases.  Assuming both updates start at the same value $\Phi_t$ will $\Phi_{t+1}$
+be in the same?  Explain your answer.
+
+{\bf Problem 5. (40 points)} Consider SGD applied to the following.
+$$W^* = \argmin_W\; E_{x\sim \mathrm{Train}}\;\mathrm{loss}(W x)$$
+where $x$ is a vector and $W$ is a matrix.
+
+a) write the expression for the SGD update computing $W_{t+1}$ from $W_t$, $x_t$, the gradient $\nabla \mathrm{loss}$, and with learning rate $\eta$.
+
+b) Suppose that we define $\tilde{x}_t$ by doubling the first input feature.
+\begin{eqnarray*}
+\tilde{x}_t[0] & = & 2x_t[0] \\
+\tilde{x}_t[i] & = & x_t[i]\;\;\mbox{for $i \not = 0$}
+\end{eqnarray*}
+and simultaeously making a compensating change in $W_0$
+\begin{eqnarray*}
+  \tilde{W}_0[i,0] & = & W_0[i,0]/2 \\
+        \tilde{W}_0[i,j] & = & W_0[i,j]\;\;\mbox{for $j \not = 0$}
+\end{eqnarray*}
+Consider SGD running from $W_0$ on $x_0$, $x_1$, $\ldots$ and SGD running from $\tilde{W}_0$ on $\tilde{x}_0$, $\tilde{x}_1$, $\ldots$.
+Show that these are not equivalent --- they do not produce the same sequence of vectors $W_tx_t$ (consider the first update).
+
+c) Explain why part b implies that SGD is senstive to the choice of feature units (pounds vs. kilograms).
+
+d) Define an SGD update on $\tilde{W}$ that maintains the invariant $\tilde{W}_t[i,0] = W_t[i,0]/2$.
+
+e) Define
+\begin{eqnarray*}
+  \sigma[i] & = & \sqrt{E_{x \sim \mathrm{Train}}\;(x[i] - \mu[i])^2} \\
+  \mu[i] & = & E_{x \sim \mathrm{Train}}\;x[i]
+\end{eqnarray*}
+Define an SGD update involving $\sigma[i]$ such that the resulting sequence of vectors $W_0 x_0$, $W_1 x_x$, $W_2 x_2$, $\ldots$ remains the same when
+we rescale the components of $x$ and inverse scale the initial componets of $\Phi_0$.  Compare your ``units independent''
+update to RMSProp.
+
+{\bf Problem 6.} We consider SGD on an arbitrary loss function.
+$$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Pop}}\;\mathrm{loss}(\Phi,x,y)$$
+SGD defines a random walk in parameter space --- a Markov process in parameter space.  Let $P_t$ be a probability distribution over parameters
+for time $t$ in this Markov process.  We are interested in understanding the stationary distribution of this process as a function of the learning rate $\eta$.
+The update equation is
+\begin{eqnarray*}
+\Phi_{t+1} & = & \Phi_t - \eta \hat{g}_t \\
+\hat{g}_t & = & \nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t)
+\end{eqnarray*}
+We let $P_\eta$ be the stationary distribution of this process at learning rate $\eta$.
+Intuitively, smaller values of $\eta$ should lead to sharper distributions more focused on $\Phi^*$.
+To simplify the notation we assume WLOG that $\Phi^* = 0$.
+For a distribution $P$ consider the following definition of the spread of the distribution
+around the optimum $\Phi^* = 0$.
+$$\mathrm{Spread}(P) \doteq E_{\Phi \sim P} ||\Phi||^2$$
+
+a) Let $P_t$ be the probability distribution over parameter vectors for time step $t$ of the Markov process
+defined by SGD.  Give an expression for the expected change in spread $\mathrm{Spread}(\Phi_{t+1}) - \mathrm{Spread}(\Phi_{t})$.
+Your expression should be given as an expectation over $\Phi$ drawn from $P$ and over a draw of $\hat{g}$ conditioned on $\Phi$.
+Leave your expression in terms of a random draw over $\hat{g}$ and do not expand this into a draw over $(x,y)$.
+
+\solution{
+  \begin{eqnarray*}
+    & & E_{\Phi \sim P_t, \hat{g}}\; ||\Phi - \eta \hat{g}||^2 - E_{\Phi \sim P_t}\; ||\Phi||^2 \\
+    \\
+    & = & E_{\Phi \sim P_t, \hat{g}}\; ||\Phi - \eta \hat{g}||^2 - ||\Phi||^2 \\
+    \\    
+    & = & E_{\Phi \sim P_t, \hat{g}}\; -2 \eta \Phi^\top \hat{g} + \eta^2 ||\hat{g}||^2
+    \end{eqnarray*}
+  } 
+
+b) Use your answer to (a) to give a condition on the stationary distribution by setting the change in spread to be zero. (A simple rewrite of (a)).
+
+\solution{
+  \begin{eqnarray*}
+  E_{\Phi \sim P_t, \hat{g}}\; \Phi^\top \hat{g} & = & \frac{\eta}{2} E_{\Phi \sim P_t, \hat{g}}\; ||\hat{g}||^2
+  \end{eqnarray*}
+  }
+
+c)  
+For $\eta$ small, and for a positive definite total Hessian, the distribution will be tightly focused on the optimum parameter
+value.  In this case we can use the following second order Taylor expansion of the loss function
+around $\Phi^* = 0$.
+\begin{eqnarray*}
+\mathrm{loss}(\Phi,x,y) & \approx & L(x,y) + g(x,y) \Phi + \frac{1}{2} \Phi^\top H(x,y) \Phi \\
+\\
+L(x,y) & = & \mathrm{loss}(0,x,y) \\
+g(x,y) & = & \nabla_\Phi \mathrm{loss}(0,x,y) \\
+H(x,y) & = & \nabla_\Phi \nabla_\Phi \mathrm{loss}(0,x,y)
+\end{eqnarray*}
+Your condition for (b) should express a balance between two expressions. Insert the above second order approximation for $\hat{g}$ into each of these expressions
+to get a balance condition between the two leading terms of the two expressions. 
+
+\solution{
+  \begin{eqnarray*}
+  E_{\Phi \sim P_t, (x,y)\sim \mathrm{Pop}}\; \Phi^\top(g(x,y) + H(x,y)\Phi) & = & \frac{\eta}{2} E_{(x,y) \sim \mathrm{Pop}}\; ||g(x,y)||^2 \\
+  \\
+  E_{\Phi \sim P_t}\; \Phi^\top H \Phi & = & \frac{\eta}{2} E_{(x,y) \sim \mathrm{Pop}}\; ||g(x,y)||^2 \\
+  \\
+  H & \doteq & E_{(x,y) \sim \mathrm{Pop}} \;H(x,y)
+  \end{eqnarray*}
+  }
+
+d) Recall that $P_\eta$ is the stationary distribution of the Markov process at learning rate $\eta$.
+Show that under the second order approximations, your solution to (c) implies that the loss gap
+$$E_{\Phi\sim P_\eta,\; (x,y) \sim \mathrm{Pop}}\; \mathrm{loss}(\Phi,x,y) - E_{(x,y) \sim \mathrm{Pop}}\; \mathrm{loss}(0,x,y)$$
+is proportional to $\eta$.
+
+\solution{
+Inserting the second order approximation into the loss gap, and observing that $E_{(x,y) \sim \mathrm{Pop}} \;g(x,y) = 0$
+we have that the loss gap can be written as
+\begin{eqnarray*}
+\mathrm{gap} & = & E_{\Phi \sim P_\eta,\;(x,y) \sim \mathrm{Pop} } \;\frac{1}{2}\Phi^\top H(x,y) \Phi \\
+ \\
+ & = & E_{\Phi \sim P_\eta} \;\frac{1}{2}\Phi^\top H \Phi \\
+ \\
+ & = & \frac{\eta}{4} E_{(x,y) \sim \mathrm{Pop}}\; ||g(x,y)||^2
+ \end{eqnarray*}
+}
+
+\end{document}
