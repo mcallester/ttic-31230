@@ -306,10 +306,10 @@ We have {\color{red} $H(P,Q) \geq H(P)$} or equivalently {\color{red} $KL(P,Q) \
 
 \slide{The Universality Assumption}
 
-{\color{red} $$\Phi* = \argmin_\Phi\;H(\pop,P_\Phi)$$}
+{\color{red} $$\Phi^* = \argmin_\Phi\;H(\pop,P_\Phi) = \argmin_\Phi\;H(\pop) + KL(\pop,P_\Phi)$$}
 
 \vfill
-Universality assumption: {\color{red} $P_\Phi$ can represent any distribution.}
+Universality assumption: {\color{red} $P_\Phi$ can represent any distribution and $\Phi$ can be fully optimized.}
 
 \vfill
 This is clearly false for deep networks.  {\color{red} But it gives important insights like:}
@@ -375,41 +375,6 @@ $$E[f(x)] \geq f(E[x])$$
   \\
   & = & 0
 \end{eqnarray*}
-
-\ignore{
-\slide{The Rearrangement Trick}
-
-{\huge
-\begin{eqnarray*}
-H(P,Q) & \doteq & E_{x \sim P} \;-\ln Q(x) \\
-\\
-& = & E_{x \sim P}\; -\ln\;\left(P(x)\;\frac{Q(x)}{P(x)}\right) \\
-\\
-& = & E_{x\sim P}\; \left(-\ln P(x) + \ln \frac{P(x)}{Q(x)}\right) \\
-\\
-& = & \left(E_{x\sim P}\; -\ln P(x)\right) + \left(E_{x \sim P(x)} \ln \frac{P(x)}{Q(x)}\right) \\
-\\
-& = & H(P) + KL(P,Q) \\
-\\
-& \geq & H(P)
-\end{eqnarray*}
-}
-
-\slideplain{The rearrangement Trick}
-
-\begin{eqnarray*}
-H(P,Q) & = & H(P) + KL(P,Q) \\
-\\
-KL(P,Q) & = & H(P,Q) - H(P)
-\end{eqnarray*}
-
-
-\vfill
-The rearrangement trick applies to any expression of the form
-
-\vfill
-$$E_{x \sim P} \;\ln \left(\prod_i A_i\right)$$
-}
 
 \ignore{
 \slideplain{Density Estimation}
@@ -488,6 +453,42 @@ Colorization is unsupervised structured labeling.
 
 \vfill
 \centerline{{\color{red} $H(P,Q) \geq H(P),\;\;\;KL(P,Q) \geq 0,\;\;\;\argmin_Q\;H(P,Q) = P$}}
+
+
+\ignore{
+\slide{The Rearrangement Trick}
+
+{\huge
+\begin{eqnarray*}
+H(P,Q) & \doteq & E_{x \sim P} \;-\ln Q(x) \\
+\\
+& = & E_{x \sim P}\; -\ln\;\left(P(x)\;\frac{Q(x)}{P(x)}\right) \\
+\\
+& = & E_{x\sim P}\; \left(-\ln P(x) + \ln \frac{P(x)}{Q(x)}\right) \\
+\\
+& = & \left(E_{x\sim P}\; -\ln P(x)\right) + \left(E_{x \sim P(x)} \ln \frac{P(x)}{Q(x)}\right) \\
+\\
+& = & H(P) + KL(P,Q) \\
+\\
+& \geq & H(P)
+\end{eqnarray*}
+}
+}
+
+\slideplain{Appendix: The Rearrangement Trick}
+
+\begin{eqnarray*}
+H(P,Q) & = & H(P) + KL(P,Q) \\
+\\
+KL(P,Q) & = & H(P,Q) - H(P)
+\end{eqnarray*}
+
+
+\vfill
+The rearrangement trick applies to any expression of the form
+
+\vfill
+$$E_{x \sim P} \;\ln \left(\prod_i A_i\right) = E_{x \sim P} \;\sum_i \ln A_i$$
 
 \slideplain{END}
 
