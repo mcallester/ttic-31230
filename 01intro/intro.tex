@@ -243,11 +243,11 @@ $V_x$ and $V_y$ are source and target vocabularies respectively.
 
 \slideplain{Entropy of a Distribution}
 
-The entropy of a distribution $\pop$ is defined by
+The entropy of a distribution $P$ is defined by
 
-$${\color{red} H(\pop) = E_{y \sim \pop} \;- \ln P(y)}\;\;\mbox{in units of ``nats''}$$
+$${\color{red} H(P) = E_{y \sim \pop} \;- \ln P(y)}\;\;\mbox{in units of ``nats''}$$
 
-$${\color{red} H_2(\pop) = E_{y \sim \pop} \;- \log_2 P(y)}\; \mbox{in units of bits}$$
+$${\color{red} H_2(P) = E_{y \sim \pop} \;- \log_2 P(y)}\; \mbox{in units of bits}$$
 
 \vfill
 Example: Let $Q$ be a uniform distribution on 256 values.
@@ -380,7 +380,7 @@ $$E[f(x)] \geq f(E[x])$$
 \begin{eqnarray*}
   KL(P,Q) & = & \expectsub{y \sim P}{- \log \frac{Q(y)}{P(y)}} \\
   \\
-  & \geq & - \log \expectsub{x\sim P}{\frac{Q(y)}{P(y)}} \\
+  & \geq & - \log \expectsub{y\sim P}{\frac{Q(y)}{P(y)}} \\
   \\
   & = & - \log \sum_y\; P(y) \frac{Q(y)}{P(y)}  \\
   \\
