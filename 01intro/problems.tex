@@ -21,7 +21,7 @@ $$\Phi^* = \argmin_\Phi\;H(\mathrm{Pop},P_\Phi) = E_{y \sim \mathrm{Pop}}\;-\log
 This equation is used for language modeling --- estimating the probability distribution over the population of English sentences that appear, say, in the New York Times.
 Show the following.
 $$\Phi^* = \argmin_\Phi\;H(\mathrm{Pop},P_\Phi) = \argmin_\Phi \;KL(\mathrm{Pop},P_\Phi)$$
-Assuming that the model probability $P_\Phi(y)$ can be computed for any given $y$, but that wehave no way of computing $\mathrm{Pop}(y)$ for a given $y$,
+Assuming that the model probability $P_\Phi(y)$ can be computed for any given $y$, but that we have no way of computing $\mathrm{Pop}(y)$ for a given $y$,
 explain why gradient descent on the cross-entropy objective
 can be done while gradient descent on the KL-divergence form is problematic.
 
@@ -56,6 +56,10 @@ while optimizing $P_\Phi$ under the objective $KL(Q,P_\Phi)$ we will tend to get
 are minimized at $P = Q$.
 
 \bigskip
+{\bf Problem 5.}
+Prove the data processing inequality that for any function $f$ with $z = f(y)$ we have $H(z) \leq H(y)$.
+
+\bigskip
 {\bf Problem 3:} Consider a joint distribution $P(x,y)$ on discrete random variables $x$ and $y$.
 We define the marginal distributions $P(x)$ and $P(y)$ as follows.
 \begin{eqnarray*}
@@ -71,19 +75,27 @@ which I will write as
 {\color{red} $$I(x,y) = KL(P(x,y),Q(x,y))$$}
 We define conditional entropy $H(y|x)$ by
 {\color{red} $$H(y|x) = E_{x,y} \;-\log P(y|x).$$}
-Show
+
+(a) Show
 {\color{red} $$I(x,y) = H(y) - H(y|x) = H(x) - H(x|y)$$}
 
+(b) Explain why (a) implies $H(x) \geq H(x|y)$.
 
-    
+\medskip
+(c) By stating (b) conditioned on $z$ we have
+$$H(x|z) \geq H(x|y,z).$$
+Use this to show that the data process inequality applies to mutual information,
+i.e., that for $z = f(y)$ we have $I(x,z) \leq I(x,y)$.
+
 \bigskip
 {\bf Problem 4:}
-For three distributions $P$, $Q$ and $G$ show the following equality.
+(a) For three distributions $P$, $Q$ and $G$ show the following equality.
 $$KL(P,Q) =  \left(E_{y \sim P} \;\log \frac{G(y)}{Q(y)}\right) + KL(P,G)$$
-Show that this implies
+
+(b) Show that this implies
 $$KL(P,Q) =  \sup_G \;E_{y \sim P}\; \log \frac{G(y)}{Q(y)}$$
 
-Next define
+(c) Now define
 \begin{eqnarray*}
   G(y) & = & \frac{1}{Z}\;Q(y)e^{s(y)} \\
   \\
@@ -95,14 +107,6 @@ $$KL(P,Q) =  \sup_s \;E_{y \sim P}\; s(y) - \log E_{y \sim Q} \;e^{s(y)}$$
 This is the Donsker-Varadhan variational representation of KL-divergence.
 This can be used in cases where we can sample from $P$ and $Q$ but cannot compute $P(y)$ or $Q(y)$.
 Instead we can use a model score $s_\Phi(y)$ where $s_\Phi(y)$ can be computed.
-    
-\bigskip
-{\bf Problem 5.} Prove the data processing inequality that for any function $f$ with $z = f(y)$ we have $H(z) \leq H(y)$.
-
-\bigskip
-{\bf Problem 6.}  This problem uses the definition of $H(x|y)$ and $I(x,y)$ from problem 3.
-For $z = f(y)$ prove $P(x|z) = E_{y \sim P(y|z)} P(x|y)$.  Use this fact and Jensen's inequality to prove $H(x|z) \geq H(x|y)$.
-Using the results of problem 3, conclude that the mutual information $I(x,z) \leq I(x,y)$.
 
 \ignore{
 \bigskip
