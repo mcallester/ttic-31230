@@ -14,25 +14,7 @@
   \vfill
   \vfill
 
-  
-\slide{The Core of EDF}
-
-\begin{verbatim}
-def Forward():
-    for c in CompNodes: c.forward()
-
-def Backward(loss):
-    for c in CompNodes + Parameters: c.grad = 0
-    loss.grad = 1/nBatch
-    for c in CompNodes[::-1]: c.backward()
-
-def SGD():
-    for p in Parameters:
-        p.SGD()
-\end{verbatim}
-\vfill
-
-\slide{EDF}
+\slide{The Educational Framework (EDF)}
 
 The educational frameword (EDF) is a simple Python-NumPy implementation of a deep learning framework.
 
@@ -75,6 +57,24 @@ $z$ is an object in the class $G$ (subclass of {\tt CompNode}).
 \medskip
 $u$ and ${\cal L}$ are the same object in the class $H$ (suclass of {\tt CompNode}).
 
+\slide{The Core of EDF}
+
+\begin{verbatim}
+def Forward():
+    for c in CompNodes: c.forward()
+
+def Backward(loss):
+    for c in CompNodes + Parameters: c.grad = 0
+    loss.grad = 1/nBatch
+    for c in CompNodes[::-1]: c.backward()
+
+def SGD():
+    for p in Parameters:
+        p.SGD()
+\end{verbatim}
+\vfill
+
+
 \anaslideplain{$y = F(x)$}
 
 \begin{tabbing}
@@ -85,10 +85,10 @@ $u$ and ${\cal L}$ are the same object in the class $H$ (suclass of {\tt CompNod
         \>\>self.x = x \\
 \\
     \>def forward(self): \\
-        \>\>self.value = f(self.x.value) \\
+        \>\>self.value = ... compute the value ... \\
 \\
     \>def backward(self): \\
-        \>\>self.x.addgrad(self.grad$ \;*\; \nabla_x\;f(x)$) \hspace{2em} \#needs x.value
+        \>\>self.x.addgrad(... compute the gradient ...)
 \end{tabbing}
 
 \slide{Nodes of the Computation Graph}
@@ -135,7 +135,7 @@ The following Python code constructs the computation graph of a multi-layer perc
 
 \vfill
 \begin{verbatim}
-  L1 = Relu(Affine(Phi1,x))
+  L1 = Sigmoid(Affine(Phi1,x))
   Q = Softmax(Sigmoid(Affine(Phi2,L1))
   ell = LogLoss(Q,y)
 \end{verbatim}
@@ -146,6 +146,58 @@ whose value have been set.
 Here {\tt Phi1} and {\tt Phi2} are ``parameter packages'' (a matrix and a bias vector in this case).
 We have computation node classes {\tt Affine}, {\tt Relu}, {\tt Sigmoid}, {\tt LogLoss} each of which has
 a forward and a backward method.
+
+\slide{The {\tt Sigmoid} Class}
+
+\begin{eqnarray*}
+y[b,i] & = &  \sigma(x[b,i]) \\
+\\
+y & = & \frac{1}{1 + e^{-x}} \\
+\\
+\frac{d y}{dx} & = & \frac{e^{-x}}{(1 + e^{-x})^2} \\
+\\
+& = & y(1-y) \\
+\\
+x.\grad[b,i] & \pluseq & y.\grad[b,i]y.\mathrm{value}[b,i](1-y.\mathrm{value}[b,i])
+\end{eqnarray*}
+
+
+
+\slide{The {\tt Sigmoid} Class}
+
+\begin{verbatim}
+class Sigmoid:
+  def __init__(self,x):
+    CompNodes.append(self)
+    self.x = x
+
+  def forward(self):
+    self.value = 1. / (1. + np.exp(-self.x.value))
+
+  def backward(self):
+    self.x.addgrad(self.grad*self.value*(1.-self.value))
+\end{verbatim}
+
+
+\slide{The {\tt Affine} Class}
+\vspace{-3ex}
+\begin{eqnarray*}
+  \tilde{y}[b,j] & = & \sum_i\;W[j,i]\;x[b,i] \\
+  y[b,j] & = & \tilde{y}[b,j] + B[j]
+  \end{eqnarray*}
+
+\vspace{-4ex}
+{\color{red}
+\begin{eqnarray*}
+  \\
+  \tilde{y}.\mathrm{grad}[b,j] & = & y.\mathrm{grad}[b,j]\;\;\mbox{\color{black} internal to {\tt Affine}} \\
+  B.\mathrm{grad}[j] & \pluseq & \sum_b\;y.\mathrm{grad}[b,j] \\
+  \\
+  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;y.\mathrm{grad}[b,j]W[i,j] \\
+  \\
+  W.\mathrm{grad}[i,j] & \pluseq & \sum_b\;y.\mathrm{grad}[b,j]x[b,i]
+\end{eqnarray*}
+}
 
 \vfill
 \eject
@@ -178,93 +230,19 @@ class Affine(CompNode):
                            * self.grad[:,np.newaxis,:])
 \end{verbatim}
 
-\slide{forward and backward must handle minibatching}
 
-The forward and backward methods must be written to handle minibatching.  We will consider some examples.
-
-
-\slide{An MLP}
-
-\vfill
-\begin{verbatim}
-  L1 = Relu(Affine(Phi1,x))
-  P = Softmax(Sigmoid(Affine(Phi2,L1))
-  ell = LogLoss(P,y)
-\end{verbatim}
-
-
-\slide{The {\tt Sigmoid} Class}
-
-The Sigmoid and Relu classes just work.
+\slide{Procedures in EDF}
 
 \begin{verbatim}
-class Sigmoid:
-    def __init__(self,x):
-        CompNodes.append(self)
-        self.x = x
+def MLP(Phi,x)
 
-    def forward(self):
-        self.value = 1. / (1. + np.exp(-self.x.value))
+   if len(Phi) = 0
+      return x
 
-    def backward(self):
-        self.x.grad += self.grad
-                       * self.value
-                       * (1.-self.value)
+   return Sigmoid(Affine(Phi[0],MLP(Phi[1:],x)))
 \end{verbatim}
 
-
-\vfill
-\eject
-\begin{verbatim}
-y = Affine([W,B],x)
-
- forward:
-  y.value[b,j] = x.value[b,i]W.value[i,j]
-  y.value[b,j] += B.value[j]
-
- backward:
-    x.grad[b,i] += y.grad[b,j]W.value[i,j]
-    W.grad[i,j] += y.grad[b,j]x.value[i]
-    B.grad[j] += y.grad[b,j]
-\end{verbatim}
-
-\vfill
-\eject
-\begin{verbatim}
-class Affine(CompNode):
-
-    def __init__(self,Phi,x):
-        CompNodes.append(self)
-        self.x = x
-        self.Phi = Phi
-
-    def forward(self):
-        # y.value[b,j] = x.value[b,i]W.value[i,j]
-        # y.value[b,j] += B.value[j]
-        self.value = (np.matmul(self.x.value,
-                                self.Phi.W.value)
-                      + self.Phi.B.value)
-\end{verbatim}
-\vfill
-\eject
-\vfill
-\begin{verbatim}
-    def backward(self):
-
-        self.x.addgrad(
-           # x.grad[b,i] += y.grad[b,j]W.value[i,j]
-           np.matmul(self.grad,
-                     self.Phi.W.value.transpose()))
-
-        # B.grad[j] += y.grad[b,j]
-        self.Phi.B.addgrad(self.grad)
-
-        # W.grad[i,j] += y.grad[b,j]x.value[b,i]
-        self.Phi.W.addgrad(self.x.value[:,:,np.newaxis]
-                           * self.grad[:,np.newaxis,:])
-\end{verbatim}
-
-
+\ignore{
 \slide{NumPy: Reshaping Tensors}
 
 For an ndarray $x$ (tensor) we have that $x.\mathrm{shape}$ is a tuple of dimensions.  The product of the dimensions is the number of numbers.
@@ -316,6 +294,7 @@ When a vector of shape $(k)$ is added to a matrix the vector is reshaped to $(1,
 \vfill
 In general when two tensors of different order (number of dimensions) are added, unit dimensions are prepended to the shape of the tensor of smaller order
 to make the orders match.
+}
 
 \slide{END}
 }

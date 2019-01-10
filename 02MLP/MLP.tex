@@ -14,9 +14,19 @@
   \vfill
   \vfill
 
-\slide{What is a Deep Learning Framework?}
+\slideplain{What is a Deep Learning Framework?}
 
-A Deep learning framework is a package of tools that support the construction and training of deep models.
+A framework provides a high level language for writing models $P_\Phi(y|x)$.
+
+\vfill
+A framework compiles a model into an optimization algorithm.
+\vfill
+{\color{red} $$\Phi^* \approx \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; -\ln P_\Phi(y|x)$$}
+
+\vfill
+A framework also typically provides support for managing large training sets and pre-trained model parameter values (also called ``models'').
+
+\slide{Some Frameworks}
 
 \begin{itemize}
   
@@ -39,7 +49,7 @@ A Deep learning framework is a package of tools that support the construction an
 
   \vfill
 
-\item EDF (Educational Framework written for this class).
+\item EDF (Educational Framework in Python for this class).
 \end{itemize}
 
 $\vdots$
@@ -51,10 +61,10 @@ It must provide a high level language for writing models $P_\Phi(y|x)$ (or other
 \vfill
 It must be able to compile a model into an optimization algorithm.
 \vfill
-$$\Phi^* \approx \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; {\cal L}(x,y,\Phi).$$
+{\color{red} $$\Phi^* \approx \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; -\ln P_\Phi(y|x)$$}
 
 \vfill
-It typically also provides support for managing large data sets (such as ``$\mathrm{Train}$'' in the above equation).  We will not discuss data management in this class.
+It typically also provides support for managing large data sets (such as {\color{red} ``$\mathrm{Train}$''} in the above equation).
 
 \slide{An Example: Multi-Layer Perceptron Models for MNIST}
 
@@ -76,70 +86,44 @@ For MNIST $k = 10$.
 \vfill
 Let $\mathrm{Train}$ be a sample $(x_0,y_0),\;\ldots,\;(x_{N-1},y_{N-1})$ drawn IID from the population.
 
-\slide{Multi Layer Perceptrons (MLPs)}
+\slide{A Multi Layer Perceptron (MLP)}
 
-Activation functions:
+$$\Phi = (W^0,\;b^0,\;W^1,\;b^1)$$
 
-\vfill
-$$\sigma(u) = \frac{1}{1+e^{-u}}\;\;\;\;\;\;\;\;\mathrm{ReLU}(u) = \max(u,0)$$
-
-\vfill
-\centerline{\includegraphics[width=1.5in]{../images/sigmoid}\hspace{1.0in}\includegraphics[width=1.2in]{../images/relu}}
-
-\slide{An MLP in Einstein Notation (Explicit Indices)}
-
-\centerline{$i$ --- input feature \hspace{1em} $j$ --- hidden layer feature \hspace{1em} $\hat{y}$ --- possible label}
-$$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
-
-\vfill
 \begin{eqnarray*}
-  h[j] & = & \mathrm{ReLU}\left(\left(\sum_i\;W^0[j,i] \;x[i]\right) + b^0[j]\right) \\
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} + b^0\right) \\
   \\
-  s[\hat{y}] & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;h[j]\right) + b^1[\hat{y}]\right) \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} + b^1 \right) \\
   \\
-  P_\Phi(\hat{y}) & = & \softmax_{\hat{y}}\;s[\hat{y}]
+  {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
 \end{eqnarray*}
+
+\slide{Activation Functions}
+
+An activation function $\sigma:\reals \rightarrow \reals$ (scalar-to-scalar) is applied to each component of a vector.
+
+\vfill
+\centerline{{\color{red} $\sigma(u) = \frac{1}{1+e^{-u}}$}\hspace{3em}\includegraphics[width=1.5in]{../images/sigmoid}}
+
+\vfill
+other common activation functions are
+
+\vfill
+\centerline{{\color{red} $\mathrm{ReLU}(u) = \max(0,u)$}\includegraphics[width=1.5in]{../images/relu},
+{\color{red} $\mathrm{tanh}(u) = 2\sigma(u)-1$}\includegraphics[width=1.5in]{../images/tanh}}
 
 \slide{Optimization}
 
 Once we have specified our model $P_\Phi(y|x)$ in high level equations (such as on the previous two slides) we need to train it.
 
-$$\Phi^* \approx \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; {\cal L}(x,y,\Phi).$$
+$$\Phi^* \approx \argmin_\Phi E_{(x,y) \sim {\color{red} \mathrm{Train}}} \; - \ln P_\Phi(y|x)$$
 
 \vfill
 The framework generates the training code automatically from the model definition.
 
 \vfill
-Optimization is almost always done with some form of stochastic gradient descent (SGD) and the gradient is computed
-by back-propagation on the model definition.
-
-
-\slide{Gradients with Respect to Systems of Parameters}
-
-$\nabla_\Phi\;{\cal L}(x,y,\Phi)$ denotes the partial derivative of ${\cal L}(x,y,\Phi)$ with respect to the parameter system $\Phi$.
-
-\vfill
-We can think of $\Phi$ as a single vector with
-$$(\nabla_\Phi \;{\cal L}(x,y,\Phi)\;)[i] = \partial {\cal L}(x,y,\Phi) /\partial \Phi[i]$$
-
-\vfill
-But typically $\Phi$ is actually some system of multi-dimensional arrays (tensors).
-
-\vfill
-$$\Phi = (W^0[j,i],b^0[j],W^1[\hat{y},j],b^1[\hat{y}]).$$
-
-\vfill
-$$\nabla_\Phi \;{\cal L}(x,y,\Phi) = (W^0.\mathrm{grad}[j,i],\;b^0.\mathrm{grad}[j],\;W^1.\mathrm{grad}[\hat{y},j],\;b^1.\mathrm{grad}[\hat{y}]).$$
-
-\slide{Total Gradient Descent}
-
-$${\cal L}_{\mathrm{Train}}(\Phi) = \frac{1}{N}\sum_n {\cal L}(\Phi,x_n,y_n)$$
-
-\vfill
-\centerline{We want: \hspace{3ex} $\Phi^*  =  \argmin_\Phi {\cal L}_{\mathrm{Train}}(\Phi)$}
-
-\vfill
-$$\Phi \;\;\;\mbox{\tt -=}\;\;\; \eta \nabla_\Phi {\cal L}_\mathrm{Train}(\Phi)$$
+{\color{red} Optimization is almost always done with some form of stochastic gradient descent (SGD) and the gradient is computed
+by back-propagation on the model definition.}
 
 \slide{Stochastic Gradient Descent (SGD)}
 $$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; {\cal L}(x,y,\Phi).$$
@@ -159,6 +143,45 @@ $$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; {\cal L}(x,y,\Phi).$$
     \end{itemize}
 \end{enumerate}
 
+\slide{Epochs}
+
+In practice we cycle through the training data visiting each training pair once.
+
+\vfill
+One pass through the training data is called an Epoch.
+
+\vfill
+One typically imposes a random suffle of the training data before each epoch.
+
+\slide{SGD for MLPs}
+
+$$\Phi = (W^0,\;b^0,\;W^1,\;b^1)$$
+
+\begin{eqnarray*}
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} + b^0\right) \\
+  \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} + b^1 \right) \\
+  \\
+  {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
+\end{eqnarray*}
+
+\vfill
+We now need to automatically compute $\nabla_\Phi {\cal L}(x,y,\Phi)$.
+
+
+
+\ignore{
+\slide{Total Gradient Descent}
+
+$${\cal L}_{\mathrm{Train}}(\Phi) = \frac{1}{N}\sum_n {\cal L}(\Phi,x_n,y_n)$$
+
+\vfill
+\centerline{We want: \hspace{3ex} $\Phi^*  =  \argmin_\Phi {\cal L}_{\mathrm{Train}}(\Phi)$}
+
+\vfill
+$$\Phi \;\;\;\mbox{\tt -=}\;\;\; \eta \nabla_\Phi {\cal L}_\mathrm{Train}(\Phi)$$
+
+
 \slide{Stochastic Gradient Descent (SGD) on the Training set.}
 
 \vfill
@@ -174,47 +197,35 @@ repeat:  Select $n$ at random. $\Phi \;\;\minuseq\;\; \eta \;\nabla_\Phi \; {\ca
   \\
   &  = & \nabla_\Phi\;{\cal L}_{\mathrm{Train}}(\Phi)
 \end{eqnarray*}
+}
 
-
-
-\slide{Epochs}
-
-In practice we cycle through the training data visiting each training pair once.
-
-\vfill
-One pass through the training data is called an Epoch.
-
-\vfill
-One typically imposes a random suffle of the training data before each epoch.
-
-\slide{SGD for MLPs}
-
-\centerline{$i$ --- input feature \hspace{4ex} $j$ --- hidden feature \hspace{4ex} $\hat{y}$ --- possible label}
-\vfill
-\centerline{$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$}
-
-\vfill
-\begin{eqnarray*}
-  h[j] & = & \mathrm{ReLU}\left(\left(\sum_i\;W^0[j,i] \;x[i]\right) + b^0[j]\right) \\
-  \\
-  s[\hat{y}] & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;h[j]\right) + b^1[\hat{y}]\right) \\
-  \\
-  P_\Phi(\hat{y}) & = & \softmax_{\hat{y}}\;s[\hat{y}]
-\end{eqnarray*}
-
-\vfill
-We now need to automatically compute $\nabla_\Phi {\cal L}(x,y,\Phi)$.
-
-\slide{Computation Graphs}
+\slideplain{Computation Graphs (Framework Source Code)}
 
 A computation graph (sometimes called a ``computation{\color{red} al} graph'') is a sequence of assignment statements.
 
-\vfill
-$${\cal L} = \sqrt{x^2 + y^2}$$
+
+\begin{eqnarray*}
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} + b^0\right) \\
+  \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} + b^1 \right) \\
+  \\
+  {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
+\end{eqnarray*}
 
 \vfill
-Can be written as the assignment sequence:
+I prefer the term ``source code'' to the term ``graph''.
 
+\slideplain{Simpler Source Code}
+
+The expression
+
+\vfill
+{\color{red} $${\cal L} = \sqrt{x^2 + y^2}$$}
+
+\vfill
+can be transformed to the assignment sequence
+
+{\color{red}
 \vfill
 \begin{eqnarray*}
   u & = & x^2  \\
@@ -222,23 +233,24 @@ Can be written as the assignment sequence:
   r & =& u + v \\
   {\cal L} & = & \sqrt{r}
 \end{eqnarray*}
+}
 
-\anaslide{Computation Graphs}
+\anaslide{Source Code}
 \vspace{-1ex}
+{\color{red}
 $$\begin{array}{lcl}
  1.\;u & = & x^2  \\
  2.\;w & = & y^2 \\
  3.\;r & =& u + w \\
   4.\;{\cal L} & = & \sqrt{r}
 \end{array}$$
+}
 
 \vfill
-For each variable $z$ we can consider $\partial {\cal L}/\partial z$.
+For each variable $z$, the derivative $\partial {\cal L}/\partial z$ will get computed in reverse order.
 
 \vfill
-Gradients are computed in the reverse order.
-
-\vfill
+{\color{red}
 $$\begin{array}{lcl}
 (4)\; \partial{\cal L}/\partial r & = & \frac{1}{2\sqrt{r}} \\
 (3)\; \partial{\cal L}/\partial u & = & \partial {\cal L}/\partial r \\
@@ -246,8 +258,9 @@ $$\begin{array}{lcl}
 (2)\; \partial{\cal L}/\partial y & = & (\partial {\cal L}/\partial w) * (2y) \\
 (1)\; \partial{\cal L}/\partial x & = & (\partial {\cal L}/\partial u) * (2x)
 \end{array}$$
+}
 
-\anaslide{A More Abstract Example}
+\anaslideplain{A More Abstract Example (Still Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -262,7 +275,7 @@ For now assume all values are scalars.
 \medskip
 We will ``backpopagate'' the assignments the reverse order.
 
-\anaslide{Backpropagation}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -274,7 +287,7 @@ We will ``backpopagate'' the assignments the reverse order.
 \medskip
 {\color{red} ${\partial {\cal L}}/{\partial u} = 1$}
 
-\anaslide{Backpropagation}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -289,7 +302,7 @@ ${\partial {\cal L}}/{\partial u} = 1$
 \medskip
 {\color{red} ${\partial {\cal L}}/{\partial z} = ({\partial {\cal L}}/{\partial u})\; ({\partial h}/{\partial z})$} (this uses the value of $z$)
 
-\anaslide{Backpropagation}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -307,7 +320,7 @@ ${\partial {\cal L}}/{\partial z} = ({\partial {\cal L}}/{\partial u})\; ({\part
 \medskip
 {\color{red} ${\partial {\cal L}}/{\partial y} = ({\partial {\cal L}}/{\partial z})\; ({\partial g}/{\partial y})$} (this uses the value of $y$ and $x$)
 
-\anaslide{Backpropagation}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f({\color{red} x}) \\
@@ -328,7 +341,7 @@ ${\partial {\cal L}}/{\partial y} = ({\partial {\cal L}}/{\partial z})\; ({\part
 \medskip
 {\color{red} ${\partial {\cal L}}/{\partial x} =$ ???} Oops, we need to add up multiple occurrences.
 
-\anaslide{Backpropagation}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f({\color{red} x}) \\
@@ -338,18 +351,16 @@ ${\partial {\cal L}}/{\partial y} = ({\partial {\cal L}}/{\partial z})\; ({\part
 \end{eqnarray*}
 
 \medskip
-We let {\color{red} $x.\grad$} be an attribute (as in Python) of node {\color{red} $x$}.
+Each framework program variable denotes an {\color{red} object} (in the sense of C++ or Python).
+
+\medskip
+{\color{red} $x.\mathrm{value}$} and {\color{red} $x.\grad$} are attributes of the {\color{red} object $x$}.
 
 \bigskip
-\bigskip
-We will initialize {\color{red} $x.\mathrm{grad}$} to zero.
-
-\bigskip
-\bigskip
-During backpropagation we will accumulate contributions to {\color{red} ${\partial {\cal L}}/{\partial x}$} into {\color{red} $x.\grad$}.
+Values are computed ``forward'' while gradients are computed ``backward''.
 
 
-\anaslide{Backpropagation}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -359,16 +370,16 @@ During backpropagation we will accumulate contributions to {\color{red} ${\parti
 \end{eqnarray*}
 
 
-\medskip
-$z.\grad = y.\grad = x.\grad = 0$
+\bigskip
+We initialize {\color{red} $x.\mathrm{grad}$} to zero: {\color{red} $z.\grad = y.\grad = x.\grad = 0$}
 
-\medskip
-$u.\grad = 1$
+\bigskip
+We initialize the loss gradient to 1: {\color{red} $u.\grad = 1$}
 
 \medskip
 {\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
 
-\anaslide{Backpropagation}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -377,6 +388,7 @@ $u.\grad = 1$
   {\color{red} {\cal L}} & {\color{red}  =} &  {\color{red} u}
 \end{eqnarray*}
 
+{\color{red}
 \medskip
 $z.\grad = y.\grad = x.\grad = 0$
 
@@ -384,12 +396,14 @@ $z.\grad = y.\grad = x.\grad = 0$
 $u.\grad = 1$
 
 \medskip
-{\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
-
-\medskip
 $z.\grad\;\pluseq\; u.\grad * {\partial h}/{\partial z}$
 
-\anaslide{Backpropagation}
+}
+
+\medskip
+{\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
+
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -398,14 +412,12 @@ $z.\grad\;\pluseq\; u.\grad * {\partial h}/{\partial z}$
   {\color{red} {\cal L}} & {\color{red} =} & {\color{red}  u}
 \end{eqnarray*}
 
+{\color{red}
 \medskip
 $z.\grad = y.\grad = x.\grad = 0$
 
 \medskip
 $u.\grad = 1$
-
-\medskip
-    {\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
 
 \medskip
 $z.\grad\;\pluseq\; u.\grad * {\partial h}/{\partial z}$
@@ -416,7 +428,12 @@ $y.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial y}$
 \medskip
 $x.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial x}$
 
-\anaslideplain{Backpropagation}
+}
+
+\medskip
+    {\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
+
+\anaslideplain{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   {\color{red} y} & {\color{red} =} & {\color{red} f(x)} \\
@@ -425,6 +442,7 @@ $x.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial x}$
   {\color{red} {\cal L}} & {\color{red} =} & {\color{red} u}
 \end{eqnarray*}
 
+{\color{red}
 \medskip
 $z.\grad = y.\grad = x.\grad = 0$
 
@@ -442,8 +460,9 @@ $x.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial x}$
 
 \medskip
 $x.\grad \;\pluseq\; y.\grad * {\partial f}/{\partial x}$
+}
 
-
+\ignore{
 \anaslide{The Vector-Valued Case}
 \vspace{-3ex}
 \begin{eqnarray*}
@@ -462,27 +481,61 @@ The loss ${\cal L}$ is still a scalar.
 \vfill
 In this case
 $$x.\mathrm{grad} = \nabla_x\;{\cal L}$$
+}
+
+\slide{Handling Vectors, Arrays, and Tensors}
+
+
+\begin{eqnarray*}
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} + b^0\right) \\
+  \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} + b^1 \right) \\
+  \\
+  {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
+\end{eqnarray*}
 
 \vfill
-These are now vectors of the same dimension with
-$$x.\mathrm{grad}[i] = \partial {\cal L}/\partial x[i]$$
-
-\anaslide{The Vector-Valued Case}
-
-$$y = f(x)$$
+Each array (tensor) {\color{red} $W$} is an object with attributes {\color{red} $W.\mathrm{value}$} and a gradient {\color{red} $W.\mathrm{grad}$}.
 
 \vfill
+The attribute {\color{red} $W.\mathrm{grad}$} is an array (tensor) with the same indeces as {\color{red} $W.\mathrm{value}$}.
 
-In this case we consider the Jacobian matrix of $f$.
+\slide{Einstein Notation}
 
-$$(\nabla_x f(x))[j,i] = \frac{\partial f(x)[j]}{\partial x[i]}$$
+\centerline{$i$ --- input feature index \hspace{1em} $j$  --- hidden layer index, \hspace{1em} $\hat{y}$ --- possible label}
+$$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 
 \vfill
-We then have
-$$x.\mathrm{grad}[i]\;\; \pluseq \;\; \sum_j\;y.\mathrm{grad}[j] (\nabla_x f(x))[j,i]$$
+\begin{eqnarray*}
+  {\color{red} h[j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[i]}\right) + b^0[j]\right) \\
+  \\
+  {\color{red} s[\hat{y}]} & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;{\color{red} h[j]}\right) + b^1[\hat{y}]\right) \\
+  \\
+  {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
+\end{eqnarray*}
 
+\slide{The Swap Rule}
+\vspace{-3ex}
+\begin{eqnarray*}
+\vdots \\
+  \tilde{y}[j] & = & \sum_i\;W[j,i]\;x[i] \\
+  \\
+  y[j] & = & \sigma(\tilde{y}[j]) + b[j] \\
+  \vdots
+  \end{eqnarray*}
 
-\slide{Minibatching}
+{\color{red} 
+  \begin{eqnarray*}
+  \\
+  x.\mathrm{grad}[i] & \pluseq & \sum_j\;\tilde{y}.\mathrm{grad}[j]W[j,i] \\
+  \\
+  W.\mathrm{grad}[j,i] & \pluseq & \tilde{y}.\mathrm{grad}[j]x[i]
+\end{eqnarray*}
+}
+
+For backprop one swaps the output with one of the inputs and sums over the indeces not occuring on the left.
+
+\slideplain{Minibatching}
 
 Training time is greatly improved by minibatching.
 
@@ -503,72 +556,51 @@ With minibatching each input value and each computed value is actually a batch o
 We add a batch index as an additional first tensor dimension for each input and computed node.
 
 \vfill
-For example, if a given input is a $D$-dimensional vector then the value of an input node
-has shape $(B,D)$ where $B$ is size of the minibatch.
-
-\vfill
 Parameters do not have a batch index.
 
-\slide{Minibatching for MLPs}
+\slide{Einstein Notation with Minibatching}
 
-{\huge
-\centerline{$b$ --- batch index \hspace{1ex} $i$ --- input feature index}
-\centerline{$j$ --- hidden feature index \hspace{1ex} $\hat{y}$ --- label index}
-\vfill
-\centerline{$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$}
-}
+\centerline{$b$--- batch index,\hspace{3em} $i$ --- input feature index}
+\centerline{$j$ --- hidden layer index, \hspace{3em} $\hat{y}$ --- possible label}
+$$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 
 \vfill
 \begin{eqnarray*}
-  h[b,j] & = & \mathrm{ReLU}\left(\left(\sum_i\;W^0[j,i] \;x[b,i]\right) + b^0[j]\right) \\
+  {\color{red} h[b,j]} & = & \mathrm{ReLU}\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[b,i]}\right) + b^0[j]\right) \\
   \\
-  s[b,\hat{y}] & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;h[b,j]\right) + b^1[\hat{y}]\right) \\
+  {\color{red} s[b,\hat{y}]} & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;{\color{red} h[b,j]}\right) + b^1[\hat{y}]\right) \\
   \\
-  P[b,\hat{y}] & = & \softmax_{\hat{y}}\;s[b,\hat{y}] \\
-  \\
-  {\cal L}[b] & = & - \log P[b,y[b]]
+  {\color{red} P_\Phi[b,\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[b,\hat{y}]}
 \end{eqnarray*}
 
-\slideplain{BackProp for MLPs}
-
-\begin{eqnarray*}
-  \tilde{s}[b,\hat{y}] & = & \left(\sum_j\;W^1[\hat{y},j]\;h[b,j]\right) + b^1[\hat{y}] \\
-  \\
-  \\
-  s[b,\hat{y}] & = & \sigma(\tilde{s}[b,\hat{y}]) \\
-  \\
-  \\
-  \tilde{s}.\mathrm{grad}[b,\hat{y}] & \pluseq & s.\mathrm{grad}[b,\hat{y}]\;\; \sigma'|_{\tilde{s}[b,\hat{y}]}
-\end{eqnarray*}
-
-\slide{BackProp for MLPs}
+\slideplain{The Swap Rule with Minibatching}
 \vspace{-3ex}
 \begin{eqnarray*}
-  \tilde{s}[b,\hat{y}] & = & \left(\sum_j\;W^1[\hat{y},j]\;h[b,j]\right) + b^1[\hat{y}] \\
+\vdots \\
+  \tilde{y}[b,j] & = & \sum_i\;W[j,i]\;x[b,i] \\
+  \vdots
+  \end{eqnarray*}
+
+  \begin{eqnarray*}
   \\
+  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;\tilde{y}.\mathrm{grad}[b,j]W[j,i] \\
   \\
-  h.\mathrm{grad}[b,j] & \pluseq & \sum_{\hat{y}}\;\tilde{s}.\mathrm{grad}[b,\hat{y}]W^1[\hat{y},j] \\
-  \\
-  b^1.\mathrm{grad}[\hat{y}] & \pluseq & \frac{1}{B}\;\sum_b \;\tilde{s}.\mathrm{grad}[b,\hat{y}] \\
-  \\
-  W^1.\mathrm{grad}[\hat{y},j] & \pluseq & \frac{1}{B} \sum_b\;\tilde{s}.\mathrm{grad}[b,\hat{y}]h[b,j]
+  W.\mathrm{grad}[j,i] & \pluseq & {\color{red} \frac{1}{B} \sum_b}\;\tilde{y}.\mathrm{grad}[b,j]x[b,i]
 \end{eqnarray*}
 
-By convention parameter gradients are averaged over the batch.
+\slide{Summary}
 
-\slide{The Swap Rule}
-\vspace{-3ex}
-\begin{eqnarray*}
-  \tilde{s}[b,\hat{y}] & = & \left(\sum_j\;W^1[\hat{y},j]\;h[b,j]\right) + \ldots \\
-  \\
-  \\
-  h.\mathrm{grad}[b,j] & \pluseq & \sum_{\hat{y}}\;\tilde{s}.\mathrm{grad}[b,\hat{y}]W^1[\hat{y},j] \\
-  \\
-  W^1.\mathrm{grad}[\hat{y},j] & \pluseq & \frac{1}{B} \sum_b\;\tilde{s}.\mathrm{grad}[b,\hat{y}]h[b,j]
-\end{eqnarray*}
+A framework provides a high level language for writing models $P_\Phi(y|x)$.
 
-When writing a backprop rule for a contraction of tensors one swaps the output with one of the inputs.
+\vfill
+A framework compiles a model into an optimization algorithm.
+\vfill
+{\color{red} $$\Phi^* \approx \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; -\ln P_\Phi(y|x)$$}
 
+\vfill
+A framework also typically provides support for managing large training sets and pre-trained model parameter values (also called ``models'').
+
+ 
 \slide{END}
 }
 \end{document}
