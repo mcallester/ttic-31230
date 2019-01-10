@@ -19,11 +19,12 @@ Assume that probability distributions $P(y)$ are discrete with $\sum_y\;P(y) = 1
 {\bf Problem 1:} The problem of population density estimation is defined by the following equation.
 $$\Phi^* = \argmin_\Phi\;H(\mathrm{Pop},P_\Phi) = E_{y \sim \mathrm{Pop}}\;-\log\;P_\Phi(y)$$
 This equation is used for language modeling --- estimating the probability distribution over the population of English sentences that appear, say, in the New York Times.
-Show the following.
+
+\medskip
+(a) Show the following.
 $$\Phi^* = \argmin_\Phi\;H(\mathrm{Pop},P_\Phi) = \argmin_\Phi \;KL(\mathrm{Pop},P_\Phi)$$
-Assuming that the model probability $P_\Phi(y)$ can be computed for any given $y$, but that we have no way of computing $\mathrm{Pop}(y)$ for a given $y$,
-explain why gradient descent on the cross-entropy objective
-can be done while gradient descent on the KL-divergence form is problematic.
+
+(b) Explain why we can measure $H(\pop,P_\Phi)$ but cannot measure $KL(\pop,P_\Phi)$.
 
 
 \bigskip
