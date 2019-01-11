@@ -517,13 +517,12 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 \slide{The Swap Rule}
 \vspace{-3ex}
 \begin{eqnarray*}
-\vdots \\
   \tilde{y}[j] & = & \sum_i\;W[j,i]\;x[i] \\
   \\
-  y[j] & = & \sigma(\tilde{y}[j]) + b[j] \\
-  \vdots
+  y[j] & = & \sigma(\tilde{y}[j] + b[j]) \\
   \end{eqnarray*}
 
+\vspace{-5ex}
 {\color{red} 
   \begin{eqnarray*}
   \\
@@ -533,7 +532,7 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 \end{eqnarray*}
 }
 
-For backprop one swaps the output with one of the inputs and sums over the indeces not occuring on the left.
+one swaps the output with one of the inputs and sums over the indeces not occuring on the left.
 
 \slideplain{Minibatching}
 
@@ -566,7 +565,7 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 
 \vfill
 \begin{eqnarray*}
-  {\color{red} h[b,j]} & = & \mathrm{ReLU}\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[b,i]}\right) + b^0[j]\right) \\
+  {\color{red} h[b,j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[b,i]}\right) + b^0[j]\right) \\
   \\
   {\color{red} s[b,\hat{y}]} & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;{\color{red} h[b,j]}\right) + b^1[\hat{y}]\right) \\
   \\

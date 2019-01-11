@@ -182,20 +182,19 @@ class Sigmoid:
 \slide{The {\tt Affine} Class}
 \vspace{-3ex}
 \begin{eqnarray*}
-  \tilde{y}[b,j] & = & \sum_i\;W[j,i]\;x[b,i] \\
-  y[b,j] & = & \tilde{y}[b,j] + B[j]
+  \tilde{y}[b,j] & = & \sum_i\;W[i,j]\;x[b,i] {\color{red}\;\; = xW}  \\
+  y[b,j] & = & \tilde{y}[b,j] + B[j] {\color{red} \;\;=\;???}
   \end{eqnarray*}
 
-\vspace{-4ex}
+\vspace{-2ex}
 {\color{red}
 \begin{eqnarray*}
-  \\
-  \tilde{y}.\mathrm{grad}[b,j] & = & y.\mathrm{grad}[b,j]\;\;\mbox{\color{black} internal to {\tt Affine}} \\
+  \tilde{y}.\mathrm{grad}[b,j] &\pluseq & y.\mathrm{grad}[b,j] \\
   B.\mathrm{grad}[j] & \pluseq & \sum_b\;y.\mathrm{grad}[b,j] \\
   \\
-  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;y.\mathrm{grad}[b,j]W[i,j] \\
+  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;y.\mathrm{grad}[b,j]W[i,j] = yW^\top\\
   \\
-  W.\mathrm{grad}[i,j] & \pluseq & \sum_b\;y.\mathrm{grad}[b,j]x[b,i]
+  W.\mathrm{grad}[i,j] & \pluseq & \sum_b\;y.\mathrm{grad}[b,j]x[b,i] =\; ???
 \end{eqnarray*}
 }
 
