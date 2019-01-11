@@ -70,7 +70,7 @@ def Backward(loss):
 
 def SGD():
     for p in Parameters:
-        p.SGD()
+        p.value -= eta*p.grad
 \end{verbatim}
 \vfill
 
@@ -123,9 +123,6 @@ class \=Parameter: \\
     \>def \>addgrad(self, delta): \\
           \>\>\#sums over the minibatch \\
     \>\>self.grad += np.sum(delta, axis = 0) \\
-    \\
-    \>def \>SGD(self): \\
-    \>\>self.value -= learning\_rate*self.grad
 \end{tabbing}
 
 \anaslide{MLP in EDF}

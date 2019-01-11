@@ -54,18 +54,6 @@ A framework also typically provides support for managing large training sets and
 
 $\vdots$
 
-\slide{What Must a Framework Support?}
-
-It must provide a high level language for writing models $P_\Phi(y|x)$ (or other forms of models).
-
-\vfill
-It must be able to compile a model into an optimization algorithm.
-\vfill
-{\color{red} $$\Phi^* \approx \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; -\ln P_\Phi(y|x)$$}
-
-\vfill
-It typically also provides support for managing large data sets (such as {\color{red} ``$\mathrm{Train}$''} in the above equation).
-
 \slide{An Example: Multi-Layer Perceptron Models for MNIST}
 
 We consider the problem of taking an input $x$ (such as an image of a hand written digit) and classifying it into some small number of classes (such as the digits $0$ through $9$).
@@ -103,7 +91,7 @@ $$\Phi = (W^0,\;b^0,\;W^1,\;b^1)$$
 An activation function $\sigma:\reals \rightarrow \reals$ (scalar-to-scalar) is applied to each component of a vector.
 
 \vfill
-\centerline{{\color{red} $\sigma(u) = \frac{1}{1+e^{-u}}$}\hspace{3em}\includegraphics[width=1.5in]{../images/sigmoid}}
+\centerline{{\color{red} $\sigma(u) = \frac{1}{1+e^{-u}}$}\hspace{3em}\includegraphics[width=1.5in]{../images/sigmoid}, {\color{red} $\sigma(m) = P(y|m)$ for margin $m$}.}
 
 \vfill
 other common activation functions are
@@ -111,6 +99,25 @@ other common activation functions are
 \vfill
 \centerline{{\color{red} $\mathrm{ReLU}(u) = \max(0,u)$}\includegraphics[width=1.5in]{../images/relu},
 {\color{red} $\mathrm{tanh}(u) = 2\sigma(u)-1$}\includegraphics[width=1.5in]{../images/tanh}}
+
+\slide{Einstein Notation}
+
+$${\color{red} h} = \sigma\left(W^0{\color{red} x} + b^0\right)$$
+
+\vfill
+is an abbreviation for
+\begin{eqnarray*}
+  {\color{red} h[j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[i]}\right) + b^0[j]\right) 
+\end{eqnarray*}
+
+\vfill
+Think of this as a separate assignment statement for each {\color{red} $j$}.
+
+\vfill
+Each {\color{red} $h[j]$} is the output of a ``linear threshold unit''.
+
+\vfill
+Einstein notation makes all indeces and summations explicit.
 
 \slide{Optimization}
 
@@ -270,7 +277,7 @@ $$\begin{array}{lcl}
 \end{eqnarray*}
 
 \medskip
-For now assume all values are scalars.
+For now assume all values are scalars (single numbers rather than arrays).
 
 \medskip
 We will ``backpopagate'' the assignments the reverse order.
@@ -483,8 +490,7 @@ In this case
 $$x.\mathrm{grad} = \nabla_x\;{\cal L}$$
 }
 
-\slide{Handling Vectors, Arrays, and Tensors}
-
+\slide{Handling Arrays}
 
 \begin{eqnarray*}
   {\color{red} h} & = & \sigma\left(W^0{\color{red} x} + b^0\right) \\
@@ -495,10 +501,13 @@ $$x.\mathrm{grad} = \nabla_x\;{\cal L}$$
 \end{eqnarray*}
 
 \vfill
-Each array (tensor) {\color{red} $W$} is an object with attributes {\color{red} $W.\mathrm{value}$} and a gradient {\color{red} $W.\mathrm{grad}$}.
+Each array {\color{red} $W$} is an object with attributes {\color{red} $W.\mathrm{value}$} and {\color{red} $W.\mathrm{grad}$}.
 
 \vfill
-The attribute {\color{red} $W.\mathrm{grad}$} is an array (tensor) with the same indeces as {\color{red} $W.\mathrm{value}$}.
+{\color{red} $W.\mathrm{grad}$} is an array with the same indeces as {\color{red} $W.\mathrm{value}$}.
+
+\vfill
+An array with more than two indeces is called a tensor.
 
 \slide{Einstein Notation}
 
