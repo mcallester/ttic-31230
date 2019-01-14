@@ -65,7 +65,7 @@ def Forward():
 
 def Backward(loss):
     for c in CompNodes + Parameters: c.grad = 0
-    loss.grad = 1/nBatch
+    loss.grad = 1.
     for c in CompNodes[::-1]: c.backward()
 
 def SGD():
@@ -122,7 +122,7 @@ class \=Parameter: \\
 \\
     \>def \>addgrad(self, delta): \\
           \>\>\#sums over the minibatch \\
-    \>\>self.grad += np.sum(delta, axis = 0) \\
+    \>\>self.grad += np.sum(delta, axis = 0)/nBatch \\
 \end{tabbing}
 
 \anaslide{MLP in EDF}
@@ -180,18 +180,18 @@ class Sigmoid:
 \vspace{-3ex}
 \begin{eqnarray*}
   \tilde{y}[b,j] & = & \sum_i\;W[i,j]\;x[b,i] {\color{red}\;\; = xW}  \\
-  y[b,j] & = & \tilde{y}[b,j] + B[j] {\color{red} \;\;=\;???}
+  y[b,j] & = & \tilde{y}[b,j] - B[j] {\color{red} \;\;=\;\tilde{y} - B}\; \mathrm{(broadcasting)}
   \end{eqnarray*}
 
 \vspace{-2ex}
 {\color{red}
 \begin{eqnarray*}
   \tilde{y}.\mathrm{grad}[b,j] &\pluseq & y.\mathrm{grad}[b,j] \\
-  B.\mathrm{grad}[j] & \pluseq & \sum_b\;y.\mathrm{grad}[b,j] \\
+  B.\mathrm{grad}[j] & \minuseq & \frac{1}{B} \sum_b\;y.\mathrm{grad}[b,j] \\
   \\
   x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;y.\mathrm{grad}[b,j]W[i,j] = yW^\top\\
   \\
-  W.\mathrm{grad}[i,j] & \pluseq & \sum_b\;y.\mathrm{grad}[b,j]x[b,i] =\; ???
+  W.\mathrm{grad}[i,j] & \pluseq & \frac{1}{B} \sum_b\;y.\mathrm{grad}[b,j]x[b,i] =\; ???
 \end{eqnarray*}
 }
 
@@ -208,7 +208,7 @@ class Affine(CompNode):
     def forward(self):
         self.value = (np.matmul(self.x.value,
                                self.Phi.w.value)
-                      + self.Phi.b.value)
+                      - self.Phi.b.value)
 \end{verbatim}
 \vfill
 \eject
@@ -220,7 +220,7 @@ class Affine(CompNode):
            np.matmul(self.grad,
                      self.Phi.w.value.transpose()))
 
-        self.Phi.b.addgrad(self.grad)
+        self.Phi.b.addgrad(- self.grad)
 
         self.Phi.w.addgrad(self.x.value[:,:,np.newaxis]
                            * self.grad[:,np.newaxis,:])

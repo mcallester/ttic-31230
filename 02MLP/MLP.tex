@@ -79,9 +79,9 @@ Let $\mathrm{Train}$ be a sample $(x_0,y_0),\;\ldots,\;(x_{N-1},y_{N-1})$ drawn 
 $$\Phi = (W^0,\;b^0,\;W^1,\;b^1)$$
 
 \begin{eqnarray*}
-  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} + b^0\right) \\
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - b^0\right) \\
   \\
-  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} + b^1 \right) \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} - b^1 \right) \\
   \\
   {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
 \end{eqnarray*}
@@ -102,12 +102,12 @@ other common activation functions are
 
 \slide{Einstein Notation}
 
-$${\color{red} h} = \sigma\left(W^0{\color{red} x} + b^0\right)$$
+$${\color{red} h} = \sigma\left(W^0{\color{red} x} - b^0\right)$$
 
 \vfill
 is an abbreviation for
 \begin{eqnarray*}
-  {\color{red} h[j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[i]}\right) + b^0[j]\right) 
+  {\color{red} h[j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[i]}\right) - b^0[j]\right) 
 \end{eqnarray*}
 
 \vfill
@@ -165,9 +165,9 @@ One typically imposes a random suffle of the training data before each epoch.
 $$\Phi = (W^0,\;b^0,\;W^1,\;b^1)$$
 
 \begin{eqnarray*}
-  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} + b^0\right) \\
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - b^0\right) \\
   \\
-  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} + b^1 \right) \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} - b^1 \right) \\
   \\
   {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
 \end{eqnarray*}
@@ -212,9 +212,9 @@ A computation graph (sometimes called a ``computation{\color{red} al} graph'') i
 
 
 \begin{eqnarray*}
-  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} + b^0\right) \\
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - b^0\right) \\
   \\
-  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} + b^1 \right) \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} - b^1 \right) \\
   \\
   {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
 \end{eqnarray*}
@@ -493,9 +493,9 @@ $$x.\mathrm{grad} = \nabla_x\;{\cal L}$$
 \slide{Handling Arrays}
 
 \begin{eqnarray*}
-  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} + b^0\right) \\
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - b^0\right) \\
   \\
-  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} + b^1 \right) \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} - b^1 \right) \\
   \\
   {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
 \end{eqnarray*}
@@ -516,9 +516,9 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 
 \vfill
 \begin{eqnarray*}
-  {\color{red} h[j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[i]}\right) + b^0[j]\right) \\
+  {\color{red} h[j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[i]}\right) - b^0[j]\right) \\
   \\
-  {\color{red} s[\hat{y}]} & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;{\color{red} h[j]}\right) + b^1[\hat{y}]\right) \\
+  {\color{red} s[\hat{y}]} & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;{\color{red} h[j]}\right) - b^1[\hat{y}]\right) \\
   \\
   {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
 \end{eqnarray*}
@@ -528,7 +528,7 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 \begin{eqnarray*}
   \tilde{y}[j] & = & \sum_i\;W[j,i]\;x[i] \\
   \\
-  y[j] & = & \sigma(\tilde{y}[j] + b[j]) \\
+  y[j] & = & \sigma(\tilde{y}[j] - b[j]) \\
   \end{eqnarray*}
 
 \vspace{-5ex}
@@ -574,9 +574,9 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 
 \vfill
 \begin{eqnarray*}
-  {\color{red} h[b,j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[b,i]}\right) + b^0[j]\right) \\
+  {\color{red} h[b,j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[b,i]}\right) - b^0[j]\right) \\
   \\
-  {\color{red} s[b,\hat{y}]} & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;{\color{red} h[b,j]}\right) + b^1[\hat{y}]\right) \\
+  {\color{red} s[b,\hat{y}]} & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;{\color{red} h[b,j]}\right) - b^1[\hat{y}]\right) \\
   \\
   {\color{red} P_\Phi[b,\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[b,\hat{y}]}
 \end{eqnarray*}
