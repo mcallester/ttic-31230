@@ -135,7 +135,7 @@ This is typically done with a stride greater than one so that the image dimensio
 We reshape $L_{\mathrm{in}}[b,x,y,i]$ to $L_{\mathrm{in}}[b,i']$ and then
 
 \vfill
-$$L_{\mathrm{out}}[b,j] = \sigma\left(\left(\sum_{i'} \;W[j,i]\;L_{\mathrm{in}}[b,i']\right) - B[j]\right)$$
+$$L_{\mathrm{out}}[b,j] = \sigma\left(\left(\sum_{i'} \;W[j,i']\;L_{\mathrm{in}}[b,i']\right) - B[j]\right)$$
 
 \slide{Alexnet}
 {\huge
@@ -245,7 +245,7 @@ Reduce convolution to matrix multiplication ---  more space but faster.
   \end{array}\right) + B[j] \\
   \\
     & = & \left(\sum_{(\Delta x, \Delta y, i)} \begin{array}{l}
-                                              L_{\mathrm{in}}[(b,x,j),(\Delta x,\Delta y,i)]
+                                              L_{\mathrm{in}}[(b,x,y),(\Delta x,\Delta y,i)]
                                               * W[(\Delta x, \Delta y, i), j] \\
                                            \end{array}\right) + B[j]
 \end{eqnarray*}

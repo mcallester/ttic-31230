@@ -124,7 +124,7 @@ increase exponentially with depth. {\bf Exploding Gradients.}
 Initialize a weight matrix (or tensor) to preserve zero-mean unit variance distributions.
 
 \vfill
-If we assume $x_i$ has unit mean and zero variance then we want
+If we assume $x_i$ has zero unit mean and zero variance then we want
 
 \vfill
 $$y_j = \sum_{j=0}^{N-1} x_i w_{i,j}$$
@@ -138,7 +138,7 @@ Xavier initialization randomly sets $w_{i,j}$ to be uniform in the interval $\le
 \vfill
 Assuming independence this gives zero mean and unit variance for $y_j$.
 
-\slide{He Initialization}
+\slideplain{He Initialization}
 
 A Relu nonlinearity reduces the variance.
 
@@ -289,12 +289,12 @@ J_{\color{red} \ell+1} & \geq &  J_{\color{red} \ell}
 
 
 \vfill
-In this case we construct $\tilde{L}_{\color{red} \ell +1 }[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}]$
+In this case we construct $\tilde{L}_{\color{red} \ell}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}]$
 
 \begin{eqnarray*}
-\mathrm{for}\;b,x,y,j\;\;\tilde{L}_{\color{red} \ell+1}[b,x,y,j] & = & \left\{\begin{array}{ll} L_{\color{red} \ell}[b,s*x,s*y,j] & \mbox{for $j < J_{\color{red} \ell}$} \\ 0 & \mbox{otherwise} \end{array}\right.\\
+\mathrm{for}\;b,x,y,j\;\;\tilde{L}_{\color{red} \ell}[b,x,y,j] & = & \left\{\begin{array}{ll} L_{\color{red} \ell}[b,s*x,s*y,j] & \mbox{for $j < J_{\color{red} \ell}$} \\ 0 & \mbox{otherwise} \end{array}\right.\\
 \\
-L_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] & = & \tilde{L}_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] \\
+L_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] & = & \tilde{L}_{\color{red} \ell}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] \\
 & & + R_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}]
 \end{eqnarray*}
 
