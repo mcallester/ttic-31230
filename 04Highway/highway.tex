@@ -22,6 +22,35 @@
   \vfill
   \centerline{Gated RNNs}
 
+\slide{The Expressive Power of DNNs}
+
+Linear Threshold units generalize logical operations.
+
+\vfill
+Consider Boolean Values $P,Q$ --- numbers that are either close to 0 or close to 1.
+
+\vfill
+\begin{eqnarray*}
+P \wedge Q & \approx & \sigma(100*P + 100* Q -150) \\
+\\
+P \vee Q & \approx & \sigma(100*P + 100* Q -50) \\
+\\
+\neg P & \approx & \sigma(100*(1-P) - 50)
+\end{eqnarray*}
+
+\vfill
+DNNs generalize digital circuits.
+
+\slide{DNNs are Expressive and Trainable}
+
+{\color{red} Universality Assumption:} DNNs are universally expressive (can model any function) and trainable (the desired function can be found by SGD).
+
+\vfill
+The Universality assumption is clearly false but can still guide architecture design.
+
+\vfill
+But equally expressive architectures differ in trainability.  This lecture is on trainability.
+
 \slide{Vanishing and Exploding Gradients}
 ~
 \vfill
@@ -229,31 +258,50 @@ Here $\hat{\mu}$ and $\hat{\sigma}$ should be computed only after earlier normal
   ResNets were introduced in late 2015 (Kaiming He et al.) and revolutionized computer vision.
 \end{minipage}
 
-\slideplain{Simple Residual Skip Connections in CNNs (stride 1)}
+\anaslideplain{Simple Residual Skip Connections in CNNs (stride 1)}
 
-$$L_{i+1} = L_i + R_i$$
+\medskip
+\begin{eqnarray*}
+R_{\color{red} \ell+1}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+1}[X,Y,J,J],B_{\color{red} \ell+1}[J],L_{\color{red} \ell}[B,X,Y,J]) \\
+\\
+\mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\\
+L_{\color{red} \ell+1}[b,x,y,j] & = & L_{\color{red}\ell}[b,x,y,j] + R_{\color{red} \ell+1}[b,x,y,j]
+\end{eqnarray*}
 
+\vfill I will use capital letter indeces to denote entire tensors and lower case letters for particular indeces.
+
+\anaslide{Simple Residual Skip Connections in CNNs (stride 1)}
+
+\medskip
+\begin{eqnarray*}
+R_{\color{red} \ell+1}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+1}[X,Y,J,J],B_{\color{red} \ell+1}[J],L_{\color{red} \ell}[B,X,Y,J]) \\
+\\
+\mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\\
+L_{\color{red} \ell+1}[b,x,y,j] & = & L_{\color{red}\ell}[b,x,y,j] + R_{\color{red} \ell+1}[b,x,y,j]
+\end{eqnarray*}
+
+\vfill Note that in the above equations $L_{\color{red} \ell}[B,X,Y,J]$ and $R_{\color{red} \ell+1}[B,X,Y,J]$ are the same shape.
 \vfill
-In ResNet $R_i$ is computed by two or three convolution layers.
-
-\vfill
-If all convolution layers are stride 1, and preserve the number of channels, then $R_i$ and $L_i$ are the same shape.
+In the actual ResNet $R_{\color{red} \ell+1}$ is computed by two or three convolution layers.
 
 \slideplain{Handling Spacial Reduction}
 
-Let the shape of $L_i$ be $[B,X_i,Y_i,J_i]$.
-
-\vfill
-Let the shape of $R_i$ be $[B,X_{i+1},Y_{i+1},J_{i+1}]$ where $X_{i+1} = X_i/s$ and $Y_{i+1} = Y_i/s$ for some stride $s$, and where $J_{i+1} \geq J_i$.
-
-\vfill
-In this case we construct $\tilde{L}_i$ to have the same shape as $R_i$.
-
-\vfill
+Consider $L_{\color{red} \ell}[B,X_{\color{red} \ell},Y_{\color{red} \ell},J_{\color{red} \ell}]$ and $R_{\color{red} \ell+1}[B,X_{\color{red} \ell+1},Y_{\color{red} \ell+1},J_{\color{red} \ell+1}]$
 \begin{eqnarray*}
-\tilde{L}_i[b,x,y,j] & = & \left\{\begin{array}{ll} L_i[b,s*x,s*y,j] & \mbox{for $j < J_i$} \\ 0 & \mbox{otherwise} \end{array}\right.\\
+X_{\color{red} \ell+1} & = & X_{\color{red} \ell}/s \\
+Y_{\color{red} \ell+1} & = & Y_{\color{red} \ell}/s \\
+J_{\color{red} \ell+1} & \geq &  J_{\color{red} \ell}
+\end{eqnarray*}
+
+
+\vfill
+In this case we construct $\tilde{L}_{\color{red} \ell +1 }[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}]$
+
+\begin{eqnarray*}
+\mathrm{for}\;b,x,y,j\;\;\tilde{L}_{\color{red} \ell+1}[b,x,y,j] & = & \left\{\begin{array}{ll} L_{\color{red} \ell}[b,s*x,s*y,j] & \mbox{for $j < J_{\color{red} \ell}$} \\ 0 & \mbox{otherwise} \end{array}\right.\\
 \\
-L_{i+1} & = & \tilde{L}_i  + R_i
+L_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] & = & \tilde{L}_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] \\
+& & + R_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}]
 \end{eqnarray*}
 
 \slide{Resnet32}
@@ -262,24 +310,40 @@ L_{i+1} & = & \tilde{L}_i  + R_i
 
 
 \slideplain{Deeper Versions use Bottleneck Residual Paths}
-We reduce the number of channels to $K < J_i$ before doing the convolution.
+We reduce the number of channels to $K < J_{\color{red} \ell}$ before doing the convolution.
 
 {\huge
 \begin{eqnarray*}
-A_i[B,X_i,Y_i,K] & = & \mathrm{Conv}'(\Phi_i^A{\color{red} [1,1,J_i,K]},L_i[B,X_i,Y_i,J_i]) \\
+A_{\color{red} \ell}[B,X_{\color{red} \ell},Y_{\color{red} \ell},K] & = & \mathrm{Conv}'(\Phi_{\color{red} \ell}^A{\color{red} [1,1,J_{\color{red} \ell},K]},L_{\color{red} \ell}[B,X_{\color{red} \ell},Y_{\color{red} \ell},J_{\color{red} \ell}]) \\
 \\
-B_i[B,X_{i+1},Y_{i+1},K] & = & \mathrm{Conv}'(\Phi_i^B{\color{red}[3,3,K,K]},A_i[B,X_i,Y_i,K],\;\mathrm{stride}\;s) \\
+B_{\color{red} \ell}[B,X_{\color{red} \ell+1},Y_{\color{red} \ell+1},K] & = & \mathrm{Conv}'(\Phi_{\color{red} \ell}^B{\color{red}[3,3,K,K]},A_{\color{red} \ell}[B,X_{\color{red} \ell},Y_{\color{red} \ell},K],\;\mathrm{stride}\;s) \\
 \\
-R_i[B,X_{i+1},Y_{i+1},J_{i+1}] & = & \mathrm{Conv}'(\Phi_i^R{\color{red} [1,1,K,J_{i+1}]},B_i[B,X_{i+1},Y_{i+1},K]) \\
+R_{\color{red} \ell+1}[B,X_{\color{red} \ell+1},Y_{\color{red} \ell+1},J_{\color{red} \ell+1}] & = & \mathrm{Conv}'(\Phi_{\color{red} \ell}^R{\color{red} [1,1,K,J_{\color{red} \ell+1}]},B_{\color{red} \ell}[B,X_{\color{red} \ell+1},Y_{\color{red} \ell+1},K]) \\
 \\
-L_{i+1} & = & \tilde{L}_i + R_i
+L_{\color{red} \ell+1} & = & \tilde{L}_{\color{red} \ell+1} + R_{\color{red} \ell+1}
 \end{eqnarray*}
 }
 
 \vfill
 Here $\mathrm{CONV}'$ may include batch normalization and/or an activation function.
 
-\slideplain{Deep Residual Networks}
+\slide{A General Resdual Connection}
+
+$${\color{red} y = \tilde{x} + R(x)}$$
+
+\vfill
+Where $\tilde{x}$ is either $x$ or a version of $x$ adjusted to match the shape of $R(x)$.
+
+\slide{DenseNet}
+
+For {\color{red} $u[I]$} and {\color{red} $v[J]$} we let {\color{red} $(u;w)[I+J]$} denote vector concatenation.
+\vfill
+$$(u;v)[k] - \left\{\begin{array}{l} u[k]\;\mbox{for $k < J$} \\ v[k-I] \;\mbox{otherwise} \end{array}\right.$$
+
+\vfill
+$$\mbox{for}\;b,x,y\;\;L_{\color{red} \ell + 1}[b,x,y,J_{\color{red} \ell} + J_{\color{red} R}] = L_\ell[b,x,y,J_{\color{red} \ell}];R[b,x,y,J_{\color{red} R}]$$
+
+\slide{Deep Residual Networks}
 
 \vfill
 \includegraphics[width= 2.5in]{../images/resnet}
@@ -307,14 +371,34 @@ Here $\mathrm{CONV}'$ may include batch normalization and/or an activation funct
 \centerline{\includegraphics[width=3.5in]{../images/RNN}}
 \centerline{{\large [Christopher Olah]}}
 
-$$\tilde{h}_{t+1}[b,j] = \left(\sum_i\;W^{h,h}[i,j]h_t[b,i]\right) + \left(\sum_k W^{x,h}[k,j]x_t[b,k]\right) + \beta[j]$$
+We use two input linear threshold units.
+
+{\huge
+$${\color{red} h_{t+1}[b,j]} = \sigma\left(\left(\sum_i\;W^{h,h}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,h}[k,j]{\color{red} x_t[b,k]}\right) - B[j]\right)$$
+}
+\vfill
+$$\mathrm{Parameter}\;{\color{red} \Phi = (W^{h,h}[J,J],\;W^{x,h}[K,J],\;B[J])}$$
+
+
+\slide{Time as Depth}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
 
 \vfill
-$$\mathrm{Parameter}\;\Phi = (W^{h,h}[J,J],\;W^{x,h}[K,J],\;\beta[J])$$
+We would like the RNN to {\color{red} remember and use} information from much earlier inputs.
 
-\slideplain{Exploding and Vanishing Gradients}
 
-An RNN uses the same weights at every time step.
+\vfill
+All the issues with depth now occur through time.
+
+\vfill
+However, for RNNs {\color{red} at each time step we use the same model parameters.}
+
+\vfill
+In CNNs {\color{red} at each layer uses its own model parameters.}
+
+\slide{Exploding and Vanishing Gradients}
 
 \vfill
 If we avoid saturation of the activation functions then we get exponentially growing or shrinking eigenvectors of the weight matrix.
@@ -339,16 +423,29 @@ $$W.\mathrm{grad} = \left\{\begin{array}{l} W.\mathrm{grad} \;\;\;\mbox{if $||W.
 \vfill
 See {\tt torch.nn.utils.clip\_grad\_norm}
 
-\slide{Vanishing Gradients: Gated Skip Connections}
+\slide{Skip Connections Through Time}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+\vfill
+We would like to add {\color{red} residual connections through time}.
+
+\vfill
+However, We have to handle the fact that the same model parameters are used at every time step.
+
+\slide{Gated Skip Connections}
 
 
 $$\begin{array}{lrcl}
-\mbox{Residual Skip:} & L_{i+1} & = & \tilde{L}_i + R_i \\
-\mbox{(layer-specific parameters)} \\
-\\
-\\
-\mbox{Gated Skip:} & h_{t+1} & = & G_t\odot h_t + (1-G_t)\odot R_t \\
-\mbox{(time-independent parameters)}
+\mbox{Residual Skip:} & L_{\ell+1} & = & {\color{red} \tilde{L}_\ell} + R_{\color{red} \Phi_{\ell+1}}({\color{red} L_\ell})
+\end{array}$$
+\vfill
+Here ${\color{red} \Phi_{\ell+1}}$ controls data independent data flow.
+
+\vfill
+$$\begin{array}{lrcl}
+\mbox{Gated Skip:} & h_{t+1} & = & G_t\odot {\color{red} h_t} + (1-G_t)\odot R_{\color{red} \Phi}(x_t,{\color{red} h_t}) \\
 \end{array}$$
 
 \vfill
@@ -359,22 +456,22 @@ $$\begin{array}{lrcl}
 \end{eqnarray*}
 
 \vfill
-Gating allows data dependent data flow.
+Here Gating allows {\color{red} data dependent data flow.}
 
 \slideplain{Update Gate RNN (UGRNN)}
 
 {\huge
 \begin{eqnarray*}
-\tilde{R}_t[b,j] & = & \left(\sum_i\;W^{h,R}[i,j]h_t[b,i]\right) + \left(\sum_k W^{x,R}[k,j]x_t[b,k]\right) + \beta^R[j] \\
+{\color{red} R_t[b,j]} & = & \mathrm{tanh}\left(\left(\sum_i\;W^{h,R}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,R}[k,j]{\color{red} x_t[b,k]}\right) - B^R[j]\right) \\
 \\
 \\
-\tilde{G}_t[b,j] & = & \left(\sum_i\;W^{h,G}[i,j]h_t[b,i]\right) + \left(\sum_k W^{x,G}[k,j]x_t[b,k]\right) + \beta^G[j] \\
+{\color{red} G_t[b,j]} & = & \sigma\left(\left(\sum_i\;W^{h,G}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,G}[k,j]{\color{red} x_t[b,k]}\right) - B^G[j]\right) \\
 \\
 \\
-h_{t+1}[b,j] & = & \sigma(G_t[b,j]) h_t[b,j] + (1-\sigma(G_t[b,j])) \tanh(R_t[b,j]) \\
+{\color{red} h_{t+1}[b,j]} & = & G_t[b,j]{\color{red} h_t[b,j]} + (1-G_t[b,j]){\color{red} R_t[b,j]} \\
 \\
 \\
-\Phi & = & (W^{h,R},W^{x,R},\beta^R,W^{h,G},W^{x,G},\beta^G)
+{\color{red} \Phi} & {\color{red} =} & {\color{red} (W^{h,R},W^{x,R},\beta^R,W^{h,G},W^{x,G},\beta^G)}
 \end{eqnarray*}
 }
 

@@ -2,6 +2,9 @@
 \input ../preamble
 \parindent = 0em
 
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
 \begin{document}
 
 
@@ -15,24 +18,74 @@
   p[b,j] & = & \exp(s[b,j])/Z[b]
 \end{eqnarray*}
 
-Give a back-propagation $\pluseq$ update based on the second equation for adding to $s.\grad$ using $p.\grad$
+An alternative way to compute this is to initialize the tensors $Z$ and $p$ to zero and then execute the following loops.
+
+\medskip
+$\mathrm{for}\;b,j$
+$\;\;\;Z[b]\;\pluseq\;\exp(s[b,j])$
+
+\medskip
+$\mathrm{for}\;b,j$
+$\;\;\;p[b,j] \;\pluseq\; \exp(s[b,j])/Z[b]$
+
+\medskip
+Each individual $\pluseq$ operation inside the loops can be treated independently in backpropagation.
+
+\medskip
+(a) Give a back-propagation loop over $\pluseq$ updates based on the second loop for adding to $s.\grad$ using $p.\grad$
 (and using the forward-computed tensors $Z$ and $s$).
 
+\solution{
+  \medskip
+  For $b,j\;\;\;s.\grad[b,j] \;\pluseq\; p.\grad[b,j]\exp(s[b,j])/Z[b]$}
+
 \medskip
-Give a back-propagation $\pluseq$ update based on the second equation for adding to $Z.\grad$ using $p.\grad$
+(b) Give a back-propagation loop over $\pluseq$ updates based on the second equation for adding to $Z.\grad$ using $p.\grad$
 (and using the forward-computed tensors $s$ and $Z$).
 
+\solution{
+  \medskip
+  For $b,j\;\;\;Z.\grad[b] \;\minuseq\; p.\grad[b,j]\exp(s[b,j])/Z[b]^2$}
+
 \medskip
-Give a back-propagation $\pluseq$ update based on the first equation for adding to $s.\grad$ using $Z.\grad$
+(c) Give a back-propagation loop over $\pluseq$ updates based on the first equation for adding to $s.\grad$ using $Z.\grad$
 (and using the forward-computed tensor $s$).
 
+\solution{
+  \medskip
+  For $b,j\;\;\;s.\grad[b,j] \;\pluseq\; Z.\grad[b]\exp(s[b,j])$}
+
 \bigskip
-{\bf Problem 2:} For the softmax in problem 1 show that we can instead use
+{\bf Problem 2:} Show that the addition to $s.\grad$ shown in problem 1 can be computed using the following more efficient updates.
+
+\medskip
+$\mathrm{for}\;b,j\;\;\;e[b] \; \minuseq \; p[b,j]p.\grad[b,j]$
+
+\medskip
+$\mathrm{for}\;b,j\;\;\;s.\grad[b,j] \;\pluseq \; p[b,j](p.\grad[b,j] + e[b])$
+
+\medskip
+Hint: show $Z.\grad[b] = e[b]/Z[b]$.
+
+\solution{
+  The updates for problem 1 can be written as
+
+  \medskip
+  \begin{eqnarray*}
+    \mathrm{for}\;b\;\;\;Z.\grad[b] & = & \sum_j \;-p.\grad[b,j]\exp(s[b,j])/Z[b]^2 \\
+    & = & \left(\sum_j -p[b,j]p.\grad[b,j]\right)/Z[b] \\
+    & = & e[b]/Z[b]
+  \end{eqnarray*}
+
 \begin{eqnarray*}
-  e[b] & = & \sum_j p[b,j]p.\grad[b,j] \\
-  s.\grad[b,j] & = & p[b,j](p.\grad[b,j] - e[b])
+  \mathrm{for}\;b,j\;\;\;s.\grad[b,j] & = & p.\grad[b,j]\exp(s[b,j])/Z[b] + Z.\grad[b]\exp(s[b,j]) \\
+  & = &  p.\grad[b,j]\left(\exp(s[b,j])/Z[b]\right) + e[b]\left(\exp(s[b,j])/Z[b]\right) \\
+    & = &  p[b,j](p.\grad[b,j] +e[b])
 \end{eqnarray*}
 
+}
+  
+\medskip
 This formula shows how hand-written back-propagation methods for ``layers'' such as softmax
 can be more efficient than compiler-generated back-propagation code.
 While optimizing compilers can of course be written, one must keep in mind the trade-off

@@ -53,6 +53,18 @@ Einstein notation makes all indeces and summations explicit.
  & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{\mathrm{in}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)
 \end{eqnarray*}
 
+\slideplain{A Convolution Layer}
+\centerline{\includegraphics[height = 2.0in]{../images/VGG}}
+
+Each box is a tensor $L[b,x,y,i]$
+\begin{eqnarray*}
+ & &  L_{\mathrm{out}}[b,x,y,j] \\
+ & = & \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{\mathrm{in}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)
+\end{eqnarray*}
+
+\vfill
+Each $L_{\mathrm{out}}[b,x,y,j]$ is the output of a single linear threshold unit.
+
 \slide{Padding}
 
 \centerline{\includegraphics[height = 2.0in]{../images/padding2}}
@@ -100,7 +112,7 @@ We can move the filter by a ``stride'' $s$ for each spatial step.
 \vfill
 $L_{\mathrm{out}}[b,{\color{red}x},{\color{red}y},j] =$
 
-$$\hspace{-1em}\sigma\left(\left(\sum_{\Delta x,\Delta y,j}\;W[\Delta x, \Delta y, i, j] L_{\mathrm{in}}[b,{\color{red} s*x} + \Delta x, {\color{red} s*y} + \Delta y, i]\right) - B[j]\right)$$
+$$\hspace{-1em}\sigma\left(\left(\sum_{\Delta x,\Delta y,i}\;W[\Delta x, \Delta y, i, j] L_{\mathrm{in}}[b,{\color{red} s*x} + \Delta x, {\color{red} s*y} + \Delta y, i]\right) - B[j]\right)$$
 
 \vfill
 For strides greater than 1 the spatial dimention is reduced.
