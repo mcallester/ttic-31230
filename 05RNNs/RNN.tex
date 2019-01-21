@@ -19,28 +19,18 @@
   \vfill
   \centerline{\bf Error-Based Training}
 
-\slide{Digression on Tensor Notation}
+\slide{Notation}
+We will now stop showing the batch index.  Of course training is still done in batches.
 
-We will assume a high level RNN procedure $\mathrm{RNN}_\Phi$ which takes a sequence of input vectors and returns
-a sequence of hidden state vectors.
+
+\vfill
+As usual, we use capital letter indeces to denote tensors and lower case indeces to denote particular values from tensors.
+
+\vfill
+We will assume a high level RNN procedure $\mathrm{RNN}_\Phi$.
 
 \vfill
 $$h[T,J] = \mathrm{RNN}_\Phi(x[T,I])$$
-
-\vfill
-Here, and in the future, we use capital letter indeces to denote tensors and lower case indeces to denote particular values from tensors.
-
-\vfill
-We will also omit the batch index.  Minibatching can be viewed as an efficiency optimization.
-
-\slide{Digression on Tensor Notation}
-
-We use capital letter indeces to denote tensors and lower case indeces to denote particular values from tensors.
-
-\vfill
-The equation
-$$\tilde{L}[\ell+1,j] = \left(\sum_i\;W[\ell,i,j]L[\ell,i]\right) + \beta[\ell,j]$$
-stands for a set of assignments --- one for each value $\ell$ and $j$
 
 \slide{Slicing Notation}
 
@@ -50,7 +40,7 @@ A mixture of upper and lower case indeces denotes a slice.
 $h[t,J]$ denotes the vector whose $j$th component is $h[t,j]$.
 
 \vfill
-$L[X,Y,j]$ denotes the matrix (image) determined by the $j$th channel.
+$L[X,Y,j]$ denotes the matrix (image) determined by the $j$th feature.
 
 \slide{}
 
@@ -86,7 +76,7 @@ Return $h[T,J]$
 \\
 \cev{h}[T,\cev{J}] & = & \cev{\mathrm{RNN}}_{\Phi.RL}(x[T,I]) \\
 \\
-h[t,J] & = & [\vec{h}[T,\vec{J}],\;\cev{h}[t,\cev{J}]]\;\;\mbox{where $[x,y]$ is vector concatenation}
+h[t,J] & = & [\vec{h}[t,\vec{J}],\;\cev{h}[t,\cev{J}]]\;\;\mbox{where $[x,y]$ is vector concatenation}
 \end{eqnarray*}
 
 

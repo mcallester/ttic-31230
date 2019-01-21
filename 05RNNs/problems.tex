@@ -6,17 +6,25 @@
 
 
 \centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
-\centerline{\bf Problems For Fundamental Equations.}
+\medskip
+\centerline{\bf Problems For Language Modeling, Translation and Attention.}
 
 \bigskip
 \bigskip
-    {\bf Problem 2. (10 points)} This problem is on RNNs.  Explain why gating is needed for the highway path (skip connections) in RNNs but not in resnet.
-
-    
-{\bf Problem 3. (20 points)} What is the order of the number of floating point operations (serial computer running time)
+{\bf Problem 1.} What is the order of the number of floating point operations (serial computer running time)
 as a function of input sentence length and output sentence length
 for both the forward and backward pass of sequence to sequence models for machine translation both with and without attention.
 
 \bigskip
-{\bf Problem:} Consider a simple synthetic grammar and analyze the difference between greedy decoding and most likely decoding.
+{\bf Problem 2.} Consider a bidirectional RNN run on a sequence of words $w_1,\ldots,w_T$ such that for each time $t$ we have a forward
+hidden state $\vec{h}[t,J]$ computed from $w_1,\ldots,w_t$ and a backward hidden state $\cev{h}[t,J]$ computed from $w_T,\;w{T-1},\ldots w_t$.
+
+\medskip
+(a) Given an explicit index (Einstein notation) definition of a cross entropy loss ${\cal L}_t$ for $P(w[t]\;|\;w_1,\ldots w_{t-1},\;w_{t+1},\ldots,w_T)$.  You should define
+the probability with a softmax and assume that softmax is given as a primitive.  Assume a word embedding matrix $e[w,j]$ where $e[w,J]$ is the embedding vector for word $w$.
+
+\medskip
+(b) Suppose we take the loss of a given model on a sentence $w_1,\ldots,w_t$ to be $\sum_t {\cal L}_t$ for ${\cal L}_t$ defined as in part (a).  What is the order
+of run time, as a function of sentence length, for the forward-backward procedure with this loss function?  Explain your answer.
+
 \end{document}

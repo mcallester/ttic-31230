@@ -9,7 +9,8 @@
 
 
 \centerline{\bf TTIC 31230 Fundamentals of Deep Learning, winter 2019}
-\centerline{\bf Framework Problems}
+\medskip
+\centerline{\bf Backpropagation  Problems}
 
 \bigskip
 {\bf Problem 1:} Consider the following softmax.
@@ -64,9 +65,6 @@ $\mathrm{for}\;b,j\;\;\;e[b] \; \minuseq \; p[b,j]p.\grad[b,j]$
 \medskip
 $\mathrm{for}\;b,j\;\;\;s.\grad[b,j] \;\pluseq \; p[b,j](p.\grad[b,j] + e[b])$
 
-\medskip
-Hint: show $Z.\grad[b] = e[b]/Z[b]$.
-
 \solution{
   The updates for problem 1 can be written as
 
@@ -91,4 +89,41 @@ can be more efficient than compiler-generated back-propagation code.
 While optimizing compilers can of course be written, one must keep in mind the trade-off
 between the abstraction level of the programming language and the efficiency of the generated code.
 
+\medskip
+{\bf Problem 3.} Consider the following set of $\pluseq$ statements defining batch normalization
+where all computed tensors are initialized to zero.
+
+\medskip
+For $b,j \;\;\mu[j] \;\pluseq\; \frac{1}{B}\;x[b,j]$
+
+\medskip
+For $b,j\;\;s[j] \;\pluseq\; \frac{1}{B-1}\;(x[b,j] - \mu[j])^2$
+
+\medskip
+For $b,j\;\;x'[b,j] \;\pluseq\; \frac{x[b,j] - \mu[b]}{\sqrt{s[j]}}$
+
+\medskip
+Give backpropagation $\pluseq$ equations for computing $x.\grad[b,j]$, $\mu.\grad[j]$, and $s.\grad[j]$ from $x'.\grad[b,j]$.
+
+
+\bigskip
+{\bf Problem 4.} The equations defining a UGRNN are given below.
+
+
+\begin{eqnarray*}
+R_t[b,j] & = & \mathrm{tanh}\left(\left(\sum_i\;W^{h,R}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,R}[k,j]{\color{red} x_t[b,k]}\right) - B^R[j]\right) \\
+\\
+G_t[b,j] & = & \sigma\left(\left(\sum_i\;W^{h,G}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,G}[k,j]{\color{red} x_t[b,k]}\right) - B^G[j]\right) \\
+\\
+{\color{red} h_{t+1}[b,j]} & = & G_t[b,j]{\color{red} h_t[b,j]} + (1-G_t[b,j])R_t[b,j]
+\end{eqnarray*}
+
+(a) Rewrite this using $\pluseq$ loops instead of summations assuming that all computed tensors are initialized to zero.
+You will need to define two additional tensors for the inputs to the activation functions.
+
+\medskip
+(b) Give $\pluseq$ loops for the backward computation of tensor gradients starting from $h_{t+1}.\grad[B,J]$.  You can write the derivatives of the activation functions tanh and $\sigma$
+simply as $\mathrm{tanh}'$ and $\sigma'$ respectively.
+
+    
 \end{document}

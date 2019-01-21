@@ -44,7 +44,7 @@ DNNs generalize digital circuits.
 {\color{red} Universality Assumption:} DNNs are universally expressive (can model any function) and trainable (the desired function can be found by SGD).
 
 \vfill
-The Universality assumption is clearly false but can still guide architecture design.
+The universality assumption is clearly false but can still guide architecture design.
 
 \vfill
 Equally expressive architectures differ in trainability.  This lecture is on trainability.
@@ -124,7 +124,7 @@ increase exponentially with depth. {\bf Exploding Gradients.}
 Initialize a weight matrix (or tensor) to preserve zero-mean unit variance distributions.
 
 \vfill
-If we assume $x_i$ has zero unit mean and zero variance then we want
+If we assume $x_i$ has zero mean and unit variance then we want
 
 \vfill
 $$y_j = \sum_{j=0}^{N-1} x_i w_{i,j}$$
@@ -133,7 +133,7 @@ $$y_j = \sum_{j=0}^{N-1} x_i w_{i,j}$$
 to have zero mean and unit variance.
 
 \vfill
-Xavier initialization randomly sets $w_{i,j}$ to be uniform in the interval $\left(-\sqrt{\frac{3}{N}},\;\sqrt{\frac{3}{N}}\right)$.
+Xavier initialization randomly draws $w_{i,j}$ from a uniform distribution on the interval $\left(-\sqrt{\frac{3}{N}},\;\sqrt{\frac{3}{N}}\right)$.
 
 \vfill
 Assuming independence this gives zero mean and unit variance for $y_j$.
@@ -304,7 +304,7 @@ L_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\colo
 
 
 \slideplain{Deeper Versions use Bottleneck Residual Paths}
-We reduce the number of channels to $K < J_{\color{red} \ell}$ before doing the convolution.
+We reduce the number of channels to ${\color{red} K < J_\ell}$ before doing the convolution.
 
 {\huge
 \begin{eqnarray*}
@@ -423,47 +423,22 @@ See {\tt torch.nn.utils.clip\_grad\_norm}
 \centerline{{\large [Christopher Olah]}}
 
 \vfill
-We would like to add {\color{red} residual connections through time}.
+We would like to add {\color{red} skip connections through time}.
 
 \vfill
 However, We have to handle the fact that the same model parameters are used at every time step.
-
-\slide{Gated Skip Connections}
-
-
-$$\begin{array}{lrcl}
-\mbox{Residual Skip:} & L_{\ell+1} & = & {\color{red} \tilde{L}_\ell} + R_{\color{red} \Phi_{\ell+1}}({\color{red} L_\ell})
-\end{array}$$
-\vfill
-Here ${\color{red} \Phi_{\ell+1}}$ controls data independent data flow.
-
-\vfill
-$$\begin{array}{lrcl}
-\mbox{Gated Skip:} & h_{t+1} & = & G_t\odot {\color{red} h_t} + (1-G_t)\odot R_{\color{red} \Phi}(x_t,{\color{red} h_t}) \\
-\end{array}$$
-
-\vfill
-\begin{eqnarray*}
-(G\odot h)[b,j] & = & G[b,j] * h[b,j] \\
-\\
-(1-G_t)[b,j] & = & 1-G_t[b,j]
-\end{eqnarray*}
-
-\vfill
-Here Gating allows {\color{red} data dependent data flow.}
 
 \slideplain{Update Gate RNN (UGRNN)}
 
 {\huge
 \begin{eqnarray*}
-{\color{red} R_t[b,j]} & = & \mathrm{tanh}\left(\left(\sum_i\;W^{h,R}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,R}[k,j]{\color{red} x_t[b,k]}\right) - B^R[j]\right) \\
+R_t[b,j] & = & \mathrm{tanh}\left(\left(\sum_i\;W^{h,R}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,R}[k,j]{\color{red} x_t[b,k]}\right) - B^R[j]\right) \\
 \\
+G_t[b,j] & = & \sigma\left(\left(\sum_i\;W^{h,G}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,G}[k,j]{\color{red} x_t[b,k]}\right) - B^G[j]\right) \\
 \\
-{\color{red} G_t[b,j]} & = & \sigma\left(\left(\sum_i\;W^{h,G}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,G}[k,j]{\color{red} x_t[b,k]}\right) - B^G[j]\right) \\
+{\color{red} h_{t+1}[b,j]} & = & G_t[b,j]{\color{red} h_t[b,j]} + (1-G_t[b,j])R_t[b,j] \\
 \\
-\\
-{\color{red} h_{t+1}[b,j]} & = & G_t[b,j]{\color{red} h_t[b,j]} + (1-G_t[b,j]){\color{red} R_t[b,j]} \\
-\\
+h_{t+1}[b,J] & = & G_t[b,J] \odot h_t[b,J] + (1-G_t[b,J])\odot R_t[b,J]\;\;\mbox{(confusing version)} \\
 \\
 {\color{red} \Phi} & {\color{red} =} & {\color{red} (W^{h,R},W^{x,R},\beta^R,W^{h,G},W^{x,G},\beta^G)}
 \end{eqnarray*}
@@ -471,8 +446,14 @@ Here Gating allows {\color{red} data dependent data flow.}
 
 \slide{Gated Recurrent Unity (GRU) by Cho et al. 2014}
 
-\centerline{\includegraphics[width=6.0in]{../images/GRU}}
+\centerline{\includegraphics[width=4.0in]{../images/GRU}}
 \centerline{{\huge [Christopher Olah]}}
+
+\vfill
+The right half is a UGRNN.
+
+\vfill
+The GRU adds a gating on $h_{t-1}$ before the tanh.
 
 \slide{Long Short Term Memory (LSTM)}
 \centerline{\includegraphics[width=3.5in]{../images/LSTM}}
@@ -492,7 +473,17 @@ A systematic study [Collins, Dickstein and Sussulo 2016] states:
   Our results point to the GRU as being the most learnable of gated RNNs for shallow architectures, followed by the UGRNN.
 \end{quotation}
 
-\slideplain{END}
+\slide{Improving Trainability}
+\vfill
+  \centerline{Initialization}
+  \vfill
+  \centerline{Batch Normalization}
+  \vfill
+  \centerline{Residual Networks}
+  \vfill
+  \centerline{Gated RNNs}
+
+\slide{END}
 
 }
 \end{document}
