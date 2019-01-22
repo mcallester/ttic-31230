@@ -262,7 +262,7 @@ R_{\color{red} \ell+1}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+1}[X,Y,J
 L_{\color{red} \ell+1}[b,x,y,j] & = & L_{\color{red}\ell}[b,x,y,j] + R_{\color{red} \ell+1}[b,x,y,j]
 \end{eqnarray*}
 
-\vfill I will use capital letter indeces to denote entire tensors and lower case letters for particular indeces.
+\vfill I will use capital letter indices to denote entire tensors and lower case letters for particular indeces.
 
 \anaslide{Simple Residual Skip Connections in CNNs (stride 1)}
 
@@ -304,24 +304,24 @@ L_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\colo
 
 
 \slideplain{Deeper Versions use Bottleneck Residual Paths}
-We reduce the number of channels to ${\color{red} K < J_\ell}$ before doing the convolution.
+We reduce the number of features to ${\color{red} K < J}$ before doing the convolution.
 
 {\huge
 \begin{eqnarray*}
-A_{\color{red} \ell}[B,X_{\color{red} \ell},Y_{\color{red} \ell},K] & = & \mathrm{Conv}'(\Phi_{\color{red} \ell}^A{\color{red} [1,1,J_{\color{red} \ell},K]},L_{\color{red} \ell}[B,X_{\color{red} \ell},Y_{\color{red} \ell},J_{\color{red} \ell}]) \\
+U[B,X,Y,{\color{red} K}] & = & \mathrm{Conv}'(\Phi^A_{\ell+1}{ [1,1,{\color{red} J},{\color{red} K}]},L_\ell[B,X,Y,{\color{red} J}]) \\
 \\
-B_{\color{red} \ell}[B,X_{\color{red} \ell+1},Y_{\color{red} \ell+1},K] & = & \mathrm{Conv}'(\Phi_{\color{red} \ell}^B{\color{red}[3,3,K,K]},A_{\color{red} \ell}[B,X_{\color{red} \ell},Y_{\color{red} \ell},K],\;\mathrm{stride}\;s) \\
+V[B,X,Y,{\color{red} K}] & = & \mathrm{Conv}'(\Phi^B_{\ell+1}{[3,3,{\color{red} K},{\color{red} K}]},U[B,X,Y,{\color{red} K}]) \\
 \\
-R_{\color{red} \ell+1}[B,X_{\color{red} \ell+1},Y_{\color{red} \ell+1},J_{\color{red} \ell+1}] & = & \mathrm{Conv}'(\Phi_{\color{red} \ell}^R{\color{red} [1,1,K,J_{\color{red} \ell+1}]},B_{\color{red} \ell}[B,X_{\color{red} \ell+1},Y_{\color{red} \ell+1},K]) \\
+R[B,X,Y,{\color{red} J}] & = & \mathrm{Conv}'(\Phi^R_{\ell+1}{ [1,1,{\color{red} K},{\color{red} J}]},V[B,X,Y,{\color{red} K}]) \\
 \\
-L_{\color{red} \ell+1} & = & \tilde{L}_{\color{red} \ell+1} + R_{\color{red} \ell+1}
+L_{ \ell+1} & = & L_\ell + R
 \end{eqnarray*}
 }
 
 \vfill
 Here $\mathrm{CONV}'$ may include batch normalization and/or an activation function.
 
-\slide{A General Resdual Connection}
+\slide{A General Residual Connection}
 
 $${\color{red} y = \tilde{x} + R(x)}$$
 
@@ -332,7 +332,7 @@ Where $\tilde{x}$ is either $x$ or a version of $x$ adjusted to match the shape 
 
 For {\color{red} $u[I]$} and {\color{red} $v[J]$} we let {\color{red} $(u;w)[I+J]$} denote vector concatenation.
 \vfill
-$$(u;v)[k] - \left\{\begin{array}{l} u[k]\;\mbox{for $k < J$} \\ v[k-I] \;\mbox{otherwise} \end{array}\right.$$
+$$(u;v)[k] = \left\{\begin{array}{l} u[k]\;\mbox{for $k < J$} \\ v[k-I] \;\mbox{otherwise} \end{array}\right.$$
 
 \vfill
 $$\mbox{for}\;b,x,y\;\;L_{\color{red} \ell + 1}[b,x,y,J_{\color{red} \ell} + J_{\color{red} R}] = L_\ell[b,x,y,J_{\color{red} \ell}];R[b,x,y,J_{\color{red} R}]$$
@@ -409,7 +409,7 @@ However the gradients can still explode.
 We can dampen the effect of exploding gradients by clipping them before applying SGD.
 
 \vfill
-$$W.\mathrm{grad} = \left\{\begin{array}{l} W.\mathrm{grad} \;\;\;\mbox{if $||W.\mathrm{grad}|| \leq n_{\mathrm{max}}$} \\
+$$W.\mathrm{grad'} = \left\{\begin{array}{l} W.\mathrm{grad} \;\;\;\mbox{if $||W.\mathrm{grad}|| \leq n_{\mathrm{max}}$} \\
                                                       \\ \\
                                                       n_{\mathrm{max}} \; W.\mathrm{grad} / ||W.\mathrm{grad}|| \;\; \mbox{otherwise}
 \end{array} \right.$$
@@ -436,9 +436,9 @@ R_t[b,j] & = & \mathrm{tanh}\left(\left(\sum_i\;W^{h,R}[i,j]{\color{red} h_t[b,i
 \\
 G_t[b,j] & = & \sigma\left(\left(\sum_i\;W^{h,G}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,G}[k,j]{\color{red} x_t[b,k]}\right) - B^G[j]\right) \\
 \\
-{\color{red} h_{t+1}[b,j]} & = & G_t[b,j]{\color{red} h_t[b,j]} + (1-G_t[b,j])R_t[b,j] \\
+{\color{red} h_{t+1}[b,j]} & = & {\color{red} G_t[b,j]h_t[b,j] + (1-G_t[b,j])R_t[b,j]} \\
 \\
-h_{t+1}[b,J] & = & G_t[b,J] \odot h_t[b,J] + (1-G_t[b,J])\odot R_t[b,J]\;\;\mbox{(confusing version)} \\
+h_{t+1}[b,J] & = & G_t[b,J] \odot h_t[b,J] + (1-G_t[b,J])\odot R_t[b,J]\;\;\mbox{(alternative notation)} \\
 \\
 {\color{red} \Phi} & {\color{red} =} & {\color{red} (W^{h,R},W^{x,R},\beta^R,W^{h,G},W^{x,G},\beta^G)}
 \end{eqnarray*}
