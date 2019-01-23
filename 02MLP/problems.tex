@@ -111,11 +111,11 @@ Give backpropagation $\pluseq$ equations for computing $x.\grad[b,j]$, $\mu.\gra
 
 
 \begin{eqnarray*}
-R_t[b,j] & = & \mathrm{tanh}\left(\left(\sum_i\;W^{h,R}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,R}[k,j]{\color{red} x_t[b,k]}\right) - B^R[j]\right) \\
+R_t[b,j] & = & \mathrm{tanh}\left(\left(\sum_i\;W^{h,R}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,R}[j,k]{\color{red} x_t[b,k]}\right) - B^R[j]\right) \\
 \\
-G_t[b,j] & = & \sigma\left(\left(\sum_i\;W^{h,G}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,G}[k,j]{\color{red} x_t[b,k]}\right) - B^G[j]\right) \\
+G_t[b,j] & = & \sigma\left(\left(\sum_i\;W^{h,G}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,G}[j,k]{\color{red} x_t[b,k]}\right) - B^G[j]\right) \\
 \\
-{\color{red} h_{t+1}[b,j]} & = & G_t[b,j]{\color{red} h_t[b,j]} + (1-G_t[b,j])R_t[b,j]
+{\color{red} h_t[b,j]} & = & G_t[b,j]{\color{red} h_{t-1}[b,j]} + (1-G_t[b,j])R_t[b,j]
 \end{eqnarray*}
 
 (a) Rewrite this using $\pluseq$ loops instead of summations assuming that all computed tensors are initialized to zero.

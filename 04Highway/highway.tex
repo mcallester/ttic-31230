@@ -368,29 +368,11 @@ $$\mbox{for}\;b,x,y\;\;L_{\color{red} \ell + 1}[b,x,y,J_{\color{red} \ell} + J_{
 We use two input linear threshold units.
 
 {\huge
-$${\color{red} h_{t+1}[b,j]} = \sigma\left(\left(\sum_i\;W^{h,h}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,h}[k,j]{\color{red} x_t[b,k]}\right) - B[j]\right)$$
+$${\color{red} h_t[b,j]} = \sigma\left(\left(\sum_i\;W^{h,h}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,h}[j,k]{\color{red} x_t[b,k]}\right) - B[j]\right)$$
 }
 \vfill
-$$\mathrm{Parameter}\;{\color{red} \Phi = (W^{h,h}[J,J],\;W^{x,h}[K,J],\;B[J])}$$
+$$\mathrm{Parameter}\;{\color{red} \Phi = (W^{h,h}[J,J],\;W^{x,h}[J,K],\;B[J])}$$
 
-
-\slide{Time as Depth}
-
-\centerline{\includegraphics[width=3.5in]{../images/RNN}}
-\centerline{{\large [Christopher Olah]}}
-
-\vfill
-We would like the RNN to {\color{red} remember and use} information from much earlier inputs.
-
-
-\vfill
-All the issues with depth now occur through time.
-
-\vfill
-However, for RNNs {\color{red} at each time step we use the same model parameters.}
-
-\vfill
-In CNNs {\color{red} at each layer uses its own model parameters.}
 
 \slide{Exploding and Vanishing Gradients}
 
@@ -417,6 +399,24 @@ $$W.\mathrm{grad'} = \left\{\begin{array}{l} W.\mathrm{grad} \;\;\;\mbox{if $||W
 \vfill
 See {\tt torch.nn.utils.clip\_grad\_norm}
 
+\slide{Time as Depth}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+\vfill
+We would like the RNN to {\color{red} remember and use} information from much earlier inputs.
+
+
+\vfill
+All the issues with depth now occur through time.
+
+\vfill
+However, for RNNs {\color{red} at each time step we use the same model parameters.}
+
+\vfill
+In CNNs {\color{red} at each layer uses its own model parameters.}
+
 \slide{Skip Connections Through Time}
 
 \centerline{\includegraphics[width=3.5in]{../images/RNN}}
@@ -432,15 +432,15 @@ However, We have to handle the fact that the same model parameters are used at e
 
 {\huge
 \begin{eqnarray*}
-R_t[b,j] & = & \mathrm{tanh}\left(\left(\sum_i\;W^{h,R}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,R}[k,j]{\color{red} x_t[b,k]}\right) - B^R[j]\right) \\
+R_t[b,j] & = & \mathrm{tanh}\left(\left(\sum_i\;W^{h,R}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,R}[j,k]{\color{red} x_t[b,k]}\right) - B^R[j]\right) \\
 \\
-G_t[b,j] & = & \sigma\left(\left(\sum_i\;W^{h,G}[i,j]{\color{red} h_t[b,i]}\right) + \left(\sum_k W^{x,G}[k,j]{\color{red} x_t[b,k]}\right) - B^G[j]\right) \\
+G_t[b,j] & = & \sigma\left(\left(\sum_i\;W^{h,G}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,G}[j,k]{\color{red} x_t[b,k]}\right) - B^G[j]\right) \\
 \\
-{\color{red} h_{t+1}[b,j]} & = & {\color{red} G_t[b,j]h_t[b,j] + (1-G_t[b,j])R_t[b,j]} \\
+{\color{red} h_t[b,j]} & = & {\color{red} G_t[b,j]h_{t-1}[b,j] + (1-G_t[b,j])R_t[b,j]} \\
 \\
-h_{t+1}[b,J] & = & G_t[b,J] \odot h_t[b,J] + (1-G_t[b,J])\odot R_t[b,J]\;\;\mbox{(alternative notation)} \\
+h_t[b,J] & = & G_t[b,J] \odot h_{t-1}[b,J] + (1-G_t[b,J])\odot R_t[b,J]\;\;\mbox{(alternate notation)} \\
 \\
-{\color{red} \Phi} & {\color{red} =} & {\color{red} (W^{h,R},W^{x,R},\beta^R,W^{h,G},W^{x,G},\beta^G)}
+{\color{red} \Phi} & {\color{red} =} & {\color{red} (W^{h,R},W^{x,R},B^R,W^{h,G},W^{x,G},B^G)}
 \end{eqnarray*}
 }
 
