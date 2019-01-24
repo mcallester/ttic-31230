@@ -185,7 +185,7 @@ We are seeking a nonlinear transformation on hyperparameters yielding robust con
 Let $\eta'$ be a learning rate that is appropriate without momentum ($N_g = 1$).
 
 \vfill
-We will solve for a learning rate $\eta$ as a function of $N_g$ so as to minimize the perturbance of SGD
+We will solve for a learning rate $\eta$ as a function of $N_g$ so as to minimize the perturbation of SGD
 as we increase $N_g$.
 
 \slide{An Equivalent Formulation of Momentum}
@@ -235,7 +235,7 @@ batches.
 Let $\eta'$ be a learning rate appropriate for $N_g = 1$ and $B = 1$.
 
 \vfill
-We will solve for $\eta$ as a function of $\eta'$ and $B$ so as to minimize the perturbance of SGD as we increase $B$.
+We will solve for $\eta$ as a function of $\eta'$ and $B$ so as to minimize the perturbation of SGD as we increase $B$.
 
 \slide{Solving for $\eta$ as a function of $B$}
 
@@ -279,7 +279,7 @@ We expect conjugacy for the parameters $\eta'$ and $B$.
 Let $N'_g$ be a momentum parameter appropriate for $B=1$.
 
 \vfill
-We will solve for $N_g$ as a function of $B$ so as to minimize the perturbance of SGD as we increase $B$.
+We will solve for $N_g$ as a function of $B$ so as to minimize the perturbation of SGD as we increase $B$.
 
 \vfill
 For batch size $B$, $\hat{\mu}_t$ is an average of $\hat{g}$ over $N_gB$ gradient values.
