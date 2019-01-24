@@ -55,7 +55,7 @@ Suppose that $y$ is a scalar, and consider
 \begin{eqnarray*}
  \mathrm{loss}(\beta,y) & = & \frac{1}{2}(\beta - y)^2 \\
  \\
-  g & = & E_{y \sim \mathrm{Pop}}\; \nabla_\beta\;\frac{1}{2}(\beta - y)^2 \\
+  g & = &  \nabla_\beta\;E_{y \sim \mathrm{Pop}}\;\frac{1}{2}(\beta - y)^2 \\
   \\
   & = & \beta - E_{y \sim \mathrm{Pop}} \; y \\
   \\
@@ -140,26 +140,10 @@ where we have
 
 $$\sum_{n\geq 0} \left(1-\frac{1}{N}\right)^{-n} = N$$
 
-\slide{RMSProp}
-
-RMSProp is based on a running average of $\hat{g}[i]^2$ for each real-valued model parameter $i$.
-
-\begin{eqnarray*}
-{\color{red} s_t[i]} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
-\\
-{\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i] + \epsilon}}\;\; \hat{g}_t[i]} \\
-\\
-\\
-s[i] & \approx & E\;\hat{g}[i]^2  =  g[i]^2 + \sigma[i]^2
-\end{eqnarray*}
-
-\vfill
-We should expect $\sigma[i] >> g[i]$.
-
 \slide{Momentum}
 
 \begin{eqnarray*}
-  {\color{red} v_t} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N}\right) v_{t-1} + \eta * \hat{g}_t} \\
+  {\color{red} v_t} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_g}\right) v_{t-1} + \eta * \hat{g}_t} \;\;\;\mbox{$N_g$ is typically 10 or 100}\\
   \\
   {\color{red} \Phi_{t+1}} & {\color{red} =} & {\color{red} \Phi_t -  v_t} \\
 \end{eqnarray*}
@@ -177,34 +161,217 @@ However, second order analyses are controversial in Deep Learning.
 \vfill
 We can perhaps get insight by reparameterizing the momentum equations.
 
-\slide{A Reparameterization}
+\slide{We are Entering a Twilight Zone (TZ)}
+
+\centerline{\includegraphics[width = 6in]{../images/Twilight}}
+
+\vfill
+The twilight zone is material for which I do not know of a reference. 
+
+\slide{Conjugacy of SGD Hyperparameters}
+
+For an objective function $f(x,y)$ we say that $x$ and $y$ are conjugate if changing $x$ does effect the loss gradient for $y$.
+
+\vfill
+In other words if
+
+{\color{red} $$\frac{\partial f(x,y)}{\partial x \partial y} = 0$$}
+
+\vfill
+We are seeking a nonlinear transformation on hyperparameters yielding robust conjugacy.
+
+\slide{Solving for $\eta$ in terms of $N_g$ (TZ)}
+
+Let $\eta'$ be a learning rate that is appropriate without momentum ($N_g = 1$).
+
+\vfill
+We will solve for a learning rate $\eta$ as a function of $N_g$ so as to minimize the perturbance of SGD
+as we increase $N_g$.
+
+\slide{An Equivalent Formulation of Momentum}
 
 \begin{eqnarray*}
-v_t & = & \left(1-\frac{1}{N}\right) v_{t-1} + \eta \hat{g}_t \\
+{\color{red} v_t} & = & \left(1-\frac{1}{N_g}\right) v_{t-1} + \eta \hat{g}_t \\
 \\
-& = & \left(1-\frac{1}{N}\right) v_{t-1} + \frac{1}{N}(N\eta \hat{g}_t) \\
+& = & \left(1-\frac{1}{N_g}\right) v_{t-1} + \frac{1}{N_g}({\color{red} N_g\eta \hat{g}_t}) \\
 \\
-& = & N\eta\mu_t\;\;\mbox{for}\;{\color{red} \mu_t = \left(1-\frac{1}{N}\right)\mu_{t-1} + \frac{1}{N} \hat{g}_t} \\
+{\color{red} v_t} & = & {\color{red} N_g\eta\mu_t}\;\;\mbox{for}\;{\color{red} \mu_t = \left(1-\frac{1}{N_g}\right)\mu_{t-1} + \frac{1}{N_g} \hat{g}_t} \\
 \\
 \Phi_{t+1} & = & \Phi_t - v_t \\
 \\
-& = & \Phi_t - {\color{red} N\eta\mu_t} 
+{\color{red} \Phi_{t+1}} & {\color{red} =} & {\color{red} \Phi_t - N_g\eta\mu_t} 
 \end{eqnarray*}
 
-\slide{A Reparameterization}
+\slide{Solving for $\eta$ (TZ)}
 
-\begin{eqnarray}
-{\color{red} \mu_t} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_{\mu}}\right)\mu_{t-1} + \frac{1}{N_{\mu}} \hat{g}_t}\;\;N_{\mu}\;\mbox{typically 10 or 100} \nonumber \\
-\nonumber \\
-\label{eq:momentum1}
-\Phi_{t+1} & = & \Phi_t - N\eta\mu_t \\
-\nonumber\\
- \label{eq:momentum2}
- & = & {\color{red} \Phi_t - \eta'\mu_t}
-\end{eqnarray}
+\begin{eqnarray*}
+\mu_t & = &  \left(1-\frac{1}{N_g}\right)\mu_{t-1} + \frac{1}{N_g} \hat{g}_t \\
+\\
+\mbox{we have}\;\Phi_{t+1}& = & {\color{red} \Phi_t - N_g\eta\;\mu_t} \\
+\\
+\mbox{unperturbed is}\;\Phi_{t+1}& = & {\color{red} \Phi_t - \eta'\mu_t}
+\end{eqnarray*}
 
-My intuition: For the parameterization $N$ and $\eta'$ defined by (\ref{eq:momentum2}) it should be possible to optimize $N$ and $\eta'$ largely independently.
-I would not expect this to be true for the $N$ and $\eta$ defined by (\ref{eq:momentum1}).
+\vfill
+This gives {\color{red} $\eta = \eta'/N_g$}.
+
+\vfill
+We expect that that $\eta'$ and $N_g$ exhibit more independence (conjugacy) than $\eta$, $N_g$.
+
+\slide{Scaling $\eta$ and $N_g$ with Batch Size}
+
+Recent work has show that scaling hyper-parameters with the batch size can lead to effective learning with very large (highly parallel)
+batches.
+
+\vfill
+{\bf Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour}, Goyal et al., 2017.
+
+\vfill
+{\bf Don't Decay the Learning Rate, Increase the Batch Size}, Smith et al., 2018
+
+
+\slide{Solving for $\eta$ as a Function of $B$}
+
+Let $\eta'$ be a learning rate appropriate for $N_g = 1$ and $B = 1$.
+
+\vfill
+We will solve for $\eta$ as a function of $\eta'$ and $B$ so as to minimize the perturbance of SGD as we increase $B$.
+
+\slide{Solving for $\eta$ as a function of $B$}
+
+Consider two consecutive updates for a batch size of 1 with learning rate $\eta'$.
+
+\begin{eqnarray*}
+  \Phi_{t+1} & = & \Phi_t - \eta' \nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t) \\
+  \\
+  \Phi_{t+2} & = & \Phi_{t+1} - \eta' \nabla_\Phi \mathrm{loss}({\color{red} \Phi_{t+1}},x_{t+1},y_{t+1}) \\\
+  \\
+  & \approx & \Phi_{t+1} - \eta' \nabla_\Phi \mathrm{loss}({\color{red} \Phi_t},x_{t+1},y_{t+1}) \\
+  \\
+  & = & \Phi_t - \eta'((\nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t)) + (\nabla_\Phi \mathrm{loss}(\Phi_t,x_{t+1},y_{t+1})))
+\end{eqnarray*}
+
+\slide{Solving for $\eta$ as a function of $B$}
+
+Let $\eta$ be the learning rate for batch size $B$.
+
+\vfill
+\begin{eqnarray*}
+  \Phi_{t+2} & \approx & \Phi_t - \eta'((\nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t)) + (\nabla_\Phi \mathrm{loss}(\Phi_t,x_{t+1},y_{t+1}))) \\
+  \\
+  & = & \Phi_t - 2\eta'\;\hat{g}\;\;\;\mathrm{for}\;\;B=2
+\end{eqnarray*}
+
+\vfill
+We have {\color{red} $\Phi \;\minuseq \; \eta\;\hat{g}$}
+
+\vfill
+unperturbed is {\color{red} $\Phi \;\minuseq \; B\eta'\;\hat{g}$}
+
+\vfill
+This gives {\color{red} $\eta = B \eta'$}.
+
+\vfill
+We expect conjugacy for the parameters $\eta'$ and $B$.
+
+\slide{Solving for $N_g$ as a Function of $B$}
+
+Let $N'_g$ be a momentum parameter appropriate for $B=1$.
+
+\vfill
+We will solve for $N_g$ as a function of $B$ so as to minimize the perturbance of SGD as we increase $B$.
+
+\vfill
+For batch size $B$, $\hat{\mu}_t$ is an average of $\hat{g}$ over $N_gB$ gradient values.
+
+\vfill
+SGD seems minimally perturbed by
+$$N_gB = N'_g\;\;\;\mbox{or}\;\;\;{\color{red} N_g = N'_g/B}$$
+
+\vfill
+We expect conjugacy for the parameters $N'_g$ and $B$.
+
+\slide{Putting It Together (TZ)}
+
+{\color{red}
+\begin{eqnarray*}
+N_g & = & \min(1,N'_g/B) \\
+\\
+\eta & = & B\eta'/N_g
+\end{eqnarray*}
+}
+
+\vfill
+We expect conjugacy for $\eta'$, $N'_g$ and $B$.
+
+\slide{RMSProp}
+
+RMSProp is based on a running average of $\hat{g}[i]^2$ for each real-valued model parameter $i$.
+
+\begin{eqnarray*}
+{\color{red} s_t[i]} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
+\\
+{\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i] + \epsilon}}\;\; \hat{g}_t[i]}
+\end{eqnarray*}
+
+
+\slide{RMSProp}
+\begin{eqnarray*}
+{\color{red} s_t[i]} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
+\\
+{\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i] + \epsilon}}\;\; \hat{g}_t[i]}
+\end{eqnarray*}
+
+\vfill
+For $B = 1$ we have $s[i] \approx E\;\hat{g}[i]^2  =  g[i]^2 + \sigma[i]^2$
+
+\vfill
+We should expect $\sigma[i] >> g[i]$.
+
+\vfill
+We can therefore think of RMSProp as {\color{red} $\Phi[i] \;\minuseq\; \eta(\hat{g}[i]/\sigma[i])$}
+
+\slide{RMSProp is Theoretically Mysterious}
+
+{\color{red} $$\Phi[i] \;\minuseq \; \eta\;\frac{\hat{g}[i]}{\sigma[i]}\;\;(1)\hspace{5em}\Phi[i] \;\minuseq \; \eta\;\frac{\hat{g}[i]}{\sigma^2[i]}\;\;(2)$$}
+
+\vfill
+Although (1) seems to work better, (2) is better motivated theoretically.  To see this we can consider units.
+
+\vfill
+If parameters have units of ``weight'', and loss is in bits, then (2) type checks with $\eta$ having units of bits --- the numerical value of $\eta$
+has no dependence on the choice of the weight unit.
+
+\vfill
+Consistent with the dimensional analysis, many theoretical analyses support (2) over (1) contrary to apparent empirical performance.
+
+\slide{Scaling $\eta$ with Batch Size for RMSProp (TZ)}
+
+Current RMSProp framework implementations do not scale well with batch size.
+
+\vfill
+The meaning of  $\hat{g}_i^2$ changes when increasing $B$.
+
+\vfill
+$\hat{g}_i$ is an average over a batch --- averaging reduces variance.
+
+\begin{eqnarray*}
+{\color{red} E\; \hat{g}_i^2} & {\color{red} =} & {\color{red} = \; \mu_i^2 + \frac{\sigma_i^2}{B}}
+\end{eqnarray*}
+
+
+\slide{Scaling $\eta$ with Batch Size for RMSProp (TZ)}
+
+\begin{eqnarray*}
+{\color{red} E\; \hat{g}_i^2} & {\color{red} = } &{\color{red} \mu_i^2 + \frac{\sigma_i^2}{B}}
+\end{eqnarray*}
+
+\vfill
+To preserve the behavior of RMSProp while increasing $B$ we need a running average of $g_{b,i}^2$ for individual batch elements $b$.
+
+\vfill
+This requires augmenting backpropagation to compute an average (or sum) of $g_{b,i}^2$ as well as an average of
+$g_{b,i}$ within each batch.
 
 \slide{Adam --- Adaptive Momentum}
 
@@ -236,7 +403,10 @@ The following running average maintains the invariant that $\hat{\mu}_t$ is exac
 \begin{eqnarray*}
 \hat{\mu}_0 & = & 0 \\
 \\
-\hat{\mu}_t & = & \left(1-\frac{1}{t}\right)\hat{\mu}_{t-1} + \left(\frac{1}{t}\right)x_t
+\hat{\mu}_t & = & \left(\frac{t-1}{t}\right)\hat{\mu}_{t-1} + \left(\frac{1}{t}\right)x_t \\
+\\
+\\
+& = & \left(1-\frac{1}{t}\right)\hat{\mu}_{t-1} + \left(\frac{1}{t}\right)x_t
 \end{eqnarray*}
 
 \vfill
@@ -267,72 +437,90 @@ The published version of Adam has a more obscure form of bias correction which y
 \Phi_{t+1}[i] & =  & \Phi_t - \frac{\eta}{\sqrt{s_{t}[i] + \epsilon}}\;\;\mu_{t}[i]
 \end{eqnarray*}
 
-\slide{Scaling $\eta$, $N_{\mu}$ and $N_s$ with Batch Size}
+\slide{Annealing the Learning Rate}
 
-Recent work has show that scaling hyper-parameters with the batch size can lead to effective learning with very large (highly parallel)
-batches.
-
-\vfill
-{\bf Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour}, Goyal et al., 2017.
+\centerline{\includegraphics[width = 7in]{../images/annealing}}
 
 \vfill
-{\bf Don't Decay the Learning Rate, Increase the Batch Size}, Smith et al., 2018
+These Plots are from the original ResNet paper.  Left plot is for CNNs without residual skip connections, the right plot is ResNet.
 
-\slide{Scaling $\eta$}
+\vfill
+Thin lines are training error, thick lines are validataion error.
 
-Consider two consecutive updates for a batch size of 1 with learning rate $\eta_1$.
+\vfill
+In all cases $\eta$ is reduced twice, each time by a factor of 2.
+
+\slide{A Quadratic Basin Annealing Theorem (TZ)}
+
+\vfill
+In practice annealed SGD will converge to a local optimum.
+
+\vfill
+We consider stationary distributions restricted to a neighborhood of a (local) optimim $\Phi^*$ satisfying
 
 \begin{eqnarray*}
-  \Phi_{t+1} & = & \Phi_t - \eta_1 \nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t) \\
-  \\
-  \Phi_{t+2} & = & \Phi_{t+1} - \eta_1 \nabla_\Phi \mathrm{loss}(\Phi_{t+1},x_{t+1},y_{t+1}) \\\
-  \\
-  & \approx & \Phi_{t+1} - \eta_1 \nabla_\Phi \mathrm{loss}(\Phi_t,x_{t+1},y_{t+1}) \\
-  \\
-  & = & \Phi_t - \eta_1((\nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t)) + (\nabla_\Phi \mathrm{loss}(\Phi_t,x_{t+1},y_{t+1})))
+{\cal L}(\Phi) & = & E_i\;{\cal L}_i(\Phi) \\
+\\
+{\cal L}_i(\Phi^* + \Delta \Phi) & = & {\cal L}_i + g_i \Delta \Phi + \frac{1}{2} \Delta\Phi^\top H_i \Delta\Phi \\
+\\
+E_i\; g_i & = & 0\\
+\\
+E_i\; H_i & & \mbox{is positive definite}
 \end{eqnarray*}
 
-\slide{Scaling $\eta$}
+\slide{A Quadratic Basin Annealing Theorem (TZ)}
 
-Let $\eta_B$ be the learning rate for batch size $B$.
+Theorem:
+
+$${\cal L}(0) = {\cal L}(\Phi^*)\;\;\;\;\;\;\;\;\;\;\;\;{\color{red} \left.\frac{\partial {\cal L}(\eta)}{\partial \eta}\right|_{\eta = 0} \;\;=\;\; \frac{1}{4}\; E_i\; ||g_i||^2}$$
+
+\slide{Analyzing Stationary Distributions (TZ)}
+
+$${\cal L}(\eta) \approx {\cal L}(\Phi^*) + \eta \left(E_I ||g_i||^2\right)$$
 
 \vfill
+$${\cal L}(\Phi^*) = {\cal L}(\eta) - 2({\cal L}(\eta) - {\cal L}(\eta/2)) = 2{\cal L}(\eta/2) - {\cal L}(\eta)$$
+
+\vfill
+\centerline{\includegraphics[width = 7in]{../images/annealing}}
+
+\slide{Proof: Observation 1 (TZ)}
+
 \begin{eqnarray*}
-  \Phi_{t+2} & \approx & \Phi_t - \eta_1((\nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t)) + (\nabla_\Phi \mathrm{loss}(\Phi_t,x_{t+1},y_{t+1}))) \\
-  \\
-  & = & \Phi_t - 2\eta_1\;\hat{g}\;\;\;\mathrm{for}\;\;B=2
+{\cal L}(\eta) & = & \;\;\; E_{\Delta \Phi \sim P_\eta}\;E_i \;\;\;\; {\cal L}_i + g_i\Delta _\Phi + \frac{1}{2}\;\Delta \Phi^\top H_i \Delta \Phi \\
+\\
+& = & E_i\; {\cal L}_i + E_{\Delta \Phi \sim P_\eta} \;\;\;\;(E_i\;g_i) \;\Delta \Phi + \frac{1}{2}\;\Delta \Phi^\top (E_i\; H_i) \Delta \Phi \\
+\\
+& = & {\cal L}(\Phi^*)\;\; + \;\; E_{\Delta \Phi \sim P_\eta}\;\;\;\frac{1}{2}\;\Delta \Phi^\top (E_i\;H_i) \Delta \Phi
 \end{eqnarray*}
 
-\vfill
-Hence two updates with $B=1$ at learning rate $\eta_1$ is the same as one update at $B=2$ and learning rate $2\eta_1$.
+\slide{Proof: Step 1 (TZ)}
+Because $P_\eta$ is a stationary distribution we must have
+
+$$E_{\Delta \Phi \sim P_\eta}E_i\; ||\Delta \Phi - \eta (g_i + H_i\Delta \Phi)||^2 = E_{\Delta \Phi \sim P_\eta}\; ||\Delta \Phi||^2$$
 
 \vfill
-$$\eta_2 = 2\eta_1,\;\;\;\;\;\;{\color{red} \eta_B = B\eta_1}$$
-
-\slide{Scaling $N_\mu$}
-
-Let $N_{\mu,B}$ be the momentum parameter to be used with batch size $B$.
+$$E_{\Delta \Phi \sim P_\eta}E_i\;-2\eta \Delta \Phi^\top (g_i + H_i\Delta \Phi) +\eta^2||(g_i + H_i\Delta \Phi)||^2 = 0$$
 
 \vfill
-For batch size $B$, $\hat{\mu}_t$ is averaging over $N_{\mu,B}B$ gradient values.
+$$E_{\Delta \Phi \sim P_\eta}\;\left(\frac{1}{2}\Delta \Phi^\top (E_i \;H_i)\Delta \Phi\right) = \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_i \;||(g_i + H_i\Delta \Phi)||^2$$
 
 \vfill
-Holding the number of included gradients constant gives
+$${\color{red} {\cal L}(\eta)  = {\cal L}(\Phi^*) + \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_i \;||(g_i + H_i\Delta \Phi)||^2}$$
 
-\vfill
-$${\color{red} N_{\mu,B}B = N_{\mu,1}\;\;\;\mbox{or}\;\;\;N_{\mu,B} = N_{\mu,1}/B}$$
+\slide{Proof Step 2 (TZ)}
 
-\slide{Scaling $N_s$}
-
-The simple analysis for $N_{\mu}$ fails for $N_s$.
-
-\vfill
-To estimate $E\;g[i]^2$ we should average $\hat{g}_t[i]^2$ over batch elements rather than batch averages.
-
-\vfill
-The parameter $N_s$ should be a number of gradients (batch elements) rather than a number of batches,
-
-\vfill Under this semantics, $N_s$ should be constant independent of batch size.
+\begin{eqnarray*}
+{\color{red} {\cal L}(\eta)}  & {\color{red} =} & {\color{red} {\cal L}(\Phi^*) + \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_i \;||(g_i + H_i\Delta \Phi)||^2} \\
+\\
+{\color{red} \left.\frac{\partial {\cal L}(\eta)}{\partial \eta}\right|_{\eta = 0}} & = & \frac{1}{4} \; \lim_{\eta \rightarrow 0} \; E_{\Delta \Phi \sim P_\eta}\; E_i \;||(g_i + H_i\Delta \Phi)||^2 \\
+\\
+\\
+& = & \frac{1}{4} \; E_i\;\lim_{\eta \rightarrow 0}\;E_{\Delta \Phi \sim P_\eta} \;||(g_i + H_i\Delta \Phi)||^2 \\
+\\
+\\
+& {\color{red} =} & {\color{red} \frac{1}{4}\; E_i\;||g_i||^2}
+\end{eqnarray*}
 
 \slide{Gradient Flow}
 
@@ -403,28 +591,57 @@ But the number of updates within each block grows as $\sqrt{N}$ and hence the av
 
 \slide{Langevin Dynamics}
 
-Consider actual gradient descent
-$$\Phi_{j+1} = \Phi_j - \eta\hat{g}_j$$
+Consider SGD with $B = 1$.
+
+$$\Phi \;\minuseq\; \eta\hat{g}$$
 
 \vfill
-Inspired by gradient flow, we define time by $t = \eta i$.
+As with gradient flow, for $N$ steps of SGD we define $t = N \eta$.
 
 \vfill
-For $\Delta t$ large compared to $\eta$ (so that it corresponds to many SGD updates), but still small enough
-so that the gradient does not change as the updates are made, we have that $\Phi(t + \Delta t)$ is distributed as
-$$\Phi(t + \Delta t) \approx \Phi(t) -g(\Phi)\Delta t + \sqrt{\eta} \epsilon \sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma)$$
-where $\Sigma$ is the covariance matrix of the random vector $\hat{g}$.
+In Langevin dynamics we hold $\eta > 0$ fixed.
+
+\vfill
+We then consider $\Delta t$ large compared to $\eta$ (so that it corresponds to many SGD updates) but
+small enough so that the gradient distribution does not change during the interval $\Delta t$.
+
+\slide{Langevin Dynamics}
+
+If the mean gradient $g(\Phi)$ is approximately constant over the interval $\Delta t = N \eta$ we have
+
+$$\Phi(t + \Delta t)  \approx \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i)$$
+
+\vfill
+The Random variables in the last term have zero mean.
+
+\vfill
+By the law of large numbers a sum (not the average) of $N$ random vectors will approximate a Gaussian distribution where the standard deviation
+grows like $\sqrt{N}$.
+
+\slide{Langevin Dynamics}
+
+Let $\Sigma$ be the covariance matrix of the random variable $\hat{g}$ and assume this is approximately constant over the interval $\Delta t$.
+
+\vfill
+Let $\epsilon$ be a zero mean Gaussian random variable with the same covariance matrix $\Sigma$.
+
+\begin{eqnarray*}
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i) \\
+\\
+& \approx & \Phi(t) -g(\Phi)\Delta t + \eta \epsilon \sqrt{N} \\
+\\
+& = & \Phi(t) -g(\Phi)\Delta t + \eta \epsilon \sqrt{\frac{\Delta t}{\eta}}
+\end{eqnarray*}
+
 
 \slide{Langevin Dynamics}
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \sqrt{\eta} \epsilon \sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma) \\
-\\
-\Sigma & = & E_i\;(\hat{g}_i-g)(\hat{g}_i-g)^\top
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \sqrt{\eta} \epsilon \sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma)
 \end{eqnarray*}
 
 \vfill
-It turns out that one can define a continuous time stochastic process --- Langevin dynamics --- defined by the notation
+This can be modeled by a continuous time stochastic process --- Langevin dynamics --- defined by the notation
 
 $$d\Phi =  -g(\Phi)dt + \sqrt{\eta} \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma)$$
 
@@ -432,49 +649,126 @@ $$d\Phi =  -g(\Phi)dt + \sqrt{\eta} \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim
 This is a stochastic differential equation.
 
 \vfill
-If ${\cal L}(\Phi)$ is constant (a plateau) and $\Sigma(\Phi)$ is constant we get Brownian motion.
+If ${\cal L}$ is constant and $\Sigma = I$ we get Brownian motion.
 
-\slide{Langevin Dynamics (Without Annealing)}
+\slide{Langevin Dynamics}
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \sqrt{\Delta t\; \eta}\;\epsilon\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma) \\
-\\
-\Sigma & = & E_i\;(\hat{g}_i-g)(\hat{g}_i-g)^\top
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \sqrt{\Delta t\; \eta}\;\epsilon\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma)
 \end{eqnarray*}
 
 \vfill
-Note that as the learning rate $\eta \rightarrow 0$ the noise term vanishes and we are back to gradient flow.
-
-\slide{Annealing the Learning Rate}
-
-\centerline{\includegraphics[width = 7in]{../images/annealing}}
+Note that for $\eta \rightarrow 0$ the noise term vanishes.  If we then take $\Delta t \rightarrow 0$ (at a slower rate) we are back to gradient flow.
 
 \vfill
-These Plots are from the original ResNet paper.  Left plot is for CNNs without residual skip connections, the right plot is ResNet.
-
-\vfill
-Thin lines are training error, thick lines are validataion error.
-
-\vfill
-In all cases $\eta$ is reduced twice, each time by a factor of 2.
+In Langevin dynamics we hold $\eta > 0 $ fixed.
 
 \slide{Stationary Distributions}
 
-SGD defines a Markov process in parameter space.
+SGD at $B = 1$ defines a Markov process
 
-$$\Phi_{i+1} = \Phi_i - \eta \hat{g}_i$$
-
-\vfill
-Under Langevin dynamics the stationary distribution of the Markov process must satisfy a certain
-differential equation which can be solved.  This gives a general form for
-Langevin stationary distributions.
+$$\Phi \;\minuseq \; \eta \hat{g}$$
 
 \vfill
-In one dimension the stationary distribution is a Boltzman distribution. But this is not generally true in dimension higher than 1.
+Under Langevin dynamics the stationary distribution is a continuous density in parameter space.
 
-\slide{Langevin Dynamics With Annealing}
+\vfill
+If the covariance matrix is isotropic (all eigenvalues are the same) we get a Gibbs distribution.
 
-Although the stationary distribution is not a Boltzman distribution, the learning rate $\eta$ acts as a temperature parameter in the sense of the last line below.
+
+\slide{The 1-D Langevin Stationary Distribution}
+
+Consider SGD on a single parameter.
+
+\vfill
+Let $p$ be a probability density on $x$.
+
+\vfill
+Assume that the gradient $\hat{g}$ has variance $\sigma$ everywhere.
+
+\vfill
+There is a diffusion flow proportional to $\eta^2\sigma^2\;dp/dx$.
+
+\vfill
+There is a gradient flow equal to $\eta p \;d {\cal L}/dx$.
+
+\vfill
+For a stationary distribution the two flows cancel giving.
+
+\vfill
+{\color{red} $$\alpha \eta^2 \sigma^2 \frac{dp}{dx} = - \eta p\frac{d{\cal L}}{dx}$$}
+
+
+\slide{The 1-D Langevin Stationary Distribution}
+
+\vspace{-2ex}
+\begin{eqnarray*}
+\alpha \eta^2 \sigma^2 \frac{dp}{dx} & = & - \eta p\frac{d{\cal L}}{dx} \\
+\\
+\frac{dp}{p} & = & \frac{-d{\cal L}}{\alpha\eta\sigma^2} \\
+\\
+\ln p & = & \frac{-{\cal L}}{\alpha \eta \sigma^2} + C \\
+\\
+{\color{red} p(x)} & = & {\color{red} \frac{1}{Z}\exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma^2}\right)}\;\;\alpha \approx 1/10
+\end{eqnarray*}
+
+\vfill
+We get a Gibbs distribution!
+
+\slide{A 2-D Langevin Stationary Distribution}
+
+Let $p$ be a probability density on two parameters $(x,y)$.
+
+\vfill
+We consider the case where $x$ and $y$ are completely independent with
+$${\cal L}(x,y) = {\cal L}(x) + {\cal L}(y)$$
+
+\vfill
+For completely independent variables we have
+\begin{eqnarray*}
+p(x,y) & = & p(x)p(y) \\
+\\
+&= & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta \sigma_y^2}\right)
+\end{eqnarray*}
+
+\slide{A 2-D Langevin Stationary Distribution}
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta \sigma_y^2}\right) \\
+\\
+\\
+& = & \frac{1}{Z} \exp\left(-\beta_x{\cal L}(x) - \beta_y{\cal L}(y)\right)
+\end{eqnarray*}
+
+\vfill
+This is not a Gibbs distribution!
+
+\vfill
+It has two different temperature parameters!
+
+\slide{Langevin and RMSProp}
+
+Suppose we use parameter-specific learning rates $\eta_x$ and $\eta_y$
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta_x \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta_y \sigma_y^2}\right)
+\end{eqnarray*}
+
+Setting $\eta_x = \eta'/\sigma^2_x$ and $\eta_y = \eta'/\sigma^2_y$ gives
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta'} + \frac{-{\cal L}(y)}{\alpha \eta'}\right) \\
+\\
+& = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x,y)}{\alpha \eta'}\right)\;\;\;\mathrm{Gibbs!}
+\end{eqnarray*}
+
+\vfill
+RMSProp sets $\eta_x = \eta'/\sigma_x$ rather than $\eta_x = \eta'/\sigma_x^2$.  Empirically this seems better.
+
+\slideplain{Annealing Langevin Stationary Distributions}
+
+Although the stationary distribution is not a Boltzman distribution, the learning rate $\eta$ acts as a temperature parameter giving an eiganvalue-dependent temperature for each eigenvector
+of the noise covariance $\Sigma$.
 
 \vfill
 Let $P_\eta$ be the stationary distribution at learning rate $\eta$.
@@ -487,86 +781,6 @@ Let $P_\eta$ be the stationary distribution at learning rate $\eta$.
 \lim_{\eta \rightarrow 0} {\cal L}(\eta) & = & {\cal L}(\Phi^*)\;\;\;\mbox{for Langevin dynamics}
 \end{eqnarray*}
 
-\slide{A Quadratic Basin Theorem}
-
-\vfill
-In practice annealed SGD will converge to a local optimum.
-
-\vfill
-We consider stationary distributions restricted to a neighborhood of a (local) optimim $\Phi^*$ satisfying
-
-\begin{eqnarray*}
-{\cal L}(\Phi) & = & E_i\;{\cal L}_i(\Phi) \\
-\\
-{\cal L}_i(\Phi^* + \Delta \Phi) & = & {\cal L}_i + g_i \Delta \Phi + \frac{1}{2} \Delta\Phi^\top H_i \Delta\Phi \\
-\\
-E_i\; g_i & = & 0\\
-\\
-E_i\; H_i & & \mbox{is positive definite}
-\end{eqnarray*}
-
-\slide{A Quadratic Basin Theorem}
-
-\begin{eqnarray*}
-{\cal L}(\Phi) & = & E_i\;{\cal L}_i(\Phi) \\
-{\cal L}(\eta) & = & E_{\Phi \sim P_\eta}\;{\cal L}(\Phi) \\
-{\cal L}_i(\Phi^* + \Delta \Phi) & = & {\cal L}_i + g_i \Delta \Phi + \frac{1}{2} \Delta\Phi^\top H_i \Delta\Phi \\
-E_i\; g_i & = & 0\\
-E_i\; H_i & & \mbox{is positive definite} \\
-\end{eqnarray*}
-
-\vfill
-Theorem:
-
-$${\cal L}(0) = {\cal L}(\Phi^*)\;\;\;\;\;\;\;\;\;\;\;\;{\color{red} \left.\frac{\partial {\cal L}(\eta)}{\partial \eta}\right|_{\eta = 0} \;\;=\;\; \frac{1}{4}\; E_i\; ||g_i||^2}$$
-
-\slide{Analyzing Stationary Distributions}
-
-$${\cal L}(\eta) \approx {\cal L}(\Phi^*) + \eta \left(E_I ||g_i||^2\right)$$
-
-\vfill
-$${\cal L}(\Phi^*) = {\cal L}(\eta) - 2({\cal L}(\eta) - {\cal L}(\eta/2)) = {\cal L}(\eta) - 2{\cal L}(\eta/2)$$
-
-\vfill
-\centerline{\includegraphics[width = 7in]{../images/annealing}}
-
-\slide{Proof: Observation 1}
-
-\begin{eqnarray*}
-{\cal L}(\eta) & = & \;\;\; E_{\Delta \Phi \sim P_\eta}\;E_i \; {\cal L}_i + g_i\Delta _\Phi + \frac{1}{2}\;\Delta \Phi^\top H_i \Delta \Phi \\
-\\
-& = & E_i\; {\cal L}_i + E_{\Delta \Phi \sim P_\eta} \;(E_i\;g_i) \Delta \Phi + \frac{1}{2}\;\Delta \Phi^\top (E_i\; H_i) \Delta \Phi \\
-\\
-& = & {\cal L}(\Phi^*)\;\; + \;\; E_{\Delta \Phi \sim P_\eta}\;\;\;\frac{1}{2}\;\Delta \Phi^\top (E_i\;H_i) \Delta \Phi
-\end{eqnarray*}
-
-\slide{Proof: Step 1}
-Because $P_\eta$ is a stationary distribution we must have
-
-$$E_{\Delta \Phi \sim P_\eta}E_i\; ||\Delta \Phi - \eta (g_i + H_i\Delta \Phi)||^2 = E_{\Delta \Phi \sim P_\eta}\; ||\Delta \Phi||^2$$
-
-\vfill
-$$E_{\Delta \Phi \sim P_\eta}E_i\;-2\eta \Delta \Phi^\top (g_i + H_i\Delta \Phi) +\eta^2||(g_i + H_i\Delta \Phi)||^2 = 0$$
-
-\vfill
-$$E_{\Delta \Phi \sim P_\eta}\;\left(\frac{1}{2}\Delta \Phi^\top (E_i \;H_i)\Delta \Phi\right) = \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_i \;||(g_i + H_i\Delta \Phi)||^2$$
-
-\vfill
-$${\color{red} {\cal L}(\eta)  = {\cal L}(\Phi^*) + \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_i \;||(g_i + H_i\Delta \Phi)||^2}$$
-
-\slide{Proof Step 2}
-
-\begin{eqnarray*}
-{\color{red} {\cal L}(\eta)}  & {\color{red} =} & {\color{red} {\cal L}(\Phi^*) + \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_i \;||(g_i + H_i\Delta \Phi)||^2} \\
-\\
-{\color{red} \left.\frac{\partial {\cal L}(\eta)}{\partial \eta}\right|_{\eta = 0}} & = & \frac{1}{4} \; \lim_{\eta \rightarrow 0} \; E_{\Delta \Phi \sim P_\eta}\; E_i \;||(g_i + H_i\Delta \Phi)||^2 \\
-\\
-\\
-& = & \frac{1}{4} \; E_i\;\lim_{\eta \rightarrow 0}\;E_{\Delta \Phi \sim P_\eta} \;||(g_i + H_i\Delta \Phi)||^2 \\
-\\
-\\
-& {\color{red} =} & {\color{red} \frac{1}{4}\; E_i\;||g_i||^2}
-\end{eqnarray*}
 
 \ignore{
 \slide{An Original Algorithm Derivation}
@@ -779,7 +993,6 @@ B^* & = & \frac{16\hat{\sigma}^2}{\hat{g}^2} \\
 \eta^*(B^*) = \eta^*  & = & \frac{1}{2L}
 \end{eqnarray*}
 
-\ignore{
 \slide{Appendix II: A Formal Bound for the Vector Case}
 
 We will prove that minibatch SGD for a {\bf sufficiently large batch size} (for gradient estimation) and a {\bf sufficient small learning rate} (to avoid gradient drift)
@@ -892,7 +1105,6 @@ k & = & \left(\frac{22\hat{\sigma}}{||\widehat{g}||}\right)^2 \\
 \end{eqnarray*}
 }
 
-}
 
 \slide{END}
 
