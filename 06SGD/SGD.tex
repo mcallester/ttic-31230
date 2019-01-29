@@ -596,7 +596,7 @@ Consider SGD with $B = 1$.
 $$\Phi \;\minuseq\; \eta\hat{g}$$
 
 \vfill
-As with gradient flow, for $N$ steps of SGD we define $t = N \eta$.
+For $N$ steps of SGD we define $\Delta t = N \eta$.
 
 \vfill
 In Langevin dynamics we hold $\eta > 0$ fixed.
@@ -651,7 +651,7 @@ This can be modeled by a continuous time stochastic process --- Langevin dynamic
 This is a stochastic differential equation.
 
 \vfill
-If $g(\phi) = 0$ and $\Sigma = I$ we get Brownian motion.
+If $g(\Phi) = 0$ and $\Sigma = I$ we get Brownian motion.
 
 \slide{Langevin Dynamics}
 
@@ -764,10 +764,22 @@ p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta'} + \frac{-{\
 & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x,y)}{\alpha \eta'}\right)\;\;\;\mathrm{Gibbs!}
 \end{eqnarray*}
 
-\vfill
-RMSProp sets $\eta_x = \eta'/\sigma_x$ rather than $\eta_x = \eta'/\sigma_x^2$.  Empirically this seems better.
+\slide{Langevin and RMSProp}
 
-\slideplain{Annealing Langevin Stationary Distributions}
+Suppose we use parameter-specific learning rates $\eta_x$ and $\eta_y$
+
+Setting $\eta_x = \eta'/\sigma^2_x$ and $\eta_y = \eta'/\sigma^2_y$ gives
+
+\vfill
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x,y)}{\alpha \eta'}\right)\;\;\;\mathrm{Gibbs!}
+\end{eqnarray*}
+
+\vfill
+RMSProp sets $\eta_x = \eta'/\sigma_x$ rather than $\eta_x = \eta'/\sigma_x^2$.  Empirically RMSProp seems better that the more
+theoretically motivated algorithm.
+
+\slide{Annealing Langevin Stationary Distributions}
 
 Although the stationary distribution is not a Boltzman distribution, the learning rate $\eta$ acts as a temperature parameter giving an eiganvalue-dependent temperature for each eigenvector
 of the noise covariance $\Sigma$.

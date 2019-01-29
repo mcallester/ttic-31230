@@ -23,7 +23,8 @@ Suppose that we initialize each weight in $W$ from a distribution with
 zero mean and variance $\sigma$ and that is symmetric about zero --- (the probability that $w[i] = z$ equals the probability that $w[i] = -z$).
 Consider $y = \sum_i\;W[i]x[i]$ as a random variable defined by the distribution on $x$ and the independent random distribution on $W$.
 Recall that the variance $\sigma^2$ of
-a sum of independent random is the sum of the variances and the variance of a product of independent random variables is the product of the variances.
+a sum of independent random variables is the sum of the variances and the variance of a product of zero mean independent
+random variables is the product of the variances.
 
 \medskip
 (a) What value of the initialization variance
@@ -71,7 +72,7 @@ a sum of independent random is the sum of the variances and the variance of a pr
 \medskip
 (a) Give an expression for
 the variance $\sigma^2_\ell$ of $L_{\ell+1}[b,x,y,j]$ as a function of $\ell$, the filter dimension $D = \Delta X = \Delta Y$,
-the feature dimension $J$, and the weight variance $\sigma_W^2$.
+shthe feature dimension $J$, and the weight variance $\sigma_W^2$.
 
 \solution{
 Assuming everything is independent we have
