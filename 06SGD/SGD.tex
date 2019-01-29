@@ -779,25 +779,9 @@ p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x,y)}{\alpha \eta'}\right)\;\
 RMSProp sets $\eta_x = \eta'/\sigma_x$ rather than $\eta_x = \eta'/\sigma_x^2$.  Empirically RMSProp seems better that the more
 theoretically motivated algorithm.
 
-\slide{Annealing Langevin Stationary Distributions}
-
-Although the stationary distribution is not a Boltzman distribution, the learning rate $\eta$ acts as a temperature parameter giving an eiganvalue-dependent temperature for each eigenvector
-of the noise covariance $\Sigma$.
-
-\vfill
-Let $P_\eta$ be the stationary distribution at learning rate $\eta$.
-
-\begin{eqnarray*}
-{\cal L}(\Phi) & = & E_i\;{\cal L}_i(\Phi) \\
-\\
-{\cal L}(\eta) & = & E_{\Phi \sim P_\eta}\;{\cal L}(\Phi) \\
-\\
-\lim_{\eta \rightarrow 0} {\cal L}(\eta) & = & {\cal L}(\Phi^*)\;\;\;\mbox{for Langevin dynamics}
-\end{eqnarray*}
-
 
 \ignore{
-\slide{An Original Algorithm Derivation}
+\slide{A Second Order Algorithm (TZ)}
 
 \vfill
 We will derive a learning rate by maximizing a lower bound on the rate of reduction in training loss.
