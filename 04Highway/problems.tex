@@ -15,34 +15,36 @@
 
 \bigskip
 {\bf Problem 1.}  This problem is on initialization.  Consider a single unit defined by
-$$u = f\left(\left(\sum_i\;W[i]x[i]\right) - B\right).$$
+$$u = f\left(\left(\sum_{i=1}^N\;W[i]x[i]\right) - B\right).$$
 where $B$ is initialized to zero and $f$ is an activation function such as a sigmoid or ReLU.
 The vector $x$ is a random variable determined by a random draw of a training example.
-Assume that the components of $x$ are independent and that each component zero mean and unit variance.   Suppose that we initialize each weight in $W$ from a distribution with
-zero mean and variance $\sigma$. Consider $y = \sum_i\;W[i]x[i]$ as a random variable defined by the distribution on $x$ and the independent random distribution on $W$.
+Assume that the components of $x$ are independent and that each component has zero mean and unit variance.
+Suppose that we initialize each weight in $W$ from a distribution with
+zero mean and variance $\sigma$ and that is symmetric about zero --- (the probability that $w[i] = z$ equals the probability that $w[i] = -z$).
+Consider $y = \sum_i\;W[i]x[i]$ as a random variable defined by the distribution on $x$ and the independent random distribution on $W$.
 Recall that the variance $\sigma^2$ of
 a sum of independent random is the sum of the variances and the variance of a product of independent random variables is the product of the variances.
 
 \medskip
 (a) What value of the initialization variance
-$\sigma$ gives zero mean and unit variance for $y$?  Show your derivation.
+$\sigma$ for $W[i]$ gives zero mean and unit variance for $y$?  Show your derivation.
 
 \medskip
-(b) For a sigmoid activation function, and for the components of $x$ and $W$ drawn form zero mean Gaussians, what is the mean of $u$.
+(b) For a sigmoid activation function what is the mean of $u$.
 
 \medskip
-(c) For a signmoid activation function, is the variance of $u$ larger than, equal to, or smaller than the variance of $y$?
+(c) For a sigmoid activation function
+is the variance of $u$ larger than, equal to, or smaller than the variance of $y$?
 
 \medskip
-(d) A ReLU activation yields a non-zero mean for $u$ than a sigmoid activation.  Is the variance of the ReLU version smaller or larger
-than the variance of the $\sigma$ version?
+(d) What is the largest possible variance of the output of a sigmoid?
 
 \medskip
 (e) If we assume recursively that each component of $x$ has a positive nonzero mean, should we change the initialization of the threshold $B$?
 
 \bigskip
 {\bf Problem 2.} This problem is on the initialization of ResNet filters.
-Consider the following residual skip connection where the diversion is a convolution with an $N \times N$ filter.
+Consider the following residual skip connection where $R_{\ell+1}$ is computed with an $N \times N$ filter.
 
 \begin{eqnarray*}
   \mathrm{for}\;b,x,y,j\Delta x,\Delta y,j' \\
@@ -60,7 +62,8 @@ Here we have omitted an activation function that would be present in practice.  
 into the more complex case with activations.
 
 Assume that $L_0[b,x,y,j]$
-is computed from the input in some unspecified way such that $L_0[b,x,y,j]$ has unit variance. Assume that the values $L_\ell[b,x,y,j]$  and $R_\ell[b,x,y,j]$ are all independent.
+is computed from the input in some unspecified way such that $L_0[b,x,y,j]$ has unit variance.
+Assume that the values $L_\ell[b,x,y,j]$  and $R_{\ell+1}[b,x,y,j]$ are all independent.
 Suppose that each weight $W_\ell[\Delta x,\Delta y,j,j']$ is drawn independently at random
 from a distribution with zero mean and variance $\sigma_W$. Recall that the variance $\sigma^2$ of
 a sum of independent random is the sum of the variances and the variance of a product of independent random variables is the product of the variances.
