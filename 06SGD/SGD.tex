@@ -73,7 +73,7 @@ $$\Phi \;\minuseq \; \eta_t \nabla_\Phi\;\mathrm{loss}(\Phi,x_t,y_t)$$
 For ``sufficiently smooth'' non-negative loss with
 
 \vfill
-$$\eta_t > 0\;\;\;\;\mbox{and}\;\;\;\;\lim_{t \rightarrow 0} \;\eta_t = 0\;\;\;\;\mbox{and}\;\;\;\;\sum_t \eta_t = \infty,$$
+$$\eta_t > 0\;\;\;\;\mbox{and}\;\;\;\;\lim_{t \rightarrow \infty} \;\eta_t = 0\;\;\;\;\mbox{and}\;\;\;\;\sum_t \eta_t = \infty,$$
 
 \vfill
 we have that the training loss of $\Phi$ converges (in practice $\Phi$ converges to a local optimum of training loss).
@@ -437,7 +437,53 @@ The published version of Adam has a more obscure form of bias correction which y
 \Phi_{t+1}[i] & =  & \Phi_t - \frac{\eta}{\sqrt{s_{t}[i] + \epsilon}}\;\;\mu_{t}[i]
 \end{eqnarray*}
 
-\slide{Annealing the Learning Rate}
+\slide{Gradient Flow}
+
+Gradient flow is a non-stochastic ({\color{red} deterministic}) model of {\color{red} stochastic} gradient descent (SGD).
+
+\vfill
+Gradient flow is defined by the {\color{red} total gradient} differential equation
+
+$${\color{red} \frac{d \Phi}{d t} = - g(\Phi) \;\;\;\;\;\; g(\Phi) = \nabla_\Phi\; E_{(x,y) \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y)}$$
+
+\vfill
+We let $\Phi(t)$ be the solution satisfying $\Phi(0) = \Phi_{\mathrm{init}}$.
+
+\slide{Gradient Flow}
+$${\color{red} \frac{d \Phi}{d t} = - g(\Phi)}$$
+
+\vfill
+For small values of $\Delta t$ this differential equation can be approximated by
+
+\vfill
+$${\color{red} \Delta \Phi = - g(\Phi)\Delta t}$$
+
+\vfill
+Here $\Delta t$ can be interpreted as a learning rate.
+
+\slide{Gradient Flow also Models SGD}
+Consider the SGD update with $\hat{g}$ from a random data point
+
+
+{\color{red} $$\Delta \Phi = - \hat{g}\Delta t$$}
+
+\vfill
+This also converges to deterministic gradient flow as $\Delta t$ goes to zero.
+
+\vfill
+To see this note that we can divide the updates into $\sqrt{N}$ blocks each of size $\sqrt{N}$.  The ``time'' spent within each block is $t/\sqrt{N}$ which converges to 0.
+But the number of updates within each block grows as $\sqrt{N}$ and hence the average update within a block converges to $g$.
+
+\slide{Gradient Flow also Models SGD}
+Consider the SGD update with $\hat{g}$ from a random data point
+
+
+{\color{red} $$\Delta \Phi = - \hat{g}\Delta t$$}
+
+\vfill
+The sum of the learning rates can be interpreted as ``time''.
+
+\slide{MCMC models of SGD}
 
 \centerline{\includegraphics[width = 7in]{../images/annealing}}
 
@@ -450,13 +496,38 @@ Thin lines are training error, thick lines are validataion error.
 \vfill
 In all cases $\eta$ is reduced twice, each time by a factor of 2.
 
-\slide{A Quadratic Basin Annealing Theorem (TZ)}
+\slide{Converged Loss as a Function of $\eta$}
+
+\centerline{\includegraphics[width = 4in]{../images/annealing}}
+For each value of $\eta$ we converge at a loss ${\cal L}(\eta)$.
+\begin{eqnarray*}
+{\cal L}(0) & \doteq & \lim_{\eta \rightarrow 0}\;{\cal L}(\eta) \\
+\\
+& = & {\cal L}(\Phi^*)\;\;\;\;\mbox{$\Phi^*$ a local optimum}
+\end{eqnarray*}
 
 \vfill
-In practice annealed SGD will converge to a local optimum.
+Can we do a Taylor expansion of ${\cal L}(\eta)$?
+$${\cal L}(\eta) = {\cal L}(\Phi^*) + \left(\left.\frac{d{\cal L}}{d \eta}\right|_{\eta = 0}\right)\eta + \ldots$$
+
+\slide{A Nice Theorem (TZ)}
+$${\cal L}(\eta) = {\cal L}(\Phi^*) + \left(\left.\frac{d{\cal L}}{d \eta}\right|_{\eta = 0}\right)\eta + \ldots$$
 
 \vfill
-We consider stationary distributions restricted to a neighborhood of a (local) optimim $\Phi^*$ satisfying
+Let $i$ index a training example and let $g_i$ denote $\nabla_\Phi {\cal L}_i(\Phi)$ at $\Phi = \Phi^*$.
+
+\vfill
+Theorem:
+$${\color{red} \left.\frac{\partial {\cal L}(\eta)}{\partial \eta}\right|_{\eta = 0} \;\;=\;\; \frac{1}{4}\; E_i\; ||g_i||^2}$$
+
+\slide{Proof Step 1 (TZ)}
+
+\vfill
+Let $i$ index a training example and let ${\cal L}_i(\Phi^* + \Delta \Phi)$ be the loss on training example $i$
+with model parameters $\Phi^* + \Delta\Phi$. 
+
+\vfill
+We take a second order Taylor expansion.
 
 \begin{eqnarray*}
 {\cal L}(\Phi) & = & E_i\;{\cal L}_i(\Phi) \\
@@ -468,23 +539,7 @@ E_i\; g_i & = & 0\\
 E_i\; H_i & & \mbox{is positive definite}
 \end{eqnarray*}
 
-\slide{A Quadratic Basin Annealing Theorem (TZ)}
-
-Theorem:
-
-$${\cal L}(0) = {\cal L}(\Phi^*)\;\;\;\;\;\;\;\;\;\;\;\;{\color{red} \left.\frac{\partial {\cal L}(\eta)}{\partial \eta}\right|_{\eta = 0} \;\;=\;\; \frac{1}{4}\; E_i\; ||g_i||^2}$$
-
-\slide{Analyzing Stationary Distributions (TZ)}
-
-$${\cal L}(\eta) \approx {\cal L}(\Phi^*) + \eta \left(E_I ||g_i||^2\right)$$
-
-\vfill
-$${\cal L}(\Phi^*) = {\cal L}(\eta) - 2({\cal L}(\eta) - {\cal L}(\eta/2)) = 2{\cal L}(\eta/2) - {\cal L}(\eta)$$
-
-\vfill
-\centerline{\includegraphics[width = 7in]{../images/annealing}}
-
-\slide{Proof: Observation 1 (TZ)}
+\slide{Proof: Step 2 (TZ)}
 
 \begin{eqnarray*}
 {\cal L}(\eta) & = & \;\;\; E_{\Delta \Phi \sim P_\eta}\;E_i \;\;\;\; {\cal L}_i + g_i\Delta _\Phi + \frac{1}{2}\;\Delta \Phi^\top H_i \Delta \Phi \\
@@ -494,7 +549,7 @@ $${\cal L}(\Phi^*) = {\cal L}(\eta) - 2({\cal L}(\eta) - {\cal L}(\eta/2)) = 2{\
 & = & {\cal L}(\Phi^*)\;\; + \;\; E_{\Delta \Phi \sim P_\eta}\;\;\;\frac{1}{2}\;\Delta \Phi^\top (E_i\;H_i) \Delta \Phi
 \end{eqnarray*}
 
-\slide{Proof: Step 1 (TZ)}
+\slide{Proof: Step 3 (TZ)}
 Because $P_\eta$ is a stationary distribution we must have
 
 $$E_{\Delta \Phi \sim P_\eta}E_i\; ||\Delta \Phi - \eta (g_i + H_i\Delta \Phi)||^2 = E_{\Delta \Phi \sim P_\eta}\; ||\Delta \Phi||^2$$
@@ -508,89 +563,34 @@ $$E_{\Delta \Phi \sim P_\eta}\;\left(\frac{1}{2}\Delta \Phi^\top (E_i \;H_i)\Del
 \vfill
 $${\color{red} {\cal L}(\eta)  = {\cal L}(\Phi^*) + \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_i \;||(g_i + H_i\Delta \Phi)||^2}$$
 
-\slide{Proof Step 2 (TZ)}
+\slide{Proof Step 4 (TZ)}
 
 \begin{eqnarray*}
 {\color{red} {\cal L}(\eta)}  & {\color{red} =} & {\color{red} {\cal L}(\Phi^*) + \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_i \;||(g_i + H_i\Delta \Phi)||^2} \\
 \\
+\\
 {\color{red} \left.\frac{\partial {\cal L}(\eta)}{\partial \eta}\right|_{\eta = 0}} & = & \frac{1}{4} \; \lim_{\eta \rightarrow 0} \; E_{\Delta \Phi \sim P_\eta}\; E_i \;||(g_i + H_i\Delta \Phi)||^2 \\
-\\
-\\
-& = & \frac{1}{4} \; E_i\;\lim_{\eta \rightarrow 0}\;E_{\Delta \Phi \sim P_\eta} \;||(g_i + H_i\Delta \Phi)||^2 \\
 \\
 \\
 & {\color{red} =} & {\color{red} \frac{1}{4}\; E_i\;||g_i||^2}
 \end{eqnarray*}
 
-\slide{Gradient Flow}
-
-Consider the differential equation
-
-$${\color{red} \frac{d \Phi}{d t} = - g(\Phi) \;\;\;\;\;\; g(\Phi) = \nabla_\Phi\; E_{(x,y) \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y)}$$
-
-\vfill
-Let $\Phi(t)$ be the solution satisfying $\Phi(0) = \Phi_{\mathrm{init}}$.
-
-\vfill
-For small values of $\Delta t$ this differential equation can be approximated by
-
-\vfill
-$${\color{red} \Delta \Phi = - g(\Phi)\Delta t}$$
-
-\vfill
-Here $\Delta t$ can be interpreted as a learning rate.
-
-\slide{Gradient Flow}
-
-$${\color{red} \Delta \Phi = - g(\Phi)\Delta t}$$
-
-\vfill
-For a given value of $t$ and $N$ let $\Phi_j$ be defined by
-
-\vfill
-\begin{eqnarray*}
-\Phi_0 & = & \Phi_{\mathrm{init}} \\
-\\
-\Phi_{j+1} & = & \Phi_j - \left(\frac{t}{N}\right) g(\Phi_j)
-\end{eqnarray*}
-
-\vfill
-$${\color{red} \lim_{N\rightarrow \infty} \;\Phi_N = \Phi(t)}$$
-
-
-\slide{Progress Theorem for Gradient Flow}
-
-\begin{eqnarray*}
-  \frac{d \ell}{d t} & = & (\nabla_\Phi \;\ell(\Phi)) \cdot \frac{d \Phi}{dt} \\
-  \\
-  & = & - (\nabla_\Phi \;\ell(\Phi)) \cdot (\nabla_\Phi \;\ell(\Phi)) \\
-  \\
-  & = & - ||\nabla_\Phi \;\ell(\Phi)||^2 \\
-  \\
-  & \leq & 0
-\end{eqnarray*}
-
-\vfill
-If $\ell(\Phi) \geq 0$ then $\ell(\Phi)$ must converge to a limiting value.
-
-\vfill
-This does not imply that $\Phi$ converges.
-
-\slide{SGD also yields Gradient Flow}
-For
-$$\Phi_{j+1} = \Phi_j - \left(\frac{t}{N}\right) {\color{red} \hat{g}_j}$$
-we still have
-
-\vfill
-$${\color{red} \lim_{N\rightarrow \infty} \;\Phi_N = \Phi(t)}$$
-
-\vfill
-To see this note that we can divide the updates into $\sqrt{N}$ blocks each of size $\sqrt{N}$.  The ``time'' spent within each block is $t/\sqrt{N}$ which converges to 0.
-But the number of updates within each block grows as $\sqrt{N}$ and hence the average update within a block converges to $g$.
-
 
 \slide{Langevin Dynamics}
 
+Can we analytically solve for stationary distributions?
+
+\vfill
+Is the stationary distributin some kind of Gibbs Distribution?
+
+\vfill
+Langevin dynamics models both the stationary distribution and non-stationary stochastic dynamics
+with {\color{red} a continuous time stochastic differential equation}.
+
+\slide{Langevin Dynaimcs}
+
+
+\vfill
 Consider SGD with $B = 1$.
 
 $$\Phi \;\minuseq\; \eta\hat{g}$$
@@ -637,24 +637,26 @@ Let $\epsilon$ be a zero mean Gaussian random variable with the same covariance 
 \slide{Langevin Dynamics}
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \sqrt{\eta} \epsilon \sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma)
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \epsilon \sqrt{{\color{red} \eta}\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma) \\
+\\
+& = & \Phi(t) -g(\Phi)\Delta t + \epsilon \sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,{\color{red} \eta}\Sigma)
 \end{eqnarray*}
 
 \vfill
 This can be modeled by a continuous time stochastic process --- Langevin dynamics --- defined by the notation
 
-$$d\Phi =  -g(\Phi)dt + \sqrt{\eta} \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma)$$
+{\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\Sigma)$$}
 
 \vfill
 This is a stochastic differential equation.
 
 \vfill
-If ${\cal L}$ is constant and $\Sigma = I$ we get Brownian motion.
+If $g(\phi) = 0$ and $\Sigma = I$ we get Brownian motion.
 
 \slide{Langevin Dynamics}
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \sqrt{\Delta t\; \eta}\;\epsilon\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma)
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \epsilon\sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\Sigma)
 \end{eqnarray*}
 
 \vfill
