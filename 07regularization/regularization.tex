@@ -12,95 +12,15 @@
 \centerline{David McAllester, April 2017}
 
 \vfill
-\centerline{\bf Over-Fitting and Regularization}
+\centerline{\bf Generalization}
 \vfill
 \vfill
 
-\centerline{}
-\slide{Over Fitting}
-
-If we have more parameters than data then we can fit any set of labels.
-
-\vfill
-\begin{quotation}
-``Our experiments establish that state-of-the-art convolutional networks
-for image classification trained with stochastic gradient methods easily fit a random
-labeling of the training data.''
-\end{quotation}
-
-\vfill
-\rightline{Rethinking Generalization, Zhang et al., ICLR 2017}
-
-
-\slide{Train Data, Development Data and Test Data}
-
-Data is typically divided into {\bf a training set}, {\bf a development set} and {\bf a test set} each drawn IID from the population.
-
-\vfill
-A learning algorithm optimizes training loss.
-
-\vfill
-One then optimizes algorithm design (and hyper-parameters) on the development set. (graduate student descent).
-
-\vfill
-Ultimate performance should be done on a test set not used for development.  Test data is often withheld from developers.
-
-\slideplain{Loss Vs. Error Rate}
-While training (gradient descent) is generally done on cross entropy loss, performance is often judged by other measures such as classification error rate.
-
-\vfill
-The term ``loss'' is often used as a synonym for cross entropy loss.
-
-\vfill
-Hence one often reports both ``loss'' and ``error rate''.
-
-\vfill
-Note that classification error rate is not differentiable.
-
-
-\slide{Early Stopping}
-
-\centerline{\includegraphics[width = 6in]{../images/EarlyStopping}}
-
-\centerline{\huge [Goodfellow et al.]}
-
-\vfill
-During SGD one should be tracking validation loss.
-
-\vfill
-A typical rule is to stop when the validation loss has not set a new record low for some period.
-
-\ignore{
-  The following slide is not true --- gradient flow approaches the optimum directly along the smallest eigenvector of H.  The regularization path
-  satisfies g = lambda(t) Phi and approaches with a fixed nonzero angle to the eigenvector.
-  
-\slide{Early Stopping}
-
-\centerline{\includegraphics[width = 7in]{../images/EarlyStopping2}}
-\centerline{[Goodfellow et al.]}
-
-\vfill
-For differential Newton updates (gradient flow) on a quadratic loss function, with $\Phi$ initialized to zero, early stopping and $L_2$ regularization are equivalent.
-}
-
-\slide{Early stopping on Random Labels}
-
-\centerline{\includegraphics[width = 6in]{../images/EarlyStopping}}
-
-\centerline{\huge [Goodfellow et al.]}
-
-
-\vfill
-For random labels the optimal score function is the constant zero which, for binary classification, has a loss of $\ln 2 \approx .69$.
-
-\vfill
-If the validation data is random then the validation loss should start to climb immediately.
-
-\ignore{
-\slide{Hinton vs. Chomsky}
+\slide{Chomsky vs. Kolmogorov and Hinton}
 
 \includegraphics[width=1.0 in]{../images/Chomsky} \begin{minipage}[b]{8in} Noam Chomsky: 
-Natural language grammar is unlearnable without with an innate linguistic capacity. This position is supported by the ``no free lunch theorem''.\end{minipage}
+Natural language grammar cannot be learned by a universal learning algorithm.
+This position is supported by the ``no free lunch theorem''.\end{minipage}
 
 \vfill
 \includegraphics[height=1.0 in]{../images/Kolmogorov}
@@ -120,38 +40,234 @@ Without prior knowledge, such as universal grammar, it is impossible to make a p
 {\bf Proof:} Select a predictor $h$ uniformly at random from all functions from ${\cal X}$ to ${\cal Y}$ and then take the data distribution to draw pairs $(x, h(x))$
 where $x$ is drawn uniformly from ${\cal X}$.  No learning algorithm can predict $h(x)$ where $x$ does not occur in the training data.
 
+
+\slide{The Free Lunch Theorem}
+
+Consider a classifier $f$ written in C++ with an arbitrarily large standard library.
+
+\vfill
+Let $|f|$ be the number of bits needed to represent $f$.
+
+\vfill
+Let $\hat{E}(f)$ be the error rate on an IID training set and let $E(f)$ be the population error rate.
+
+\vfill
+Theorem: With probability at least $1-\delta$ over the draw of the training data the following holds simultaneously for all $f$.
+
+{\color{red} $$E(f) \leq \frac{10}{9}\left(\hat{E}(f) + \frac{5}{N}\left((\ln 2)|f| +\ln\frac{1}{\delta}\right)\right)$$}
+
+\slide{Training Data, Validation Data and Test Data}
+
+Good performance on training data does not guarantee good performance on test data.
+
+\vfill
+An nth order polynomial can fit any n (pure noise) data points.
+
+\vfill
+For each order $n$ we can fit a polynomial to the training data and select the order $n$ with the best performance on validation data.
+
+\vfill
+Ultimately performance should be measured on test data not used in any way during learning.
+
+\slide{Train Data, Validation Data and Test Data}
+
+In general one designs algorithms and tunes hyper-parameters by training on training data and evaluating on validation data.
+
+\vfill
+This is sometimes called graduate student descent.
+
+\vfill
+Kaggle withholds test data until the final contest evaluation.
+
+\slideplain{Loss Vs. Error Rate (or BLEU Score)}
+While SGD is generally done on cross entropy loss, one often wants minimum classification error or BLEU Score (for translation).
+
+\vfill
+The term ``loss'' often refers to cross entropy loss as opposed to error rate.
+
+\vfill
+SGD optimizes loss because error is not differentiable.
+
+\vfill
+Later we will discuss attempts to directly optimize error.
+
+\vfill
+But training on loss is generally effective.
+
+
+\slide{Early Stopping}
+
+\centerline{\includegraphics[height = 1.5in]{../images/Early}}
+
+\centerline{\huge Claudia Perlich}
+
+\vfill
+During SGD one tracks validation loss or validation error.
+
+\vfill
+One stops training when the validation error stops improving.
+
+\vfill
+Empirically, loss reaches a minimum sooner than error.
+
+\slide{Over Confidence}
+
+\centerline{\includegraphics[height = 2in]{../images/Early}}
+
+\vfill
+Validation error is larger than training error when we stop.
+
+\vfill
+The model probabilities are tuned on training data statistics.
+
+\vfill
+The probabilities are tuned to an unrealistically low lower error rate and are therefore over-confident.
+
+\vfill
+This over-confidence occurs before the stopping point and damages validation loss.
+
+\slide{Regularization}
+
+There is never harm in doing early stopping --- one should always do early stopping.
+
+\vfill
+Regularization is a modification to the training algorithm motivated by reducing the training-validation gap and, in this way, improving overall performance.
+
+\slide{$L_2$ Regularization (Weight Decay or Shrinkage)}
+
+We will later theoretically motivate the following where $N$ is the number of training examples.
+
+\vfill
+{\color{red}
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \left(\;E_{(x,y) \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y)\right) + \frac{\lambda}{2N}||\Phi||^2 \\
+\\
+& = & \argmin_\Phi\;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{\lambda}{2N}||\Phi||^2\right)
+\end{eqnarray*}
 }
 
-\slide{PAC-Bayesian Generalization Guarantees}
+This objective corresponds to a Gaussian prior bias
 
-It is possible to prove formal generalization guarantees without looking at the validation or test data.
+{\color{red} $$p(\Phi) \propto \exp\left(-\frac{1}{2}||\Phi||^2\right)$$}
 
-\vfill
-To do this we assume a prior distribution on models.
+\slide{Applying SGD}
 
-\vfill
-Intuitively, for any prior (true or not) selected before seeing the data, one can prove that
-any model with high posterior probability must generalize well.
-
-\vfill
-But there is no guarantee that any model will have sufficiently large posterior probability.
-
-
-\slide{PAC-Bayesian Generalization Guarantees}
-
-Consider an arbitrary prior probability distribution over an arbitrary discrete class ${\cal H}$ of ``hypotheses'' (or models).
+{\color{red} $$\Phi^* = \argmin_\Phi \;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{\lambda}{2N}||\Phi||^2\right)$$}
+\begin{eqnarray*}
+  & & \nabla_\Phi \;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{\lambda}{2N}||\Phi||^2\right) \\
+  \\
+  & = & E_{(x,y) \sim \mathrm{Train}} \;\left(g(\Phi,x,y) + \frac{\lambda}{N} \Phi\right)
+\end{eqnarray*}
 
 \vfill
-Consider a population distribution over pairs $(x,y)$ with $x \in {\cal X}$ and $y \in {\cal Y}$.
+{\color{red} $$\Phi \;\minuseq\; \eta\left(\hat{g} +\frac{\lambda}{N}\Phi\right)$$}
+
+\slide{Conjugacy Considerations (TZ)}
+
+The update
+{\color{red} $$\Phi \;\minuseq\; \eta\left(\hat{g} +\frac{\lambda}{N}\Phi\right)$$}
 
 \vfill
-Consider a loss function ${\cal L}(h,x,y)$ such that for any $h \in {\cal H}$ and pair $(x,y)$ we have
-${\cal L}(h,x,y) \in (0,L_\mathrm{max})$.
+is typically parameterized as
+
+{\color{red} $$\Phi \;\minuseq \; \eta \hat{g} + \gamma \Phi$$}
 
 \vfill
-For example ${\cal }(h,x,y) = \min(L_\mathrm{max},\; - \ln\; P(y|h,x))$.
+where $\gamma$ is the weight decay parameter.
 
-\slide{PAC-Bayesian Generalization Guarantees}
+\vfill
+However, the $\eta$, $\lambda$, $N$ parameterization seems more conjugate (independently optimizable) than $\eta$, $\gamma$.
+
+\slide{Batch Scaling (TZ)}
+
+{\color{red} $$\Phi \;\minuseq\; \eta\left(\hat{g} +\frac{\lambda}{N}\Phi\right)$$}
+
+\vfill
+Setting {\color{red} $\eta = B\eta'$} will now handle batch size scaling using the batch size conjugate learning rate {\color{red} $\eta'$}.
+
+\slide{Efficiency and Numerical Stability}
+
+{\color{red} $$\Phi \;\minuseq\; \eta\left(\hat{g} +\frac{\lambda}{N}\Phi\right)$$}
+
+\vfill
+For $N$ large the shrinkage is very small.
+
+\vfill
+We can improve efficiency and numerical stability
+by separating shrinkage from SGD and performing
+
+{\color{red} $$\Phi \;\minuseq\; \eta\Phi$$}
+
+\vfill
+once for every $N/\lambda$ steps of SGD.
+
+\slide{Shrinkage meets Early Stopping}
+
+Early stopping can limit $||\Phi||$.
+
+\vfill
+But early stopping more directly limits $||\Phi - \Phi_\mathrm{init}||$.
+
+\vfill
+Theoretical guarantees also work for $||\Phi - \Phi_{\mathrm{init}}||^2$.
+
+
+
+{\color{red}
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \left(\;E_{(x,y) \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y)\right) + \frac{\lambda}{2N}||\Phi-\Phi_{\mathrm{init}}||^2 \\
+\\
+& = & \argmin_\Phi\;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{\lambda}{2N}||\Phi-\Phi_{\mathrm{init}}||^2\right)
+\end{eqnarray*}
+}
+
+\slide{A Generalization Guarantee Motivating Shrinkage}
+
+Assume $0 \leq {\cal L}(\Phi,x,y) \leq \lmax$.
+
+\vfill
+Define:
+\begin{eqnarray*}
+{\cal L}(\Phi) & = & E_{\;(x,y)\sim \pop,\;\epsilon \sim {\cal N}(0,\sigma)^d}\;{{\cal L}(\Phi+\epsilon,x,y)} \\
+\\
+\hat{{\cal L}}(\Phi) & = & E_{\;(x,y)\sim \mathrm{Train},\;\epsilon \sim {\cal N}(0,\sigma)^d}\;{{\cal L}(\Phi+\epsilon,x,y)} \\
+\end{eqnarray*}
+
+\vfill
+Theorem: With probability at least $1-\delta$ over the draw of training data the following holds {\bf simultaneously} for all $\Phi$.
+\begin{eqnarray*}
+   {\color{red} {\cal L}(\Phi)} & {\color{red} \leq} & {\color{red} \frac{10}{9}\parens{\hat{{\cal L}}(\Phi)
+   + \frac{5 \lmax}{N}\parens{\frac{||\Phi-\Phi_{\mathrm{init}}||^2}{2\sigma^2} + \ln \frac{1}{\delta}}}}
+   \;\;\;\lambda = \frac{5\lmax}{\sigma^2}
+\end{eqnarray*}
+
+
+\slide{PAC-Bayesian Guarantees}
+
+\vfill
+In the PAC-Bayesian framework we assume a prior distribution (or density) on models.
+
+\vfill
+For any prior (true or not) selected before seeing the data, any model with sufficiently large prior probability is guaranteed to have the generalization loss near the training loss.
+
+\vfill
+For the shrinkage bound the prior is $p(\Phi) \propto  \exp\left(\frac{-||\Phi -\Phi_{\mathrm{init}}||^2}{2\sigma^2}\right)$.
+
+\begin{eqnarray*}
+   {\color{red} {\cal L}(\Phi)} & {\color{red} \leq} & {\color{red} \frac{10}{9}\parens{\hat{{\cal L}}(\Phi)
+   + \frac{5 \lmax}{N}\parens{\frac{||\Phi-\Phi_{\mathrm{init}}||^2}{2\sigma^2} + \ln \frac{1}{\delta}}}}
+\end{eqnarray*}
+
+
+\slide{A Simpler Theorem}
+
+Consider any prior probability $P(h)$ over an discrete class ${\cal H}$.
+
+\vfill
+Assume $0 \leq {\cal L}(h,x,y) \leq \lmax$.
+
+\vfill
+Define:
 \begin{eqnarray*}
 {\cal L}(h)  & = &  E_{(x,y)\sim \mathrm{Pop}}\;{\cal L}(h,x,y) \\
 \\
@@ -160,10 +276,55 @@ For example ${\cal }(h,x,y) = \min(L_\mathrm{max},\; - \ln\; P(y|h,x))$.
 
 \vfill
     {\bf Theorem:} With probability
-    at least $1-\delta$ over an I.I.D. draw of training data from the population the following holds {\em simultaneously} for all $h \in {\cal H}$.
+    at least $1-\delta$ over the draw of training data the following holds simultaneously for all $h$.
 
 \vfill
-    $${\cal L}(h) \leq \frac{10}{9}\parens{\hat{\cal L}(h) + \frac{5 L_\mathrm{max}}{N}\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}$$
+    $${\cal L}(h) \leq \frac{10}{9}\parens{\hat{\cal L}(h) + \frac{5 L_\mathrm{max}}{N}\parens{\ln \frac{1}{P(h)} + \ln\frac{1}{\delta}}}$$
+
+\slide{Proof}
+
+Consider $\lmax = 1$ and define $\epsilon(h)$ by
+
+\vfill
+$$\epsilon(h) = \sqrt{\frac{2{\cal L}(h)\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{N}}.$$
+
+\vfill
+By the relative Chernov bound we have
+
+\vfill
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\hat{{\cal L}}(h) \leq {\cal L}(h) - \epsilon(h)} \leq e^{-N\frac{\epsilon(h)^2}{2{\cal L}(h)}} = \delta P(h).$$
+
+\slide{Proof}
+
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\hat{{\cal L}}(h) \leq {\cal L}(h) - \epsilon(h)} \leq \delta P(h).$$
+
+\vfill
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\exists h\;\hat{{\cal L}}(h) \leq {\cal L}(h) - \epsilon(h)} \leq \sum_h \delta P(h) =\delta$$
+
+\vfill
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\forall h\;{\cal L}(h) \leq \hat{{\cal L}}(h) + \epsilon(h)} \geq 1- \delta$$
+
+\slide{Proof}
+
+$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \sqrt{{\cal L}(h)\parens{\frac{2\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{N}}}$$
+
+using
+$$\sqrt{ab} = \inf_{\lambda > 0}\;\frac{a}{2\lambda} + \frac{\lambda b}{2}$$
+\vfill
+we get
+$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \frac{{\cal L}(h)}{2\lambda} + \frac{\lambda\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{N}$$
+
+\slide{Proof}
+$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \frac{{\cal L}(h)}{2\lambda} + \frac{\lambda\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{N}$$
+
+\vfill
+Solving for ${\cal L}(h)$ yields
+
+\vfill
+$${\cal L}(h) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{{\cal L}}(h) + \frac{\lambda}{N}\parens{\ln \frac{1}{P(h)} + \ln \frac{1}{\delta}}}$$
+
+\vfill
+Setting $\lambda = 5$ and rescaling the loss gives the version on earlier slides.
 
 \slide{A Model Compression Guarantee}
 
@@ -175,89 +336,26 @@ Let $P(\Phi) = 2^{-|\Phi|}$
 \vfill
     $${\cal L}(\Phi) \leq \frac{10}{9}\parens{\hat{\cal L}(\Phi) + \frac{5 L_\mathrm{max}}{N}\parens{(\ln 2)|\Phi| + \ln\frac{1}{\delta}}}$$
 
-\slide{A Weight Norm Guarantee}
+\slide{Adding Noise Simulates Limiting Precision}
+
+Assume $0 \leq {\cal L}(\Phi,x,y) \leq \lmax$.
 
 \vfill
+Define:
 \begin{eqnarray*}
-P(w) & = & {\cal N}(0,\sigma)^d \\
-  \\
-L(\Theta) & = & \expectsub{\epsilon \sim {\cal N}(0,\sigma)^d}{{\cal L}(\Theta+\epsilon)} \\
+{\cal L}(\Phi) & = & E_{\;(x,y)\sim \pop,\;\epsilon \sim {\cal N}(0,\sigma)^d}\;{{\cal L}(\Phi+\epsilon,x,y)} \\
 \\
-\hat{L}(\Theta) & = & \expectsub{\epsilon \sim {\cal N}(0,\sigma)^d}{\hat{{\cal L}}(\Theta+\epsilon)}
+\hat{{\cal L}}(\Phi) & = & E_{\;(x,y)\sim \mathrm{Train},\;\epsilon \sim {\cal N}(0,\sigma)^d}\;{{\cal L}(\Phi+\epsilon,x,y)} \\
 \end{eqnarray*}
 
 \vfill
+Theorem: With probability at least $1-\delta$ over the draw of training data the following holds {\bf simultaneously} for all $\Phi$.
 \begin{eqnarray*}
-   L(\Theta) & \leq & \frac{10}{9}\parens{\hat{L}(\Theta) + \frac{5 \lmax}{N}\parens{\frac{||\Theta||^2}{2\sigma^2} + \ln \frac{1}{\delta}}}
+   {\color{red} {\cal L}(\Phi)} & {\color{red} \leq} & {\color{red} \frac{10}{9}\parens{\hat{{\cal L}}(\Phi)
+   + \frac{5 \lmax}{N}\parens{\frac{||\Phi-\Phi_{\mathrm{init}}||^2}{2\sigma^2} + \ln \frac{1}{\delta}}}}
 \end{eqnarray*}
 
-\slide{$L_2$ Regularization (a.k.a. Weight Decay or Shrinkage)}
 
-$$\Phi^* = \argmin_\Phi \;E_{(x,y) \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y) + \frac{1}{2}\lambda||\Phi||^2$$
-
-\vfill
-\begin{eqnarray*}
-  & & \nabla_\Phi \;\left(E_{(x,y) \sim \mathrm{Batch}}\;{\cal L}(\Phi,x,y) + \frac{1}{2}\lambda||\Phi||^2\right) \\
-  \\
-  & = & g(\Phi) + \lambda \Phi \;\;\;\mbox{giving }\;{\color{red} \Phi^* = \frac{g(\Phi^*)}{\lambda}} \\
-  \\
-  \Phi_{t+1} & = & {\color{red} \Phi_t - \eta \hat{g}_t - \eta \lambda \Phi_t}
-\end{eqnarray*}
-
-\slide{Standard Parameterization}
-
-The update
-$$\Phi_{t+1} = \Phi_t - \eta \hat{g}_t - \eta \lambda \Phi_t$$
-
-\vfill
-is typically parameterized as
-$$\Phi_{t+1} = \Phi_t - \eta \hat{g}_t - \gamma \Phi_t$$
-where $\gamma$ is the weight decay parameter.
-
-\vfill
-{\color{red} However, the $\eta$, $\lambda$ parameterization may be less ``entangled'' in hyper-parameter search than the $\eta$, $\gamma$ parameterization.}
-
-\slide{The Gradient Smoothing Parameterization}
-
-Setting $\eta = \gamma/\lambda$ we get
-
-\begin{eqnarray*}
-  \Phi_{t+1} & = & \Phi_t - \frac{\gamma}{\lambda} \hat{g}_t - \gamma \Phi_t \\
-  \\
-  & = & \left(1 -\gamma\right)\Phi_t - \gamma\left(\frac{\hat{g}_t}{\lambda}\right) \\
-  \\
-  \Phi^* & = & \frac{g}{\lambda}
-\end{eqnarray*}
-
-\vfill
-Again, different parameterizations will have different degrees of entanglement between the parameters
-and reflect different semantic interpretations.
-
-\slide{Shrinkage meets Early Stopping}
-
-Early stopping can limit $||\Phi||$ --- growing a large $||\Phi||$ can take a long time.
-
-\vfill
-Early stopping seems more related to limiting $||\Phi - \Phi_\mathrm{init}||$
-\vfill
-
-Theoretical guarantees work for $||\Phi - \Phi_{\mathrm{init}}||^2$ just as well as for $||\Phi||^2$.
-
-\vfill
-This suggests replacing $L_2$ regularization with
-
-\vfill
-$$\Phi^* = \argmin_\Phi {\cal L}(\Phi) + \frac{1}{2}\lambda ||\Phi- \Phi_{\mathrm{init}}||^2$$
-
-\slide{Shrinkage meets Batch Scaling}
-
-We have some in-house evidence that shinkage is important in batch scaling.
-
-\vfill
-Batch scaling with shrikage seems better behaved than batch scaling without shrikage.
-
-\vfill
-\centerline{?????}
 
 \slide{$L_1$ Regularization and Sparse Weights}
 
@@ -266,7 +364,7 @@ $$p(\Phi) \propto e^{-||\Phi||_1} \;\;\;\;\;\;\;\;||\Phi||_1 = \sum_i |\Phi_i|$$
 $$\Phi^* = \argmin_\Phi \; \;\;\hat{\cal L}(\Phi) \;+ \; \;\lambda||\Phi||_1$$
 
 \begin{eqnarray*}
-  \Phi & \minuseq & \eta \nabla_\Phi \; \ell_{\mathrm{train}}(\Phi) \\
+  \Phi & \minuseq & \eta \nabla_\Phi \; {\cal L}_{\mathrm{train}}(\Phi) \\
   \Phi_i & \minuseq & \eta\lambda\; \mathrm{sign}(\Phi_i) \;\;\;\;\;\;\mbox{(shrinkage)}
 \end{eqnarray*}
 
@@ -274,8 +372,8 @@ $$\Phi^* = \argmin_\Phi \; \;\;\hat{\cal L}(\Phi) \;+ \; \;\lambda||\Phi||_1$$
 At equilibrium \hfill (sparsity is difficult to achieve with SGD)
 
 $$\begin{array}{rcll}
-\Phi_i &  = & 0  & \;\;\;\;\;\mbox{if} \;\left|\partial \ell /\partial \Phi_i\right| <  \lambda \\
-\partial \ell /\partial \Phi_i & = &  -\lambda \mathrm{sign}(\Phi_i) &\;\;\;\;\; \mbox{otherwise}
+\Phi_i &  = & 0  & \;\;\;\;\;\mbox{if} \;\left|\partial {\cal L} /\partial \Phi_i\right| <  \lambda \\
+\partial {\cal L} /\partial \Phi_i & = &  -\lambda \mathrm{sign}(\Phi_i) &\;\;\;\;\; \mbox{otherwise}
 \end{array}$$
 
 
@@ -303,9 +401,9 @@ For log loss we average the probability vectors.
 $$P(y|x) = \frac{1}{k} \sum_i \;P_i(y|x)$$
 
 \vfill
-$- \log P$ is a convex function of $P$.  For any convex $\ell(P)$ Jensen's inequality states that
+$- \log P$ is a convex function of $P$.  For any convex ${\cal L}(P)$ Jensen's inequality states that
 
-$$\ell\left(\frac{1}{k} \sum_i P_i\right) \leq \frac{1}{k} \sum_i \ell(P_i)$$
+$${\cal L}\left(\frac{1}{k} \sum_i P_i\right) \leq \frac{1}{k} \sum_i {\cal L}(P_i)$$
 
 \vfill
 This implies that the loss of the average model cannot be worse (can only be better) than the average loss of the models.
@@ -363,19 +461,20 @@ So solving least squares regression by SGD has an implicit weight norm regulariz
 
 \slideplain{An Implicit Regularization Generalization Guarantee}
 
-let $A(\mathrm{Train})$ be the distribution on models defined by running the stochastic algorithm $A$ on training data
-$\mathrm{Train}$.
+Let ${\cal H}$ be a discrete set of classifiers.
 
 \vfill
-We let $\overline{A}$ be the distribution on models defined first drawing $\mathrm{Train}$ and then drawing a model from $A(\mathrm{Train})$.
+Let $A$ be an algorithm mapping a training set to a classifier.
 
-\begin{eqnarray*}
-\overline{A}(\Phi) & = & E_{\mathrm{Train} \sim \mathrm{Pop}}\;A(\mathrm{Train})(\Phi) \\
-\\
-L_A(\mathrm{Train}) & = & E_{\Phi \sim A(\mathrm{Train})};E_{(x,y) \sim \mathrm{Pop}}\;{\cal L}(\Phi,x,y) \\
-\\
-\hat{L}_A(\mathrm{Train}) & = & E_{\Phi \sim A(\mathrm{Train})}\;E_{(x,y) \sim \mathrm{\mathrm{Train}}}\;{\cal L}(\Phi,x,y)
-\end{eqnarray*}
+\vfill
+Let $P(h | A,\pop)$ be the probability over the draw of the training data that $A(\mathrm{Train}) = h$.
+
+\vfill
+Theorem: With probability at least $1-\delta$ over the draw of the training data we have
+$${\color{red} \mathrm{Err}(A(\mathrm{Train}))} \leq \frac{10}{9}\parens{\begin{array}{l} {\color{red} \hat{\mathrm{Err}}(A(\mathrm{Train}))}
+ \\+ \frac{5}{N}\parens{
+\ln \frac{1}{{\color{red} P(A(\mathrm{Train})|A,\pop)}} + \ln \frac{1}{\delta}}\end{array}}$$
+
 
 \ignore{
 \slide{Optimality of $Q_{\cal A}(\mathrm{Pop})$}
@@ -407,13 +506,6 @@ Consider an arbitrary prior $P$.
 So $Q_{\cal A}(\mathrm{Pop})$ is an {\bf optimal prior} (or {\bf implicit prior}) for algorithm ${\cal A}$.
 }
 
-\slide{An Implicit Regularization Generalization Guarantee}
-
-For any given learning algorithm ${\cal A}$ and we have the following with probability at least $1-\delta$ over the draw of $\mathrm{Train}$.
-
-\vfill
-$$L(\mathrm{Train}) \leq \frac{10}{9}\parens{\hat{L}(\mathrm{Train}) + \frac{5\lmax}{N}\parens{KL(A(\mathrm{Train}),\;\overline{A}) + \ln \frac{1}{\delta}}}$$
-
 \ignore{
 \slide{The Broad Basin Hypothesis}
 
@@ -439,7 +531,7 @@ and ``broad'' should be defined in terms of that geometry.
 
 We can impose an $L_1$ regularization on the activations of the network (the output of the activation function of each neuron).
 
-$$\Phi^* = \argmin_\Phi \ell(\Phi) + \lambda||h||_1$$
+$$\Phi^* = \argmin_\Phi {\cal L}(\Phi) + \lambda||h||_1$$
 
 \vfill
 where $h$ is the vector of neuron activation outputs.
@@ -519,19 +611,6 @@ Then we use the model $(\Phi,\;\mu)$ with weight layers defined by
 \vfill
 $$y_i = \mathrm{Relu}\left(\sum_j\;W_{i,j} \;\mu_jx_j\right)$$
 
-\slide{A Dropout Bound}
-
-\begin{eqnarray*}
-KL(Q_{\alpha,\Phi},\;Q_{\alpha,0}) & = & \expectsub{\mu \sim P_\alpha, \epsilon \sim {\cal N}(0,1)^d}
-{\ln \frac{P_\alpha(\mu) e^{-\frac{1}{2}||\mu \odot \epsilon||^2}}{P_\alpha(\mu) e^{-\frac{1}{2}||\mu \odot (\Phi + \epsilon)||^2}}} \\
-\\
-& = & \expectsub{\mu \sim P_\alpha}{\frac{1}{2}||\mu \odot \Phi||^2} \\
-\\
-& = & \frac{1-\alpha}{2}||\Phi||^2
-\end{eqnarray*}
-
-$$L(Q_{\alpha,\Phi}) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{L}(Q_{\alpha,\Phi}) + \frac{\lambda \lmax}{N}\parens{\frac{1-\alpha}{2}||\Phi||^2 + \ln \frac{1}{\delta}}}$$
-
 \slide{Dropout Training}
 
 Repeat:
@@ -542,7 +621,7 @@ Repeat:
 \item Select a random dropout mask $\mu$
   
 \vfill
-\item $\Phi \;\minuseq\; \nabla_\Phi\; \ell(\Phi, \mu)$
+\item $\Phi \;\minuseq\; \nabla_\Phi\; {\cal L}(\Phi, \mu)$
 \end{itemize}
 
 \vfill
@@ -582,56 +661,33 @@ Consider simple least square regression
 \vfill
 In this case dropout is equivalent to a form of $L_2$ regularization --- see Wager et al. (2013).
 
-\slide{Proof of the Discrete PAC-Bayes Bound}
-$${\cal L}(h) = E_{(x,y)\sim \mathrm{Pop}}\;{\cal {\cal L}}(h,x,y)$$
+\ignore{
+\slide{A Dropout Bound}
+
+\begin{eqnarray*}
+KL(Q_{\alpha,\Phi},\;Q_{\alpha,0}) & = & \expectsub{\mu \sim P_\alpha, \epsilon \sim {\cal N}(0,1)^d}
+{\ln \frac{P_\alpha(\mu) e^{-\frac{1}{2}||\mu \odot \epsilon||^2}}{P_\alpha(\mu) e^{-\frac{1}{2}||\mu \odot (\Phi + \epsilon)||^2}}} \\
+\\
+& = & \expectsub{\mu \sim P_\alpha}{\frac{1}{2}||\mu \odot \Phi||^2} \\
+\\
+& = & \frac{1-\alpha}{2}||\Phi||^2
+\end{eqnarray*}
+
+$$L(Q_{\alpha,\Phi}) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{L}(Q_{\alpha,\Phi}) + \frac{\lambda \lmax}{N}\parens{\frac{1-\alpha}{2}||\Phi||^2 + \ln \frac{1}{\delta}}}$$
+}
+
+\slide{Summary}
+
+There is never harm in doing early stopping --- one should always do early stopping.
 
 \vfill
-$$\hat{{\cal L}}(h) = E_{(x,y)\sim \mathrm{Train}}\;{\cal {\cal L}}(h,x,y)$$
-
-\slide{Proof}
-
-Consider $\lmax = 1$ and define $\epsilon(h)$ by
+Regularization is any modification to the training algorithm motivated by reducing the training-validation gap.
 
 \vfill
-$$\epsilon(h) = \sqrt{\frac{2{\cal L}(h)\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{N}}.$$
+While regularization modifications to training can be inspired by theory, the theory is weak.
 
 \vfill
-By the relative Chernoof bound we have
-
-\vfill
-$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\hat{{\cal L}}(h) \leq {\cal L}(h) - \epsilon(h)} \leq e^{-N\frac{\epsilon(h)^2}{2{\cal L}(h)}} = \delta P(h).$$
-
-\slide{Proof}
-
-$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\hat{{\cal L}}(h) \leq {\cal L}(h) - \epsilon(h)} \leq \delta P(h).$$
-
-\vfill
-$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\exists h\;\hat{{\cal L}}(h) \leq {\cal L}(h) - \epsilon(h)} \leq \sum_h \delta P(h) =\delta$$
-
-\vfill
-$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\forall h\;{\cal L}(h) \leq \hat{{\cal L}}(h) + \epsilon(h)} \geq 1- \delta$$
-
-\slide{Proof}
-
-$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \sqrt{{\cal L}(h)\parens{\frac{2\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{N}}}$$
-
-using
-$$\sqrt{ab} = \inf_{\lambda > 0}\;\frac{a}{2\lambda} + \frac{\lambda b}{2}$$
-\vfill
-we get
-$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \frac{{\cal L}(h)}{2\lambda} + \frac{\lambda\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{N}$$
-
-\slide{Proof}
-$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \frac{{\cal L}(h)}{2\lambda} + \frac{\lambda\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{N}$$
-
-\vfill
-Solving for ${\cal L}(h)$ yields
-
-\vfill
-$${\cal L}(h) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{{\cal L}}(h) + \frac{\lambda}{N}\parens{\ln \frac{1}{P(h)} + \ln \frac{1}{\delta}}}$$
-
-\vfill
-Setting $\lambda = 5$ and rescaling the loss gives the version on earlier slides.
+Regularization modifications to training should be evaluated empirically.
 
 \ignore{
 \slide{A KL Divergence Bound}
@@ -671,4 +727,3 @@ Computing Nonvacuous Generalization Bounds for Deep (Stochastic) Neural Networks
 
 }
 \end{document}
-
