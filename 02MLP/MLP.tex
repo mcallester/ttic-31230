@@ -262,8 +262,8 @@ $$\begin{array}{lcl}
 (4)\; \partial{\cal L}/\partial r & = & \frac{1}{2\sqrt{r}} \\
 (3)\; \partial{\cal L}/\partial u & = & \partial {\cal L}/\partial r \\
 (3)\; \partial{\cal L}/\partial w & = & \partial {\cal L}/\partial r\\
-(2)\; \partial{\cal L}/\partial y & = & (\partial {\cal L}/\partial w) * (2y) \\
-(1)\; \partial{\cal L}/\partial x & = & (\partial {\cal L}/\partial u) * (2x)
+(2)\; \partial{\cal L}/\partial y & = &  (2y) * (\partial {\cal L}/\partial w) \\
+(1)\; \partial{\cal L}/\partial x & = & (2x) * (\partial {\cal L}/\partial u)
 \end{array}$$
 }
 
@@ -282,7 +282,7 @@ For now assume all values are scalars (single numbers rather than arrays).
 \medskip
 We will ``backpopagate'' the assignments the reverse order.
 
-\anaslide{Backpropagation (Scalar Values)}
+\anaslide{Back-Propagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -294,7 +294,7 @@ We will ``backpopagate'' the assignments the reverse order.
 \medskip
 {\color{red} ${\partial {\cal L}}/{\partial u} = 1$}
 
-\anaslide{Backpropagation (Scalar Values)}
+\anaslide{Back-Propagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -307,9 +307,9 @@ We will ``backpopagate'' the assignments the reverse order.
 ${\partial {\cal L}}/{\partial u} = 1$
 
 \medskip
-{\color{red} ${\partial {\cal L}}/{\partial z} = ({\partial {\cal L}}/{\partial u})\; ({\partial h}/{\partial z})$} (this uses the value of $z$)
+{\color{red} ${\partial {\cal L}}/{\partial z} = ({\partial h}/{\partial z})\; ({\partial {\cal L}}/{\partial u})$} (this uses the value of $z$)
 
-\anaslide{Backpropagation (Scalar Values)}
+\anaslide{Back-Propagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -322,12 +322,12 @@ ${\partial {\cal L}}/{\partial u} = 1$
 ${\partial {\cal L}}/{\partial u} = 1$
 
 \medskip
-${\partial {\cal L}}/{\partial z} = ({\partial {\cal L}}/{\partial u})\; ({\partial h}/{\partial z})$
+${\partial {\cal L}}/{\partial z} = ({\partial h}/{\partial z}) \; ({\partial {\cal L}}/{\partial u})$
 
 \medskip
-{\color{red} ${\partial {\cal L}}/{\partial y} = ({\partial {\cal L}}/{\partial z})\; ({\partial g}/{\partial y})$} (this uses the value of $y$ and $x$)
+{\color{red} ${\partial {\cal L}}/{\partial y} = ({\partial g}/{\partial y}) \; ({\partial {\cal L}}/{\partial z})$} (this uses the value of $y$ and $x$)
 
-\anaslide{Backpropagation (Scalar Values)}
+\anaslide{Back-Propagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f({\color{red} x}) \\
@@ -340,15 +340,15 @@ ${\partial {\cal L}}/{\partial z} = ({\partial {\cal L}}/{\partial u})\; ({\part
 ${\partial {\cal L}}/{\partial u} = 1$
 
 \medskip
-${\partial {\cal L}}/{\partial z} = ({\partial {\cal L}}/{\partial u})\; ({\partial h}/{\partial z})$
+${\partial {\cal L}}/{\partial z} = ({\partial h}/{\partial z}) \;({\partial {\cal L}}/{\partial u})$
 
 \medskip
-${\partial {\cal L}}/{\partial y} = ({\partial {\cal L}}/{\partial z})\; ({\partial g}/{\partial y})$
+${\partial {\cal L}}/{\partial y} = ({\partial g}/{\partial y}) \;({\partial {\cal L}}/{\partial z})$
 
 \medskip
 {\color{red} ${\partial {\cal L}}/{\partial x} =$ ???} Oops, we need to add up multiple occurrences.
 
-\anaslide{Backpropagation (Scalar Values)}
+\anaslide{Back-Propagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f({\color{red} x}) \\
@@ -367,7 +367,7 @@ Each framework program variable denotes an {\color{red} object} (in the sense of
 Values are computed ``forward'' while gradients are computed ``backward''.
 
 
-\anaslide{Backpropagation (Scalar Values)}
+\anaslide{Back-Propagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -386,7 +386,7 @@ We initialize the loss gradient to 1: {\color{red} $u.\grad = 1$}
 \medskip
 {\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
 
-\anaslide{Backpropagation (Scalar Values)}
+\anaslide{Back-Propagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -403,14 +403,14 @@ $z.\grad = y.\grad = x.\grad = 0$
 $u.\grad = 1$
 
 \medskip
-$z.\grad\;\pluseq\; u.\grad * {\partial h}/{\partial z}$
+$z.\grad\;\pluseq\;  ({\partial h}/{\partial z}) * u.\grad$
 
 }
 
 \medskip
 {\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
 
-\anaslide{Backpropagation (Scalar Values)}
+\anaslide{Back-Propagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -427,20 +427,20 @@ $z.\grad = y.\grad = x.\grad = 0$
 $u.\grad = 1$
 
 \medskip
-$z.\grad\;\pluseq\; u.\grad * {\partial h}/{\partial z}$
+$z.\grad\;\pluseq\; ({\partial h}/{\partial z}) * u.\grad$
 
 \medskip
-$y.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial y}$
+$y.\grad \;\pluseq\; ({\partial g}/{\partial y}) * z.\grad$
 
 \medskip
-$x.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial x}$
+$x.\grad \;\pluseq\; ({\partial g}/{\partial x}) * z.\grad$
 
 }
 
 \medskip
     {\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
 
-\anaslideplain{Backpropagation (Scalar Values)}
+\anaslideplain{Back-Propagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   {\color{red} y} & {\color{red} =} & {\color{red} f(x)} \\
@@ -448,7 +448,6 @@ $x.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial x}$
   {\color{red} u} & {\color{red} =} & {\color{red} h(z)} \\
   {\color{red} {\cal L}} & {\color{red} =} & {\color{red} u}
 \end{eqnarray*}
-
 {\color{red}
 \medskip
 $z.\grad = y.\grad = x.\grad = 0$
@@ -457,16 +456,16 @@ $z.\grad = y.\grad = x.\grad = 0$
 $u.\grad = 1$
 
 \medskip
-$z.\grad\;\pluseq\; u.\grad * {\partial h}/{\partial z}$
+$z.\grad\;\pluseq\; ({\partial h}/{\partial z}) * u.\grad$
 
 \medskip
-$y.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial y}$
+$y.\grad \;\pluseq\; ({\partial g}/{\partial y}) * z.\grad$
 
 \medskip
-$x.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial x}$
+$x.\grad \;\pluseq\; ({\partial g}/{\partial x}) * z.\grad$
 
 \medskip
-$x.\grad \;\pluseq\; y.\grad * {\partial f}/{\partial x}$
+$x.\grad \;\pluseq\; ({\partial f}/{\partial x}) * y.\grad$
 }
 
 \ignore{
@@ -507,7 +506,7 @@ Each array {\color{red} $W$} is an object with attributes {\color{red} $W.\mathr
 {\color{red} $W.\mathrm{grad}$} is an array with the same indeces as {\color{red} $W.\mathrm{value}$}.
 
 \vfill
-An array with more than two indeces is called a tensor.
+An array with more than two indeces is called a {\color{red} tensor}.
 
 \slide{Einstein Notation}
 
@@ -523,25 +522,43 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
   {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
 \end{eqnarray*}
 
-\slide{The Swap Rule}
-\vspace{-3ex}
-\begin{eqnarray*}
-  \tilde{y}[j] & = & \sum_i\;W[j,i]\;x[i] \\
-  \\
-  y[j] & = & \sigma(\tilde{y}[j] - b[j]) \\
-  \end{eqnarray*}
+\slide{Loop Notation}
 
-\vspace{-5ex}
-{\color{red} 
-  \begin{eqnarray*}
-  \\
-  x.\mathrm{grad}[i] & \pluseq & \sum_j\;\tilde{y}.\mathrm{grad}[j]W[j,i] \\
-  \\
-  W.\mathrm{grad}[j,i] & \pluseq & \tilde{y}.\mathrm{grad}[j]x[i]
-\end{eqnarray*}
-}
+We will define back-propagation on tensor computations by first compiling them to loop notation.
+Loop notation assumes all computed tensors are initialized to zero.
 
-one swaps the output with one of the inputs and sums over the indeces not occuring on the left.
+\vfill
+$$\begin{array}{llrcl}
+
+\mathrm{Vector:} & & {\color{red} h} & = & {\color{red} \sigma(Wx -B)} \\
+\\
+\mathrm{Einstein:} & &  {\color{red} h[j]} & = & {\color{red} \sigma\left(\left(\sum_i\;W[j,i] \;x[i]\right) - B[j]\right)} \\
+  \\
+\mathrm{Loop:} & \mathrm{for}\;i,j & {\color{red} \tilde{h}[j]} & \pluseq & {\color{red} W[j,i]x[i]} \\
+\\
+& \mathrm{for}\;j & {\color{red} \tilde{h}[j]} & \minuseq & {\color{red} B[j]} \\
+  \\
+& \mathrm{for}\;j & {\color{red} h[j]} & = & \sigma(\tilde{h}[j]) \\
+\end{array}$$
+
+\slideplain{Back-Propagation on Loop Notation}
+We backpropagate the body of the loop.
+
+$$\begin{array}{lrcl}
+\mathrm{for}\;i,j & {\color{red} \tilde{h}[j]} & \pluseq & {\color{red} W[j,i]x[i]}
+\end{array}$$
+
+\vfill
+The body of the loop is just a product of scalars.  A product of scalars has a trivial back-propagation:
+
+$$\begin{array}{lrcl}
+\mathrm{for}\;i,j & {\color{red} W.\grad[j,i]} & \pluseq & {\color{red} x[i]\tilde{h}.\grad[j]} \\
+\\
+& {\color{red} x.\grad[i]} & \pluseq & {\color{red} W[j,i]\tilde{h}.\grad[j]} \\
+\end{array}$$
+
+\vfill For 2D CNNS the weight tensor and the data tensor each have four indeces (including the batch index).
+Vector notation becomes unwieldy while loop notation remains trivial.
 
 \slideplain{Minibatching}
 
@@ -581,22 +598,21 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
   {\color{red} P_\Phi[b,\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[b,\hat{y}]}
 \end{eqnarray*}
 
-\slideplain{The Swap Rule with Minibatching}
+\slideplain{Back-Propagation with Minibatching}
 \vspace{-3ex}
 \begin{eqnarray*}
-\vdots \\
-  \tilde{y}[b,j] & = & \sum_i\;W[j,i]\;x[b,i] \\
-  \vdots
-  \end{eqnarray*}
-
-  \begin{eqnarray*}
-  \\
-  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;\tilde{y}.\mathrm{grad}[b,j]W[j,i] \\
-  \\
-  W.\mathrm{grad}[j,i] & \pluseq & {\color{red} \frac{1}{B} \sum_b}\;\tilde{y}.\mathrm{grad}[b,j]x[b,i]
+  \mathrm{for}\;b,i,j\;\;\;\tilde{y}[b,j] & \pluseq & W[j,i]\;x[b,i]
 \end{eqnarray*}
 
-\slide{Summary}
+\begin{eqnarray*}
+\mathrm{for}\;b,i,j\;\;\;  x.\mathrm{grad}[b,i] & \pluseq & W[j,i]\tilde{y}.\mathrm{grad}[b,j] \\
+  \\
+  W.\mathrm{grad}[j,i] & \pluseq & {\color{red} \frac{1}{B}}\;x[b,i]\tilde{y}.\mathrm{grad}[b,j]
+\end{eqnarray*}
+
+\vfill
+$B$ is the number of batch elements.  By convention parameter gradients are averaged over the batch.
+\slide{Framework Summary}
 
 A framework provides a high level language for writing models $P_\Phi(y|x)$.
 
@@ -608,7 +624,283 @@ A framework compiles a model into an optimization algorithm.
 \vfill
 A framework also typically provides support for managing large training sets and pre-trained model parameter values (also called ``models'').
 
- 
+\slide{The Educational Framework (EDF)}
+
+The educational frameword (EDF) is 150 lines of Python-NumPy that implement a deep learning framework.
+
+\vfill
+In EDF we write
+
+\vfill
+\begin{eqnarray*}
+  y & = & F(x) \\
+  z & = & G(y,x) \\
+  u & = & H(z) \\
+  {\cal L} &  = &  u
+\end{eqnarray*}
+\medskip
+
+\vfill
+This is Python code where variables are bound to objects.
+
+\anaslide{The EDF Framework}
+
+\begin{eqnarray*}
+  y & = & F(x) \\
+  z & = & G(y,x) \\
+  u & = & H(z) \\
+  {\cal L} &  = &  u
+\end{eqnarray*}
+
+\vfill
+This is Python code.
+
+\vfill
+$x$ is an object in the class {\tt Input}.
+
+\vfill
+$y$ is an object in the class $F$ (subclass of {\tt CompNode}).
+
+\vfill
+$z$ is an object in the class $G$ (subclass of {\tt CompNode}).
+
+\medskip
+$u$ and ${\cal L}$ are the same object in the class $H$ (suclass of {\tt CompNode}).
+
+\slide{The Core of EDF}
+
+\begin{tabbing}
+def \=Forward(): \\
+   \>for c in CompNodes: c.forward() \\
+\\
+def \>Backward(loss): \\
+    \> for c in CompNodes + Parameters: c.grad = 0 \\
+    \> loss.grad = 1. \\
+    \> for c in CompNodes[::-1]: c.backward() \\
+    \\
+def \> SGD(): \\
+    \> for \= p in Parameters: \\
+       \>\>p.value -= eta*p.grad
+\end{tabbing}
+
+\anaslideplain{$y = F(x)$}
+
+\begin{tabbing}
+  class \=$F$(CompNode): \\
+  \\
+    \>def \=\_\_init\_\_(self, x): \\
+        \>\>CompNodes.append(self) \\
+        \>\>self.x = x \\
+\\
+    \>def forward(self): \\
+        \>\>self.value = ... compute the value ... \\
+\\
+    \>def backward(self): \\
+        \>\>self.x.addgrad(... compute the gradient ...)
+\end{tabbing}
+
+\slide{Nodes of the Computation Graph}
+
+There are three kinds of nodes in a computation graph --- inputs, parameters and computation nodes.
+
+\vfill
+\begin{tabbing}
+class \=Input: \\
+    \>def \=\_\_init\_\_(self): \\
+        \>\>pass \\
+    \>def \>addgrad(self, delta): \\
+    \>\>pass
+\end{tabbing}
+
+\vfill
+\begin{tabbing}
+class \=CompNode: \#initialization is handled by the subclass \\
+   \>def \=addgrad(self, delta): \\
+   \>\>self.grad += delta
+\end{tabbing}
+
+\slide{}
+
+\begin{tabbing}
+class \=Parameter: \\
+    \\
+    \>def \=\_\_init\_\_(self,value): \\
+        \>\>Parameters.append(self) \\
+        \>\>self.value = value \\
+\\
+    \>def \>addgrad(self, delta): \\
+          \>\>\#sums over the minibatch \\
+    \>\>self.grad += np.sum(delta, axis = 0)/nBatch \\
+\end{tabbing}
+
+\anaslide{MLP in EDF}
+\medskip
+
+The following Python code constructs the computation graph of a multi-layer perceptron (NLP) with one hidden layer.
+
+\vfill
+\begin{verbatim}
+  L1 = Sigmoid(Affine(Phi1,x))
+  Q = Softmax(Sigmoid(Affine(Phi2,L1))
+  ell = LogLoss(Q,y)
+\end{verbatim}
+
+\vfill
+Here {\tt x} and {\tt y} are input computation nodes
+whose value have been set.
+Here {\tt Phi1} and {\tt Phi2} are ``parameter packages'' (a matrix and a bias vector in this case).
+We have computation node classes {\tt Affine}, {\tt Relu}, {\tt Sigmoid}, {\tt LogLoss} each of which has
+a forward and a backward method.
+
+\slide{The {\tt Sigmoid} Class}
+
+\begin{eqnarray*}
+y[b,i] & = &  \sigma(x[b,i]) \\
+\\
+y & = & \frac{1}{1 + e^{-x}} \\
+\\
+\frac{d y}{dx} & = & \frac{e^{-x}}{(1 + e^{-x})^2} \\
+\\
+& = & y(1-y) \\
+\\
+x.\grad[b,i] & \pluseq & y.\grad[b,i]y.\mathrm{value}[b,i](1-y.\mathrm{value}[b,i])
+\end{eqnarray*}
+
+
+
+\slide{The {\tt Sigmoid} Class}
+
+\begin{verbatim}
+class Sigmoid:
+  def __init__(self,x):
+    CompNodes.append(self)
+    self.x = x
+
+  def forward(self):
+    self.value = 1. / (1. + np.exp(-self.x.value))
+
+  def backward(self):
+    self.x.addgrad(self.grad*self.value*(1.-self.value))
+\end{verbatim}
+
+
+\slide{The {\tt Affine} Class}
+\vspace{-3ex}
+\begin{eqnarray*}
+  \tilde{y}[b,j] & = & \sum_i\;W[i,j]\;x[b,i] {\color{red}\;\; = xW}  \\
+  y[b,j] & = & \tilde{y}[b,j] - B[j] {\color{red} \;\;=\;\tilde{y} - B}\; \mathrm{(broadcasting)}
+  \end{eqnarray*}
+
+\vspace{-2ex}
+{\color{red}
+\begin{eqnarray*}
+  \tilde{y}.\mathrm{grad}[b,j] &\pluseq & y.\mathrm{grad}[b,j] \\
+  B.\mathrm{grad}[j] & \minuseq & \frac{1}{B} \sum_b\;y.\mathrm{grad}[b,j] \\
+  \\
+  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;y.\mathrm{grad}[b,j]W[i,j] = yW^\top\\
+  \\
+  W.\mathrm{grad}[i,j] & \pluseq & \frac{1}{B} \sum_b\;y.\mathrm{grad}[b,j]x[b,i] =\; ???
+\end{eqnarray*}
+}
+
+\vfill
+\eject
+\begin{verbatim}
+class Affine(CompNode):
+
+    def __init__(self,Phi,x):
+        CompNodes.append(self)
+        self.x = x
+        self.Phi = Phi
+
+    def forward(self):
+        self.value = (np.matmul(self.x.value,
+                               self.Phi.w.value)
+                      - self.Phi.b.value)
+\end{verbatim}
+\vfill
+\eject
+\vfill
+\begin{verbatim}
+    def backward(self):
+
+        self.x.addgrad(
+           np.matmul(self.grad,
+                     self.Phi.w.value.transpose()))
+
+        self.Phi.b.addgrad(- self.grad)
+
+        self.Phi.w.addgrad(self.x.value[:,:,np.newaxis]
+                           * self.grad[:,np.newaxis,:])
+\end{verbatim}
+
+
+\slide{Procedures in EDF}
+
+\begin{verbatim}
+def MLP(Phi,x)
+
+   if len(Phi) = 0
+      return x
+
+   return Sigmoid(Affine(Phi[0],MLP(Phi[1:],x)))
+\end{verbatim}
+
+\ignore{
+\slide{NumPy: Reshaping Tensors}
+
+For an ndarray $x$ (tensor) we have that $x.\mathrm{shape}$ is a tuple of dimensions.  The product of the dimensions is the number of numbers.
+
+\vfill
+In NumPy an ndarray (tensor) $x$ can be reshaped into any shape with the same number of numbers.
+
+\slide{NumPy: Broadcasting}
+
+Shapes can contain dimensions of size 1.
+
+\vfill
+Dimensions of size 1 are treated as ``wild card'' dimensions in operations on tensors.
+
+\vfill
+\begin{eqnarray*}
+  x.\mathrm{shape} & = & (5,1) \\
+  y.\mathrm{shape} & = & (1,10) \\
+  z & = & x*y \\
+  z.\mathrm{shape} & = & (5,10) \\
+  z[i,j] & = & x[i,0] * y[0,j]
+\end{eqnarray*}
+
+\vfill
+\eject
+\vfill
+\begin{verbatim}
+class Affine(CompNode):
+    ...
+    def backward(self):
+        ...
+        # W.grad[i,j] += y.grad[b,j]x.value[b,i]
+        self.Phi.W.addgrad(self.grad[:,np.newaxis,:]
+                           *self.x.value[:,:,np.newaxis])
+
+class Parameter:
+    ...
+    def addgrad(self, delta):
+        self.grad += np.sum(delta, axis = 0)
+\end{verbatim}
+
+\slide{NumPy: Broadcasting}
+
+When a scalar is added to a matrix the scalar is reshaped to shape $(1,1)$ so that it is added to each element of the matrix.
+
+\vfill
+When a vector of shape $(k)$ is added to a matrix the vector is reshaped to $(1,k)$ so that it is added to each row of the matrix.
+
+\vfill
+In general when two tensors of different order (number of dimensions) are added, unit dimensions are prepended to the shape of the tensor of smaller order
+to make the orders match.
+}
+
 \slide{END}
 }
+
 \end{document}
