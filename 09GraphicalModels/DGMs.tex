@@ -36,7 +36,7 @@ is exactly the same as that of the unconditional case.
 {\color{red} The structured case:} $y \in {\cal Y}$ where ${\cal Y}$ is discrete but {\color{red} iteration over $\hat{y} \in {\cal Y}$ is infeasible}.
 
 \vfill
-Language modeling (unconditional) and machine translation (conditional) are distributions on exponentially large (even infinite) sets.
+{\color{red} Language modeling} (unconditional) and {\color{red} machine translation} (conditional) are distributions on exponentially large (even infinite) sets.
 
 \slide{Friendly and Unfriendly Distributions}
 
@@ -52,192 +52,16 @@ Distributions which are not friendly in this sense will be called {\color{red} u
 \slide{The Importance of Being Friendly}
 
 
-In cases where $P_\Phi(y|x)$ can be computed (a friendly model)
-we can do SGD by back-propagating through the computation of $P_\Phi(y|x)$.
+{\color{red} If $P_\Phi(y|x)$ can be computed} (a friendly model)
+we can do SGD on cross-entropy loss {\color{red} $- \ln P_\Phi(y|x)$} by back-propagating
+through the computation of $P_\Phi(y|x)$.
 
-
-
-\slidetwo{Graphical Models are Generally Unfriendly:}
-{Semantic Segmentation}
-\centerline{\includegraphics[height = 2.5in]{../images/SLICcolor}}
-\centerline{\huge SLIC superpixels, Achanta et al.}
-
-\vfill
-We want to assign each superpixel one of $k$ semantic classes.
-
-\vfill
-For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
-
-\anaslide{Exponential Softmax}
-\bigskip
-{\color{red}
-\begin{eqnarray*}
-P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
-\end{eqnarray*}
-}
-
-\vfill
-Let ${\cal C}$ be the semantic classes, ${\cal I}$ be superpixels, and ${\cal E}$ be edges.
-
-\vfill
-We will compute
-
-\vfill {\bf a unary potential tensor} $s_i[c] = s_\Phi(c|x,i)$
-
-\vfill
-{\bf a binary potential tensor} $s_e[c,c'] = s_\Phi(c,c'|x,e)$
-
-\vfill
-{\color{red} $$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$}
-
-\anaslide{Exponential Softmax}
-\bigskip
-{\color{red}
-\begin{eqnarray*}
-P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
-\end{eqnarray*}
-}
-
-\vfill
-Distributions defined by exponential softmax operations are not friendly in general --- there is no efficient general sampling algorithm or efficient general method of computing $Z$.
-
-\vfill
-Computing $Z$ is easily shown to be \#P hard.
-
-\slide{Latent Variables}
-
-We are often interested in models of the form
-
-\vfill
-{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
-
-\vfill
-Probabilistic grammar models have this form where $y$ is a sentence and $z$ is a parse tree
-and $P(y|z)$ is deterministic.
-
-
-\slide{Exponential Softmax as Intermediate Computation}
-$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$
-
-\vfill
-{\color{red}
-\begin{eqnarray*}
-& & \mbox{intput}\; x \\
-\vdots \\
-z & = & \expsoftmax_z \ldots \\
-\\
-& & \mbox{input}\; z \\
-\vdots \\
-y & = & \expsoftmax_y\;\ldots
-\end{eqnarray*}
-}
-
-\slide{A Composition of Friendlies is Typically  Unfriendly}
-
-{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
-
-\vfill
-It is often the case that $P_\Phi(z)$ is friendly, and $P_\Phi(y|z)$ is friendly, but $P_\Phi(y)$ is not friendly (the sum over $z$ is intractible).
-
-\vfill
-For example $z$ might be uniformly distributed over assignments of truth values to Boolean variables (which is friendly) and $y$ might be the value of a fixed Boolean formula $\Phi$ (which is friendly given $z$).  In this case
-determining if $P_\Phi(y) > 0$ is the SAT problem which is NP hard.
-
-\slidetwo{Connectionist Temporal Classification (CTC)}
-{A Successful Friendly Latent Variable Model}
-
-A speech signal
-$$x = x_1,\; \ldots,\; x_{\color{red} T}$$
-is labeled with a phone sequence
-$$y = y_1, \ldots, y_{\color{red} N}$$
-with {\color{red} $N << T$} and with $y_n \in {\cal P}$ for a set of phonemes ${\cal P}$.
-
-\vfill
-{\color{red} The length $N$ of $y$ is not determined by $x$ and the alignment between $x$ and $y$ is not given.}
-
-\slide{CTC: A Friendly Compositions of Friendlies}
-
-{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z).$$}
-
-\vfill
-\begin{tabbing}
-Input Signal: \hspace{3em} \=$x = x_1,\;\ldots,\;x_{\color{red} T}$ \\
-Latent Label: \>$z = z_1,\;\ldots,\;z_{\color{red} T},\;\;\;z_t \in {\cal P} \cup \{\bot\}$ \\
-Output: \>$y(z) = y_1,\;\ldots,\;y_{\color{red} N}$
-\end{tabbing}
-
-\vfill
-$y(z)$ is the result of removing all the occurrences of $\bot$ from $z$:
-
-{\color{red} $$\hspace{5em} z \hspace{7em} \Rightarrow \hspace{2em} y$$}
-{\color{red} $$\bot,a_1,\bot,\bot,\bot,a_2,\bot,\bot,a_3,\bot \;\;\;\Rightarrow\;\; a_1,a_2,a_3$$}
-
-
-\slide{The CTC Model}
-
-For $z \in {\cal P} \cup \{\bot\}$ we have an embedding $e(z)$.  The embedding is a parameter of the model.
-
-\begin{eqnarray*}
-  h_1,\;\ldots,\;h_T & = & \mathrm{RNN}_\Phi(x_1,\;\ldots,\;x_T) \\
-  \\
-  P_\Phi(z_t|x_1,\ldots,x_T) & = & {\color{red} \softmax_{z} \;e(z)^\top h_t}
-\end{eqnarray*}
-
-\vfill
-$z_1$, $\ldots$ $z_T$ are {\color{red}  all independent} given $x$ (very friendly).
-
-\vfill
-$P_\Phi(y|z)$ is {\color{red} deterministic} (very friendly).
-
-\vfill
-{\color{red} But it is not obvious whether $P_\Phi(y|x)$ is friendly.}
-
-
-\slide{Dynamic Programming (Forward-Backward)}
-\begin{eqnarray*}
-  x & = & x_1,\;\ldots,\; x_T \\
-  z & = & z_1, \;\ldots,\;z_T,\;\;\;z_t \in {\cal P}\cup \{\bot\} \\
-  y & = & y_1,\;\ldots,\;y_N,\;\;\;\;y_n \in {\cal P},\;\;\;N << T \\
-  y(z) & = & (z_1,\;\ldots,\;z_T) - \bot
-\end{eqnarray*}
-
-\vfill
-
-Forward-Backward
-\begin{eqnarray*}
-  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
-  {\color{red} F[n,t]} & = & {\color{red} P(\vec{y}_t = y_1,\;\ldots,\;y_n)} \\
-  {\color{red} B[n,t]} & = & {\color{red} P(y_{n+1},\;\ldots,y_N | \vec{y}_t = y_1,\;\ldots,\;y_n)} \\
-  P(y) & = & F[N,T] = B[0,0]
-\end{eqnarray*}
-
-
-
-\slide{Dynamic Programming (Forward-Backward)}
-
-\begin{eqnarray*}
-  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
-  {\color{red} F[n,t]} & = & {\color{red} P(\vec{y}_t = y_1,\;\ldots,\;y_n)} \\
-  {\color{red} B[n,t]} & = & {\color{red} P(y_{n+1},\;\ldots,y_N | \vec{y}_t = y_1,\;\ldots,\;y_n)}
-\end{eqnarray*}
-
-\begin{eqnarray*}
-  F[0,0] & = & 1 \\
-  F[n,0] & = & 0 \;\;\;\mbox{for $n > 0$} \\
-  {\color{red} F[n+1,t+1]} & = & {\color{red} P(z_{t+1} = \bot) F[n+1,t] + P(z_{t+1} = y_{n+1})F[n,t]} \\
-  \\
-  B[N,T] & = & 1 \\
-  B[n,T] & = & 0,\;\;\;\mbox{for $n < N$} \\
-  {\color{red} B[n-1,t-1]} & = & {\color{red} P(z_t = \bot)B[n-1,t] +  P(z_t = y_n)B[n,t]}
-\end{eqnarray*}
-
-\slideplain{Graphical Models}
+\slide{Graphical Models}
 
 \centerline{\includegraphics[height = 4in]{../images/Koller}}
 \centerline{Koller and Friedman, MIT Press, 2009, 1270 pages}
 
-\slidetwo{Unfriendly Exponential Softmax:}
-{Semantic Segmentation}
+\slide{Semantic Segmentation}
 \centerline{\includegraphics[height = 2.5in]{../images/SLICcolor}}
 \centerline{\huge SLIC superpixels, Achanta et al.}
 
@@ -248,45 +72,12 @@ We want to assign each superpixel one of $k$ semantic classes.
 For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
 
 
-\anaslide{Unfriendly Exponential Softmax}
-\bigskip
-{\color{red}
-\begin{eqnarray*}
-P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
-\end{eqnarray*}
-}
-
-\vfill
-Let ${\cal C}$ be the semantic classes, ${\cal I}$ be superpixels, and ${\cal E}$ be edges.
-
-\vfill
-We will compute
-
-\vfill {\bf a unary potential tensor} $s_i[c] = s_\Phi(c|x,i)$
-
-\vfill
-{\bf a binary potential tensor} $s_e[c,c'] = s_\Phi(c,c'|x,e)$
-
-\vfill
-{\color{red} $$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$}
-
-\slide{Back-Propagation Through Unfriendly Softmax}
-
-\vfill
-\begin{eqnarray*}
-\mbox{intput}\; x \\
- & \vdots & \\
-{\color{red} s_i[c]} & = & \ldots \\
-{\color{red} s_e[c,c']} & = & \ldots \\
-{\cal L} & = & - \ln\; P(y\;|\;s_{\cal I}[{\cal C}],\;s_{\cal E}[{\cal C}, {\cal C}])
-\end{eqnarray*}
-
-\vfill
-We need to compute {\color{red} $s_i.\grad[c]$} and {\color{red} $s_e.\grad[c,c']$}.
-
 \slide{General Markov Random Fields (MRFs)}
 
 \centerline{\includegraphics[height= 1.5in]{../images/Graph}}
+
+$\hat{y} $ assigns a class $\hat{y}[i]$ to each node (superpixel) $i$.
+
 
 $$s(\hat{y}) = \sum_{i \in \mathrm{Nodes}}\; s_i[\hat{y}[i]]\; + \sum_{e \in \mathrm{Edges}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$
 
@@ -342,6 +133,199 @@ If all are foreground we have $s(\hat{y}) = 3$.
 \vfill
 $$Z = 6*1 + 2*3 = 12\;\;\;\;P_A(\mathrm{Foregound}) = \frac{3*1 + 3}{12} = \frac{1}{2}$$
 
+\anaslide{Exponential Softmax}
+\bigskip
+\centerline{\includegraphics[height= 1.5in]{../images/Graph}}
+\medskip
+$\hat{y} $ assigns a class $\hat{y}[i]$ to each node (superpixel) $i$.
+\bigskip
+\bigskip
+{\color{red}
+\begin{eqnarray*}
+P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
+\end{eqnarray*}
+}
+
+\vfill
+{\color{red} $$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$}
+
+\anaslide{Exponential Softmax is Typically Unfriendly}
+\bigskip
+\centerline{\includegraphics[height= 1.5in]{../images/Graph}}
+\medskip
+$\hat{y} $ assigns a class $\hat{y}[i]$ to each node (superpixel) $i$.
+\bigskip
+\bigskip
+{\color{red}
+\begin{eqnarray*}
+P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
+\end{eqnarray*}
+}
+
+\vfill
+Computing $Z$ in general is \#P hard.
+
+\vfill
+{\color{red} But special cases can be friendly and approximations can be made in unfriendly cases.}
+
+\slide{Latent Variables}
+
+We are often interested in models of the form
+
+\vfill
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
+
+\vfill
+Probabilistic grammar models have this form where $y$ is a sentence and $z$ is a parse tree
+and $P(y|z)$ is deterministic.
+
+
+\slide{Exponential Softmax as Intermediate Computation}
+$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$
+
+\vfill
+{\color{red}
+\begin{eqnarray*}
+& & \mbox{intput}\; x \\
+\vdots \\
+z & = & \expsoftmax_z \ldots \\
+\\
+& & \mbox{input}\; z \\
+\vdots \\
+y & = & \expsoftmax_y\;\ldots
+\end{eqnarray*}
+}
+
+\slide{A Composition of Friendlies is Typically  Unfriendly}
+
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
+
+\vfill
+It is often the case that $P_\Phi(z)$ is friendly, and $P_\Phi(y|z)$ is friendly, but $P_\Phi(y)$ is not friendly (the sum over $z$ is intractible).
+
+\vfill
+For example $z$ might be uniformly distributed over assignments of truth values to Boolean variables (which is friendly) and $y$ might be the value of a fixed Boolean formula $\Phi$ (which is friendly given $z$).  In this case
+determining if $P_\Phi(y) > 0$ is the SAT problem which is NP hard.
+
+\slidetwo{Connectionist Temporal Classification (CTC)}
+{A Successful Deep Latent Variable Model}
+
+A speech signal
+$$x = x_1,\; \ldots,\; x_{\color{red} T}$$
+is labeled with a phone sequence
+$$y = y_1, \ldots, y_{\color{red} N}$$
+with {\color{red} $N << T$} and with $y_n \in {\cal P}$ for a set of phonemes ${\cal P}$.
+
+\vfill
+{\color{red} The length $N$ of $y$ is not determined by $x$ and the alignment between $x$ and $y$ is not given.}
+
+\slide{CTC: A Friendly Compositions of Friendlies}
+
+{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z).$$}
+
+\vfill
+\begin{tabbing}
+Input Signal: \hspace{3em} \=$x = x_1,\;\ldots,\;x_{\color{red} T}$ \\
+Latent Label: \>$z = z_1,\;\ldots,\;z_{\color{red} T},\;\;\;z_t \in {\cal P} \cup \{\bot\}$ \\
+Output: \>$y(z) = y_1,\;\ldots,\;y_{\color{red} N}$
+\end{tabbing}
+
+\vfill
+$y(z)$ is the result of removing all the occurrences of $\bot$ from $z$:
+
+{\color{red} $$\hspace{5em} z \hspace{7em} \Rightarrow \hspace{2em} y$$}
+{\color{red} $$\bot,a_1,\bot,\bot,\bot,a_2,\bot,\bot,a_3,\bot \;\;\;\Rightarrow\;\; a_1,a_2,a_3$$}
+
+
+\slide{The CTC Model}
+
+For $z \in {\cal P} \cup \{\bot\}$ we have an embedding $e(z)$.  The embedding is a parameter of the model.
+
+\begin{eqnarray*}
+  h_1,\;\ldots,\;h_T & = & \mathrm{RNN}_\Phi(x_1,\;\ldots,\;x_T) \\
+  \\
+  P_\Phi(z_t|x_1,\ldots,x_T) & = & {\color{red} \softmax_{z} \;e(z)^\top h_t}
+\end{eqnarray*}
+
+\vfill
+$z_1$, $\ldots$ $z_T$ are {\color{red}  all independent} given $x$ (very friendly).
+
+\vfill
+$P_\Phi(y|z)$ is {\color{red} deterministic} (very friendly).
+
+\vfill
+{\color{red} But it is not obvious whether $P_\Phi(y|x)$ is friendly.}
+
+
+\slide{Dynamic Programming}
+\begin{eqnarray*}
+  x & = & x_1,\;\ldots,\; x_T \\
+  z & = & z_1, \;\ldots,\;z_T,\;\;\;z_t \in {\cal P}\cup \{\bot\} \\
+  y & = & y_1,\;\ldots,\;y_N,\;\;\;\;y_n \in {\cal P},\;\;\;N << T \\
+  y(z) & = & (z_1,\;\ldots,\;z_T) - \bot
+\end{eqnarray*}
+
+\vfill
+
+\begin{eqnarray*}
+  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
+  {\color{red} F[n,t]} & = & P(\vec{y}_{\color{red} t} = y_1,\;\ldots,\;y_{\color{red} n}) \\
+  P(y) & = & F[N,T]
+\end{eqnarray*}
+
+\slide{Dynamic Programming}
+
+\begin{eqnarray*}
+  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
+  {\color{red} F[n,t]} & = & P(\vec{y}_{\color{red} t} = y_1,\;\ldots,\;y_{\color{red} n}) \\
+\end{eqnarray*}
+
+\begin{eqnarray*}
+  F[0,0] & = & 1 \\
+  F[n,0] & = & 0 \;\;\;\mbox{for $n > 0$} \\
+  {\color{red} F[n+1,t+1]} & = & {\color{red} P(z_{t+1} = \bot) F[n+1,t] + P(z_{t+1} = y_{n+1})F[n,t]}
+\end{eqnarray*}
+
+\slide{Semantic Segmentation}
+\centerline{\includegraphics[height = 2.5in]{../images/SLICcolor}}
+\centerline{\huge SLIC superpixels, Achanta et al.}
+
+\vfill
+We want to assign each superpixel one of $k$ semantic classes.
+
+\vfill
+For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
+
+\slide{Unfriendly Exponential Softmax}
+\bigskip
+\centerline{\includegraphics[height= 1.5in]{../images/Graph}}
+\medskip
+$\hat{y} $ assigns a class $\hat{y}[i]$ to each node (superpixel) $i$.
+\bigskip
+\bigskip
+{\color{red}
+\begin{eqnarray*}
+P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
+\end{eqnarray*}
+}
+
+\vfill
+{\color{red} $$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$}
+
+\slide{Back-Propagation Through Unfriendly Softmax}
+
+\vfill
+\begin{eqnarray*}
+\mbox{intput}\; x \\
+ & \vdots & \\
+{\color{red} s_i[c]} & = & \ldots \\
+{\color{red} s_e[c,c']} & = & \ldots \\
+{\cal L} & = & - \ln\; P(y\;|\;{\color{red} s_{\cal I}[{\cal C}]},\;{\color{red} s_{\cal E}[{\cal C}, {\cal C}]})
+\end{eqnarray*}
+
+\vfill
+We need to compute {\color{red} $s_i.\grad[c]$} and {\color{red} $s_e.\grad[c,c']$}.
+
 \slide{Hyper-Graphs: More General and More Concise}
 
 A hyper-edge is a subset of nodes.
@@ -369,30 +353,23 @@ s_e[\hat{y}] & = & \ldots \\
 
 \vfill We abbreviate $P(\hat{y}\;|\;s_{\cal E}[{\cal Y}])$ as {\color{red} $P_s(\hat{y})$} --- the distribution on $\hat{y}$ defined by the tensor $s$.
 \vfill
-We need to compute {\color{red} $\nabla_s -\ln P_s(y)$}, or equivalently, {\color{red} $s_e.\grad[\tilde{y}]$}.
+We need to compute {\color{red} $\nabla_s -\ln P_s(y)$}, or equivalently, {\color{red} $s_e.\grad[\hat{y}[e]]$}.
 
-\ignore{
-\slidetwo{Generative Fully Observed Models}
-{(Language Models) are Tractable}
+\slide{Back-Propagation Through An Exponential Softmax}
 
-\centerline{\includegraphics[height=1.5in]{../images/DAG} \hspace{1in} \includegraphics[height=1.5in]{../images/SortedDAG}}
+We will abbreviate $s_e[\hat{y}[e]]$ as {\color{red} $s_e[\tilde{y}]$}.
 
 \vfill
-An auto-regressive model is locally normalized.
-
-\begin{eqnarray*}
-  P_s(\hat{y}) & = & \prod_i \; P_s(\hat{y}[i]\;|\; \hat{y}[\mathrm{Parents}(i)]) \\
-  \\
-  P_s(\hat{y}[i]\;|\; \hat{y}[\mathrm{Parents}(i)])  & = &  \softmax_{\tilde{y}} s(\tilde{y}|\hat{y}[\mathrm{Parents}(i)])
-\end{eqnarray*}
+{\color{red} $\tilde{y}$ has a small number of possible values.}
 
 \vfill
-There are exponentially many possible values for $\hat{y}$ but each softmax is over a tractable-sized set.
-}
+We will similarly write {\color{red} $s_e.\grad[\tilde{y}]$}.
 
-\slideplain{Back-Propagation Through An Exponential Softmax}
+\vfill
+We need to compute the tensor values ${\color{red} s_e.\grad[\tilde{y}]}$
 
-\bigskip
+\slide{Back-Propagation Through An Exponential Softmax}
+
 \begin{eqnarray*}
   \mathrm{loss}(s,y) & = & - \ln \left(\frac{1}{Z(s)}\;e^{s(y)}\right) \\
   \\
@@ -430,35 +407,11 @@ There are exponentially many possible values for $\hat{y}$ but each softmax is o
 \end{eqnarray*}
 
 \vfill
-We will write {\color{red} $P_e(\tilde{y})$} for {\color{red} $P_{\hat{y} \sim P_s}(\hat{y}(e) = \tilde{y})$}.
+We write {\color{red} $P_e(\tilde{y})$} for the {\color{red} hyperedge marginal} $P_{\hat{y} \sim P_s}(\hat{y}(e) = \tilde{y})$.
 
 \vfill
-To compute $s.\mathrm{grad}$ it suffices to compute ${\color{red} P_e(\tilde{y})}$.
-
-\vfill
-We now focus on computing the hyperedge marginals for a given hyperedge score function (MRF) $s$.
-
-\ignore{
-\slide{An Aside: Features and Weights}
-
-The indicators $\mathbbm{1}[\hat{y}[e] = \tilde{y}]$ form a 0-1 feature vector $\Psi(\hat{y})$.
-
-\vfill
-The tensor $s[e,\;\tilde{y}]$ forms a weight vector.
-
-\begin{eqnarray*}
-s(\hat{y}) & = & \sum_e s[e,\hat{y}[e]] \\
-\\
-& = & \sum_{e,\tilde{y}}\;s[e,\tilde{y}] \mathbbm{1}[e, \hat{y}[e] = \tilde{y}] \\
-\\
-& = & f^\top \Psi(\hat{y})
-\end{eqnarray*}
-
-\slide{An Aside: Features and Weights}
-
-The hyperedge marginals  ${\color{red} P_{\hat{y} \sim P_s}(\hat{y}[e] = \tilde{y})}$ are just the expected value of the features under the distribution
-defined by the MRF.
-}
+To back-propagate log loss on a labeling of an unfriendly MRF {\color{red} it suffices to compute (or perhaps approximate)
+the current model's hyperedge marginals ${\color{red} P_e(\tilde{y})}$.}
 
 \slide{Tree-Structured Models are Friendly}
 
@@ -469,15 +422,18 @@ Tree structure models can always be locally renormalized to form ``autoregressiv
 predict one node at a time.
 
 \vfill
-Also, The hyperedge Marginals Can be Computed Exactly.
+Also, the hyperedge marginals can be computed exactly.
 \begin{eqnarray*}
   s.\mathrm{grad}[e,\tilde{y}] & = & {\color{red} P_e(\tilde{y})} - \mathbbm{1}[y[e] = \tilde{y}]
 \end{eqnarray*}
 
 
-\anaslide{Defining the Messages}
+\anaslide{Belief Propagation}
 
 \centerline{\includegraphics[height=1.5in]{../images/Tree}}
+
+\vfill
+Belief Propagation is a message passing procedure (actually dynamic programming).
 
 \vfill
 For each edge $\{i,j\}$ and possible value $\tilde{y}$ for node $i$ we define {\color{red} $Z_{j \rightarrow i}[\tilde{y}]$}
