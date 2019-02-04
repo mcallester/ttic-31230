@@ -14,6 +14,87 @@
   \vfill
   \centerline{Rate-Distortion Autoencoders}
 
+\slidetwo{The Fundamental Equation:}
+{Conditional vs. Unconditional}
+
+\vfill
+$$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Pop}}\;-\ln \;P(y|x)$$
+
+\vfill
+$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Pop}}\;-\ln \;P(y)$$
+
+\vfill
+This is a non-distinction: the issues in the to the conditional case
+are exactly the same as in the unconditional case.
+
+\slidetwo{The Fundamental Equation:}
+{Distributions on Exponentially Large Sets}
+
+The structured case: $y \in {\cal Y}$ where ${\cal Y}$ is discrete but iteration over $\hat{y} \in {\cal Y}$ is infeasible.
+
+\vfill
+Language modeling (unconditional) and machine translation (conditional) are distributions on exponentially large (even infinite) sets.
+
+\slide{Friendly and Unfriendly Distributions}
+
+\vfill
+Autoregressive Language models (unconditional) and machine translation models (conditional) are {\color{red} friendly}.
+
+
+\vfill
+A model $P_\Phi(y)$ will be called {\color{red} friendly} if we can efficiently sample from it and, for any given $y$, can efficiently compute $P(y)$.
+
+\vfill
+Distributions which are not friendly in this sense will be called {\color{red} unfriendly}.
+
+\slidetwo{Graphical Models are Generally Unfriendly:}
+{Semantic Segmentation}
+\centerline{\includegraphics[height = 2.5in]{../images/SLICcolor}}
+\centerline{\huge SLIC superpixels, Achanta et al.}
+
+\vfill
+We want to assign each pixel one of $k$ semantic classes such as ``person'', ``car'', ``building'', ``sky'', ``other'' (multiclass classification of each superpixel).
+
+\vfill
+$\hat{y}[i]$ is the semantic class value of superpixel $i$.
+
+\anaslide{Exponential Softmax}
+\bigskip
+{\color{red}
+\begin{eqnarray*}
+P_\Phi(\hat{y}|x) & = & \softmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
+\end{eqnarray*}
+}
+
+\vfill
+Let ${\cal C}$ be the semantic classes, ${\cal I}$ be superpixels, and ${\cal E}$ be edges.
+
+\vfill
+We will compute
+
+\vfill {\bf a unary potential tensor} $s_i[c] = s_\Phi(c|x,i)$
+
+\vfill
+{\bf a binary potential tensor} $s_e[c,c'] = s_\Phi(c,c'|x,e)$
+
+\vfill
+$$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$
+
+\anaslide{Exponential Softmax}
+\bigskip
+{\color{red}
+\begin{eqnarray*}
+P_\Phi(\hat{y}|x) & = & \softmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
+\end{eqnarray*}
+}
+
+\vfill
+Distributions defined by exponential softmax operations are not friendly in general --- there is no efficient general sampling algorithm or efficient general method of computing $Z$.
+
+\vfill
+Computing $Z$ is easily shown to be \#P hard.
+
+
 \slide{Big Picture: Cross-Entropy as a Data Rate}
 
 For a distribution $P(y)$ on a discrete set ${\cal Y}$, the entropy $H(P)$, when measured using $\log_2$ rather than $\ln$, gives the number of bits needed

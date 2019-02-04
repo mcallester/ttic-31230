@@ -661,6 +661,136 @@ Consider simple least square regression
 \vfill
 In this case dropout is equivalent to a form of $L_2$ regularization --- see Wager et al. (2013).
 
+\slide{Model Compression}
+
+Deep Compression: Compressing Deep Neural
+Networks With Pruning, Trained Quantization
+and Huffman Coding, Han et al., ICLR 2016.
+
+\vfill
+\begin{itemize}
+\item Compressed Models can be downloaded to mobile devices faster and fit in lower-power CPU memory.  (The motivation of this paper).
+
+\vfill
+\item Sparse models may be more interpretable than dense models.
+
+\vfill
+\item Model size is a measure of model complexity and can be viewed as a form of regularization.
+\end{itemize}
+
+\vfill
+VGG-16 is reduced by $49 \times$ from 552MB to 11.3MB with no loss of accuracy.
+
+\slide{Three Stages}
+
+\begin{itemize}
+\item Sparsification by simple weight thresholding.  ($10 \times$ reduction).
+
+  \vfill
+\item Trained Quantization ($6\times$ reduction).
+
+  \vfill
+\item Huffman coding ($40\%$ reduction).
+\end{itemize}
+
+\slide{Quantization}
+
+They use 5 bits of numerical precision for the weights.
+
+\vfill
+This is done by having a table of the 32 possible weight values.
+
+\vfill
+We have to cluster the weights into 32 groups and decide on a {\bf centroid value} for each weight.
+
+\vfill
+This is done with K-means clustering.
+
+\slide{Initialization of Centroids}
+
+\centerline{\includegraphics[width = 7in]{../images/Compression1}}
+
+\slide{After Running K-means}
+
+\centerline{\includegraphics[width = 7in]{../images/Compression2}}
+
+\slide{Retrain to Adjust Centroids}
+
+Run over the data again doing backpropagation to adjust the table of the 32 possible weights.
+
+\vfill
+This leaves the 5-bit code of each weight in the model unchanged.
+
+\slide{Huffman Coding}
+
+Different 5-bit numerical codes have different frequencies.
+
+\vfill
+This can be viewed as distribution over the 32 code words.
+
+\vfill
+We can reduce the average number of bits per weight using fewer bits to code the more common weight values.
+
+\vfill
+Huffman coding is applied to both the 5 bit weight coding and a three bit code used in the sparse representation of the weight matrices.
+
+\vfill
+This results in about 5 bits  per {\bf nonzero} weight in a {\bf sparse} coding of the weight matrices.
+
+\slide{Dense-Sparse-Dense}
+
+DSD: Dense-Sparse-Dense Training for Deep
+Neural Networks, Han et al., ICLR 2017
+
+\vfill
+\begin{enumerate}
+\item Train a model.
+
+  \vfill
+\item Make the model sparse by weight thresholding.
+
+  \vfill
+\item Retrain the model holding the sparsity pattern fixed (still 32 bits per weight).
+
+  \vfill
+\item Go back to a dense model with all pruned weights initialized to zero.
+
+  \vfill
+\item  Retrain the dense model.
+\end{enumerate}
+
+Results in significant performance improvements in a wide variety of models.
+
+\slide{Step 1}
+
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/DSD1}}
+
+\slide{Step 2}
+
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/DSD2}}
+
+\slide{Step 3}
+
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/DSD3}}
+
+\slide{Step 4}
+
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/DSD4}}
+
+\slide{Step 5}
+
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/DSD5}}
+
+\slide{Results}
+
+\vfill
+\centerline{\includegraphics[width = 9.5in]{../images/DSDtable}}
+
 \ignore{
 \slide{A Dropout Bound}
 

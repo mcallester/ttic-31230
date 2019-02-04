@@ -9,76 +9,75 @@
   \bigskip
   \centerline{David McAllester, Winter 2019}
   \vfill
-  \centerline{\bf Deep Graphical Models}
-  \vfill
-  \centerline{\bf Expectation Gradient}
-  \vfill
-  \centerline{\bf Belief Propagation}
-  \vfill
   \centerline{\bf Connectionist Temporal Classification (CTC)}
+  \vfill
+  \centerline{\bf and Deep Graphical Models}
 \vfill
 \vfill
 \vfill
-\slide{The Big Picture I}
+\slidetwo{The Fundamental Equation:}
+{Conditional vs. Unconditional}
 
-Conditional vs. Unconditional
-
 \vfill
+{\color{red}
 $$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Pop}}\;-\ln \;P(y|x)$$
 
 \vfill
 $$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Pop}}\;-\ln \;P(y)$$
+}
 
 \vfill
-This is a non-distinction: the issues in the to the conditional case
-are exactly the same as in the unconditional case.
+This is a non-distinction: the analysis of the conditional case
+is exactly the same as that of the unconditional case.
 
-\slide{The Big Picture II}
+\slidetwo{The Fundamental Equation:}
+{Distributions on Exponentially Large Sets}
 
-The structured case: $y \in {\cal Y}$ where ${\cal Y}$ is discrete but iteration over $\hat{y} \in {\cal Y}$ is infeasible.
-
-\vfill
-{\color{red} Graphical models rely on assumptions about the structure of $P_\Phi(y)$.}
+{\color{red} The structured case:} $y \in {\cal Y}$ where ${\cal Y}$ is discrete but {\color{red} iteration over $\hat{y} \in {\cal Y}$ is infeasible}.
 
 \vfill
-{\color{red} Loopy Graphical Models can use weaker assumptions than those supporting exact computation of $P_\Phi(y)$.}
+Language modeling (unconditional) and machine translation (conditional) are distributions on exponentially large (even infinite) sets.
+
+\slide{Friendly and Unfriendly Distributions}
+
+A model $P_\Phi(y)$ will be called {\color{red} friendly} if we can efficiently sample from it and, for any given $y$, can efficiently compute $P_\Phi(y)$.
 
 \vfill
-{\color{red} For loopy graphical Models there are various methods of performing approximate gradient descent on cross-entropy loss.}
+{\color{red} Autoregressive} language models (unconditional) and autoregressive machine translation models (conditional) are {\color{red} friendly}.
 
-\slide{Colorization --- a Self-Supervised Problem}
-
-\centerline{\includegraphics[height = 2in]{../images/colorization}}
-
-$x$ is a black and white image.
 
 \vfill
-$y$ is a ``color'' image drawn from $\pop(y|x)$ where the color has been rounded to one of, say, 100 color words.
+Distributions which are not friendly in this sense will be called {\color{red} unfriendly}.
 
-\vfill
-$\hat{y}$ is an arbitrary color image.
+\slide{The Importance of Being Friendly}
 
-\vfill
-$P_\Phi(\hat{y}|x)$ is the probability that model $\Phi$ assigns to the color image $\hat{y}$ given black and white image $x$.
 
-\slide{Colorizing Superpixels}
-\centerline{\includegraphics[height = 3in]{../images/SLIC} \hspace{.5in} \includegraphics[height = 3in]{../images/SLICcolor}}
+In cases where $P_\Phi(y|x)$ can be computed (a friendly model)
+we can do SGD by back-propagating through the computation of $P_\Phi(y|x)$.
+
+
+
+\slidetwo{Graphical Models are Generally Unfriendly:}
+{Semantic Segmentation}
+\centerline{\includegraphics[height = 2.5in]{../images/SLICcolor}}
 \centerline{\huge SLIC superpixels, Achanta et al.}
 
 \vfill
-$\hat{y}[i]$ is the color value of superpixel $i$ in color image $\hat{y}$.
+We want to assign each superpixel one of $k$ semantic classes.
 
 \vfill
-$\hat{y}[(i,j)]$ is the pair $(\hat{y}[i],\hat{y}[j])$ for neighbors $i$ and $j$.
+For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
 
-\slide{Exponential Softmax}
-
+\anaslide{Exponential Softmax}
+\bigskip
+{\color{red}
 \begin{eqnarray*}
-P_\Phi(\hat{y}|x) & = & \softmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
+P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
 \end{eqnarray*}
+}
 
 \vfill
-Let ${\cal C}$ be colors, ${\cal I}$ be superpixels, and ${\cal E}$ be edges.
+Let ${\cal C}$ be the semantic classes, ${\cal I}$ be superpixels, and ${\cal E}$ be edges.
 
 \vfill
 We will compute
@@ -89,21 +88,201 @@ We will compute
 {\bf a binary potential tensor} $s_e[c,c'] = s_\Phi(c,c'|x,e)$
 
 \vfill
-$$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$
+{\color{red} $$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$}
 
-\slide{Backpropagation}
+\anaslide{Exponential Softmax}
+\bigskip
+{\color{red}
+\begin{eqnarray*}
+P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
+\end{eqnarray*}
+}
 
-The input is the image $x$ and the parameter package $\Phi$
+\vfill
+Distributions defined by exponential softmax operations are not friendly in general --- there is no efficient general sampling algorithm or efficient general method of computing $Z$.
+
+\vfill
+Computing $Z$ is easily shown to be \#P hard.
+
+\slide{Latent Variables}
+
+We are often interested in models of the form
+
+\vfill
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
+
+\vfill
+Probabilistic grammar models have this form where $y$ is a sentence and $z$ is a parse tree
+and $P(y|z)$ is deterministic.
+
+
+\slide{Exponential Softmax as Intermediate Computation}
+$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$
+
+\vfill
+{\color{red}
+\begin{eqnarray*}
+& & \mbox{intput}\; x \\
+\vdots \\
+z & = & \expsoftmax_z \ldots \\
+\\
+& & \mbox{input}\; z \\
+\vdots \\
+y & = & \expsoftmax_y\;\ldots
+\end{eqnarray*}
+}
+
+\slide{A Composition of Friendlies is Typically  Unfriendly}
+
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
+
+\vfill
+It is often the case that $P_\Phi(z)$ is friendly, and $P_\Phi(y|z)$ is friendly, but $P_\Phi(y)$ is not friendly (the sum over $z$ is intractible).
+
+\vfill
+For example $z$ might be uniformly distributed over assignments of truth values to Boolean variables (which is friendly) and $y$ might be the value of a fixed Boolean formula $\Phi$ (which is friendly given $z$).  In this case
+determining if $P_\Phi(y) > 0$ is the SAT problem which is NP hard.
+
+\slidetwo{Connectionist Temporal Classification (CTC)}
+{A Successful Friendly Latent Variable Model}
+
+A speech signal
+$$x = x_1,\; \ldots,\; x_{\color{red} T}$$
+is labeled with a phone sequence
+$$y = y_1, \ldots, y_{\color{red} N}$$
+with {\color{red} $N << T$} and with $y_n \in {\cal P}$ for a set of phonemes ${\cal P}$.
+
+\vfill
+{\color{red} The length $N$ of $y$ is not determined by $x$ and the alignment between $x$ and $y$ is not given.}
+
+\slide{CTC: A Friendly Compositions of Friendlies}
+
+{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z).$$}
+
+\vfill
+\begin{tabbing}
+Input Signal: \hspace{3em} \=$x = x_1,\;\ldots,\;x_{\color{red} T}$ \\
+Latent Label: \>$z = z_1,\;\ldots,\;z_{\color{red} T},\;\;\;z_t \in {\cal P} \cup \{\bot\}$ \\
+Output: \>$y(z) = y_1,\;\ldots,\;y_{\color{red} N}$
+\end{tabbing}
+
+\vfill
+$y(z)$ is the result of removing all the occurrences of $\bot$ from $z$:
+
+{\color{red} $$\hspace{5em} z \hspace{7em} \Rightarrow \hspace{2em} y$$}
+{\color{red} $$\bot,a_1,\bot,\bot,\bot,a_2,\bot,\bot,a_3,\bot \;\;\;\Rightarrow\;\; a_1,a_2,a_3$$}
+
+
+\slide{The CTC Model}
+
+For $z \in {\cal P} \cup \{\bot\}$ we have an embedding $e(z)$.  The embedding is a parameter of the model.
 
 \begin{eqnarray*}
+  h_1,\;\ldots,\;h_T & = & \mathrm{RNN}_\Phi(x_1,\;\ldots,\;x_T) \\
+  \\
+  P_\Phi(z_t|x_1,\ldots,x_T) & = & {\color{red} \softmax_{z} \;e(z)^\top h_t}
+\end{eqnarray*}
+
+\vfill
+$z_1$, $\ldots$ $z_T$ are {\color{red}  all independent} given $x$ (very friendly).
+
+\vfill
+$P_\Phi(y|z)$ is {\color{red} deterministic} (very friendly).
+
+\vfill
+{\color{red} But it is not obvious whether $P_\Phi(y|x)$ is friendly.}
+
+
+\slide{Dynamic Programming (Forward-Backward)}
+\begin{eqnarray*}
+  x & = & x_1,\;\ldots,\; x_T \\
+  z & = & z_1, \;\ldots,\;z_T,\;\;\;z_t \in {\cal P}\cup \{\bot\} \\
+  y & = & y_1,\;\ldots,\;y_N,\;\;\;\;y_n \in {\cal P},\;\;\;N << T \\
+  y(z) & = & (z_1,\;\ldots,\;z_T) - \bot
+\end{eqnarray*}
+
+\vfill
+
+Forward-Backward
+\begin{eqnarray*}
+  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
+  {\color{red} F[n,t]} & = & {\color{red} P(\vec{y}_t = y_1,\;\ldots,\;y_n)} \\
+  {\color{red} B[n,t]} & = & {\color{red} P(y_{n+1},\;\ldots,y_N | \vec{y}_t = y_1,\;\ldots,\;y_n)} \\
+  P(y) & = & F[N,T] = B[0,0]
+\end{eqnarray*}
+
+
+
+\slide{Dynamic Programming (Forward-Backward)}
+
+\begin{eqnarray*}
+  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
+  {\color{red} F[n,t]} & = & {\color{red} P(\vec{y}_t = y_1,\;\ldots,\;y_n)} \\
+  {\color{red} B[n,t]} & = & {\color{red} P(y_{n+1},\;\ldots,y_N | \vec{y}_t = y_1,\;\ldots,\;y_n)}
+\end{eqnarray*}
+
+\begin{eqnarray*}
+  F[0,0] & = & 1 \\
+  F[n,0] & = & 0 \;\;\;\mbox{for $n > 0$} \\
+  {\color{red} F[n+1,t+1]} & = & {\color{red} P(z_{t+1} = \bot) F[n+1,t] + P(z_{t+1} = y_{n+1})F[n,t]} \\
+  \\
+  B[N,T] & = & 1 \\
+  B[n,T] & = & 0,\;\;\;\mbox{for $n < N$} \\
+  {\color{red} B[n-1,t-1]} & = & {\color{red} P(z_t = \bot)B[n-1,t] +  P(z_t = y_n)B[n,t]}
+\end{eqnarray*}
+
+\slideplain{Graphical Models}
+
+\centerline{\includegraphics[height = 4in]{../images/Koller}}
+\centerline{Koller and Friedman, MIT Press, 2009, 1270 pages}
+
+\slidetwo{Unfriendly Exponential Softmax:}
+{Semantic Segmentation}
+\centerline{\includegraphics[height = 2.5in]{../images/SLICcolor}}
+\centerline{\huge SLIC superpixels, Achanta et al.}
+
+\vfill
+We want to assign each superpixel one of $k$ semantic classes.
+
+\vfill
+For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
+
+
+\anaslide{Unfriendly Exponential Softmax}
+\bigskip
+{\color{red}
+\begin{eqnarray*}
+P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
+\end{eqnarray*}
+}
+
+\vfill
+Let ${\cal C}$ be the semantic classes, ${\cal I}$ be superpixels, and ${\cal E}$ be edges.
+
+\vfill
+We will compute
+
+\vfill {\bf a unary potential tensor} $s_i[c] = s_\Phi(c|x,i)$
+
+\vfill
+{\bf a binary potential tensor} $s_e[c,c'] = s_\Phi(c,c'|x,e)$
+
+\vfill
+{\color{red} $$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$}
+
+\slide{Back-Propagation Through Unfriendly Softmax}
+
+\vfill
+\begin{eqnarray*}
+\mbox{intput}\; x \\
  & \vdots & \\
-s_i[c] & = & \ldots \\
-s_e[c,c'] & = & \ldots \\
+{\color{red} s_i[c]} & = & \ldots \\
+{\color{red} s_e[c,c']} & = & \ldots \\
 {\cal L} & = & - \ln\; P(y\;|\;s_{\cal I}[{\cal C}],\;s_{\cal E}[{\cal C}, {\cal C}])
 \end{eqnarray*}
 
 \vfill
-We need to compute $s_i.\grad[c]$ and $s_e.\grad[c,c']$.
+We need to compute {\color{red} $s_i.\grad[c]$} and {\color{red} $s_e.\grad[c,c']$}.
 
 \slide{General Markov Random Fields (MRFs)}
 
@@ -281,17 +460,20 @@ The hyperedge marginals  ${\color{red} P_{\hat{y} \sim P_s}(\hat{y}[e] = \tilde{
 defined by the MRF.
 }
 
-\slidetwo{For Tree-Strutured Models}{The Hyperedge Marginals Can be Computed Exactly}
+\slide{Tree-Structured Models are Friendly}
 
+\centerline{\includegraphics[height= 2in]{../images/Tree}}
+
+\vfill
+Tree structure models can always be locally renormalized to form ``autoregressive'' models that
+predict one node at a time.
+
+\vfill
+Also, The hyperedge Marginals Can be Computed Exactly.
 \begin{eqnarray*}
   s.\mathrm{grad}[e,\tilde{y}] & = & {\color{red} P_e(\tilde{y})} - \mathbbm{1}[y[e] = \tilde{y}]
 \end{eqnarray*}
 
-\vfill
-\centerline{\includegraphics[height= 2in]{../images/Tree}}
-
-\vfill
-For trees we can compute $P_{e}(\tilde{y})$ exactly by message passing, a.k.a., belief propagation.
 
 \anaslide{Defining the Messages}
 
@@ -371,141 +553,244 @@ Constrastive Divergence
 \vfill
 Pseudo-Liklihood
 
-\slidetwo{Connectionist Temporal Classification (CTC)}
-{Phonetic Transcription}
 
-A speech signal
-$$x = x_1,\; \ldots,\; x_T$$
-is labeled with a phone sequence
-$$y = y_1, \ldots, y_N$$
-with $N << T$ and with $y_n \in {\cal Y}$ for a set of phonemes ${\cal Y}$.
+\slide{Sampling}
+The quantities ${\color{red} P_e(\tilde{e})}$ are {\bf hyperedge marginals}.
 
 \vfill
-The length $N$ of $y$ is not determined by $x$ and the alignment between $x$ and $y$ is not given.
+We can estimate the hyperedge marginals by sampling $\hat{y}$ from $P_s(\hat{y})$.
 
-\slide{CTC}
-The model defines $P_\Phi(\hat{z}|x)$ where $\hat{z}$ is latent and where $y$ is determined by $\hat{z}$.
+\slide{Monte Carlo Markov Chain (MCMC) Sampling}
 
-\vfill
-$$\hat{z} = \hat{z}_1,\;\ldots,\;\hat{z}_T,\;\;\;\hat{z}_t \in {\cal Y} \cup \{\bot\}$$
+\centerline{\bf Metropolis Algorithm}
 
 \vfill
-The sequence
+Pick an initial graph label $\hat{y}$ and then repeat:
+
+\begin{enumerate}
+\item Pick a ``neighbor'' $\hat{y}'$ of $\hat{y}$ uniformly at random.  The neighbor relation must be symmetric.  Perhaps Hamming distance one.
+
+  \vfill
+\item If $s(\hat{y}') > s(\hat{y})$ update $\hat{y} = \hat{y}'$
+
+  \vfill
+\item If $s(\hat{y}') \leq s(\hat{y})$ then update $\hat{y} = \hat{y}'$ with probability $e^{-(s(\hat{y}) - s(\hat{y}'))}$
+  \end{enumerate}  
+
+\slide{Markov Processes and Stationary Distributions}
+
+A Markov process is a process defined by a fixed state transition probability $P(\hat{y}'|\hat{y}) = M_{\hat{y}',\hat{y}}$.
 
 \vfill
-$$y(\hat{z}) = y_1,\;\ldots,\;y_N$$
+Let $P^t$ the probability distribution for time $t$.
 
 \vfill
-is the result of removing all the occurrences of $\bot$ from $\hat{z}$.
+$$P^{t+1} = MP^t$$
 
-$$\bot,a_1,\bot,\bot,\bot,a_2,\bot,\bot,a_3,\bot \Rightarrow a_1,a_2,a_3$$
+\vfill
+If every state can be reached form every state (ergodic process) then $P^t$ converges to a unique {\bf stationary distribution} $P^\infty$
 
-\slide{The CTC Model}
+\vfill
+$$P^\infty = MP^\infty$$
+
+\slide{Metropolis Theorem}
+
+To verify that the Metropolis process has the correct stationary distribution we simply verify that $MP = P$ where $P$
+is the desired distribution.
+
+\vfill
+This can be done by checking that under the desired distribution the flow from $\hat{y}$ to $\hat{y}'$
+equals the flow from $\hat{y}'$ to $\hat{y}$ ({\bf detailed balance}).
+
+\slide{Metropolis Theorem}
+
+For $s(\hat{y}) \geq s(\hat{y}')$
+
+\vfill
+\begin{eqnarray*}
+  \mathrm{flow}(\hat{y}' \rightarrow \hat{y}) &  = & \frac{1}{Z}e^{s(\hat{y}')} \frac{1}{N} \\
+  \\
+\mathrm{flow}(\hat{y} \rightarrow \hat{y}') & = & \frac{1}{Z}e^{s(\hat{y})} \frac{1}{N} e^{-\Delta f} = \frac{1}{Z} e^{s(\hat{y}')} \frac{1}{N}
+\end{eqnarray*}
+
+\vfill
+But detailed balance is not required in general (see Hamiltonian MCMC).
+
+\slide{Gibbs Sampling}
+
+The Metropolis algorithm wastes time by rejecting proposed moves.
+
+\vfill
+Gibbs sampling avoids this move rejection.
+
+\vfill
+In Gibbs sampling we select a node $i$ at random and change that node by drawing a new node value conditioned on the current values of the other nodes.
+
+\slide{Gibbs Sampling}
 
 \begin{eqnarray*}
-  h_1,\;\ldots,\;h_T & = & \mathrm{RNN}_\Phi(x_1,\;\ldots,\;x_T) \\
+  P_s(i=\tilde{y} \;|\;\hat{y}) & \doteq & P_s(\hat{y}[i] = \tilde{y}\;|\;\hat{y}[1],\ldots,\hat{y}[i-1],\hat{y}[i+1],\ldots,\hat{y}[I])
+\end{eqnarray*}
+
+\vfill
+Markov Blanket Property:
+$$P_s(i=\tilde{y} \;|\;\hat{y}) = P_s(i=\tilde{y} \;|\;\hat{y}[N(i)])$$
+  
+\vfill
+Gibbs Sampling, Repeat:
+
+\begin{itemize}
+\item   Select $i$ at random
+
+\item draw $\tilde{y}$ from $P_s(i = \tilde{y} \;|\;\hat{y})$
+
+\item $\hat{y}[i] = \tilde{y}$
+\end{itemize}
+
+\slide{Gibbs Sampling}
+
+Let $\hat{y}[i = \tilde{y}]$ be the assignment $\hat{y}'$ equal to $\hat{y}$ except $\hat{y}'[i] = \tilde{y}$.
+
+\vfill
+\begin{eqnarray*}
+ P_s(i = \tilde{y} \;|\; \hat{y})  & = & \frac{P_s(\hat{y}[i] = \tilde{y})}{\sum_{\tilde{y}} P_s(\hat{y}[i] = \tilde{y})} \\
   \\
   \\
-  P_\Phi(\hat{z}_t|x_1,\ldots,x_T) & = & \softmax_{\hat{z}_t} \;e(\hat{z}_t)^\top h_t
+  & = & \frac{e^{s(\hat{y}[i = \tilde{y}])}}{\sum_{\tilde{y}} e^{s(\hat{y}[i = \tilde{y}])}}
 \end{eqnarray*}
 
-\vfill
-Where $e(\hat{z}_t)$ is a vector embedding of the phoneme $\hat{z}_t$.  The embedding is a parameter of the model.
+\slide{Gibbs Sampling Theorem}
+
+$P_s(\hat{y})$ is a stationary distribution of Gibbs Sampling.
 
 \vfill
-Note that $\hat{z}_1$, $\ldots$ $\hat{z}_T$ are all independent given $x$.
+\begin{itemize}
+\item   Select $i$ at random
 
-\slide{The Expectation Gradient (EG) Algorithm}
+\item draw $\tilde{y}$ from $P_s(i = \tilde{y} \;|\;\hat{y})$
 
-CTC is a special case of a latent variable graphical model.
+\item $\hat{y}[i] = \tilde{y}$
+\end{itemize}
 
-\vfill
-In cases where $P_\Phi(y|x)$ can be computed from dynamic programming
-we can backpropagate through the dynamic programming algorithm to get the gradient of cross-entropy loss.
-
-\vfill
-This general technique is the {\bf expectation gradient} (EG) algorithm.
 
 \vfill
-We will first show that for the CTC model we can compute $P_\Phi(y|x)$ by
-dynamic programming.
+The distribution before the update equals the distribution after the update.
+
+\slide{Pseudolikelihood}
+
+In Pseudolikelihood we replace the objective $- \log P_s(\hat{y})$ with the objective $- \log \tilde{Q}_s(\hat{y})$ where
 
 \vfill
-We will then note that it is not necessary to backpropagate through the dynamic programming algorithm.
-
-\slideplain{Dynamic Programming (Forward-Backward)}
 \begin{eqnarray*}
-  x & = & x_1,\;\ldots,\; x_T \\
-  \hat{z} & = & \hat{z}_1, \;\ldots,\;\hat{z}_T,\;\;\;\hat{z}_t \in {\cal Y}\cup \{\bot\} \\
-  y & = & y_1,\;\ldots,\;y_N,\;\;\;\;y_n \in {\cal Y},\;\;\;N << T \\
-  y(\hat{z}) & = & (\hat{z}_1,\;\ldots,\;\hat{z}_T) - \bot
-\end{eqnarray*}
-
-\vfill
-
-Forward-Backward
-\begin{eqnarray*}
-  \vec{y}_t & = & (\hat{z}_1,\;\ldots,\;\hat{z}_t)-\bot \\
-  F[n,t] & = & P(\vec{y}_t = y_1,\;\ldots,\;y_n) \\
-  B[n,t] & = & P(y_{n+1},\;\ldots,y_N | \vec{y}_t = y_1,\;\ldots,\;y_n) \\
-  P(y) & = & F[N,T] = B[0,0]
-\end{eqnarray*}
-
-
-
-\slide{Dynamic Programming (Forward-Backward)}
-
-\begin{eqnarray*}
-  \vec{y}_t & = & (\hat{z}_1,\;\ldots,\;\hat{z}_t)-\bot \\
-  F[n,t] & = & P(\vec{y}_t = y_1,\;\ldots,\;y_n) \\
-  B[n,t] & = & P(y_{n+1},\;\ldots,y_N | \vec{y}_t = y_1,\;\ldots,\;y_n)
-\end{eqnarray*}
-
-\begin{eqnarray*}
-  F[0,0] & = & 1 \\
-  F[n,0] & = & 0 \;\;\;\mbox{for $n > 0$} \\
-  F[n+1,t+1] & = & P(\hat{z}_{t+1} = \bot) F[n+1,t] + P(\hat{z}_{t+1} = y_{n+1})F[n,t] \\
+  \tilde{Q}_s(\hat{y}) & \doteq & \prod_i \;P_s(i = \hat{y}[i] \;|\;\hat{y}) \\
   \\
-  B[N,T] & = & 1 \\
-  B[n,T] & = & 0,\;\;\;\mbox{for $n < N$} \\
-  B[n-1,t-1] & = & P(\hat{z}_t = \bot)B[n-1,t] +  P(\hat{z}_t = y_n)B[n,t]
+  \mathrm{loss}(f) & \doteq & - \log \tilde{Q}(y) \\
+  \\
+  s.\mathrm{grad}[e,\tilde{y}] & = & \sum_i - \partial \log P_s[i = \hat{y}[i] \;|\;\hat{y}] /\partial s[e,\tilde{y}]
 \end{eqnarray*}
 
-\slideplain{The Big Picture I}
 
-Conditional vs. Unconditional
+\slide{Pseudolikelihood Theorem}
 
-\vfill
-$$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Pop}}\;-\ln \;P(y|x)$$
+$$\argmin_Q \; E_{y \sim \mathrm{Pop}} \;-\log \tilde{Q}(y) = \mathrm{Pop}$$
 
 \vfill
-$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Pop}}\;-\ln \;P(y)$$
+
+\slide{Proof I}
+
+We have
+
+$$\min_{Q} \;E_{y \sim \mathrm{Pop}}\;-\log \tilde{Q}(y) \;\;\leq \;\; E_{y \sim \mathrm{Pop}}\;-\log \widetilde{\mathrm{Pop}}(y)$$
 
 \vfill
-This is a non-distinction: the issues in the to the conditional case
-are exactly the same as in the unconditional case.
+If we can show
 
-\slide{The Big Picture II}
+$$\min_{Q} \;E_{y \sim \mathrm{Pop}}\;-\log \tilde{Q}(y) \;\;\geq \;\; E_{y \sim \mathrm{Pop}}\;-\log \widetilde{\mathrm{Pop}}(y)$$
 
-The binary case: $y \in \{-1,1\}$ (cancer screening).
+Then the minimizer (the argmin) is $\mathrm{Pop}$ as desired.
 
-\vfill
-The multiclass case: $y \in {\cal Y}$ where iteration over $\hat{y} \in {\cal Y}$ is feasible (MNIST, CFAR, ImageNet).
+\slide{Proof II}
 
-\vfill
-{\color{red} The structured case: $y \in {\cal Y}$ where ${\cal Y}$ is discrete but iteration over $\hat{y} \in {\cal Y}$ is infeasible} (language modeling, speech recognition).
+We will prove the case of two nodes.
 
 \vfill
-{\color{red} Graphical models (such as CTC) rely on assumptions about the structure of $P_\Phi(y)$.}
+\begin{eqnarray*}
+  & & \min_Q \;E_{y\sim \mathrm{Pop}}{-\log Q(y[1]|y[2])\;Q(y[2]|y[1])} \\
+  \\
+  & \geq & \min_{P_1,P_2} E_{y \sim \mathrm{Pop}}{-\log P_1(y[1]|y[2])\;P_2(y[2]|y[1])} \\
+  \\
+  & = & \min_{P_1} E_{y \sim \mathrm{Pop}}{-\log P_1(y[1]|y[2])} + \min_{P_2} E_{y \sim \mathrm{Pop}}{-\log P_2(y[2]|y[1])} \\
+  \\
+  & = & E_{y \sim \mathrm{Pop}}{-\log \mathrm{Pop}(y[1]|y[2])} + E_{y \sim \mathrm{Pop}}{-\log \mathrm{Pop}(y[2]|y[1])} \\
+  \\
+  & = & E_{y \sim \mathrm{Pop}}{-\log \widetilde{\mathrm{Pop}}(y|x)}
+\end{eqnarray*}
+
+  
+\slideplain{Contrastive Divergence}
+{\bf Algorithm (CDk)}: Run $k$ steps of MCMC for $P_s(\hat{y})$ {\bf starting from $y$} to get $\hat{y}$.
+
+\vfill
+Then set
+$$s.\mathrm{grad}[e,\tilde{y}] = \mathbbm{1}[\hat{y}[e] = \tilde{y}] - \mathbbm{1}[y[e]= \tilde{y}]$$
+
+\vfill
+    {\bf CD Theorem}: If $P_s(\hat{y}) = \mathrm{Pop}$ then
+    
+    $$E_{y \sim \mathrm{Pop}}\; \mathbbm{1}[\hat{y}[e] = \tilde{y}] - \mathbbm{1}[y[e]= \tilde{y}] = 0$$
+
+\vfill
+{\bf Here we can take $k=1$ --- \bf no mixing time required}.
+
 
 \slide{END}
 
 }
 \end{document}
+ 
 
 
-\slide{END}
+\slide{Colorization --- a Self-Supervised Problem}
 
-}
-\end{document}
+\centerline{\includegraphics[height = 2in]{../images/colorization}}
 
+$x$ is a black and white image.
+
+\vfill
+$y$ is a ``color'' image drawn from $\pop(y|x)$ where the color has been rounded to one of, say, 100 color words.
+
+\vfill
+$\hat{y}$ is an arbitrary color image.
+
+\vfill
+$P_\Phi(\hat{y}|x)$ is the probability that model $\Phi$ assigns to the color image $\hat{y}$ given black and white image $x$.
+
+\slide{Colorizing Superpixels}
+\centerline{\includegraphics[height = 3in]{../images/SLIC} \hspace{.5in} \includegraphics[height = 3in]{../images/SLICcolor}}
+\centerline{\huge SLIC superpixels, Achanta et al.}
+
+\vfill
+$\hat{y}[i]$ is the color value of superpixel $i$ in color image $\hat{y}$.
+
+\vfill
+$\hat{y}[(i,j)]$ is the pair $(\hat{y}[i],\hat{y}[j])$ for neighbors $i$ and $j$.
+
+\slide{Exponential Softmax}
+
+\begin{eqnarray*}
+P_\Phi(\hat{y}|x) & = & \softmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
+\end{eqnarray*}
+
+\vfill
+Let ${\cal C}$ be colors, ${\cal I}$ be superpixels, and ${\cal E}$ be edges.
+
+\vfill
+We will compute
+
+\vfill {\bf a unary potential tensor} $s_i[c] = s_\Phi(c|x,i)$
+
+\vfill
+{\bf a binary potential tensor} $s_e[c,c'] = s_\Phi(c,c'|x,e)$
+
+\vfill
+$$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$

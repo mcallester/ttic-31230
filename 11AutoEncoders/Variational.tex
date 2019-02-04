@@ -10,74 +10,118 @@
   \bigskip
   \centerline{David McAllester, Winter 2019}
   \vfill
+  \centerline{Expectation Maximization (EM)}
+  \vfill
   \centerline{The Evidence Lower Bound (the ELBO)}
   \vfill
-  \centerline{Variational Autoencoders}
+  \centerline{Variational Autoencoders (VAEs)}
   \vfill
   \vfill
 
-\slide{{\color{red} Big Picture}: Latent Variables}
+\slide{Latent Variable Models}
 
 We are often interested in models of the form
 
 \vfill
-$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
+{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z).$$}
 
 \vfill
-Note that CTC has this form.
+For example, CTC and probabilistic grammar models.
+
+\slidetwo{Expectation Maximization (EM)}
+{Mixture of Gaussian Modeling}
+
+{\color{red} $$\Phi = (\pi_1,\mu_1,\Sigma_1,\ldots,\pi_k,\mu_k,\Sigma_k)$$}
+
+\begin{eqnarray*}
+p_\Phi(y) & = & {\color{red} \sum_i\;P(i)P(y|i)} \\
+\\
+& = & \sum_i\;\pi_i\;\frac{1}{Z_i}\exp\left(-\frac{1}{2}(y-\mu_i)^\top \Sigma_i^{-1}(y - \mu_i)\right)
+\end{eqnarray*}
 
 \vfill
-Probabilistic grammar models also have this form where $y$ is a sentence and $z$ is a parse tree.
+{\color{red} $i$ is the latent variable.}
+
+\slidetwo{Expectation Maximization (EM)}
+{Mixture of Gaussian Modeling}
+\vspace{-4ex}
+$$\Phi = (\pi_1,\mu_1,\Sigma_1,\ldots,\pi_k,\mu_k,\Sigma_k)$$
+$$\mbox{Train} = \{y_1,\ldots,y_N\}$$
+Until Convergence:
+$$w[i,j] = P_\Phi(i|y_j) \;\;\mbox{\color{red} Inference (E step)}$$
+
+$$\left.
+\begin{array}{rcl}
+  \pi_i & = & \frac{1}{N}\; \sum_j \;w[i,j] \\
+  \mu_i & = & \frac{1}{N}\; \sum_j \;w[i,j]y_j \\
+  \Sigma_i & = & \frac{1}{N}\; \sum_j w[i,j]y_jy_j^\top
+\end{array}
+  \right\} \mbox{\color{red} Model Update (M step)}$$
+
+\slide{General EM}
+{\color{red} $$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Train}} -\ln P_\Phi(y)$$}
 
 \vfill
-Rate-Distortion Autoencoders also have this form where $z$ is the compression of $y$.
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
 
 \vfill
-In the first two cases, and for lossless compression, the sum over $z$ can be computed exactly.
+$${\color{red} \Phi^{t+1}} =  {\color{red} \argmin_\Phi}\;E_{y \sim \mathrm{Train}} \;E_{z \sim {\color{red} P_{\Phi^t}(z|y)}}\; - \ln P_{\color{red} \Phi}(z,y)$$
+\centerline{M Step \hspace{6em} E Step \hspace{2.5em}~}
+\centerline{\hspace{1em} Update \hspace{6em} Inference \hspace{2.5em}~}
 
-\slide{{\color{red} Big Picture}: Friendly Distributions}
+\slide{Superpixel Colorization}
 
-A distribution $P(u)$ will be called {\bf friendly} if we can both draw samples from it and compute $P(u)$ for any value $u$.
+\centerline{\includegraphics[height = 3in]{../images/SLIC} \hspace{.5in} \includegraphics[height = 3in]{../images/SLICcolor}}
+\centerline{\huge SLIC superpixels, Achanta et al.}
 
-\vfill
-$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$
-
-\vfill
-It is often the case that $P_\Phi(z)$ is friendly, and $P_\Phi(y|z)$ is friendly, but $P_\Phi(y)$ is not friendly (the sum over $z$ is intractible).
-
-\vfill
-For example $z$ might be an assignment of truth values to Boolean variables and $y$ might be the value of a fixed Boolean formula $\Phi$.  In this case
-determining if $P_\Phi(y) > 0$ is the SAT problem which is NP hard.
-
-\slide{Colorization}
-
-\centerline{\includegraphics[height = 2in]{../images/Colorization}}
-
-$x$ is a black and white image, $y$ a color image, and $z$ a semantic segmentation.
+$x$ is a black and white image.
 
 \vfill
-$$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z,x).$$
-
-\slide{Colorization}
-
-$P_\Phi(z|x)$ is defined by a deep network computing a friendly graphical model on semantic segmentations --
-perhaps each pixel is assigned a distribution over material categories such as ``face'', ``shirt'', ``shirt-color1'' or ``shirt-color2''.
+$y$ is a color image drawn from $\pop(y|x)$.
 
 \vfill
-$P_\Phi(y|z,x)$ is a deep network taking a particular semantic segmentation (a particular semantic material label at each pixel) and computing
-a distribution on a discrete color space for each material label.
+$\hat{y}$ is an arbitrary color image.
 
 \vfill
-Although $P(z|x)$ is friendly, and $P_\Phi(y|z,x)$ is friendly, $P(y|x)$ not friendly (similar to the SAT example).
+$P_\Phi(\hat{y}|x)$ is the probability that model $\Phi$ assigns to the color image $\hat{y}$ given black and white image $x$.
 
-\slide{{\color{red} Big Picture}: ELBO Replaces Search with Generation}
+\slideplain{Latent Semantic Segmentation (TZ)}
+
+{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z).$$}
+\begin{eqnarray*}
+\mbox{intput}\; x \\
+P_\Phi(z|x) & = & \ldots \;\;\mbox{\color{red} semantic segmentation (friendly --- pixel RNN?)} \\
+P_\Phi(\hat{y}|z) & = & \ldots \;\;\mbox{\color{red} colorization (friendly --- table lookup?)} \\
+{\cal L}(y,\hat{y}) & = & -\ln\;p_\Phi(y|\hat{y}) \;\; \mbox{\color{red} distortion (friendly --- Gaussian)}
+\end{eqnarray*}
+
 
 \vfill
+{\color{red} The composition is unfriendly.}
+
+\slideplain{Maybe EM?}
+
+\begin{eqnarray*}
+\mbox{intput}\; x \\
+P_\Phi(z|x) & = & \ldots \;\;\mbox{\color{red} semantic segmentation (friendly)} \\
+P_\Phi(\hat{y}|z) & = & \ldots \;\;\mbox{\color{red} colorization (friendly)} \\
+{\cal L}(y,\hat{y}) & = & -\ln\;p_\Phi(y|\hat{y}) \;\; \mbox{\color{red} distortion (friendly)}
+\end{eqnarray*}
+
+$${\color{red} \Phi^{t+1}} =  {\color{red} \argmin_\Phi}\;E_{y \sim \mathrm{Train}} \;E_{z \sim {\color{red} P_{\Phi^t}(z|y)}}\; - \ln P_{\color{red} \Phi}(z,y)$$
+\centerline{\hspace{1em} Update \hspace{6em} Inference \hspace{2.5em}~}
+
+\vfill
+{\color{red} The inference is intractible!}
+
+\slidetwo{Variational Inference:}
+{The Evidence Lower Bound (The ELBO)}
+
+$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z)\;\;\mbox{\color{red} unfriendly composition of friendlies}$$
 {\huge
 \begin{eqnarray*}
-P_\Phi(y) & = & E_{\color{red} z \sim P_\Phi(z)}P_\Phi(y|z) \;\;\;\mbox{\color{red} sampling $z$ is ineffective}\\
-\\
-\ln P_\Phi(y) & = & E_{\color{red} z \sim P_\Psi(z|y)} \ln P_\Phi(y) \;\;\;\mbox{\color{red} introduce $z$ generator using $y$}\\
+\ln P_\Phi(y) & = & E_{\color{red} z \sim P_\Psi(z|y)} \ln P_\Phi(y) \;\;\;{\color{red} P_\Psi(z|y)\;\mbox{friendly}}\\
 \\
  & = & E_{z \sim P_\Psi(z|y)} \left(\ln P_\Phi(y)P_\Phi(z|y) + \ln \frac{P_\Psi(z|y)}{P_\Phi(z|y)} + \ln\frac{1}{P_\Psi(z|y)}\right) \\
  \\
@@ -86,6 +130,19 @@ P_\Phi(y) & = & E_{\color{red} z \sim P_\Phi(z)}P_\Phi(y|z) \;\;\;\mbox{\color{r
  & \geq & E_{\color{red} z \sim P_\Psi(z|y)}\;\left(\;\ln\;P_\Phi(z)P_\Phi(y|z) - \ln P_\Psi(z|y)\;\right) \;\;\;\mbox{\color{red} ELBO}
 \end{eqnarray*}
 }
+
+\slidetwo{Variational Inference:}
+{The Evidence Lower Bound (The ELBO)}
+
+$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z)\;\;\mbox{\color{red} unfriendly composition of friendlies}$$
+
+\begin{eqnarray*}
+\ln P_\Phi(y) & = & \mathrm{ELBO} + KL(P_\Psi(z|y),P_\Phi(z|y))
+\end{eqnarray*}
+
+
+\vfill
+{\color{red} If the friendly $P_\Psi(z|y)$ can match the unfriendly $P_\Phi(z|y)$ then the ELBO is exact.}
 
 \slide{Measuring the ELBO}
 
