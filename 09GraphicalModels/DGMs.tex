@@ -104,7 +104,7 @@ $$s_C(\mathrm{Foreground}) = s_C(\mathrm{Background}) = 0$$
 Let $F_A$ be the proposition that $A$ is forground and similarly for $F_B$ and $F_C$.
 
 \vfill
-We can express $P_A \Rightarrow P_B$ with
+We can express $F_A \Rightarrow F_B$ with
 $$s_{A,B}(\mathrm{Foreground},\mathrm{Background}) = -1$$
 $$s_{A,B}(\mathrm{Foreground},\mathrm{Foreground}) = 1$$
 $$s_{A,B}(\mathrm{Background},\mathrm{Background}) = 1$$
@@ -179,23 +179,6 @@ We are often interested in models of the form
 Probabilistic grammar models have this form where $y$ is a sentence and $z$ is a parse tree
 and $P(y|z)$ is deterministic.
 
-
-\slide{Exponential Softmax as Intermediate Computation}
-$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$
-
-\vfill
-{\color{red}
-\begin{eqnarray*}
-& & \mbox{intput}\; x \\
-\vdots \\
-z & = & \expsoftmax_z \ldots \\
-\\
-& & \mbox{input}\; z \\
-\vdots \\
-y & = & \expsoftmax_y\;\ldots
-\end{eqnarray*}
-}
-
 \slide{A Composition of Friendlies is Typically  Unfriendly}
 
 {\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
@@ -227,7 +210,7 @@ with {\color{red} $N << T$} and with $y_n \in {\cal P}$ for a set of phonemes ${
 \begin{tabbing}
 Input Signal: \hspace{3em} \=$x = x_1,\;\ldots,\;x_{\color{red} T}$ \\
 Latent Label: \>$z = z_1,\;\ldots,\;z_{\color{red} T},\;\;\;z_t \in {\cal P} \cup \{\bot\}$ \\
-Output: \>$y(z) = y_1,\;\ldots,\;y_{\color{red} N}$
+Output: \>$y(z) = y_1,\;\ldots,\;y_{\color{red} N}\;\;\;\;\;\;{\color{red} N << T}$
 \end{tabbing}
 
 \vfill
@@ -283,7 +266,7 @@ $P_\Phi(y|z)$ is {\color{red} deterministic} (very friendly).
 \begin{eqnarray*}
   F[0,0] & = & 1 \\
   F[n,0] & = & 0 \;\;\;\mbox{for $n > 0$} \\
-  {\color{red} F[n+1,t+1]} & = & {\color{red} P(z_{t+1} = \bot) F[n+1,t] + P(z_{t+1} = y_{n+1})F[n,t]}
+  {\color{red} F[n,t]} & = & {\color{red} P(z_t = \bot) F[n,t-1] + P(z_t = y_n)F[n-1,t-1]}
 \end{eqnarray*}
 
 \slide{Semantic Segmentation}
@@ -341,13 +324,24 @@ $$s(\hat{y}) = \sum_{i \in \mathrm{Nodes}}\; s_i[\hat{y}[i]]\; + \sum_{e \in \ma
 $${\color{red} s(\hat{y}) = \sum_{e \in \mathrm{HyperEdges}}  \; s_e[\hat{y}[e]]}$$
 
 
+\slide{Hyper-Graph Models}
+
+We will abbreviate $s_e[\hat{y}[e]]$ as {\color{red} $s_e[\tilde{y}]$}.
+
+\vfill
+{\color{red} $\tilde{y}$ has a small number of possible values.}
+
+\vfill
+The hyper-graph model is defined by the ``tensor'' {\color{red} $s_e(\tilde{y})$}.
+
+
 \slide{Backpropagation}
 
 The input is the image $x$ and the parameter package $\Phi$
 
 \begin{eqnarray*}
  & \vdots & \\
-s_e[\hat{y}] & = & \ldots \\
+s_e[\tilde{y}] & = & \ldots \\
 {\cal L} & = & - \ln\; P(y\;|\;s_{\cal E}[{\cal Y}])
 \end{eqnarray*}
 
@@ -357,21 +351,8 @@ We need to compute {\color{red} $\nabla_s -\ln P_s(y)$}, or equivalently, {\colo
 
 \slide{Back-Propagation Through An Exponential Softmax}
 
-We will abbreviate $s_e[\hat{y}[e]]$ as {\color{red} $s_e[\tilde{y}]$}.
-
-\vfill
-{\color{red} $\tilde{y}$ has a small number of possible values.}
-
-\vfill
-We will similarly write {\color{red} $s_e.\grad[\tilde{y}]$}.
-
-\vfill
-We need to compute the tensor values ${\color{red} s_e.\grad[\tilde{y}]}$
-
-\slide{Back-Propagation Through An Exponential Softmax}
-
 \begin{eqnarray*}
-  \mathrm{loss}(s,y) & = & - \ln \left(\frac{1}{Z(s)}\;e^{s(y)}\right) \\
+  {\cal L}(s,y) & = & - \ln \left(\frac{1}{Z(s)}\;e^{s(y)}\right) \\
   \\
   & = & \ln Z(s) - s(y) \\
   \\
@@ -423,9 +404,6 @@ predict one node at a time.
 
 \vfill
 Also, the hyperedge marginals can be computed exactly.
-\begin{eqnarray*}
-  s.\mathrm{grad}[e,\tilde{y}] & = & {\color{red} P_e(\tilde{y})} - \mathbbm{1}[y[e] = \tilde{y}]
-\end{eqnarray*}
 
 
 \anaslide{Belief Propagation}
@@ -452,7 +430,7 @@ The reverse direction message $Z_{i \rightarrow j}$ is defined similarly.
 
 \vfill
 \begin{eqnarray*}
-  Z_{j\rightarrow i}[\tilde{y}] & = & \sum_{\tilde{y}'}  e^{s_j[\tilde{y}'] + s_{\{j,i\}}[\{\tilde{y}',\tilde{y}\}]}
+  Z_{j\rightarrow i}[\tilde{y}] & = & \sum_{\tilde{y}'}  e^{s_j[\tilde{y}'] + s[\{j,i\},\{\tilde{y}',\tilde{y}\}]}
     \left(\prod_{k \in N(j),\;k \not = i}\;Z_{k\rightarrow j}[\tilde{y}']\right)
 \end{eqnarray*}
 
@@ -584,13 +562,8 @@ In Gibbs sampling we select a node $i$ at random and change that node by drawing
 
 \slide{Gibbs Sampling}
 
-\begin{eqnarray*}
-  P_s(i=\tilde{y} \;|\;\hat{y}) & \doteq & P_s(\hat{y}[i] = \tilde{y}\;|\;\hat{y}[1],\ldots,\hat{y}[i-1],\hat{y}[i+1],\ldots,\hat{y}[I])
-\end{eqnarray*}
-
-\vfill
 Markov Blanket Property:
-$$P_s(i=\tilde{y} \;|\;\hat{y}) = P_s(i=\tilde{y} \;|\;\hat{y}[N(i)])$$
+$$P_s(\hat{y}[i] \;|\;\hat{y} \backslash i) = P_s(\hat{y}[i] \;|\; \hat{y}[N(i)])$$
   
 \vfill
 Gibbs Sampling, Repeat:
@@ -598,22 +571,10 @@ Gibbs Sampling, Repeat:
 \begin{itemize}
 \item   Select $i$ at random
 
-\item draw $\tilde{y}$ from $P_s(i = \tilde{y} \;|\;\hat{y})$
+\item draw $\tilde{y}$ from $P_s(\hat{y}[i] \;|\;\hat{y} \backslash i)$
 
 \item $\hat{y}[i] = \tilde{y}$
 \end{itemize}
-
-\slide{Gibbs Sampling}
-
-Let $\hat{y}[i = \tilde{y}]$ be the assignment $\hat{y}'$ equal to $\hat{y}$ except $\hat{y}'[i] = \tilde{y}$.
-
-\vfill
-\begin{eqnarray*}
- P_s(i = \tilde{y} \;|\; \hat{y})  & = & \frac{P_s(\hat{y}[i] = \tilde{y})}{\sum_{\tilde{y}} P_s(\hat{y}[i] = \tilde{y})} \\
-  \\
-  \\
-  & = & \frac{e^{s(\hat{y}[i = \tilde{y}])}}{\sum_{\tilde{y}} e^{s(\hat{y}[i = \tilde{y}])}}
-\end{eqnarray*}
 
 \slide{Gibbs Sampling Theorem}
 
@@ -623,7 +584,7 @@ $P_s(\hat{y})$ is a stationary distribution of Gibbs Sampling.
 \begin{itemize}
 \item   Select $i$ at random
 
-\item draw $\tilde{y}$ from $P_s(i = \tilde{y} \;|\;\hat{y})$
+\item draw $\tilde{y}$ from $P_s(\hat{y}[i] \;|\;\hat{y} \backslash i)$
 
 \item $\hat{y}[i] = \tilde{y}$
 \end{itemize}
@@ -634,52 +595,63 @@ The distribution before the update equals the distribution after the update.
 
 \slide{Pseudolikelihood}
 
-In Pseudolikelihood we replace the objective $- \log P_s(\hat{y})$ with the objective $- \log \tilde{Q}_s(\hat{y})$ where
+In pseudolikelihood we replace the objective $- \ln P_s(\hat{y})$ with the objective $- \ln \tilde{Q}_s(\hat{y})$ where
 
 \vfill
 \begin{eqnarray*}
-  \tilde{Q}_s(\hat{y}) & \doteq & \prod_i \;P_s(i = \hat{y}[i] \;|\;\hat{y}) \\
+  \tilde{Q}_s(y) & \doteq & \prod_i \;P_s(y[i] \;|\;y\backslash i) \\
   \\
-  \mathrm{loss}(f) & \doteq & - \log \tilde{Q}(y) \\
+  {\cal L}(s) & \doteq & - \ln \tilde{Q}_s(y) \\
   \\
-  s.\mathrm{grad}[e,\tilde{y}] & = & \sum_i - \partial \log P_s[i = \hat{y}[i] \;|\;\hat{y}] /\partial s[e,\tilde{y}]
+  {\color{red} s.\mathrm{grad}[e,\tilde{y}]} & = & {\color{red} \sum_i \frac{- \partial \ln P_s(y[i] \;|\;y\backslash i)}{\partial s[e,\tilde{y}]}
+  \hspace{3em} \mbox{immediate gradient!}}
 \end{eqnarray*}
 
 
 \slide{Pseudolikelihood Theorem}
 
-$$\argmin_Q \; E_{y \sim \mathrm{Pop}} \;-\log \tilde{Q}(y) = \mathrm{Pop}$$
+$$\argmin_Q \; E_{y \sim \mathrm{Pop}} \;-\ln \tilde{Q}(y) = \mathrm{Pop}$$
 
 \vfill
 
 \slide{Proof I}
 
-We have
+{\color{red} $$E_{y \sim \mathrm{Pop}}\;\ln \widetilde{\mathrm{Pop}}(y) = E_{y \sim \mathrm{Pop}}\;\ln \mathrm{Pop}(y)$$}
+{\huge
+\begin{eqnarray*}
+\mbox{Proof:}\hspace{5em}\pop(y) & = & \prod_i P(y[i]\;|\; y[<\;i]) \\
+\ln \pop(y) & = & \sum_i \; \ln P(y[i]\;|\; y[<\;i]) \\
+E_{y \sim \pop}\;\ln \pop(y) & = & \sum_i \;E_{y \sim \pop} \; \ln P(y[i]\;|\; y[<\;i]) \\
+& = & \sum_i \;E_{y \sim \pop} \;\ln P(y[i]\;|\; y\backslash i) \\
+& = & E_{y\sim \pop}\;\widetilde{\pop}(y)
+\end{eqnarray*}
+}
 
-$$\min_{Q} \;E_{y \sim \mathrm{Pop}}\;-\log \tilde{Q}(y) \;\;\leq \;\; E_{y \sim \mathrm{Pop}}\;-\log \widetilde{\mathrm{Pop}}(y)$$
+\slide{Proof II}
+$$\min_{Q} \;E_{y \sim \mathrm{Pop}}\;-\ln \tilde{Q}(y) \;\;\leq \;\; E_{y \sim \mathrm{Pop}}\;-\ln \widetilde{\mathrm{Pop}}(y)$$
 
 \vfill
 If we can show
 
-$$\min_{Q} \;E_{y \sim \mathrm{Pop}}\;-\log \tilde{Q}(y) \;\;\geq \;\; E_{y \sim \mathrm{Pop}}\;-\log \widetilde{\mathrm{Pop}}(y)$$
+$$\min_{Q} \;E_{y \sim \mathrm{Pop}}\;-\ln \tilde{Q}(y) \;\;\geq \;\; E_{y \sim \mathrm{Pop}}\;-\ln \widetilde{\mathrm{Pop}}(y)$$
 
 Then the minimizer (the argmin) is $\mathrm{Pop}$ as desired.
 
-\slide{Proof II}
+\slide{Proof III}
 
 We will prove the case of two nodes.
 
 \vfill
 \begin{eqnarray*}
-  & & \min_Q \;E_{y\sim \mathrm{Pop}}{-\log Q(y[1]|y[2])\;Q(y[2]|y[1])} \\
+  & & \min_Q \;E_{y\sim \mathrm{Pop}}{-\ln Q(y[1]|y[2])\;Q(y[2]|y[1])} \\
   \\
-  & \geq & \min_{P_1,P_2} E_{y \sim \mathrm{Pop}}{-\log P_1(y[1]|y[2])\;P_2(y[2]|y[1])} \\
+  & \geq & \min_{P_1,P_2} E_{y \sim \mathrm{Pop}}{-\ln P_1(y[1]|y[2])\;P_2(y[2]|y[1])} \\
   \\
-  & = & \min_{P_1} E_{y \sim \mathrm{Pop}}{-\log P_1(y[1]|y[2])} + \min_{P_2} E_{y \sim \mathrm{Pop}}{-\log P_2(y[2]|y[1])} \\
+  & = & \min_{P_1} E_{y \sim \mathrm{Pop}}{-\ln P_1(y[1]|y[2])} + \min_{P_2} E_{y \sim \mathrm{Pop}}{-\ln P_2(y[2]|y[1])} \\
   \\
-  & = & E_{y \sim \mathrm{Pop}}{-\log \mathrm{Pop}(y[1]|y[2])} + E_{y \sim \mathrm{Pop}}{-\log \mathrm{Pop}(y[2]|y[1])} \\
+  & = & E_{y \sim \mathrm{Pop}}{-\ln \mathrm{Pop}(y[1]|y[2])} + E_{y \sim \mathrm{Pop}}{-\ln \mathrm{Pop}(y[2]|y[1])} \\
   \\
-  & = & E_{y \sim \mathrm{Pop}}{-\log \widetilde{\mathrm{Pop}}(y|x)}
+  & = & E_{y \sim \mathrm{Pop}}{-\ln \widetilde{\mathrm{Pop}}(y|x)}
 \end{eqnarray*}
 
   
@@ -698,55 +670,20 @@ $$s.\mathrm{grad}[e,\tilde{y}] = \mathbbm{1}[\hat{y}[e] = \tilde{y}] - \mathbbm{
 \vfill
 {\bf Here we can take $k=1$ --- \bf no mixing time required}.
 
+\slide{Summary}
 
+We are often interested in probability distributions on structured objects such as sentence or images.
+
+\vfill
+Graphical models define softmax distributions on structured values.
+
+\vfill
+It is infeasible to enumerate all sentences or all images.
+
+\vfill
+However, some graphical models sometimes yield friendly distributions and methods exist
+for training unfriendly graphical models.
 \slide{END}
 
 }
 \end{document}
- 
-
-
-\slide{Colorization --- a Self-Supervised Problem}
-
-\centerline{\includegraphics[height = 2in]{../images/colorization}}
-
-$x$ is a black and white image.
-
-\vfill
-$y$ is a ``color'' image drawn from $\pop(y|x)$ where the color has been rounded to one of, say, 100 color words.
-
-\vfill
-$\hat{y}$ is an arbitrary color image.
-
-\vfill
-$P_\Phi(\hat{y}|x)$ is the probability that model $\Phi$ assigns to the color image $\hat{y}$ given black and white image $x$.
-
-\slide{Colorizing Superpixels}
-\centerline{\includegraphics[height = 3in]{../images/SLIC} \hspace{.5in} \includegraphics[height = 3in]{../images/SLICcolor}}
-\centerline{\huge SLIC superpixels, Achanta et al.}
-
-\vfill
-$\hat{y}[i]$ is the color value of superpixel $i$ in color image $\hat{y}$.
-
-\vfill
-$\hat{y}[(i,j)]$ is the pair $(\hat{y}[i],\hat{y}[j])$ for neighbors $i$ and $j$.
-
-\slide{Exponential Softmax}
-
-\begin{eqnarray*}
-P_\Phi(\hat{y}|x) & = & \softmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
-\end{eqnarray*}
-
-\vfill
-Let ${\cal C}$ be colors, ${\cal I}$ be superpixels, and ${\cal E}$ be edges.
-
-\vfill
-We will compute
-
-\vfill {\bf a unary potential tensor} $s_i[c] = s_\Phi(c|x,i)$
-
-\vfill
-{\bf a binary potential tensor} $s_e[c,c'] = s_\Phi(c,c'|x,e)$
-
-\vfill
-$$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$

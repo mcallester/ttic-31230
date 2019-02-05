@@ -183,7 +183,7 @@ However, the $\eta$, $\lambda$, $N$ parameterization seems more conjugate (indep
 {\color{red} $$\Phi \;\minuseq\; \eta\left(\hat{g} +\frac{\lambda}{N}\Phi\right)$$}
 
 \vfill
-Setting {\color{red} $\eta = B\eta'$} will now handle batch size scaling using the batch size conjugate learning rate {\color{red} $\eta'$}.
+Setting {\color{red} $\eta = B\eta'$} will now handle batch size scaling using the batch size independent learning rate {\color{red} $\eta'$}.
 
 \slide{Efficiency and Numerical Stability}
 
@@ -355,6 +355,24 @@ Theorem: With probability at least $1-\delta$ over the draw of training data the
    + \frac{5 \lmax}{N}\parens{\frac{||\Phi-\Phi_{\mathrm{init}}||^2}{2\sigma^2} + \ln \frac{1}{\delta}}}}
 \end{eqnarray*}
 
+\slide{A KL Divergence Bound}
+
+Let $P$ be any ``prior'' and $Q$ be any ``posterior'' on any model space.
+
+\vfill
+Define
+\begin{eqnarray*}
+  L(Q) & =  &\expectsub{h \sim Q}{L(h)} \\
+  \\
+  \hat{L}(Q) & =  &\expectsub{h \sim Q}{\hat{L}(h)}
+\end{eqnarray*}
+
+
+\vfill
+For any $P$ and any $\lambda > \frac{1}{2}$, with probability
+at least $1-\delta$ over the draw of the training data, the following holds simultaneously for all $Q$.
+\vfill
+$$L(Q) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{L}(Q) + \frac{\lambda \lmax}{N}\parens{KL(Q,P) + \ln \frac{1}{\delta}}}$$
 
 
 \slide{$L_1$ Regularization and Sparse Weights}
@@ -388,14 +406,11 @@ $$P_\mathrm{Ens}(y|x) = \frac{1}{k} \sum_{j=1}^k\; P_{\Phi_i}(y|x)$$
 \vfill
 Ensemble models almost always perform better than any single model.
 
-\vfill
-We will explore some reasons for this.
-
 
 \vfill
 \slide{Ensembles Under Cross Entropy Loss}
 
-For log loss we average the probability vectors.
+For log loss we average the probabilities.
 
 \vfill
 $$P(y|x) = \frac{1}{k} \sum_i \;P_i(y|x)$$
@@ -408,6 +423,17 @@ $${\cal L}\left(\frac{1}{k} \sum_i P_i\right) \leq \frac{1}{k} \sum_i {\cal L}(P
 \vfill
 This implies that the loss of the average model cannot be worse (can only be better) than the average loss of the models.
 
+\vfill
+\slide{Ensembles Under Cross Entropy Loss}
+
+By Jensen:
+
+$${\cal L}\left(\frac{1}{k} \sum_i P_i\right) \leq \frac{1}{k} \sum_i {\cal L}(P_i)$$
+
+\vfill
+However, in practice for each $i$ we have
+
+$${\cal L}\left(\frac{1}{k} \sum_i P_i\right) \leq {\cal L}(P_i)$$
 
 \ignore{
 \slide{Ensembles under Square Loss}
@@ -706,6 +732,7 @@ We have to cluster the weights into 32 groups and decide on a {\bf centroid valu
 \vfill
 This is done with K-means clustering.
 
+\ignore{
 \slide{Initialization of Centroids}
 
 \centerline{\includegraphics[width = 7in]{../images/Compression1}}
@@ -713,6 +740,7 @@ This is done with K-means clustering.
 \slide{After Running K-means}
 
 \centerline{\includegraphics[width = 7in]{../images/Compression2}}
+}
 
 \slide{Retrain to Adjust Centroids}
 
@@ -817,28 +845,9 @@ Regularization is any modification to the training algorithm motivated by reduci
 While regularization modifications to training can be inspired by theory, the theory is weak.
 
 \vfill
-Regularization modifications to training should be evaluated empirically.
+Regularization proposals should be evaluated empirically.
 
 \ignore{
-\slide{A KL Divergence Bound}
-
-Let $P$ be any ``prior'' and $Q$ be any ``posterior'' on any model space.
-
-\vfill
-Define
-\begin{eqnarray*}
-  L(Q) & =  &\expectsub{h \sim Q}{L(h)} \\
-  \\
-  \hat{L}(Q) & =  &\expectsub{h \sim Q}{\hat{L}(h)}
-\end{eqnarray*}
-
-
-\vfill
-For any $P$ and any $\lambda > \frac{1}{2}$, with probability
-at least $1-\delta$ over the draw of the training data, the following holds simultaneously for all $Q$.
-\vfill
-$$L(Q) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{L}(Q) + \frac{\lambda \lmax}{N}\parens{KL(Q,P) + \ln \frac{1}{\delta}}}$$
-
 \slide{$L_2$ PAC-Bayesian Bounds in Action}
 
 Computing Nonvacuous Generalization Bounds for Deep (Stochastic) Neural Networks with Many More Parameters than Training Data, (Dziugaite and Roy, arXiv, 2017)
