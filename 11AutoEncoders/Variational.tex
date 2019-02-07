@@ -35,7 +35,7 @@ For example, CTC and probabilistic grammar models.
 {\color{red} $$\Phi = (\pi_1,\mu_1,\Sigma_1,\ldots,\pi_k,\mu_k,\Sigma_k)$$}
 
 \begin{eqnarray*}
-p_\Phi(y) & = & {\color{red} \sum_i\;P(i)P(y|i)} \\
+p_\Phi(y) & = & {\color{red} \sum_i\;P(i)p(y|i)} \\
 \\
 & = & \sum_i\;\pi_i\;\frac{1}{Z_i}\exp\left(-\frac{1}{2}(y-\mu_i)^\top \Sigma_i^{-1}(y - \mu_i)\right)
 \end{eqnarray*}
@@ -49,13 +49,13 @@ p_\Phi(y) & = & {\color{red} \sum_i\;P(i)P(y|i)} \\
 $$\Phi = (\pi_1,\mu_1,\Sigma_1,\ldots,\pi_k,\mu_k,\Sigma_k)$$
 $$\mbox{Train} = \{y_1,\ldots,y_N\}$$
 Until Convergence:
-$$w[i,j] = P_\Phi(i|y_j) \;\;\mbox{\color{red} Inference (E step)}$$
+$$P_\Phi(i|y_j) = \frac{\pi_iP(y_j|i)}{\sum_i\;\pi_iP(y_j|i)} \;\;\mbox{\color{red} Inference (E step)}$$
 
 $$\left.
 \begin{array}{rcl}
-  \pi_i & = & \frac{1}{N}\; \sum_j \;w[i,j] \\
-  \mu_i & = & \frac{1}{N}\; \sum_j \;w[i,j]y_j \\
-  \Sigma_i & = & \frac{1}{N}\; \sum_j w[i,j]y_jy_j^\top
+  \pi_i^{t+1} & = & \frac{1}{N}\; \sum_j \;P_{\Phi^t}(i|y_j) \\
+  \mu_i^{t+1} & = & \frac{1}{N}\; \sum_j \;P_{\Phi^t}(i|y_j)y_j \\
+  \Sigma_i^{t+1} & = & \frac{1}{N}\; \sum_j P_{\Phi^t}(i|y_j)y_jy_j^\top
 \end{array}
   \right\} \mbox{\color{red} Model Update (M step)}$$
 
@@ -67,14 +67,17 @@ $$\left.
 
 \vfill
 $${\color{red} \Phi^{t+1}} =  {\color{red} \argmin_\Phi}\;E_{y \sim \mathrm{Train}} \;E_{z \sim {\color{red} P_{\Phi^t}(z|y)}}\; - \ln P_{\color{red} \Phi}(z,y)$$
-\centerline{M Step \hspace{6em} E Step \hspace{2.5em}~}
 \centerline{\hspace{1em} Update \hspace{6em} Inference \hspace{2.5em}~}
+\centerline{(M Step) \hspace{5em} (E Step) \hspace{1.5em}~}
 
-\slide{Superpixel Colorization}
 
-\centerline{\includegraphics[height = 3in]{../images/SLIC} \hspace{.5in} \includegraphics[height = 3in]{../images/SLICcolor}}
-\centerline{\huge SLIC superpixels, Achanta et al.}
+\anaslide{Colorization}
+\medskip
+\centerline{\includegraphics[width = 5in]{../images/colorizationGreg2}}
+\centerline{$x$ \hspace{4em} $\hat{y}$ \hspace{4em} $y$}
+\centerline{\huge Larsson et al., 2016}
 
+\vfill
 $x$ is a black and white image.
 
 \vfill
@@ -86,135 +89,51 @@ $\hat{y}$ is an arbitrary color image.
 \vfill
 $P_\Phi(\hat{y}|x)$ is the probability that model $\Phi$ assigns to the color image $\hat{y}$ given black and white image $x$.
 
-\slideplain{Latent Semantic Segmentation (TZ)}
-
-{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z).$$}
-\begin{eqnarray*}
-\mbox{intput}\; x \\
-P_\Phi(z|x) & = & \ldots \;\;\mbox{\color{red} semantic segmentation (friendly --- pixel RNN?)} \\
-P_\Phi(\hat{y}|z) & = & \ldots \;\;\mbox{\color{red} colorization (friendly --- table lookup?)} \\
-{\cal L}(y,\hat{y}) & = & -\ln\;p_\Phi(y|\hat{y}) \;\; \mbox{\color{red} distortion (friendly --- Gaussian)}
-\end{eqnarray*}
-
+\anaslide{Colorization with Latent Semantic Segmentation (TZ)}
+\medskip
+\centerline{\includegraphics[width = 5in]{../images/colorizationGreg2}}
+\centerline{$x$ \hspace{4em} $\hat{y}$ \hspace{4em} $y$}
 
 \vfill
-{\color{red} The composition is unfriendly.}
-
-\slideplain{Maybe EM?}
-
+{\color{red} $$P_\Phi(\hat{y}|x) = \sum_z\;P_\Phi(z|x)P_\Phi(\hat{y}|z,x).$$}
 \begin{eqnarray*}
-\mbox{intput}\; x \\
-P_\Phi(z|x) & = & \ldots \;\;\mbox{\color{red} semantic segmentation (friendly)} \\
-P_\Phi(\hat{y}|z) & = & \ldots \;\;\mbox{\color{red} colorization (friendly)} \\
-{\cal L}(y,\hat{y}) & = & -\ln\;p_\Phi(y|\hat{y}) \;\; \mbox{\color{red} distortion (friendly)}
+\mbox{input}\; x \\
+P_\Phi(z|x) & = & \ldots \;\;\mbox{\color{red} semantic segmentation} \\
+P_\Phi(\hat{y}|z,x) & = & \ldots \;\;\mbox{\color{red} segment colorization} \\
 \end{eqnarray*}
+
+\slide{Maybe EM?}
+
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
 
 $${\color{red} \Phi^{t+1}} =  {\color{red} \argmin_\Phi}\;E_{y \sim \mathrm{Train}} \;E_{z \sim {\color{red} P_{\Phi^t}(z|y)}}\; - \ln P_{\color{red} \Phi}(z,y)$$
 \centerline{\hspace{1em} Update \hspace{6em} Inference \hspace{2.5em}~}
 
 \vfill
-{\color{red} The inference is intractible!}
+{\color{red} In most cases the inference is intractible!}
 
 \slidetwo{Variational Inference:}
 {The Evidence Lower Bound (The ELBO)}
+We introduce a friendly model {\color{red} $P_\Psi(z|y)$} to approximate {\color{red} $P_\Phi(z|y)$}.
 
-$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z)\;\;\mbox{\color{red} unfriendly composition of friendlies}$$
 {\huge
 \begin{eqnarray*}
-\ln P_\Phi(y) & = & E_{\color{red} z \sim P_\Psi(z|y)} \ln P_\Phi(y) \;\;\;{\color{red} P_\Psi(z|y)\;\mbox{friendly}}\\
+        \ln P_\Phi(y) & = & E_{\color{red} z \sim P_\Psi(z|y)} \ln P_\Phi(y) \\
 \\
- & = & E_{z \sim P_\Psi(z|y)} \left(\ln P_\Phi(y)P_\Phi(z|y) + \ln \frac{P_\Psi(z|y)}{P_\Phi(z|y)} + \ln\frac{1}{P_\Psi(z|y)}\right) \\
+ & = & E_{z \sim P_\Psi(z|y)} \left(\ln P_\Phi(y)\frac{P_\Phi(z|y)}{P_\Psi(z|y)} + \ln \frac{P_\Psi(z|y)}{P_\Phi(z|y)}\right) \\
  \\
- & = & \left(E_{z \sim P_\Psi(z|y)} \;\ln\;P_\Phi(z,y)\right) + KL(P_\Psi(z|y),P_\Phi(z|y)) + H(P_\Psi(z|y)) \\
- \\
- & \geq & E_{\color{red} z \sim P_\Psi(z|y)}\;\left(\;\ln\;P_\Phi(z)P_\Phi(y|z) - \ln P_\Psi(z|y)\;\right) \;\;\;\mbox{\color{red} ELBO}
+  & = & \left(E_{z \sim P_\Psi(z|y)} \ln \frac{P_\Phi(z,y)}{P_\Psi(z|y)}\right) + KL(P_\Psi(z|y),P_\Phi(z|y)) \\
+  \\
+  & = & \hspace{4em} \mathrm{\color{red} ELBO} \hspace{4em}  + KL(P_\Psi(z|y),P_\Phi(z|y))
 \end{eqnarray*}
 }
-
-\slidetwo{Variational Inference:}
-{The Evidence Lower Bound (The ELBO)}
-
-$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z)\;\;\mbox{\color{red} unfriendly composition of friendlies}$$
-
-\begin{eqnarray*}
-\ln P_\Phi(y) & = & \mathrm{ELBO} + KL(P_\Psi(z|y),P_\Phi(z|y))
-\end{eqnarray*}
-
-
-\vfill
-{\color{red} If the friendly $P_\Psi(z|y)$ can match the unfriendly $P_\Phi(z|y)$ then the ELBO is exact.}
-
-\slide{Measuring the ELBO}
-
-\vfill
-{\color{red} $$\mathrm{ELBO}(y,\Phi,\Psi)  = E_{z\sim P_\Psi(y)} \; \ln P_\Phi(z)P_\Phi(y|z) - \ln P_\Psi(z)$$}
-
-\vfill
-If $P_\Phi(z)$, $P_\Phi(y|z)$, and $P_\Psi(z|y)$ are friendly (even whwn when $P_\Phi(y)$ is not friendly) we can
-measure ELBO loss through sampling.
-
-\vfill
-If we can measure it, we can do gradient descent on it (but perhaps with difficulty).
-
-\slide{Colorization}
-
-\centerline{\includegraphics[height = 2in]{../images/Colorization}}
-
-$x$ is a black and white image, $y$ a color image, and $z$ a semantic segmentation.
-
-\vfill
-$P_\Phi(z|x)$ is friendly and $P_\Phi(y|z,x)$ is friendly but $P(y|x)$ is not friendly.
-
-\vfill
-$P_\Psi(z|y,x)$ computes a friendly graphical model for $z$ given $y$.
-
-\slide{A General ELBO Architecture}
-\centerline{$P_\Phi(y|x)$ \hspace{10em} $P_\Psi(z|y,x)$}
-
-\vfill
-{\huge \color{red}
-\parbox{4.0in}{
-\begin{eqnarray*}
-& & \mbox{intput}\; x \\
-\vdots \\
-z & = & \expsoftmax_z \ldots \\
-\\
-& & \mbox{input}\; z \\
-\vdots \\
-y & = & \expsoftmax_y\;\ldots
-\end{eqnarray*}
-}
-\hfill
-\parbox{4.0in}{
-\begin{eqnarray*}
-& & \mbox{intput}\; x,y \\
-\vdots \\
-z & = & \expsoftmax_z \ldots \\
-\end{eqnarray*}
-}
-}
-\vfill
-The exponential softmaxes are friendly (they produce a friendly graphical model).
-
-\slide{Two Expressions for the ELBO}
-
-\begin{eqnarray*}
-\ln P_\Phi(y) & = & ELBO(y,\Phi,\Psi) + KL(P_\Psi(z|y),P_\Phi(z|y)) \\
-\\
- ELBO & = & E_{z \sim P_\Psi(z|y)}\; \ln P_\Phi(z,y) + H(P_\Psi(z|y))\;\;\;(1) \\
- \\      
-  & = &{\color{red} \ln\;P_{\Phi}(y) - KL(P_\Psi(z|y),P_{\Phi}(z|y))\;\;\;\;\;\;(2)}
-\end{eqnarray*}
-
 \slide{EM is Alternating Maximization of the ELBO}
-Forward-backward EM for HMMs and inside-outside EM for PCFGs (or any EM) can be written as
 
-\vfill
 \begin{eqnarray*}
-\mathrm{\color{red} ELBO}& = & E_{z \sim P_\Psi(z|y)}\; \ln P_\Phi(z,y) + H(P_\Psi(z|y))\;\;\;(1) \\
+\mathrm{ELBO} & = & E_{z \sim P_\Psi(z|y)}\; \ln \frac{P_\Phi(z,y)}{P_\Psi(z|y)}\;\;\;(1) \\
  \\      
-  & = & \ln\;P_{\Phi}(y) - KL(P_\Psi(z|y),P_{\Phi}(z|y))\;\;\;\;\;\;(2)
-\end{eqnarray*}
+  & = &\ln\;P_{\Phi}(y) - KL(P_\Psi(z|y),P_{\Phi}(z|y))\;\;\;\;\;\;(2)
+  \end{eqnarray*}
 
 \vfill
 \begin{eqnarray*}
@@ -222,6 +141,43 @@ Forward-backward EM for HMMs and inside-outside EM for PCFGs (or any EM) can be 
 \\
 \mbox{by (1)}\;\;\;{\color{red} \Phi^{t+1}} & = & \argmax_{\color{red} \Phi} E_{y \sim \mathrm{Train}} \;E_{z \sim P_{\color{red} {\Phi^t}}(z|y)}\; \ln P_{\color{red} \Phi}(z,y)
 \end{eqnarray*}
+
+\slide{Different Ways of Writing the ELBO}
+
+\begin{eqnarray*}
+\mathrm{ELBO} & = & E_{z \sim P_\Psi(z|y)}\; \ln \frac{P_\Phi(z,y)}{P_\Psi(z|y)} \\
+ \\      
+  & = &\ln\;P_{\Phi}(y) - KL(P_\Psi(z|y),P_{\Phi}(z|y)) \\
+  \\
+  & = & \left(E_{z \sim P_\Psi(z|y)} \ln P(y|z)\right) - KL(P_\Psi(z|x),P_\Phi(z)) \\
+  \\
+  & = & \left(E_{z\sim P_\Psi(z|y)} \;P_\Phi(z,y)\right) + H(P_\Psi(z|y))
+\end{eqnarray*}
+
+\slide{Hard ELBO}
+
+Hard ELBO is to ELBO as hard EM is to EM.
+
+
+\vfill
+\begin{eqnarray*}
+{\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) &  =  & KL(P_\Psi(z|y),P_\Phi(z|y)) - \ln P_\Phi(y) \\
+\\
+{\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) &  =  & E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y) + \ln P_\Psi(z|y) \\
+\\
+{\color{red} {\cal L}_{\mathrm{HELBO}}(y,\Phi,\Psi)} & {\color{red}  =} & {\color{red}  E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y)}
+\end{eqnarray*}
+
+\slide{Measuring the ELBO}
+
+$$\mathrm{ELBO}  =  E_{z \sim P_\Psi(z|y)}\; \ln \frac{P_\Phi(z,y)}{P_\Psi(z|y)}$$
+
+\vfill
+If $P_\Phi(z)$, $P_\Phi(y|z)$, and $P_\Psi(z|y)$ are friendly (even when $P_\Phi(y)$ is not friendly) we can
+measure ELBO loss through sampling.
+
+\vfill
+If we can measure it, we can do gradient descent on it (but perhaps with difficulty).
 
 \slide{We want $\Psi$ to adapt to $\Phi$}
 
@@ -245,33 +201,6 @@ $$E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{ELBO}}(y,P^*,\Psi) = H(\mathrm{Pop}
 \vfill
 It seems important that $P_\Phi(y|z)$ have limited expressive power.
 
-\slide{Hard ELBO}
-
-Hard ELBO is to ELBO as hard EM is to EM.
-
-
-\vfill
-\begin{eqnarray*}
-{\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) &  =  & KL(P_\Psi(z|y),P_\Phi(z|y)) - \ln P_\Phi(y) \\
-\\
-{\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) &  =  & E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y) + \ln P_\Psi(z|y) \\
-\\
-{\color{red} {\cal L}_{\mathrm{HELBO}}(y,\Phi,\Psi)} & {\color{red}  =} & {\color{red}  E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y)}
-\end{eqnarray*}
-
-
-\slide{Hard ELBO and Rate-Distortion Autoencoding}
-
-\begin{eqnarray*}
-{\cal L}_{\mathrm{HELBO}}(y,\Phi,\Psi) &  = &  E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y)
-\end{eqnarray*}
-
-
-\vfill
-{\color{red} $$\min_{P,Q} E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{HELBO}}(y,P,Q) \leq H(\mathrm{Pop}) + \ln 2$$}
-
-\vfill
-This can be proved from Shannon's source coding theorem where $z$ is the code for $y$.
 
 \slide{A VAE for Images}
 
@@ -525,3 +454,43 @@ VAE: {\color{red} $p_\Phi(z|y)$, $p_\Phi(y|z)$} Gaussian:
 }
 \end{document}
 
+
+\slide{Another Way of Writing the ELBO}
+{\huge
+\begin{eqnarray*}
+        \ln P_\Phi(y) & \geq & E_{z \sim P_\Psi(z|y)} \ln \frac{P_\Phi(z,y)}{P_\Psi(z|y)}\;\;\;\mbox{\color{red} ELBO} \\
+        \\
+        & = & E_{z \sim P_\Psi(z|y)} \ln \frac{P_\Phi(z)P_\Phi(y|z)}{P_\Psi(z|y)} \\
+        \\
+        & = & E_{z \sim P_\Psi(z|y)} \left(\ln \frac{P_\Phi(z)}{P_\Psi(z|y)} +\ln P_\Phi(y|z)\right) \\
+        \\
+        & = & {\color{red} \left(E_{z \sim P_\Psi(z|y)} \ln P(y|z)\right) - KL(P_\Psi(z|y),P_\Phi(z))}
+\end{eqnarray*}
+}
+
+\slidetwo{Variational Inference:}
+{The Evidence Lower Bound (The ELBO)}
+
+$$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z)\;\;\mbox{\color{red} unfriendly composition of friendlies}$$
+
+\begin{eqnarray*}
+\ln P_\Phi(y) & = & \mathrm{ELBO} + KL(P_\Psi(z|y),P_\Phi(z|y))
+\end{eqnarray*}
+
+
+\vfill
+{\color{red} If the friendly $P_\Psi(z|y)$ can match the unfriendly $P_\Phi(z|y)$ then the ELBO is exact.}
+
+
+\slide{Hard ELBO and Rate-Distortion Autoencoding}
+
+\begin{eqnarray*}
+{\cal L}_{\mathrm{HELBO}}(y,\Phi,\Psi) &  = &  E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y)
+\end{eqnarray*}
+
+
+\vfill
+{\color{red} $$\min_{P,Q} E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{HELBO}}(y,P,Q) \leq H(\mathrm{Pop}) + \ln 2$$}
+
+\vfill
+This can be proved from Shannon's source coding theorem where $z$ is the code for $y$.

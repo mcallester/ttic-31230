@@ -15,6 +15,47 @@
 \vfill
 \vfill
 \vfill
+\slide{Where We Have Been}
+
+Fundamental Equations (Information Theory)
+
+\vfill
+Frameworks (Back-Propagation)
+
+\vfill
+CNNS, RNNS,  Trainable Architectures (ResNET, Gated RNNs, Attention)
+
+\vfill
+SGD
+
+\vfill
+Generalization and Regularization
+
+\slide{Where We Are Going}
+
+Latent Variable Models (CTC)
+
+\vfill
+Exponential Softmax (Graphical Models)
+
+\vfill
+Rate-Distortion Autoencoders (RDAs)
+
+\vfill
+Variational Autoencoderes (VAEs)
+
+\vfill
+Generative Adversarial Networks (GANs)
+
+\vfill
+Unsupervised Pretraining
+
+\vfill
+Reinforcement Learning (including AlphaZero)
+
+\vfill
+Odds and Ends (Second Order SGD, Information Geometry, The Blackbox Problem, AGI)
+
 \slidetwo{The Fundamental Equation:}
 {Conditional vs. Unconditional}
 
@@ -470,11 +511,11 @@ In a graph with cycles it is common to do {\bf Loopy BP}.
 This is done by initializing all message $Z_{i \rightarrow j}[\tilde{y}] = 1$ and then repeating (until convergence) the updates
 \vfill
 \begin{eqnarray*}
-  P_{j \rightarrow i}[\tilde{y}] & = & \frac{1}{Z}\;Z_{j \rightarrow i}[\tilde{y}] \;\;\;\;\;Z = \sum_{\tilde{y}} Z_{j \rightarrow i}[\tilde{y}] \\
+  \tilde{Z}_{j \rightarrow i}[\tilde{y}] & = & \frac{1}{Z_{j \rightarrow i}}\;Z_{j \rightarrow i}[\tilde{y}] \;\;\;\;\;Z_{j \rightarrow i} = \sum_{\tilde{y}} Z_{j \rightarrow i}[\tilde{y}] \\
   \\
   \\
   Z_{j\rightarrow i}[\tilde{y}] & = & \sum_{\tilde{y}'}  e^{s[j,\tilde{y}'] + s[\{j,i\},\{\tilde{y}',\tilde{y}\}]}
-    \left(\prod_{k \in N(j),\;k \not = i}\;P_{k\rightarrow j}[\tilde{y}']\right)
+    \left(\prod_{k \in N(j),\;k \not = i}\;\tilde{Z}_{k\rightarrow j}[\tilde{y}']\right)
 \end{eqnarray*}
 
 \slide{Other Methods of Approximating Hyperedge Marginals}
@@ -489,7 +530,7 @@ Pseudo-Liklihood
 
 
 \slide{Sampling}
-The quantities ${\color{red} P_e(\tilde{e})}$ are {\bf hyperedge marginals}.
+The quantities ${\color{red} P_e(\tilde{y})}$ are {\bf hyperedge marginals}.
 
 \vfill
 We can estimate the hyperedge marginals by sampling $\hat{y}$ from $P_s(\hat{y})$.
@@ -544,7 +585,7 @@ For $s(\hat{y}) \geq s(\hat{y}')$
 \begin{eqnarray*}
   \mathrm{flow}(\hat{y}' \rightarrow \hat{y}) &  = & \frac{1}{Z}e^{s(\hat{y}')} \frac{1}{N} \\
   \\
-\mathrm{flow}(\hat{y} \rightarrow \hat{y}') & = & \frac{1}{Z}e^{s(\hat{y})} \frac{1}{N} e^{-\Delta f} = \frac{1}{Z} e^{s(\hat{y}')} \frac{1}{N}
+\mathrm{flow}(\hat{y} \rightarrow \hat{y}') & = & \frac{1}{Z}e^{s(\hat{y})} \frac{1}{N} e^{-\Delta s} = \frac{1}{Z} e^{s(\hat{y}')} \frac{1}{N}
 \end{eqnarray*}
 
 \vfill
