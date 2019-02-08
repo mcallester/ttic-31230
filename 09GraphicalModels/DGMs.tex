@@ -15,49 +15,8 @@
 \vfill
 \vfill
 \vfill
-\slide{Where We Have Been}
 
-Fundamental Equations (Information Theory)
-
-\vfill
-Frameworks (Back-Propagation)
-
-\vfill
-CNNS, RNNS,  Trainable Architectures (ResNET, Gated RNNs, Attention)
-
-\vfill
-SGD
-
-\vfill
-Generalization and Regularization
-
-\slide{Where We Are Going}
-
-Latent Variable Models (CTC)
-
-\vfill
-Exponential Softmax (Graphical Models)
-
-\vfill
-Rate-Distortion Autoencoders (RDAs)
-
-\vfill
-Variational Autoencoderes (VAEs)
-
-\vfill
-Generative Adversarial Networks (GANs)
-
-\vfill
-Unsupervised Pretraining
-
-\vfill
-Reinforcement Learning (including AlphaZero)
-
-\vfill
-Odds and Ends (Second Order SGD, Information Geometry, The Blackbox Problem, AGI)
-
-\slidetwo{The Fundamental Equation:}
-{Conditional vs. Unconditional}
+\slide{Distributions on Exponentially Large Sets}
 
 \vfill
 {\color{red}
@@ -66,13 +25,6 @@ $$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Pop}}\;-\ln \;P(y|x)$$
 \vfill
 $$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Pop}}\;-\ln \;P(y)$$
 }
-
-\vfill
-This is a non-distinction: the analysis of the conditional case
-is exactly the same as that of the unconditional case.
-
-\slidetwo{The Fundamental Equation:}
-{Distributions on Exponentially Large Sets}
 
 {\color{red} The structured case:} $y \in {\cal Y}$ where ${\cal Y}$ is discrete but {\color{red} iteration over $\hat{y} \in {\cal Y}$ is infeasible}.
 

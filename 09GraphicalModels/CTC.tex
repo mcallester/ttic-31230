@@ -1,0 +1,103 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2019}
+  \vfill
+  \centerline{\bf Connectionist Temporal Classification (CTC)}
+\vfill
+\vfill
+\vfill
+
+\slidetwo{Connectionist Temporal Classification (CTC)}
+{A Successful Deep Latent Variable Model}
+
+A speech signal
+$$x = x_1,\; \ldots,\; x_{\color{red} T}$$
+is labeled with a phone sequence
+$$y = y_1, \ldots, y_{\color{red} N}$$
+with {\color{red} $N << T$} and with $y_n \in {\cal P}$ for a set of phonemes ${\cal P}$.
+
+\vfill
+{\color{red} The length $N$ of $y$ is not determined by $x$ and the alignment between $x$ and $y$ is not given.}
+
+\slide{The CTC Model}
+
+{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z).$$}
+
+\vfill
+\begin{tabbing}
+Input Signal: \hspace{3em} \=$x = x_1,\;\ldots,\;x_{\color{red} T}$ \\
+Latent Label: \>$z = z_1,\;\ldots,\;z_{\color{red} T},\;\;\;z_t \in {\cal P} \cup \{\bot\}$ \\
+Output: \>$y(z) = y_1,\;\ldots,\;y_{\color{red} N}\;\;\;\;\;\;{\color{red} N << T}$
+\end{tabbing}
+
+\vfill
+$y(z)$ is the result of removing all the occurrences of $\bot$ from $z$:
+
+{\color{red} $$\hspace{5em} z \hspace{7em} \Rightarrow \hspace{2em} y$$}
+{\color{red} $$\bot,a_1,\bot,\bot,\bot,a_2,\bot,\bot,a_3,\bot \;\;\;\Rightarrow\;\; a_1,a_2,a_3$$}
+
+
+\slide{The CTC Model}
+
+For $z \in {\cal P} \cup \{\bot\}$ we have an embedding $e(z)$.  The embedding is a parameter of the model.
+
+\begin{eqnarray*}
+  h_1,\;\ldots,\;h_T & = & \mathrm{RNN}_\Phi(x_1,\;\ldots,\;x_T) \\
+  \\
+  P_\Phi(z_t|x_1,\ldots,x_T) & = & {\color{red} \softmax_{z} \;e(z)^\top h_t}
+\end{eqnarray*}
+
+\vfill
+$z_1$, $\ldots$ $z_T$ are {\color{red}  all independent} given $x$.
+
+
+\slide{Dynamic Programming}
+\begin{eqnarray*}
+  x & = & x_1,\;\ldots,\; x_T \\
+  z & = & z_1, \;\ldots,\;z_T,\;\;\;z_t \in {\cal P}\cup \{\bot\} \\
+  y & = & y_1,\;\ldots,\;y_N,\;\;\;\;y_n \in {\cal P},\;\;\;N << T \\
+  y(z) & = & (z_1,\;\ldots,\;z_T) - \bot
+\end{eqnarray*}
+
+\vfill
+
+\begin{eqnarray*}
+  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
+  {\color{red} F[n,t]} & = & P(\vec{y}_{\color{red} t} = y_1,\;\ldots,\;y_{\color{red} n}) \\
+  P(y) & = & F[N,T]
+\end{eqnarray*}
+
+\slide{Dynamic Programming}
+
+\begin{eqnarray*}
+  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
+  {\color{red} F[n,t]} & = & P(\vec{y}_{\color{red} t} = y_1,\;\ldots,\;y_{\color{red} n})
+\end{eqnarray*}
+
+\vfill
+\begin{tabbing}
+  {\color{red} $F[0,0] = 1$} \\
+  For \=$n = 1,\ldots,N$ {\color{red} $F[n,0] = 0$} \\
+  For \>$t = 1,\dots,T$ \\
+      \>{\color{red} $F[0,t] = P(z_t = \bot) F[0,t-1]$} \\
+      \> for \=$n = 1,\ldots, N$ \\
+      \>     \> {\color{red} $F[n,t] = P(z_t = \bot) F[n,t-1] + P(z_t = y_n)F[n-1,t-1]$}
+\end{tabbing}
+
+\slide{Back-Propagation}
+
+{\color{red} $${\cal L} = - \ln F[N,T]$$}
+
+We can now back-propagate through this computation.
+
+\slide{END}
+}
+
+\end{document}
