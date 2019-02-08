@@ -9,9 +9,8 @@
   \bigskip
   \centerline{David McAllester, Winter 2019}
   \vfill
-  \centerline{\bf Connectionist Temporal Classification (CTC)}
   \vfill
-  \centerline{\bf and Deep Graphical Models}
+  \centerline{\bf Deep Graphical Models}
 \vfill
 \vfill
 \vfill
@@ -27,521 +26,282 @@ $$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Pop}}\;-\ln \;P(y)$$
 }
 
 {\color{red} The structured case:} $y \in {\cal Y}$ where ${\cal Y}$ is discrete but {\color{red} iteration over $\hat{y} \in {\cal Y}$ is infeasible}.
-
-\vfill
-{\color{red} Language modeling} (unconditional) and {\color{red} machine translation} (conditional) are distributions on exponentially large (even infinite) sets.
-
-\slide{Friendly and Unfriendly Distributions}
-
-A model $P_\Phi(y)$ will be called {\color{red} friendly} if we can efficiently sample from it and, for any given $y$, can efficiently compute $P_\Phi(y)$.
-
-\vfill
-{\color{red} Autoregressive} language models (unconditional) and autoregressive machine translation models (conditional) are {\color{red} friendly}.
-
-
-\vfill
-Distributions which are not friendly in this sense will be called {\color{red} unfriendly}.
-
-\slide{The Importance of Being Friendly}
-
-
-{\color{red} If $P_\Phi(y|x)$ can be computed} (a friendly model)
-we can do SGD on cross-entropy loss {\color{red} $- \ln P_\Phi(y|x)$} by back-propagating
-through the computation of $P_\Phi(y|x)$.
-
-\slide{Graphical Models}
-
-\centerline{\includegraphics[height = 4in]{../images/Koller}}
-\centerline{Koller and Friedman, MIT Press, 2009, 1270 pages}
-
 \slide{Semantic Segmentation}
-\centerline{\includegraphics[height = 2.5in]{../images/SLICcolor}}
+\centerline{\includegraphics[height = 2.5in]{../images/SemSeg}}
 \centerline{\huge SLIC superpixels, Achanta et al.}
 
 \vfill
-We want to assign each superpixel one of $k$ semantic classes.
+We want to assign each pixel to one of $C$ semantic classes.
 
 \vfill
 For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
 
+\slide{Constructing a Graph}
 
-\slide{General Markov Random Fields (MRFs)}
-
-\centerline{\includegraphics[height= 1.5in]{../images/Graph}}
-
-$\hat{y} $ assigns a class $\hat{y}[i]$ to each node (superpixel) $i$.
-
-
-$$s(\hat{y}) = \sum_{i \in \mathrm{Nodes}}\; s_i[\hat{y}[i]]\; + \sum_{e \in \mathrm{Edges}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$
+We construct a graph whose nodes are the pixels and where there is an edges between each pixel and its four nearest neighboring pixels.
 
 \vfill
-\centerline{Node Potentials \hspace{4em}Edge Potentials}
+$$\begin{array}{ccccc}
+ & & {\color{red} j(i,\mathrm{up})} \\
+ & & | \\
+ {\color{red} j(i,\mathrm{right})}\;\;\;\; & -& i & -& \;\;\;\;{\color{red} j(i,\mathrm{left})} \\
+ & & | \\
+ & & {\color{red} j(i,\mathrm{down})}
+ \end{array}$$
 
-\slide{An Example}
+\slide{Labeling the Nodes of the Graph }
 
-Consider an image with three superpixels $A$, $B$ and $C$ where
-each superpixel is to labeled as either ``foreground'' or background.
 
-\vfill
-Suppose the unary potentials are all zero.
-
-\vfill
-$$s_A(\mathrm{Foreground}) = s_A(\mathrm{Background}) = 0$$
-$$s_B(\mathrm{Foreground}) = s_B(\mathrm{Background}) = 0$$
-$$s_C(\mathrm{Foreground}) = s_C(\mathrm{Background}) = 0$$
-
-\slide{The Binary Potentials}
-
+$\hat{y} $ assigns a semantic class $\hat{y}[i]$ to each node (pixel) $i$.
 
 \vfill
-Let $F_A$ be the proposition that $A$ is forground and similarly for $F_B$ and $F_C$.
+We assign a score to $\hat{y}$ by assigning a score to each node and each edge of the graph.
+
+{\color{red} $$s(\hat{y}) = \sum_{i \in \mathrm{Nodes}}\; s_n[i,\hat{y}[i]]\; + \sum_{i \in \mathrm{Nodes},\;d \in \{L,R,U,D\}}\;s_e[i,d,\hat{y}[i],\;\hat{y}[j(i,d)]]$$}
+\centerline{Node Scores \hspace{6em}Edge Scores \hspace{3em}~}
+
+
+\slide{Computing the Node and Edge Scores}
+
+We assume a CNN computing {\color{red} node and edge score tensors}
+\vfill
+$$\begin{array}{lrcl}
+& \mbox{intput image} \\
+& \vdots \\
+& \mbox{CNN} \\
+& \vdots \\
+\mathrm{for}\;i,c & \;{\color{red} s_n[i,c]} & = & \ldots \\
+\mathrm{for}\;i,d,c,c' & {\color{red} s_e[i,d,c,c']} & = & \ldots \\
+\end{array}$$
 
 \vfill
-We can express $F_A \Rightarrow F_B$ with
-$$s_{A,B}(\mathrm{Foreground},\mathrm{Background}) = -1$$
-$$s_{A,B}(\mathrm{Foreground},\mathrm{Foreground}) = 1$$
-$$s_{A,B}(\mathrm{Background},\mathrm{Background}) = 1$$
-$$s_{A,B}(\mathrm{Background},\mathrm{Foreground}) = 1$$
+The tensor {\color{red} $s_n[i,c]$} holds $PC$ scores.
 
 \vfill
-The binary potentials are then given by
-$F_A \Rightarrow F_B$, $F_B \Rightarrow F_C$, $F_C \Rightarrow F_A$.
+The tensor {\color{red} $s_e[i,j,c,c']$} holds $4PC^2$ scores.
 
-\slide{The Full Configuration Potential}
-
-For any configuration $\hat{y}$ we have that $s(\hat{y})$ is the sum of the unary and binary potentials.
-
-\vfill
-If none are foreground we have $s(\hat{y}) = 3$
-
-\vfill
-If one is foreground we have $s(\hat{y}) = -1 + 1+ 1 = 1$
-
-\vfill
-If two are foreground we also have $s(\hat{y}) = -1 + 1+ 1 = 1$
+\slide{Computationally Infeasible Exponential Softmax}
+$$\begin{array}{lrcl}
+& \mbox{intput image} \\
+& \vdots \\
+& \mbox{CNN} \\
+& \vdots \\
+\mathrm{for}\;i,c & \;{\color{red} s_n[i,c]} & = & \ldots \\
+\mathrm{for}\;i,d,c,c' & {\color{red} s_e[i,d,c,c']} & = & \ldots
+\end{array}$$
 
 \vfill
-If all are foreground we have $s(\hat{y}) = 3$.
+$$\begin{array}{lrcl}
+\mbox{for}\;\hat{y} & {\color{red} s(\hat{y})} & = & \sum_i\;s_n[i,\hat{y}[i]] + \sum_{i,d}\;s_e[i,d,\hat{y}[i],\;\hat{y}[j[i,d)]] \\
+\mbox{for}\;\hat{y} & {\color{red} P(\hat{y})} & = & \expsoftmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
+ & {\cal L} & = & {\color{red} - \ln P(y) \;\;\;\mbox{gold label $y$}}
+\end{array}$$
 
-\vfill
-$$Z = 6*1 + 2*3 = 12\;\;\;\;P_A(\mathrm{Foregound}) = \frac{3*1 + 3}{12} = \frac{1}{2}$$
-
-\anaslide{Exponential Softmax}
-\bigskip
+\slide{Exponential Softmax is Typically Intractable}
 \centerline{\includegraphics[height= 1.5in]{../images/Graph}}
 \medskip
-$\hat{y} $ assigns a class $\hat{y}[i]$ to each node (superpixel) $i$.
-\bigskip
-\bigskip
-{\color{red}
-\begin{eqnarray*}
-P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
-\end{eqnarray*}
-}
+$\hat{y} $ assigns a label $\hat{y}[i]$ to each node $i$.
 
 \vfill
-{\color{red} $$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$}
+$s(\hat{y})$ is defined by a sum over node and edge tensor scores.
 
-\anaslide{Exponential Softmax is Typically Unfriendly}
-\bigskip
-\centerline{\includegraphics[height= 1.5in]{../images/Graph}}
-\medskip
-$\hat{y} $ assigns a class $\hat{y}[i]$ to each node (superpixel) $i$.
-\bigskip
-\bigskip
-{\color{red}
-\begin{eqnarray*}
-P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
-\end{eqnarray*}
-}
+\vfill
+$P(\hat{y})$ is defined by an exponential softmax over $s(\hat{y})$.
 
 \vfill
 Computing $Z$ in general is \#P hard.
 
-\vfill
-{\color{red} But special cases can be friendly and approximations can be made in unfriendly cases.}
+\slide{Back-Propagation Through Intractable Softmax}
 
-\slide{Latent Variables}
+$$\begin{array}{lrcl}
+& \vdots \\
+\mathrm{for}\;i,c & \;{\color{red} s_n[i,c]} & = & \ldots \\
+\mathrm{for}\;i,d,c,c' & {\color{red} s_e[i,d,c,c']} & = & \ldots
+\end{array}$$
 
-We are often interested in models of the form
-
-\vfill
-{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
-
-\vfill
-Probabilistic grammar models have this form where $y$ is a sentence and $z$ is a parse tree
-and $P(y|z)$ is deterministic.
-
-\slide{A Composition of Friendlies is Typically  Unfriendly}
-
-{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
+$$\begin{array}{lrcl}
+\mbox{for}\;\hat{y} & {\color{red} s(\hat{y})} & = & \sum_i\;s_n[i,\hat{y}[i]] + \sum_{i,d}\;s_e[i,d,\hat{y}[i],\;\hat{y}[j[i,d)]] \\
+\mbox{for}\;\hat{y} & {\color{red} P(\hat{y})} & = & \expsoftmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
+ & {\cal L} & = & {\color{red} - \ln P(y) \;\;\;\mbox{gold label $y$}}
+\end{array}$$
 
 \vfill
-It is often the case that $P_\Phi(z)$ is friendly, and $P_\Phi(y|z)$ is friendly, but $P_\Phi(y)$ is not friendly (the sum over $z$ is intractible).
+We need to compute {\color{red} $s_n.\grad[i,c]$} and {\color{red} $s_e.\grad[i,d,c,c']$}.
 
 \vfill
-For example $z$ might be uniformly distributed over assignments of truth values to Boolean variables (which is friendly) and $y$ might be the value of a fixed Boolean formula $\Phi$ (which is friendly given $z$).  In this case
-determining if $P_\Phi(y) > 0$ is the SAT problem which is NP hard.
+Although exact calculation is intractable, in practice the gradients can be approximated.
 
-\slidetwo{Connectionist Temporal Classification (CTC)}
-{A Successful Deep Latent Variable Model}
+\slide{Model Marginals Theorem}
 
-A speech signal
-$$x = x_1,\; \ldots,\; x_{\color{red} T}$$
-is labeled with a phone sequence
-$$y = y_1, \ldots, y_{\color{red} N}$$
-with {\color{red} $N << T$} and with $y_n \in {\cal P}$ for a set of phonemes ${\cal P}$.
-
-\vfill
-{\color{red} The length $N$ of $y$ is not determined by $x$ and the alignment between $x$ and $y$ is not given.}
-
-\slide{CTC: A Friendly Compositions of Friendlies}
-
-{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z).$$}
-
-\vfill
-\begin{tabbing}
-Input Signal: \hspace{3em} \=$x = x_1,\;\ldots,\;x_{\color{red} T}$ \\
-Latent Label: \>$z = z_1,\;\ldots,\;z_{\color{red} T},\;\;\;z_t \in {\cal P} \cup \{\bot\}$ \\
-Output: \>$y(z) = y_1,\;\ldots,\;y_{\color{red} N}\;\;\;\;\;\;{\color{red} N << T}$
-\end{tabbing}
-
-\vfill
-$y(z)$ is the result of removing all the occurrences of $\bot$ from $z$:
-
-{\color{red} $$\hspace{5em} z \hspace{7em} \Rightarrow \hspace{2em} y$$}
-{\color{red} $$\bot,a_1,\bot,\bot,\bot,a_2,\bot,\bot,a_3,\bot \;\;\;\Rightarrow\;\; a_1,a_2,a_3$$}
-
-
-\slide{The CTC Model}
-
-For $z \in {\cal P} \cup \{\bot\}$ we have an embedding $e(z)$.  The embedding is a parameter of the model.
-
+Theorem:
 \begin{eqnarray*}
-  h_1,\;\ldots,\;h_T & = & \mathrm{RNN}_\Phi(x_1,\;\ldots,\;x_T) \\
-  \\
-  P_\Phi(z_t|x_1,\ldots,x_T) & = & {\color{red} \softmax_{z} \;e(z)^\top h_t}
+    s_n.\mathrm{grad}[i,c] & = &  {\color{red} P_{\hat{y} \sim P_s}(\;\;\hat{y}[i] = c\;\;)} \\
+    & & \;\;\;\;\;- \bbone[\;\;y[i] = c\;\;] \\
+    \\
+    s_e.\mathrm{grad}[i,d,c,c'] & = &  {\color{red} P_{\hat{y} \sim P_s}(\;\;\hat{y}[i] = c \; \wedge \; \hat{y}[j(i,d)] = c'\;\;)} \\
+    & & \;\;\;\;\;- \bbone[\;\;y[i] = c\; \wedge \; y[j(i,d)] =
+    c'\;\;]
 \end{eqnarray*}
 
 \vfill
-$z_1$, $\ldots$ $z_T$ are {\color{red}  all independent} given $x$ (very friendly).
+To approximately back-propagate log loss of an intractable graphical model it suffices to approximate
+{\color{red} the model marginals} in red above.
 
-\vfill
-$P_\Phi(y|z)$ is {\color{red} deterministic} (very friendly).
+\slide{Proof of Model Marginals Theorem}
 
-\vfill
-{\color{red} But it is not obvious whether $P_\Phi(y|x)$ is friendly.}
+We consider the case of node marginals.
 
-
-\slide{Dynamic Programming}
-\begin{eqnarray*}
-  x & = & x_1,\;\ldots,\; x_T \\
-  z & = & z_1, \;\ldots,\;z_T,\;\;\;z_t \in {\cal P}\cup \{\bot\} \\
-  y & = & y_1,\;\ldots,\;y_N,\;\;\;\;y_n \in {\cal P},\;\;\;N << T \\
-  y(z) & = & (z_1,\;\ldots,\;z_T) - \bot
-\end{eqnarray*}
-
-\vfill
-
-\begin{eqnarray*}
-  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
-  {\color{red} F[n,t]} & = & P(\vec{y}_{\color{red} t} = y_1,\;\ldots,\;y_{\color{red} n}) \\
-  P(y) & = & F[N,T]
-\end{eqnarray*}
-
-\slide{Dynamic Programming}
-
-\begin{eqnarray*}
-  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
-  {\color{red} F[n,t]} & = & P(\vec{y}_{\color{red} t} = y_1,\;\ldots,\;y_{\color{red} n}) \\
-\end{eqnarray*}
-
-\begin{eqnarray*}
-  F[0,0] & = & 1 \\
-  F[n,0] & = & 0 \;\;\;\mbox{for $n > 0$} \\
-  {\color{red} F[n,t]} & = & {\color{red} P(z_t = \bot) F[n,t-1] + P(z_t = y_n)F[n-1,t-1]}
-\end{eqnarray*}
-
-\slide{Semantic Segmentation}
-\centerline{\includegraphics[height = 2.5in]{../images/SLICcolor}}
-\centerline{\huge SLIC superpixels, Achanta et al.}
-
-\vfill
-We want to assign each superpixel one of $k$ semantic classes.
-
-\vfill
-For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
-
-\slide{Unfriendly Exponential Softmax}
-\bigskip
-\centerline{\includegraphics[height= 1.5in]{../images/Graph}}
-\medskip
-$\hat{y} $ assigns a class $\hat{y}[i]$ to each node (superpixel) $i$.
-\bigskip
-\bigskip
-{\color{red}
-\begin{eqnarray*}
-P_\Phi(\hat{y}|x) & = & \expsoftmax_{\hat{y}}\;s_\Phi(\hat{y}|x)
+{\huge \begin{eqnarray*}
+    s_n.\mathrm{grad}[i,c] & = & \partial (\ln Z - s(y))\;/\;\partial s_n[i,c] \\
+    & = & \left(\frac{1}{Z} \sum_{\hat{y}} e^{s(\hat{y})} \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
+    - \left(\partial s(y) /\partial s_b[i,c]\right)    \\
+    \\
+    & = & \left(\sum_{\hat{y}} P_s(\hat{y}) \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
+    - \left(\partial s(y) /\partial s_n[i,c]\right)    \\
+    \\
+    & = & E_{\hat{y} \sim P_s}\bbone[\hat{y}[i] = c]
+    - \mathbbm{1}[y[i] = c] \\
+    \\
+    & = & {\color{red} P_{\hat{y} \sim P_s}(\hat{y}[i] = c)}
+      - \mathbbm{1}[y[i] = c]
 \end{eqnarray*}
 }
 
-\vfill
-{\color{red} $$s_\Phi(\hat{y}|x) = \sum_{i \in {\cal I}} s_i[\hat{y}[i]] + \sum_{e \in {\cal E}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$}
-
-\slide{Back-Propagation Through Unfriendly Softmax}
-
-\vfill
-\begin{eqnarray*}
-\mbox{intput}\; x \\
- & \vdots & \\
-{\color{red} s_i[c]} & = & \ldots \\
-{\color{red} s_e[c,c']} & = & \ldots \\
-{\cal L} & = & - \ln\; P(y\;|\;{\color{red} s_{\cal I}[{\cal C}]},\;{\color{red} s_{\cal E}[{\cal C}, {\cal C}]})
-\end{eqnarray*}
-
-\vfill
-We need to compute {\color{red} $s_i.\grad[c]$} and {\color{red} $s_e.\grad[c,c']$}.
-
-\slide{Hyper-Graphs: More General and More Concise}
-
-A hyper-edge is a subset of nodes.
-
-\vfill
-\centerline{\includegraphics[height = 1.5in]{../images/HyperGraph}}
-
-
-$$s(\hat{y}) = \sum_{i \in \mathrm{Nodes}}\; s_i[\hat{y}[i]]\; + \sum_{e \in \mathrm{Edges}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$
-
-\vfill
-
-$${\color{red} s(\hat{y}) = \sum_{e \in \mathrm{HyperEdges}}  \; s_e[\hat{y}[e]]}$$
-
-
-\slide{Hyper-Graph Models}
-
-We will abbreviate $s_e[\hat{y}[e]]$ as {\color{red} $s_e[\tilde{y}]$}.
-
-\vfill
-{\color{red} $\tilde{y}$ has a small number of possible values.}
-
-\vfill
-The hyper-graph model is defined by the ``tensor'' {\color{red} $s_e(\tilde{y})$}.
-
-
-\slide{Backpropagation}
-
-The input is the image $x$ and the parameter package $\Phi$
-
-\begin{eqnarray*}
- & \vdots & \\
-s_e[\tilde{y}] & = & \ldots \\
-{\cal L} & = & - \ln\; P(y\;|\;s_{\cal E}[{\cal Y}])
-\end{eqnarray*}
-
-\vfill We abbreviate $P(\hat{y}\;|\;s_{\cal E}[{\cal Y}])$ as {\color{red} $P_s(\hat{y})$} --- the distribution on $\hat{y}$ defined by the tensor $s$.
-\vfill
-We need to compute {\color{red} $\nabla_s -\ln P_s(y)$}, or equivalently, {\color{red} $s_e.\grad[\hat{y}[e]]$}.
-
-\slide{Back-Propagation Through An Exponential Softmax}
-
-\begin{eqnarray*}
-  {\cal L}(s,y) & = & - \ln \left(\frac{1}{Z(s)}\;e^{s(y)}\right) \\
-  \\
-  & = & \ln Z(s) - s(y) \\
-  \\
-  \\
-  s_e.\mathrm{grad}[\tilde{y}]
-    & = & \left(\frac{1}{Z} \sum_{\hat{y}} e^{s(\hat{y})} \left(\partial s(\hat{y})/\partial s_e[\tilde{y}]\right)\right)
-    - \left(\partial s(y) /\partial s_e[\tilde{y}]\right)
-\end{eqnarray*}
-
-\slide{Back-Propagation Through An Exponential Softmax}
-
-\bigskip
-\begin{eqnarray*}
-    s_e.\mathrm{grad}[\tilde{y}]
-    & = & \left(\frac{1}{Z} \sum_{\hat{y}} e^{s(\hat{y})} \left(\partial s(\hat{y})/\partial s_e[\tilde{y}]\right)\right)
-    - \left(\partial s(y) /\partial s_e[\tilde{y}]\right)    \\
-    \\
-    & = & \left(\sum_{\hat{y}} P_s(\hat{y}) \left(\partial s(\hat{y})/\partial s_e[\tilde{y}]\right)\right)
-    - \left(\partial s(y) /\partial s_e[\tilde{y}]\right)    \\
-    \\
-    & = & E_{\hat{y} \sim P_s}\bbone[\hat{y}[e] = \tilde{y}]
-    - \mathbbm{1}[y[e] = \tilde{y}] \\
-    \\
-    & = & {\color{red} P_{\hat{y} \sim P_s}(\hat{y}[e] = \tilde{y})}
-      - \mathbbm{1}[y[e] = \tilde{y}]
-\end{eqnarray*}
-
-\slide{Hyperedge Marginals}
-
-\begin{eqnarray*}
-    s.\mathrm{grad}[e,\tilde{y}]
-    & = &  {\color{red} P_{\hat{y} \sim P_s}(\hat{y}[e] = \tilde{y})} - \bbone[y[e] = \tilde{y}] \\
-\end{eqnarray*}
-
-\vfill
-We write {\color{red} $P_e(\tilde{y})$} for the {\color{red} hyperedge marginal} $P_{\hat{y} \sim P_s}(\hat{y}(e) = \tilde{y})$.
-
-\vfill
-To back-propagate log loss on a labeling of an unfriendly MRF {\color{red} it suffices to compute (or perhaps approximate)
-the current model's hyperedge marginals ${\color{red} P_e(\tilde{y})}$.}
-
-\slide{Tree-Structured Models are Friendly}
-
-\centerline{\includegraphics[height= 2in]{../images/Tree}}
-
-\vfill
-Tree structure models can always be locally renormalized to form ``autoregressive'' models that
-predict one node at a time.
-
-\vfill
-Also, the hyperedge marginals can be computed exactly.
-
-
-\anaslide{Belief Propagation}
-
-\centerline{\includegraphics[height=1.5in]{../images/Tree}}
-
-\vfill
-Belief Propagation is a message passing procedure (actually dynamic programming).
-
-\vfill
-For each edge $\{i,j\}$ and possible value $\tilde{y}$ for node $i$ we define {\color{red} $Z_{j \rightarrow i}[\tilde{y}]$}
-to be  the partition function for the subtree attached to $i$ through $j$ and
-with $\hat{y}[i]$ restricted to $\tilde{y}$.
-
-\vfill
-The function $Z_{j \rightarrow i}$ on the possible values of node $i$ is called the {\bf message} from $j$ to $i$.
-
-\vfill
-The reverse direction message $Z_{i \rightarrow j}$ is defined similarly.
-
-\slide{Computing the Messages}
-
-\centerline{\includegraphics[height=2.0in]{../images/Tree}}
-
-\vfill
-\begin{eqnarray*}
-  Z_{j\rightarrow i}[\tilde{y}] & = & \sum_{\tilde{y}'}  e^{s_j[\tilde{y}'] + s[\{j,i\},\{\tilde{y}',\tilde{y}\}]}
-    \left(\prod_{k \in N(j),\;k \not = i}\;Z_{k\rightarrow j}[\tilde{y}']\right)
-\end{eqnarray*}
-
-\anaslide{Computing Node Marginals from Messages}
-
-\centerline{\includegraphics[height=1.5in]{../images/Tree}}
-
-\begin{eqnarray*}
-Z_i(\tilde{y}) & \doteq & \sum_{\hat{y}:\; \hat{y}[i] = \tilde{y}} \;e^{s(\hat{y})} \\
-\\
-& = & e^{s_i[\tilde{y}]} \left(\prod_{j\in N(i)} Z_{j \rightarrow i}[\tilde{y}]\right) \\
-\\
-{\color{red} P_i(\tilde{y})} & = & Z_i(\tilde{y})/Z,\;\;\;\;\; Z = \sum_{\tilde{y}}\;Z_i(\tilde{y})
-\end{eqnarray*}
-
-
-\anaslide{Computing Edge Marginals from Messages}
-
-\begin{eqnarray*}
-Z_{\{i,j\}}(\tilde{y}) & \doteq & \sum_{\hat{y}:\; \hat{y}[\{i,j\}] = \tilde{y}} \;e^{s(\hat{y})} \\
-\\
-& = & e^{s[i,\tilde{y}[i]] + s[j,\tilde{y}[j]] +s[\{i,j\},\tilde{y}]} \\
-& & \prod_{k\in N(i),\;k \not = j} Z_{k \rightarrow i}[\tilde{y}[i]] \\
-& & \prod_{k\in N(j),\;k \not = i} Z_{k \rightarrow j}[\tilde{y}[j]] \\
-\\
-{\color{red} P_{\{i,j\}}(\tilde{y})} & = & Z_{\{i,j\}}(\tilde{y})/Z
-\end{eqnarray*}
-
-\slide{Loopy BP}
-
-Message passing is also called belief propagation (BP).
-
-\vfill
-In a graph with cycles it is common to do {\bf Loopy BP}.
-
-\vfill
-This is done by initializing all message $Z_{i \rightarrow j}[\tilde{y}] = 1$ and then repeating (until convergence) the updates
-\vfill
-\begin{eqnarray*}
-  \tilde{Z}_{j \rightarrow i}[\tilde{y}] & = & \frac{1}{Z_{j \rightarrow i}}\;Z_{j \rightarrow i}[\tilde{y}] \;\;\;\;\;Z_{j \rightarrow i} = \sum_{\tilde{y}} Z_{j \rightarrow i}[\tilde{y}] \\
-  \\
-  \\
-  Z_{j\rightarrow i}[\tilde{y}] & = & \sum_{\tilde{y}'}  e^{s[j,\tilde{y}'] + s[\{j,i\},\{\tilde{y}',\tilde{y}\}]}
-    \left(\prod_{k \in N(j),\;k \not = i}\;\tilde{Z}_{k\rightarrow j}[\tilde{y}']\right)
-\end{eqnarray*}
-
-\slide{Other Methods of Approximating Hyperedge Marginals}
+\slide{Methods of Approximating Model Marginals}
 
 MCMC Sampling
 
 \vfill
-Constrastive Divergence
+Loopy Belief Propagation
 
 \vfill
 Pseudo-Liklihood
 
+\vfill
+Constrastive Divergence
 
-\slide{Sampling}
-The quantities ${\color{red} P_e(\tilde{y})}$ are {\bf hyperedge marginals}.
+\slide{MCMC Sampling}
+The model marginals, such as the node marginals
+ ${\color{red} P_s(\hat{y}[i]=c)}$, can be estimated by sampling $\hat{y}$ from $P_s(\hat{y})$.
 
 \vfill
-We can estimate the hyperedge marginals by sampling $\hat{y}$ from $P_s(\hat{y})$.
-
-\slide{Monte Carlo Markov Chain (MCMC) Sampling}
-
-\centerline{\bf Metropolis Algorithm}
+We will design a Markov process whose states are segmentations $\hat{y}$ and whose stationary distribution is $P_s$.
 
 \vfill
-Pick an initial graph label $\hat{y}$ and then repeat:
+We will run the process past its mixing time to get a sample $\hat{y}$ from $P_s$.
 
-\begin{enumerate}
-\item Pick a ``neighbor'' $\hat{y}'$ of $\hat{y}$ uniformly at random.  The neighbor relation must be symmetric.  Perhaps Hamming distance one.
+\slide{A Neighbor Relation on States}
+
+We will say that segmentations (states) $\hat{y}$ and $\hat{y}'$ are neighbors if they differ in exactly one pixel.
+
+\vfill
+Note that the number of neighbors of $\hat{y}$ is $P(C-1)$.
+
+\vfill
+We will write $N(\hat{y})$ for the set of neighbors of $\hat{y}$.
+
+
+\vfill
+For the correctness of the Metropolis algorithm we need that all states have the same number of neighbors
+and $\hat{y}' \in N(\hat{y})$ if and only if $\hat{y} \in N(\hat{y}')$.
+
+\slide{The Metropolis Markov Chain}
+
+We need to define state transition probabilities.
+
+\vfill
+In the {\color{red} Metropolis algorithm} we do the following.
+
+\vfill
+\vfill
+Pick an initial state $\hat{y}$ and then repeat:
+\vspace{-2ex}
+\begin{quotation}
+\noindent \begin{enumerate}
+        \item Pick a neighbor $\hat{y}' \in N(\hat{y})$ uniformly at random.
+
+        \vfill
+        \item If $P_s(\hat{y}') \geq P_s(\hat{y})$ then do $\hat{y} = \hat{y}'$
 
   \vfill
-\item If $s(\hat{y}') > s(\hat{y})$ update $\hat{y} = \hat{y}'$
-
-  \vfill
-\item If $s(\hat{y}') \leq s(\hat{y})$ then update $\hat{y} = \hat{y}'$ with probability $e^{-(s(\hat{y}) - s(\hat{y}'))}$
+\item If $P_s(\hat{y}') < P_s(\hat{y})$ then do $\hat{y} = \hat{y}'$ with probability $\frac{P_s(\hat{y}')}{P_s(\hat{y})}$
   \end{enumerate}  
+\end{quotation}
 
-\slide{Markov Processes and Stationary Distributions}
+\slide{The Metropolis Markov Chain}
+Pick an initial state $\hat{y}$ and then repeat:
+\vspace{-2ex}
+\begin{quotation}
+\noindent \begin{enumerate}
+        \item Pick a neighbor $\hat{y}' \in N(\hat{y})$ uniformly at random.
 
-A Markov process is a process defined by a fixed state transition probability $P(\hat{y}'|\hat{y}) = M_{\hat{y}',\hat{y}}$.
+        \vfill
+        \item If $P_s(\hat{y}') \geq P_s(\hat{y})$ then do $\hat{y} = \hat{y}'$
 
-\vfill
-Let $P^t$ the probability distribution for time $t$.
-
-\vfill
-$$P^{t+1} = MP^t$$
-
-\vfill
-If every state can be reached form every state (ergodic process) then $P^t$ converges to a unique {\bf stationary distribution} $P^\infty$
-
-\vfill
-$$P^\infty = MP^\infty$$
-
-\slide{Metropolis Theorem}
-
-To verify that the Metropolis process has the correct stationary distribution we simply verify that $MP = P$ where $P$
-is the desired distribution.
+  \vfill
+\item If $P_s(\hat{y}') < P_s(\hat{y})$ then do $\hat{y} = \hat{y}'$ with probability $\frac{P_s(\hat{y}')}{P_s(\hat{y})}$
+  \end{enumerate}  
+\end{quotation}
 
 \vfill
-This can be done by checking that under the desired distribution the flow from $\hat{y}$ to $\hat{y}'$
-equals the flow from $\hat{y}'$ to $\hat{y}$ ({\bf detailed balance}).
-
-\slide{Metropolis Theorem}
-
-For $s(\hat{y}) \geq s(\hat{y}')$
+Note that we can determine which probability is larger just by comparing scores --- we do not need to know $Z$.
 
 \vfill
+Also note that the ratio $P_s(\hat{y}')/P_s(\hat{y})$ can be computed from the scores without knowledge of $Z$.
+
+\slide{The Metropolis Markov Chain}
+We need to show that $P_s$ is a stationary distribution of this process.
+
+\vfill
+We must show that if we select $\hat{y}_t$ from $P_s$ and then select $\hat{y}_{t+1}$ using the transition probabilities for the process from $\hat{y}_t$
+then the distribution on $\hat{y}_{t+1}$ is also $P_s$.
+
+\slide{The Metropolis Markov Chain}
+
+{\huge
 \begin{eqnarray*}
-  \mathrm{flow}(\hat{y}' \rightarrow \hat{y}) &  = & \frac{1}{Z}e^{s(\hat{y}')} \frac{1}{N} \\
-  \\
-\mathrm{flow}(\hat{y} \rightarrow \hat{y}') & = & \frac{1}{Z}e^{s(\hat{y})} \frac{1}{N} e^{-\Delta s} = \frac{1}{Z} e^{s(\hat{y}')} \frac{1}{N}
+P'(\hat{y}) & = & \sum_{\hat{y}'}\;P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') \\
+\\
+& = & P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}) + \sum_{\hat{y}' \in N(\hat{y})}\;P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') \\
+\\
+& = & P_s(\hat{y})\left(1 - \sum_{\hat{y}' \in N(\hat{y})} P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})\right) + \sum_{\hat{y}' \in N(\hat{y})}\;P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') \\
+\\
+\\
+& = & P_s(\hat{y}) + \sum_{\hat{y}' \in N(\hat{y})}\;P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') - P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})
 \end{eqnarray*}
+}
+
+\slide{Detailed Balance}
+
+{\huge
+\begin{eqnarray*}
+P'(\hat{y}) & = & P_s(\hat{y}) + \sum_{\hat{y}' \in N(\hat{y})}\;{\color{red} P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') - P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})}
+\end{eqnarray*}
+}
 
 \vfill
-But detailed balance is not required in general (see Hamiltonian MCMC).
+{\color{red} $P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}')$} is an amount of probability mass that moves from $\hat{y}'$ to $\hat{y}$.
+
+\vfill
+{\color{red} $P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})$} is an amount of probability mass that moves from $\hat{y}$ to $\hat{y}'$.
+
+\vfill
+If these two flows are equal we call it {\color{red} detailed balance}.
+
+\vfill
+Detailed balance implies {\color{red} $P'(\hat{y}) = P_s(\hat{y})$} and hence $P_s$ is the stationary distribution.
+
+\slide{Detailed Balance}
+
+For $P_s(\hat{y}) \geq P_s(\hat{y}')$ we have
+
+\begin{eqnarray*}
+{\color{red} P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})} & = & P_s(\hat{y})\;\frac{1}{|N(\hat{y})|}\;\frac{P_s(\hat{y}')}{P_s(\hat{y})} \\
+\\
+& = & \frac{P_s(\hat{y}')}{|N(\hat{y})|} \\
+\\
+& = & {\color{red} P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}')}
+\end{eqnarray*}
 
 \slide{Gibbs Sampling}
 
@@ -585,6 +345,75 @@ $P_s(\hat{y})$ is a stationary distribution of Gibbs Sampling.
 
 \vfill
 The distribution before the update equals the distribution after the update.
+
+\slide{Loopy Belief Propagation (Loopy BP)}
+
+We design an algorithm that is correct for tree graphs and use it on non-tree (loopy) graphs.
+
+\anaslide{Belief Propagation on Trees}
+
+\centerline{\includegraphics[height=1.5in]{../images/Tree}}
+
+\vfill
+Belief Propagation is a message passing procedure (actually dynamic programming).
+
+\vfill
+For each edge $\{i,j\}$ and possible value $\tilde{y}$ for node $i$ we define {\color{red} $Z_{j \rightarrow i}[c]$}
+to be  the partition function for the subtree attached to $i$ through $j$ and
+with $\hat{y}[i]$ restricted to $c$.
+
+\vfill
+The function $Z_{j \rightarrow i}$ on the possible values of node $i$ is called the {\bf message} from $j$ to $i$.
+
+\vfill
+The reverse direction message $Z_{i \rightarrow j}$ is defined similarly.
+
+\slide{Computing the Messages}
+
+\centerline{\includegraphics[height=2.0in]{../images/Tree}}
+
+\vfill
+\begin{eqnarray*}
+  Z_{j\rightarrow i}[c] & = & \sum_{c'}  e^{s_n[j,c'] + s_e[j,i,c',c]}
+    \left(\prod_{k \in N(j),\;k \not = i}\;Z_{k\rightarrow j}[c']\right)
+\end{eqnarray*}
+
+\anaslide{Computing Node Marginals from Messages}
+
+\centerline{\includegraphics[height=1.5in]{../images/Tree}}
+
+\begin{eqnarray*}
+Z_i(c) & \doteq & \sum_{\hat{y}:\; \hat{y}[i] = c} \;e^{s(\hat{y})} \\
+\\
+& = & e^{s_i[c]} \left(\prod_{j\in N(i)} Z_{j \rightarrow i}[c]\right) \\
+\\
+{\color{red} P_i(c)} & = & Z_i(c)/Z,\;\;\;\;\; Z = \sum_{c}\;Z_i(c) = \sum_{\hat{y}} e^{s(\hat{y})}
+\end{eqnarray*}
+
+
+\anaslide{Computing Edge Marginals from Messages}
+
+\begin{eqnarray*}
+Z_{i,j}(c,c') & \doteq & \sum_{\hat{y}:\; \hat{y}[i] = c,\;\hat{y}[j] = c'} \;e^{s(\hat{y})} \\
+\\
+& = & e^{s_n[i,c] + s_n[j,c'] +s_e[i,j,c,c']} \\
+& & \prod_{k\in N(i),\;k \not = j} Z_{k \rightarrow i}[c] \\
+& & \prod_{k\in N(j),\;k \not = i} Z_{k \rightarrow j}[c'] \\
+\\
+{\color{red} P_{i,j}(c,c')} & = & Z_{i,j}(c,c')/Z
+\end{eqnarray*}
+
+\slide{Loopy BP}
+
+In a Loopy Graph we can initializing all message $Z_{i \rightarrow j}[c] = 1$ and then repeating (until convergence) the updates
+\vfill
+\begin{eqnarray*}
+  \tilde{Z}_{j \rightarrow i}[c] & = & \frac{1}{Z_{j \rightarrow i}}\;Z_{j \rightarrow i}[c] \;\;\;\;\;Z_{j \rightarrow i} = \sum_{c} Z_{j \rightarrow i}[c] \\
+  \\
+  \\
+  Z_{j\rightarrow i}[c] & = & \sum_{c'}  e^{s_n[j,c'] + s_e[j,i,c',c]}
+    \left(\prod_{k \in N(j),\;k \not = i}\;\tilde{Z}_{k\rightarrow j}[c']\right)
+\end{eqnarray*}
 
 \slide{Pseudolikelihood}
 
@@ -680,3 +509,94 @@ for training unfriendly graphical models.
 
 }
 \end{document}
+
+\slide{An Example}
+
+Consider an image with three superpixels $A$, $B$ and $C$ where
+each superpixel is to labeled as either ``foreground'' or background.
+
+\vfill
+Suppose the unary scores are all zero.
+
+\vfill
+$$s_A(\mathrm{Foreground}) = s_A(\mathrm{Background}) = 0$$
+$$s_B(\mathrm{Foreground}) = s_B(\mathrm{Background}) = 0$$
+$$s_C(\mathrm{Foreground}) = s_C(\mathrm{Background}) = 0$$
+
+\slide{The Binary Scores}
+
+
+\vfill
+Let $F_A$ be the proposition that $A$ is forground and similarly for $F_B$ and $F_C$.
+
+\vfill
+We can express $F_A \Rightarrow F_B$ with
+$$s_{A,B}(\mathrm{Foreground},\mathrm{Background}) = -1$$
+$$s_{A,B}(\mathrm{Foreground},\mathrm{Foreground}) = 1$$
+$$s_{A,B}(\mathrm{Background},\mathrm{Background}) = 1$$
+$$s_{A,B}(\mathrm{Background},\mathrm{Foreground}) = 1$$
+
+\vfill
+The binary scores are then given by
+$F_A \Rightarrow F_B$, $F_B \Rightarrow F_C$, $F_C \Rightarrow F_A$.
+
+\slide{The Full Configuration Score}
+
+For any configuration $\hat{y}$ we have that $s(\hat{y})$ is the sum of the unary and binary scores.
+
+\vfill
+If none are foreground we have $s(\hat{y}) = 3$
+
+\vfill
+If one is foreground we have $s(\hat{y}) = -1 + 1+ 1 = 1$
+
+\vfill
+If two are foreground we also have $s(\hat{y}) = -1 + 1+ 1 = 1$
+
+\vfill
+If all are foreground we have $s(\hat{y}) = 3$.
+
+\vfill
+$$Z = 6*1 + 2*3 = 12\;\;\;\;P_A(\mathrm{Foregound}) = \frac{3*1 + 3}{12} = \frac{1}{2}$$
+
+
+
+\slide{Hyper-Graphs: More General and More Concise}
+
+A hyper-edge is a subset of nodes.
+
+\vfill
+\centerline{\includegraphics[height = 1.5in]{../images/HyperGraph}}
+
+
+$$s(\hat{y}) = \sum_{i \in \mathrm{Nodes}}\; s_i[\hat{y}[i]]\; + \sum_{e \in \mathrm{Edges}}\;s_e[\hat{y}[e.i],\hat{y}[e.j]]$$
+
+\vfill
+
+$${\color{red} s(\hat{y}) = \sum_{e \in \mathrm{HyperEdges}}  \; s_e[\hat{y}[e]]}$$
+
+
+\slide{Hyper-Graph Models}
+
+We will abbreviate $s_e[\hat{y}[e]]$ as {\color{red} $s_e[\tilde{y}]$}.
+
+\vfill
+{\color{red} $\tilde{y}$ has a small number of possible values.}
+
+\vfill
+The hyper-graph model is defined by the ``tensor'' {\color{red} $s_e(\tilde{y})$}.
+
+
+\slide{Back-Propagation}
+
+The input is the image $x$ and the parameter package $\Phi$
+
+\begin{eqnarray*}
+ & \vdots & \\
+s_e[\tilde{y}] & = & \ldots \\
+{\cal L} & = & - \ln\; P(y\;|\;s_{\cal E}[{\cal Y}])
+\end{eqnarray*}
+
+\vfill We abbreviate $P(\hat{y}\;|\;s_{\cal E}[{\cal Y}])$ as {\color{red} $P_s(\hat{y})$} --- the distribution on $\hat{y}$ defined by the tensor $s$.
+\vfill
+We need to compute {\color{red} $\nabla_s -\ln P_s(y)$}, or equivalently, {\color{red} $s_e.\grad[\hat{y}[e]]$}.
