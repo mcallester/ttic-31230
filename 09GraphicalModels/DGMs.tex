@@ -339,14 +339,14 @@ The stationary distribution is $P_s$.
 
 \slide{Pseudolikelihood}
 
-Pseudolikelihood is somewhat related to Gibbs Sampling.  Rather than sample, we replace the objective
+Pseudolikelihood is related to Gibbs Sampling.  Rather than sample, we replace the objective
 $- \ln {\color{red} P_s}(\hat{y})$ with the objective $- \ln {\color{red} \tilde{P}_s}(\hat{y})$.
 
 \vfill
 \begin{eqnarray*}
   {\color{red} \tilde{P}_s(y)} & \doteq & \prod_i \;{\color{red} P_s(y[i] \;|\;y[N(i)])} \\
   \\
-  {\cal L} & \doteq & - \ln {\color{red} \tilde{P}_s}(y)
+  {\cal L}_{\mathrm{PL}} & \doteq & - \ln {\color{red} \tilde{P}_s}(y)
 \end{eqnarray*}
 
 \vfill
@@ -358,21 +358,15 @@ Since the loss is directly computed we can directly back-propagate on the loss.
 {\color{red} $$\argmin_Q \; E_{y \sim \mathrm{Pop}} \;-\ln \tilde{Q}(y) = \mathrm{Pop}$$}
 
 \vfill
+or equivalently
+
+
+\vfill
+{\color{red} $$\min_Q \; E_{y \sim \mathrm{Pop}} \;-\ln \tilde{Q}(y) = \widetilde{\mathrm{Pop}}$$}
+\vfill
+
 
 \slide{Proof I}
-
-{\color{red} $$E_{y \sim \mathrm{Pop}}\;\ln \widetilde{\mathrm{Pop}}(y) = E_{y \sim \mathrm{Pop}}\;\ln \mathrm{Pop}(y)$$}
-{\huge
-\begin{eqnarray*}
-\mbox{Proof:}\hspace{5em}\pop(y) & = & \prod_i \pop(y[i]\;|\; y[<\;i]) \\
-\ln \pop(y) & = & \sum_i \; \ln \pop(y[i]\;|\; y[<\;i]) \\
-E_{y \sim \pop}\;\ln \pop(y) & = & \sum_i \;E_{y \sim \pop} \; \ln \pop(y[i]\;|\; y[<\;i]) \\
-& = & \sum_i \;E_{y \sim \pop} \;\ln \pop(y[i]\;|\; y\backslash i) \\
-& = & E_{y\sim \pop}\;\widetilde{\pop}(y)
-\end{eqnarray*}
-}
-
-\slide{Proof II}
 We have
 $$\min_{Q} \;E_{y \sim \mathrm{Pop}}\;-\ln \tilde{Q}(y) \;\;\leq \;\; E_{y \sim \mathrm{Pop}}\;-\ln \widetilde{\mathrm{Pop}}(y)$$
 
@@ -381,7 +375,7 @@ So it suffices to show
 
 $$\min_{Q} \;E_{y \sim \mathrm{Pop}}\;-\ln \tilde{Q}(y) \;\;\geq \;\; E_{y \sim \mathrm{Pop}}\;-\ln \widetilde{\mathrm{Pop}}(y)$$
 
-\slide{Proof III}
+\slide{Proof II}
 
 We will prove the case of two nodes.
 
@@ -397,6 +391,38 @@ We will prove the case of two nodes.
   \\
   & = & E_{y \sim \mathrm{Pop}}{-\ln \widetilde{\mathrm{Pop}}(y|x)}
 \end{eqnarray*}
+
+
+\slideplain{Contrastive Divergence}
+
+Contrastive Divergence is closely related to pseudolikelihood.
+
+\vfill
+{\bf Algorithm (Gibbs CD1)}: Select a node $i$ at random. Draw {\color{red} $c \sim P(y[i]\;| \;y[N(i)])$}. Define {\color{red} $y[i=c]$}
+to be the assignment (segmentation) which is the same as $y$ except that node $i$ is assigned label $c$.
+
+\vfill
+{\color{red} $${\cal L}_{\mathrm{CD}}  = s(y[i=c]) - s(y)$$}
+
+Since the loss is directly computed, we can back-propagate on the loss.
+
+\slide{Contrastive Divergence Theorem}
+
+Gibbs CD1 is equivalent in expectation to pseudolikelihood.
+
+{\huge
+\begin{eqnarray*}
+{\cal L}_{\mathrm{PL}} & = & \sum_i \; - \ln \frac{e^{s(y)}}{\sum_c e^{s(y[i=c])}} \\
+\\
+\\
+& = & \sum_i\; \left(\ln \left(\sum_c \;e^{s(y[i=c])}\right) - s(y)\right) \\
+\\
+\\
+\nabla_\Phi {\cal L}_{\mathrm{PL}} & = & \sum_i \left(E_{c|i}\; \nabla_\Phi\;s(y[i=c]) - \nabla_\Phi\; s(y)\right) \\
+\\
+& = & N \;E_{i,c}\; \nabla_\Phi \; {\cal L}_{\mathrm{CD}}
+\end{eqnarray*}
+}
 
 \slide{Loopy Belief Propagation (Loopy BP)}
 
@@ -479,8 +505,8 @@ Graphical models define softmax distributions on structured values.
 It is infeasible to enumerate all sentences or all images.
 
 \vfill
-However, some graphical models sometimes yield friendly distributions and methods exist
-for training unfriendly graphical models.
+However, pseudolikelihood provides a reasonable training algorithm and loopy BP can be used for both training time and test time
+inference.
 
 \slide{END}
 
@@ -579,30 +605,3 @@ s_e[\tilde{y}] & = & \ldots \\
 We need to compute {\color{red} $\nabla_s -\ln P_s(y)$}, or equivalently, {\color{red} $s_e.\grad[\hat{y}[e]]$}.
 
 
-
-
-\slideplain{Contrastive Divergence}
-
-Contrastive Divergence is closely related to pseudolikelihood.
-
-\vfill
-It seems that constrastive divergence is just an improperly weighted version pseudolikelihood.
-
-\vfill
-{\bf Algorithm (Gibbs CD1)}: Select a node $i$ at random. Draw {\color{red} $c \sim P(y[i]\;| \;y[N(i)])$}. Define {\color{red} $y[i=c]$}
-to be the assignment (segmentation) which is the same as $y$ except that node $i$ is assigned label $c$.
-
-\vfill
-{\color{red} $${\cal L} = s(y[i=c]) - s(y)$$}
-
-Since the loss is directly computed, we can back-propagate on the loss.
-
-\slide{Contrastive Divergence Theorem}
-
-If $P_s(\hat{y}) = \mathrm{Pop}$ then
-{\color{red} $$E_{y \sim \pop} \;s(y) = E_{y \sim \pop}\; s(y[i=c])$$}
-and hence the expected update is zero.
-
-\vfill
-If $P_s = \pop$ then the CD updates has no net gradient.
-}
