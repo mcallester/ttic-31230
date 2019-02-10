@@ -174,6 +174,9 @@ MCMC Sampling
 Pseudolikelihood
 
 \vfill
+Contrastive Divergence
+
+\vfill
 Loopy Belief Propagation (loopy BP)
 
 \slide{MCMC Sampling}
@@ -338,18 +341,30 @@ The stationary distribution is $P_s$.
 
 \slide{Pseudolikelihood}
 
-Pseudolikelihood is related to Gibbs Sampling.  Rather than sample, we replace the objective
-$- \ln {\color{red} P_s}(\hat{y})$ with the objective $- \ln {\color{red} \tilde{P}_s}(\hat{y})$.
+For any distribution {\color{red} $Q$} on assignments of labels to nodes (segmentations), and any assignment {\color{red} $\hat{y}$},
+we define {\color{red} $\tilde{Q}(\hat{y})$} as follows.
+
+{\color{red} $$\tilde{Q}(\hat{y}) = \prod_i\;Q(\hat{y}[i]\;|\; \hat{y}/i)$$}
+
+We then train a graphical model with pseudolikelyhood loss.
+
+{\color{red} $$\Phi^* = \argmin_\Phi E_{y \sim \pop}\;\;-\ln \tilde{P}_\Phi(y)$$}
+
+
+\slide{Pseudolikelihood}
+
+{\color{red} $${\cal L}_{\mathrm{PL}} = - \ln \tilde{P}_s(y)$$}
 
 \vfill
-\begin{eqnarray*}
-  {\color{red} \tilde{P}_s(y)} & \doteq & \prod_i \;{\color{red} P_s(y[i] \;|\;y[N(i)])} \\
-  \\
-  {\cal L}_{\mathrm{PL}} & \doteq & - \ln {\color{red} \tilde{P}_s}(y)
-\end{eqnarray*}
+We note that by the Markov blanket property for Markov random fields we have
+
+{\color{red} $$\tilde{P}_s(\hat{y}) = \prod_i\;P_s(\hat{y}[i]\;|\; \hat{y}[N(i)])$$}
 
 \vfill
 Since the loss is directly computed we can directly back-propagate on the loss.
+
+
+
 
 
 \slide{Pseudolikelihood Theorem}
@@ -361,7 +376,7 @@ or equivalently
 
 
 \vfill
-{\color{red} $$\min_Q \; E_{y \sim \mathrm{Pop}} \;-\ln \tilde{Q}(y) = \widetilde{\mathrm{Pop}}$$}
+{\color{red} $$\min_Q \; E_{y \sim \mathrm{Pop}} \;-\ln \tilde{Q}(y) = E_{y \sim \pop}\;-\ln \widetilde{\mathrm{Pop}}(y)$$}
 \vfill
 
 
@@ -388,24 +403,36 @@ We will prove the case of two nodes.
   \\
   & = & E_{y \sim \mathrm{Pop}}{-\ln \mathrm{Pop}(y[1]|y[2])} + E_{y \sim \mathrm{Pop}}{-\ln \mathrm{Pop}(y[2]|y[1])} \\
   \\
-  & = & E_{y \sim \mathrm{Pop}}{-\ln \widetilde{\mathrm{Pop}}(y|x)}
+  & = & E_{y \sim \mathrm{Pop}}{-\ln \widetilde{\mathrm{Pop}}(y)}
 \end{eqnarray*}
 
+\slideplain{Contrastive Divergence (CDk)}
 
-\slideplain{Contrastive Divergence}
-
-Contrastive Divergence is closely related to pseudolikelihood.
+In contrastive divergence we first construct an MCMC process whose stationary distribution is ${\color{red} P_s}$.  This could be
+Metropolis or Gibbs or something else.
 
 \vfill
-{\bf Algorithm (Gibbs CD1)}: Select a node $i$ at random. Draw {\color{red} $c \sim P(y[i]\;| \;y[N(i)])$}. Define {\color{red} $y[i=c]$}
-to be the assignment (segmentation) which is the same as $y$ except that node $i$ is assigned label $c$.
+{\bf Algorithm CDk}: Given a gold segmentation $y$, start the MCMC process from initial state $y$ and run the process for $k$ steps
+to get ${\color{red} \hat{y}}$.  Then take the loss to be
+
+\vfill
+{\color{red} $${\cal L}_{\mathrm{CD}}  = s(\hat{y}) - s(y)$$}
+
+If $P_s = \pop$ then the the distribution on $\hat{y}$ is the same as the distribution on $y$ and the
+expected loss gradient is zero.
+
+\slideplain{Gibbs CD1}
+
+CD1 for the Gibbs MCMC process is a particularly interesting special case.
+
+\vfill
+{\bf Algorithm (Gibbs CD1)}: Given $y$, select a node $i$ at random and draw {\color{red} $c \sim P(y[i]\;| \;y[N(i)])$}. Define {\color{red} $y[i=c]$}
+to be the assignment (segmentation) which is the same as $y$ except that node $i$ is assigned label $c$.  Take the loss to be
 
 \vfill
 {\color{red} $${\cal L}_{\mathrm{CD}}  = s(y[i=c]) - s(y)$$}
 
-Since the loss is directly computed, we can back-propagate on the loss.
-
-\slide{Contrastive Divergence Theorem}
+\slide{Gibbs CD1 Theorem}
 
 Gibbs CD1 is equivalent in expectation to pseudolikelihood.
 
