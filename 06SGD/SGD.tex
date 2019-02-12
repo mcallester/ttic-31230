@@ -133,7 +133,7 @@ $$\hat{\mu}_t = \left(1-\frac{1}{N}\right)\hat{\mu}_{t-1} + \left(\frac{1}{N}\ri
 \vfill
 gives
 
-$$\hat{\mu}_t = \frac{1}{N} \sum_{1 \leq s \leq t} \left(1-\frac{1}{N}\right)^{-(t-s)} x_s$$
+$$\hat{\mu}_t = \frac{1}{N} \sum_{1 \leq s \leq t} \left(1-\frac{1}{N}\right)^{t-s} x_s$$
 
 \vfill
 where we have
@@ -956,7 +956,7 @@ $$\Phi^{t+1}[i] = \Phi^t[i] - \eta^t[i] \hat{g}^t[i]$$
 \vfill
 Here we have meta-parameters $K$, $\lambda_B$, $\epsilon$ and $\lambda_\eta$.
 
-\slideplain{Appendix: Optimizing $B$ and $\eta$}
+\slide{Appendix: Optimizing $B$ and $\eta$}
 
 $$\mathrm{loss}(\beta - \eta\hat{g}) \leq \mathrm{loss}(\beta) - \eta \hat{g}\left(\hat{g} - \frac{2\hat{\sigma}}{\sqrt{B}} \right)  + \frac{1}{2}L \eta^2 \hat{g}^2$$
 

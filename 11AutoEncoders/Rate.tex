@@ -8,14 +8,68 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2018}
+  \centerline{David McAllester, Winter 2019}
   \vfill
   \centerline{Entropy and Compressibility}
   \vfill
-  \centerline{Rate-Distortion Autoencoders}
+  \centerline{Rate-Distortion Autoencoders (RDAs)}
+  \vfill
+  \centerline{Noisy Channel RDAs}
+  \vfill
+  \centerline{Gaussian Variational Autoencoders (Gaussian VAEs)}
+
+\slide{Issue I: Measuring Cross Entropy}
+
+We typically cannot measure cross-entropy for a graphical model.
+
+\vfill
+But we can measure cross-entropy of a compression model.
+
+\vfill
+We write $\tilde{z}(y)$ for a lossless compression of $y$ and write $|\tilde{z}_\Phi(y)|$ for the bit length of the compression.
+
+\vfill
+{\color{red}
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;-\ln P_\Phi(y) \\
+\\
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;|\tilde{z}_\Phi(y)|\;\;\;\mbox{such that $\forall y\;\;\;y = \tilde{y}_\Phi(\tilde{z}_\Phi(y))$}
+\end{eqnarray*}
+}
+
+\slide{Issue II: Avoiding Differential Entropy}
+
+For reasons discussed below, we would like to avoid differential entropy.
+
+\vfill
+To avoid differential entropy we use a rate-distortion objective.
+
+\vfill
+{\color{red} \huge
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;-\ln P_\Phi(y)\;\;\;\mbox{$y$ discrete} \\
+\\
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;-\ln P_\Phi(\tilde{y}_\Phi(y)) + \lambda \mathrm{Dist}(y,\tilde{y}_\Phi(y))
+\left\{\begin{array}{l}\mbox{$y$ continuous} \\ \mbox{$\tilde{y}$ discrete}\end{array}\right.
+\end{eqnarray*}
+}
+
+\slide{Lossy Compression}
+
+Lossy compression combines compression for measuring cross-entropy with distortion for avoiding differential entropy.
+
+\vfill
+{\color{red}
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;-\ln P_\Phi(y) \\
+\\
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,\tilde{y}_\Phi(\tilde{z}_\Phi(y)))
+\end{eqnarray*}
+}
 
 
-\slide{Big Picture: Cross-Entropy as a Data Rate}
+
+\slide{Entropy and Compression}
 
 For a distribution $P(y)$ on a discrete set ${\cal Y}$, the entropy $H(P)$, when measured using $\log_2$ rather than $\ln$, gives the number of bits needed
 on average, when drawing from $P$, to represent the elements of ${\cal Y}$.
@@ -208,43 +262,6 @@ This integral can be computed by dividing the real numbers into bins and computi
 \vfill
 The KL divergence between the bin distribution often approaches a finite limit as the bin size goes to zero.
 
-\slide{The Big Picture: Rate-Distortion Loss}
-For density estimation of naturally occurring continuous distributions we consider
-a parameterized ``rounding'' operation mapping $y$ to $\tilde{y}_\Phi(y)$ with $\tilde{y} \in {\cal Y}$ for ${\cal Y}$ discrete.
-
-\vfill
-We then define rate-distortion loss
-
-\vfill
-$${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;(- \ln P_\Phi(\tilde{y}_\Phi(y))) + \lambda D(y,\tilde{y}_\Phi(y))$$
-
-\vfill
-where $D(y,\tilde{y})$ is some ``distortion function'' measuring a distance between $y$ and $\tilde{y}$.
-
-\slide{The Rate-Distortion Tradeoff}
-
-$${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;(- \ln P_\Phi(\tilde{y}_\Phi(y))) + \lambda D(y,\tilde{y}_\Phi(y))$$
-
-\vfill
-The first term is just cross-entropy loss which we are calling the ``rate''.  This terminology is explained below.
-
-\vfill
-The meta-parameter $\lambda$ controls the trade off between rate and distortion.
-
-
-\slide{Common Distortion Functions}
-
-$$\Phi^* = E_{y \sim \mathrm{Pop}}\;(- \ln P_\Phi(\tilde{y}_\Phi(y))) + \lambda D(y,\tilde{y}_\Phi(y))$$
-
-\vfill
-It is common to take
-
-$$D(y,\tilde{y}) = ||y-\tilde{y}||^2 \hspace{4em}(L_2)$$
-
-\vfill
-or
-
-$$D(y,\tilde{y}) = ||y-\tilde{y}||_1 \hspace{4em} (L_1)$$
 
 \slide{Rate-Distortion Autoencoders}
 
@@ -254,9 +271,33 @@ Given a continuous signal $y$ we can compress it into a (discrete) bit string $\
 We let $\tilde{y}_\Phi(\tilde{z}_\Phi(y))$ be the decompression of $\tilde{z}_\Phi(y)$.
 
 \vfill
-Rate-Disrtion loss can then be written as
+We can then define a rate-distortion loss.
 
-$${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda D(y,\tilde{y}(\tilde{z}(y)))$$
+{\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,\tilde{y}_\Phi(\tilde{z}_\Phi(y)))$$}
+
+\slide{The Rate-Distortion Tradeoff}
+
+{\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,\tilde{y}(\tilde{z}(y)))$$}
+
+\vfill
+The first term is as a rate measured in in bits per sample.
+
+\vfill
+The meta-parameter $\lambda$ has units of inverse distortion and controls the trade off between rate and distortion.
+
+\slide{Common Distortion Functions}
+
+$$\Phi^* = \argmin_\Phi\;E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,\tilde{y}_\Phi(y))$$
+
+\vfill
+It is common to take
+
+$$\mathrm{Dist}(y,\tilde{y}) = ||y-\tilde{y}||^2 \hspace{4em}(L_2)$$
+
+\vfill
+or
+
+$$\mathrm{Dist}(y,\tilde{y}) = ||y-\tilde{y}||_1 \hspace{4em} (L_1)$$
 
 \slide{A Case Study in Image Compression}
 
@@ -266,10 +307,6 @@ $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda D(y,\t
 \vfill
 $${\color{red}y \hspace{5em}  \tilde{z}_\Psi(y) \hspace{4em} \tilde{z} \hspace{6em} \tilde{y}_\Phi(\tilde{z}) \hspace{4em}||y - \tilde{y}||^2}$$
 \centerline{\includegraphics[width=9in]{../images/Deconv}}
-
-\vfill
-The model described here has been simplified from the original.
-
 
 \anaslide{JPEG at 4283 bytes or .121 bits per pixel}
 
@@ -286,17 +323,76 @@ The model described here has been simplified from the original.
 \bigskip
 \centerline{\includegraphics[height = 5in]{../images/RateDist4}}
 
-\slide{The Encoder $z_\Phi(y)$}
+\slide{A CNN Encoder}
 
-This paper uses a three layer CNN for the encoder.
-
-\vfill
-The first layer is computed stride 4.
+A three layer CNN is used as an encoder.
 
 \vfill
-The two remaining layers are computed stride 2.
+We let $z_\Phi(y)$ be the final layer of this CNN.
 
-\slide{The number of numbers}
+\vfill
+Each continuous value in the final layer $z_\Phi(y)$ is then rounded to a (small) integer giving a discrete encoding $\tilde{z}(y)$.
+
+\slide{Rate-Distortion Autoencoders}
+
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
+
+\vfill
+Oops: Because of rounding, $\tilde{z}_\Phi(y)$ is discrete and the gradients are zero.
+
+\slide{Rate-Distortion Autoencoders}
+
+\begin{eqnarray*}
+\Phi^* & & = \argmin_\Phi {\cal L}_{\mathrm{rate}}(\Phi) + \lambda {\cal L}_{\mathrm{dist}} (\Phi) \\
+\\
+{\cal L}_{\mathrm{rate}}(\Phi) & = & E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| \\
+\\
+{\cal L}_{\mathrm{dist}}(\Phi) & = & E_{y \sim \mathrm{Pop}} \;\mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))
+\end{eqnarray*}
+
+\vfill
+We will consider differentiable approximations to both ${\cal L}_{\mathrm{rate}}$ and ${\cal L}_{\mathrm{dist}}$.
+
+\slide{A Differentiable Approximation of ${\cal L}_{\mathrm{rate}}$}
+
+\begin{eqnarray*}
+{\cal L}_{\mathrm{rate}}(\Phi) & = & E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| 
+\end{eqnarray*}
+
+\vfill
+Recall that {\color{red} $\tilde{z}_\Phi(y)$} is a rounding of a continuous encoding {\color{red} $z_\Phi(y)$}.
+
+
+\vfill
+We can make the cross-entropy loss differentiable by approximating discrete entropy with differential entropy.
+
+\vfill
+$$|{\color{red} \tilde{z}_\Phi(y)}| \approx - \ln p_\Psi({\color{red} z_\Phi(y)})\;\;\;\;\;\;\;p_\Psi(z) \approx \sum_i \log_2 z_i$$
+
+
+\slide{Differential Entropy vs. Discrete Entropy}
+
+\bigskip
+\centerline{\includegraphics[height=5in]{../images/RateDist6}}
+
+\slide{A Differentiable Approximation of ${\cal L}_{\mathrm{dist}}$}
+
+We can make the the distortion loss differentiable by modeling rounding as the addition of noise.
+
+\begin{eqnarray*}
+{\cal L}_{\mathrm{dist}}(\Phi) & = & E_{y \sim \mathrm{Pop}} \;\mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y))) \\
+\\
+& \approx & E_{y,\epsilon} \;\mathrm{Dist}(y,\;y_\Phi(z_\Phi(y) + \epsilon))
+\end{eqnarray*}
+
+\vfill
+Here $\epsilon$ is a noise vector each component of which is drawn uniformly from $(-1/2,1/2)$.
+
+\slide{Noise vs. Rounding}
+
+\centerline{\includegraphics[height=5in]{../images/RateDist5}}
+
+\slide{Details}
 
 \vfill
 The first layer is computed stride 4.
@@ -311,7 +407,7 @@ Final image dimension is reduced by a factor of 16 with 192 channels per pixel (
 $$192 < 16 \times 16 \times 3 = 768$$
 
 \vfill
-The final values $z[x,y,i]$ are rounded to integers $\tilde{z}[x,y,i]$.
+
 
 \slide{Increasing Spatial Dimension in Decoding}
 
@@ -321,7 +417,7 @@ The final values $z[x,y,i]$ are rounded to integers $\tilde{z}[x,y,i]$.
 \vfill
 In the ICLR 17 paper the deconvolution network has the shape as the input CNN but with independent parameters.
 
-\slide{Increasing Spatial Dimensions in Deconvolution}
+\slide{Increasing Spatial Dimension in Decoding}
 
 Consider a stride 2 convolution
 \begin{eqnarray*}
@@ -340,98 +436,78 @@ The channels at each $L'_\ell[x,y]$ are divided among four higher resolution pix
 \vfill
 This is done by a simple reshaping of $L'_\ell[x,y,i]$.
 
-\slide{Rate-Distortion Autoencoders}
+\slide{Noisy-Channel RDAs (TZ)}
 
-$$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| + \lambda D(y,\tilde{y}_\Phi(z_\Phi(y)))$$
+Consider the differentiable loss used in training.
+{\color{red} $$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;- \ln p(z_\Phi(y)) + \lambda E_\epsilon\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + \epsilon))$$}
 
-\vfill
-Oops: Because of rounding, $\tilde{z}_\Phi(y)$ is discrete and the gradients are zero.
-
-\vfill
-Note, however that the rate-distortion loss is measurable.
+Intuitively, {\color{red} $- \ln p(z_\Phi(y))$} is a proxy for the number of bits used in the (intuitively rounded) encoding {\color{red} $z_\Phi(y) + \epsilon$}.
 
 \vfill
-We will approximate the gradient descent but still be able to measure loss.
+By the channel capcacity theorem the number of bits that {\color{red} $z_\Phi(y) + \epsilon$} can carry about {\color{red} $y$}
+is the mutual information between $y$ and $z_\Phi(y) + \epsilon$.
 
-\slide{Rate-Distortion Autoencoders}
+{\color{red} $$I(y,z_\Phi(y)+\epsilon)$$}
+
+\slide{Noisy-Channel RDAs (TZ)}
+
+We now consider {\color{red} $p_\Phi(z|y)$} as a generalization of {\color{red} $z_\Phi(y) + \epsilon$}.
+
+\vfill
+The channel capacity theorem motivates
+
+\vfill
+{\huge
+\begin{eqnarray*}
+{\color{red} \Phi^*} & = & {\color{red} \argmin_\Phi \left(\;I(y,z) + \;\lambda E_{y \sim \pop,z \sim p_\Phi(z|y)}\;\mathrm{Dist}(y,y_\Phi(z))\;\right)} \\
+\\
+& = & {\color{red} \argmin_\Phi  E_{y \sim \pop}\;\left(\;KL(p_\Phi(z|y),p_\Phi(z)) + \lambda E_{z \sim p_\Phi(z|y)}\; \mathrm{Dist}(y,y_\Phi(z))\;\right)} \\
+\end{eqnarray*}
+}
+
+\slide{A Variational Upper Bound}
+
+Unfortunately we cannot compute {\color{red} $p_\Phi(z) = E_{y \sim \pop}\;p_\Phi(z|y)$}.
+
+\vfill
+We now replace {\color{red} $p_\Phi(z)$} by a friendly (variational) model {\color{red} $p_\Psi(z)$}.
 
 \begin{eqnarray*}
-\Phi^* & & = \argmin_\Phi {\cal L}_{\mathrm{rate}}(\Phi) + \lambda {\cal L}_{\mathrm{dist}} (\Phi) \\
+I_\Phi(y,z) & = & E_{y \sim \pop}\; KL(p_\Phi(z|y),p_\Phi(z)) \\
 \\
-{\cal L}_{\mathrm{rate}}(\Phi) & = & E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| \\
+& = & E_{y,z\sim P_\Phi(z|y)}\; \ln \frac{p_\Phi(z|y)}{{\color{red} p_\Psi(z)}} + \ln \frac{{\color{red} p_\Psi(z)}}{p_\Phi(z)} \\
 \\
-{\cal L}_{\mathrm{dist}}(\Phi) & = & E_{y \sim \mathrm{Pop}} \;D(y,\tilde{y}_\Phi(\tilde{z}_\Phi(y)))
+& = & E_y\;KL(p_\Phi(z|y),p_\Psi(z)) - KL(p_\Phi(z),p_\Psi(z)) \\
+\\
+& \leq & E_y\;KL(p_\Phi(z|y),p_\Psi(z))
 \end{eqnarray*}
 
+\slide{The Noisy-Channel RDA}
+
+{\huge {\color{red} $$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_y \;KL(p_\Phi(z|y),P_\Psi(z)) \;+\; \lambda \; E_{z\sim p_\Phi(z|y)}\;\mathrm{Dist}(y,\;y_\Phi(z))$$}}
+
 \vfill
-We will consider differentiable approximations to both ${\cal L}_{\mathrm{rate}}$ and ${\cal L}_{\mathrm{dist}}$.
+Here $\gamma$ has the same units as distortion and controls the trade-off between rate and distortion.
 
-\slide{A Differentiable Approximation of ${\cal L}_{\mathrm{rate}}$}
+\slide{Summary: Rate-Distortion}
 
+
+Rate-Distortion: $y$, continuous, $\tilde{z}$ a bit string,
+
+{\color{red}
 \begin{eqnarray*}
-{\cal L}_{\mathrm{rate}}(\Phi) & = & E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| 
+\Phi^* &  = &  \argmin_\Phi E_y \;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))
 \end{eqnarray*}
+}
 
 \vfill
-Recall that $\tilde{z}(y)$ is a rounding of a continuous tensor $z[x,y,i]$.
+Noisy Channel: {\color{red} $\tilde{z} = z_\Phi(y) + \sigma_\Phi(y) \odot \epsilon$,\hspace{2em} $\epsilon \sim {\cal N}(0,I)$}
 
-\vfill
-We can use the differentiable approximation
-
-\vfill
-$$|\tilde{z}_\Phi(y)| \approx \sum_{x,y,i} \; \max(0,\log_2 z_\Phi[x,y,i])$$
-
-\vfill
-This can be viewed as approximating a discrete entropy with differential entropy.
-
-\slide{Differential Entropy vs. Discrete Entropy}
-
-\bigskip
-\centerline{\includegraphics[height=5in]{../images/RateDist6}}
-
-\slide{A Differentiable Approximation of ${\cal L}_{\mathrm{dist}}$}
-
+{\color{red}
 \begin{eqnarray*}
-{\cal L}_{\mathrm{dist}}(\Phi) & = & E_{y \sim \mathrm{Pop}} \;D(y,\tilde{y}_\Phi(\tilde{z}_\Phi(y))) \\
-\\
-& \approx & E_{y,\epsilon} \;D(y,\;\tilde{y}(z_\Phi(y) + \epsilon))
+\Phi^* & = & \argmin_\Phi E_y\; \;KL(p_\Phi(\tilde{z}|y),{\cal N}(0,I)) + E_{\tilde{z}\sim p_\Phi(\tilde{z}|y)}\;\lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}))
 \end{eqnarray*}
-
-\vfill
-Here $\epsilon$ is a noise tensor with $\epsilon[x,y,i]$ drawn uniformly form $(-1/2,1/2)$.
-
-\slide{Noise vs. Rounding}
-
-\centerline{\includegraphics[height=5in]{../images/RateDist5}}
-
-
-\slide{Varying the Level Of Compression}
-
-$$\Phi^* = \argmin_\Phi\; E_{y \sim \mathrm{Pop}} |\tilde{z}_\Phi(y)| + \frac{1}{2}{\color{red} \lambda} ||y - \tilde{y}_\Phi(\tilde{z}_\Phi(y))||^2$$
-
-\vfill
-Different levels of compression correspond to different values of $\lambda$.
-
-\vfill
-In all levels of compression we replace 768 numbers by 192 numbers.
-
-\vfill
-Higher levels of compression result in smaller integer values in the 192 numbers.
-
-\slide{Conditional Rate-Distortion Autoencoders}
-
-$$\Phi^* = \argmin_\Phi \;\;E_{(x,y) \sim \pop} \;\;\; |\tilde{z}_\Phi(y|x)|\; + \; \lambda D(y\;|\;\tilde{y}_\Phi(x,\tilde{z}_\Phi(y|x)))$$
-
-\slide{Colorization}
-
-\centerline{\includegraphics[height = 2in]{../images/colorization}}
-
-\vfill
-$${\color{red} \Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y|x)| + \frac{1}{2}\lambda ||y - \tilde{y}_\Phi(x,\tilde{z}_\Phi(y|x))||^2}$$
-
-\vfill
-If the image can be segmented based on $x$ then $\tilde{z}_\Phi(y|x)$ can be a specification of color of each segment --- this would be very compact.
-
+}
 
 \slide{END}
 
