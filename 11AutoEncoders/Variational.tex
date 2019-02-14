@@ -1,4 +1,4 @@
-\input ../SlidePreamble
+ \input ../SlidePreamble
 \input ../preamble
 
 
@@ -9,6 +9,8 @@
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
   \centerline{David McAllester, Winter 2019}
+  \vfill
+  \centerline{Latent Variable Models}
   \vfill
   \centerline{Expectation Maximization (EM)}
   \vfill
@@ -23,39 +25,148 @@
 We are often interested in models of the form
 
 \vfill
-{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z).$$}
-{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z).$$}
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z)$$}
+{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z)$$}
 
 \vfill
-For example, CTC and probabilistic grammar models.
+Here {\color{red} $z$} is the latent variable.
+
+\slide{Reasons for Latent Variables}
+
+\begin{itemize}
+\item Measuring cross entropy.
+
+\vfill
+\item Inserting domain knowledge.
+
+\vfill
+\item Improving interpretability.
+\end{itemize}
+
+\slide{Dangers of Latent Variables}
+
+\centerline{Domain ``knowledge'' is often wrong.}
+
+\slide{Measuring Cross Entropy (TZ)}
+
+For structured label spaces (sentences or images), cross-entropy is currently only measured for ``autoregressive'' (directed) graphical models.
+
+\vfill
+For images this is done with ``pixel RNNs''.
+
+\vfill
+But compression models can be viewed as latent variable models with measurable cross-entropy.
+
+\slide{Cross Entropy of a Compression Model}
+
+A compression model $\Phi$ maps a label $y$ to a latent value (code) $z_\Phi(y)$ such that
+there exists a decompression algorithm $y_\Phi(z)$ satisfying
+{\color{red} $$y_\Phi(z_\Phi(y)) = y.$$}
+
+\vfill
+Let {\color{red} $|z_\Phi(y)|$} be the bit length of the compression of $y$.
+
+\slide{Cross Entropy of a Compression Model}
+
+{\color{red}
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;-\ln P_\Phi(y) \\
+& = & \argmin_\Phi \;E_{y \sim \pop} \;|z_\Phi(y)|
+\end{eqnarray*}
+}
+
+\vfill
+Assuming universal expressive power, Shannon's source coding theorem implies
+
+{\color{red} $$E_{y \sim \pop}\; |z_{\Phi^*}(y)| \leq H_2(y) +1$$}
+
+\slide{Measuring Rate-Distortion Points}
+
+A noisy-channel RDA
+
+{\color{red}
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi I(y,z) + \lambda E_{y \sim \pop,\;z\sim p_\Phi(z|y)}\; \mathrm{Dist}(y,y_\Phi(z))
+\end{eqnarray*}
+}
+
+has a measurable rate-distortion trade off provided we can measure the bandwidth {\color{red} $I(y,z)$} of the noisy channel.
+
+\slide{Sparse Labeling Compression (TZ)}
+
+Given a graphical model $\Phi$ on semantic segmentations we can code a segmentation $y$
+by a sparse segmentation {\color{red} $z_\Phi(y)$} assigning a label to only a small fraction of the pixels.
+
+\vfill
+We can define a decoding {\color{red} $y_\Phi(z)$} to be the result of running a deterministic local search over
+the labels of the unspecified pixels to find a locally best-scoring full semantic segmentation.
+
+\vfill
+We can then define the encoding {\color{red} $z_\Phi(y)$} to be
+$${\color{red} z_\Phi(y)} = \argmin_{z:\; {\color{red} y_\Phi(z) = y}}\;|z|$$
+where $|z|$ is the number of pixels assigned by $z$.
+
+\slide{Encoding Domain Knowledge}
+
+In CTC the latent variable $z$ (the latent sequence of phonemes and blanks) and the blank removal operation $y(z)$ constitute useful engineered domain knowledge.
+
+\vfill
+There have been many attempts to build standard latent linguistic structure, such as parse trees, into deep language models.  These attempts have
+largely failed to improve performance on end-to-end applications.
+
+\vfill
+Attempts to use classical graphical models in computer vision have also largely failed.
+
+\vfill
+But I believe that we should not give up on engineering.
+
+\slide{Improved Interpretabilty}
+
+In CTC we can see where in the input signal system the gold labels are coming from.
+
+\vfill
+If we have latent parse trees in an NLP model we can see what parse the system is using.
+
+\vfill
+If the latent variables are engineered to have semantics then, by construction, we have a semantic interpretation of internal processing.
+
+\slide{Attention and Latent Variables}
+
+In machine translation attention is used to handle a latent alignment between the input sentence and the gold label translation.
+
+\vfill
+In general, attention can be viewed as defining a probability distribution over a latent choice.
+
+\vfill
+Attention is the central mechanism in the transformer network (to be discussed later).
+
+\vfill
+The transformer network can be viewed as constructing latent trees over an input sentence.
 
 \slidetwo{Expectation Maximization (EM)}
 {Mixture of Gaussian Modeling}
 
-{\color{red} $$\Phi = (\pi_1,\mu_1,\Sigma_1,\ldots,\pi_k,\mu_k,\Sigma_k)$$}
+{\color{red} $$\Phi = \pi[z],\mu[z],\Sigma[z],\;\;\;z \in \{1,\ldots,k\}$$}
 
 \begin{eqnarray*}
-p_\Phi(y) & = & {\color{red} \sum_i\;P(i)p(y|i)} \\
+p_\Phi(y) & = & {\color{red} \sum_z\;P(z)p(y|z)} \\
 \\
-& = & \sum_i\;\pi_i\;\frac{1}{Z_i}\exp\left(-\frac{1}{2}(y-\mu_i)^\top \Sigma_i^{-1}(y - \mu_i)\right)
+& = & \sum_{z=1}^k\;\pi[z]\;\frac{1}{Z[z]}\exp\left(-\frac{1}{2}(y-\mu[z])^\top \Sigma[z]^{-1}(y - \mu[z])\right)
 \end{eqnarray*}
-
-\vfill
-{\color{red} $i$ is the latent variable.}
 
 \slidetwo{Expectation Maximization (EM)}
 {Mixture of Gaussian Modeling}
 \vspace{-4ex}
-$$\Phi = (\pi_1,\mu_1,\Sigma_1,\ldots,\pi_k,\mu_k,\Sigma_k)$$
+$$\Phi = \pi[z],\mu[z],\Sigma[z],\;\;\;z \in \{1,\ldots,k\}$$
 $$\mbox{Train} = \{y_1,\ldots,y_N\}$$
 Until Convergence:
-$$P_\Phi(i|y_j) = \frac{\pi_iP(y_j|i)}{\sum_i\;\pi_iP(y_j|i)} \;\;\mbox{\color{red} Inference (E step)}$$
+$$P_\Phi(z|y_j) = \frac{\pi[z]P(y_j|z)}{\sum_z\;\pi[z]P(y_j|z)} \;\;\mbox{\color{red} Inference (E step)}$$
 
 $$\left.
 \begin{array}{rcl}
-  \pi_i^{t+1} & = & \frac{1}{N}\; \sum_j \;P_{\Phi^t}(i|y_j) \\
-  \mu_i^{t+1} & = & \frac{1}{N}\; \sum_j \;P_{\Phi^t}(i|y_j)y_j \\
-  \Sigma_i^{t+1} & = & \frac{1}{N}\; \sum_j P_{\Phi^t}(i|y_j)y_jy_j^\top
+  \pi^{t+1}[z] & = & \frac{1}{N}\; \sum_j \;P_{\Phi^t}(z|y_j) \\
+  \mu^{t+1}[z] & = & \frac{1}{N}\; \sum_j \;P_{\Phi^t}(z|y_j)y_j \\
+  \Sigma^{t+1}[z] & = & \frac{1}{N}\; \sum_j P_{\Phi^t}(z|y_j)y_jy_j^\top
 \end{array}
   \right\} \mbox{\color{red} Model Update (M step)}$$
 
@@ -78,7 +189,7 @@ $${\color{red} \Phi^{t+1}} =  {\color{red} \argmin_\Phi}\;E_{y \sim \mathrm{Trai
 \centerline{\huge Larsson et al., 2016}
 
 \vfill
-$x$ is a black and white image.
+$x$ is a grey level image.
 
 \vfill
 $y$ is a color image drawn from $\pop(y|x)$.
@@ -87,7 +198,7 @@ $y$ is a color image drawn from $\pop(y|x)$.
 $\hat{y}$ is an arbitrary color image.
 
 \vfill
-$P_\Phi(\hat{y}|x)$ is the probability that model $\Phi$ assigns to the color image $\hat{y}$ given black and white image $x$.
+$P_\Phi(\hat{y}|x)$ is the probability that model $\Phi$ assigns to the color image $\hat{y}$ given grey level image $x$.
 
 \anaslide{Colorization with Latent Semantic Segmentation (TZ)}
 \medskip
@@ -127,6 +238,21 @@ We introduce a friendly model {\color{red} $P_\Psi(z|y)$} to approximate {\color
   & = & \hspace{4em} \mathrm{\color{red} ELBO} \hspace{4em}  + KL(P_\Psi(z|y),P_\Phi(z|y))
 \end{eqnarray*}
 }
+
+\slide{Optimization of the ELBO}
+
+\begin{eqnarray*}
+\ln P_\Phi(y) & \geq & \mathrm{ELBO}(\Phi,\Psi,y) \\
+\\
+& = & E_{z \sim P_\Psi(z|y)}\;\ln\frac{P_\Phi(z,y)}{P_\Psi(z|y)}
+\end{eqnarray*}
+
+\begin{eqnarray*}
+\Phi^*, \Psi^* & = & {\color{red} \argmax_{\Phi,\Psi}}\; E_{y \sim \pop}\;\mathrm{ELBO}(\Phi,\Psi,y) \\
+\\
+\Phi^*, \Psi^* & = & \argmax_{\Phi,\Psi}\;E_{y \sim \pop}\;{\color{red} E_{z \sim P_\Psi(z|y)}\;\ln \frac{P_\Phi(z,y)}{P_\Psi(z|y)}}
+\end{eqnarray*}
+
 \slide{EM is Alternating Maximization of the ELBO}
 
 \begin{eqnarray*}
@@ -142,65 +268,20 @@ We introduce a friendly model {\color{red} $P_\Psi(z|y)$} to approximate {\color
 \mbox{by (1)}\;\;\;{\color{red} \Phi^{t+1}} & = & \argmax_{\color{red} \Phi} E_{y \sim \mathrm{Train}} \;E_{z \sim P_{\color{red} {\Phi^t}}(z|y)}\; \ln P_{\color{red} \Phi}(z,y)
 \end{eqnarray*}
 
-\slide{Different Ways of Writing the ELBO}
-
-\begin{eqnarray*}
-\mathrm{ELBO} & = & E_{z \sim P_\Psi(z|y)}\; \ln \frac{P_\Phi(z,y)}{P_\Psi(z|y)} \\
- \\      
-  & = &\ln\;P_{\Phi}(y) - KL(P_\Psi(z|y),P_{\Phi}(z|y)) \\
-  \\
-  & = & \left(E_{z \sim P_\Psi(z|y)} \ln P(y|z)\right) - KL(P_\Psi(z|x),P_\Phi(z)) \\
-  \\
-  & = & \left(E_{z\sim P_\Psi(z|y)} \;P_\Phi(z,y)\right) + H(P_\Psi(z|y))
-\end{eqnarray*}
-
 \slide{Hard ELBO}
-
-Hard ELBO is to ELBO as hard EM is to EM.
-
+\vfill
+In hard EM we use only the single most likely $z$ rather than the expectation of $z \sim P_{\Phi^t}(z|y)$.
 
 \vfill
+$K$-means is hard EM for mixtures of Gaussians (when all covariances matrices are fixed at $I$).
+
 \begin{eqnarray*}
-{\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) &  =  & KL(P_\Psi(z|y),P_\Phi(z|y)) - \ln P_\Phi(y) \\
+\mathrm{ELBO} & = & \left(E_{z\sim P_\Psi(z|y)} \;\ln \frac{P_\Phi(z,y)}{P_\Psi(z|y)}\right) \\
 \\
-{\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) &  =  & E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y) + \ln P_\Psi(z|y) \\
+\mbox{ELBO} & = & \left(E_{z\sim P_\Psi(z|y)} \;\ln P_\Phi(z,y)\right) + H(P_\Psi(z|y)) \\
 \\
-{\color{red} {\cal L}_{\mathrm{HELBO}}(y,\Phi,\Psi)} & {\color{red}  =} & {\color{red}  E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y)}
+{\color{red} \mbox{hard ELBO}} & {\color{red}  =} & {\color{red}  E_{z \sim P_\Psi(z|y)} - \ln P_\Phi(z,y)}
 \end{eqnarray*}
-
-\slide{Measuring the ELBO}
-
-$$\mathrm{ELBO}  =  E_{z \sim P_\Psi(z|y)}\; \ln \frac{P_\Phi(z,y)}{P_\Psi(z|y)}$$
-
-\vfill
-If $P_\Phi(z)$, $P_\Phi(y|z)$, and $P_\Psi(z|y)$ are friendly (even when $P_\Phi(y)$ is not friendly) we can
-measure ELBO loss through sampling.
-
-\vfill
-If we can measure it, we can do gradient descent on it (but perhaps with difficulty).
-
-\slide{We want $\Psi$ to adapt to $\Phi$}
-
-$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) = KL(P_\Psi(z|y),P_{\Phi}(z|y)) - \ln\;P_{\Phi}(y)$$
-
-\vfill
-$${\color{red} Q^*(z|y) = P_\Phi(z|y)}$$
-
-\vfill
-$$E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{ELBO}}(y,\Phi,Q^*) = H(\mathrm{Pop},P_\Phi)$$
-
-\slide{However, $\Phi$ can ignore $\Psi$}
-
-$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) = KL(P_\Psi(z|y),P_{\Phi}(z|y)) - \ln\;P_{\Phi}(y)$$
-
-$${\color{red} P^*(z) = P_\Psi(z)}$$
-$${\color{red} P^*(y|z) = P_\Phi(y)}$$
-
-$$E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{ELBO}}(y,P^*,\Psi) = H(\mathrm{Pop},P_\Phi)$$
-
-\vfill
-It seems important that $P_\Phi(y|z)$ have limited expressive power.
-
 
 \slide{A VAE for Images}
 
@@ -212,7 +293,7 @@ $${\color{red}y \hspace{5em}  z_\Psi(y,\epsilon) \hspace{4em} z\;p_\Phi(z) \hspa
 
 \centerline{\Large [Hyeonwoo Noh et al.]}
 
-\slide{Gaussian Distributions}
+\slide{Gaussian VAEs}
 
 \begin{eqnarray*}
 p_\Phi(z) & \propto & \exp\left(\sum_i \;(z[i] - {\color{red} \mu[i]})^2/(2{\color{red} \sigma[i]}^2)\right) \\
@@ -222,119 +303,68 @@ p_\Phi(y|z) & \propto & \exp\left(\sum_j\;(y[j] - {\color{red} y_\Phi(z)[j]})^2/
 p_\Psi(z|y) & \propto & \exp\left(\sum_i (z[i] - {\color{red} z_\Psi(y)[i]})^2/(2{\color{red} \sigma_\Psi(y)[i]}^2)\right)
 \end{eqnarray*}
 
-\slide{KL-Divergence Form for the ELBO}
+\slide{Gaussian VAEs}
 
 \begin{eqnarray*}
-&  & E_{z \in p_\Psi(z|y)}\;\ln\;p_\Psi(z|y) - \ln\;p_\Phi(z)p_\Phi(y|z) \;\;\;\;{\color{red} {\cal L}_{\mathrm{ELBO}}} \\
+\mathrm{ELBO} & = & E_{z \sim p_\Psi(z|y)} \ln \frac{p_\Phi(z,y)}{p_\Psi(z|y)} \\
 \\
-& = & {\color{red}  KL(p_\Psi(z|y),p_\Phi(z)) + E_{z \in P_\Psi(z|y)} - \ln p_\Phi(y|z)}
+{\cal L}_{\mathrm{ELBO}} & = & - \mathrm{ELBO} \\
+\\
+& = & {\color{red}  KL(p_\Psi(z|y),p_\Phi(z)) + E_{z \in p_\Psi(z|y)} - \ln p_\Phi(y|z)}
 \end{eqnarray*}
-
-\vfill
-The ELBO is a KL-divergence + a cross entropy
 
 \vfill
 Continuous KL-divergence is ok.
 
 \vfill
-Continuous cross-entropy has issues --- we will come back to that
-later.
+Continuous cross-entropy has issues ...
 
-\slide{Closed Form KL-Divergence}
+\slide{Gaussian VAEs vs. Gaussian RDAs}
 
 \begin{eqnarray*}
-& & KL(p_\Psi(z|y),p_\Phi(z)) \\
+{\cal L}_{\mathrm{ELBO}}(y) & = & {\color{red}  KL(p_\Psi(z|y),p_\Phi(z)) + E_{z \in p_\Psi(z|y)} - \ln p_\Phi(y|z)} \\
 \\
-\\
-& = & \sum_i \;\frac{\sigma_\Psi(y)[i]^2 + (z_\Psi(y)[i]-\mu[i])^2}{2 \sigma[i]^2}
-+ \ln\frac{\sigma[i]}{\sigma_\Psi(y)[i]} - \frac{1}{2}
-\end{eqnarray*}
-
-
-\slide{Standardizing $p_\Phi(z)$}
-
-The KL-divergence term is
-    
-$$\sum_i \;\frac{{\color{red} \sigma}_\Psi(y)[i]^2 +({\color{red} z}_\Psi(y)[i] - {\color{red} \mu}[i])^2}{2 {\color{red} \sigma}[i]^2} + \ln\frac{{\color{red} \sigma}[i]}{{\color{red} \sigma}_\Psi(y)[i]} - \frac{1}{2}$$
-
-\vfill
-We can adjust $\Psi$ to $\Psi'$ such that
-\begin{eqnarray*}
-z_{\Psi'}(y)[i] & = & z_\Psi(y)[i]/\sigma[i] + \mu[i] \\
-\sigma_{\Psi'}(y)[i] & = & \sigma_\Psi(y)/\sigma[i]
+{\cal L}_{\mathrm{RDA}}(y) & = & {\color{red}  KL(p_\Phi(z|y),p_\Psi(z)) + \lambda \; E_{z \in p_\Phi(z|y)}\; D(y,y_\Phi(z))}
 \end{eqnarray*}
 
 \vfill
-We then get {\color{red} $KL(p_{\Psi}(z|y),p_\Phi(z)) = KL(p_{\Psi'}(z|y),{\cal N}(0,I))$}.
-
-\slide{Standardizing $p_\Phi(z)$}
-
-\vfill
-Without loss of generality the VAE becomes.
-
-{\color{red} $$\min_{\Phi,\Psi}\; E_y\;KL(P_\Psi(z|y),{\cal N}(0,I)) + E_{z \in P_\Psi(z|y)} - \ln p_\Phi(y|z) $$}
-\slide{Reparameterization Trick for the Cross-Entropy}
+Through a reparameterization these can be written as
 
 \begin{eqnarray*}
-p_\Psi(z|y) & \propto & \exp\left(\sum_i (z[i] - {\color{red}
-z_\Psi(y)[i]})^2/(2{\color{red} \sigma_\Psi(y)[i]}^2)\right)
-\end{eqnarray*}
-
-\vfill
-\begin{eqnarray*}
-& & E_{z \in p_\Psi(z|y)} \;\ln p_\Phi(y|z)\\
+{\cal L}_{\mathrm{ELBO}}(y) & = & {\color{red}  KL(p_\Psi(z|y),{\cal N}(0,I)) + E_{z \in p_\Psi(z|y)} - \ln p_\Phi(y|z)} \\
 \\
-\\
-& = & E_{\epsilon \sim {\cal N}(0,I)} \;z[i] = {\color{red}
-z_\Psi(y)[i]} + {\color{red} \sigma_\Psi(y)[i]}\epsilon[i];\;\; \;\ln
-p_\Phi(y|z)
+{\cal L}_{\mathrm{RDA}}(y) & = & {\color{red}  KL(p_\Phi(z|y),{\cal N}(0,I))) + \lambda\;E_{z \in p_\Phi(z|y)}\; D(y,y_\Phi(z))}
 \end{eqnarray*}
 
 \slide{Sampling}
 
-$$P_\Psi(z|y) \hspace{3ex} z \hspace{3ex} P_\Phi(z,y)$$
-
-\centerline{\includegraphics[width=6in]{../images/Deconv}}
-\centerline{\large [Hyeonwoo Noh et al.]}
-
-\vfill
-Sampling uses just the second half ${\color{red} P_\Phi(z,y)}$.
-
-\slide{Sampling}
+\centerline{Sample {\color{red} $z \sim {\cal N}(0,I)$} and compute {\color{red} $y_\Phi(z)$}}
 
 \vfill
 \centerline{\includegraphics[width = 4in]{../images/VariationalFaces}}
 \centerline{[Alec Radford]}
 
-\slide{Why Blurry?}
+\slide{Reasons for Latent Variables}
 
-A common explanation for the blurryness of images generated from VAEs
-is the use of $L_2$ as the distortion measure.
-
-\vfill
-It does seem that $L_1$ works better.
+\begin{itemize}
+\item Measuring cross entropy.
 
 \vfill
-However, training on $L_2$ distortion can produce sharp images in
-rate-distortion autoencoders.
-
-\slide{Summary: ELBO and VAE}
-
-
-ELBO: {\color{red} $P_\Phi(z)$, $P_\Phi(y|z)$, $P_\Psi(z|y)$} friendly graphical models:
-
-{\color{red} $$\Phi^*,\Psi^*  =  \argmin_{\Phi,\Psi}\; E_{y \sim \mathrm{Pop},\;z \sim P_\Psi(z|y)} \;\ln P_\Psi(z|y) - \ln P_\Phi(z)P_\Phi(y|z)$$}
+\item Inserting domain knowledge.
 
 \vfill
-VAE: {\color{red} $p_\Phi(z|y)$, $p_\Phi(y|z)$} Gaussian:
+\item Improving interpretability.
+\end{itemize}
 
-{\color{red} $$\Phi^* =  \argmin_\Phi E_{y \sim \mathrm{Pop}}\; \;KL(p_\Phi(z|y),{\cal N}(0,I))  - E_{z\sim p_\Phi(z|y)}\;\ln p_\Phi(y|z)$$}
+\slide{Dangers of Latent Variables}
+
+\centerline{Domain ``knowledge'' is often wrong.}
 
 \slide{END}
 
+
 }
 \end{document}
-
 
 \slide{Another Way of Writing the ELBO}
 {\huge
@@ -375,3 +405,42 @@ $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z)\;\;\mbox{\color{red} unfriendly compo
 
 \vfill
 This can be proved from Shannon's source coding theorem where $z$ is the code for $y$.
+
+
+\slide{Measuring the ELBO}
+
+$$\mathrm{ELBO}  =  E_{z \sim P_\Psi(z|y)}\; \ln \frac{P_\Phi(z,y)}{P_\Psi(z|y)}$$
+
+\vfill
+If $P_\Phi(z)$, $P_\Phi(y|z)$, and $P_\Psi(z|y)$ are friendly (even when $P_\Phi(y)$ is not friendly) we can
+measure ELBO loss through sampling.
+
+\vfill
+If we can measure it, we can do gradient descent on it (but perhaps with difficulty).
+
+
+\slide{We want $\Psi$ to adapt to $\Phi$}
+
+$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) = KL(P_\Psi(z|y),P_{\Phi}(z|y)) - \ln\;P_{\Phi}(y)$$
+
+\vfill
+$${\color{red} Q^*(z|y) = P_\Phi(z|y)}$$
+
+\vfill
+$$E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{ELBO}}(y,\Phi,Q^*) = H(\mathrm{Pop},P_\Phi)$$
+
+\slide{However, $\Phi$ can ignore $\Psi$}
+
+$${\cal L}_{\mathrm{ELBO}}(y,\Phi,\Psi) = KL(P_\Psi(z|y),P_{\Phi}(z|y)) - \ln\;P_{\Phi}(y)$$
+
+$${\color{red} P^*(z) = P_\Psi(z)}$$
+$${\color{red} P^*(y|z) = P_\Phi(y)}$$
+
+$$E_{y \sim \mathrm{Pop}}\;{\cal L}_{\mathrm{ELBO}}(y,P^*,\Psi) = H(\mathrm{Pop},P_\Phi)$$
+
+\vfill
+It seems important that $P_\Phi(y|z)$ have limited expressive power.
+
+
+
+

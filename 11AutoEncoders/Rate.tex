@@ -10,294 +10,37 @@
   \bigskip
   \centerline{David McAllester, Winter 2019}
   \vfill
-  \centerline{Entropy and Compressibility}
-  \vfill
   \centerline{Rate-Distortion Autoencoders (RDAs)}
   \vfill
   \centerline{Noisy Channel RDAs}
   \vfill
   \centerline{Gaussian Variational Autoencoders (Gaussian VAEs)}
 
-\slide{Issue I: Measuring Cross Entropy}
-
-We typically cannot measure cross-entropy for a graphical model.
-
-\vfill
-But we can measure cross-entropy of a compression model.
-
-\vfill
-We write $\tilde{z}(y)$ for a lossless compression of $y$ and write $|\tilde{z}_\Phi(y)|$ for the bit length of the compression.
-
-\vfill
-{\color{red}
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;-\ln P_\Phi(y) \\
-\\
-\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;|\tilde{z}_\Phi(y)|\;\;\;\mbox{such that $\forall y\;\;\;y = \tilde{y}_\Phi(\tilde{z}_\Phi(y))$}
-\end{eqnarray*}
-}
-
-\slide{Issue II: Avoiding Differential Entropy}
-
-For reasons discussed below, we would like to avoid differential entropy.
-
-\vfill
-To avoid differential entropy we use a rate-distortion objective.
-
-\vfill
-{\color{red} \huge
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;-\ln P_\Phi(y)\;\;\;\mbox{$y$ discrete} \\
-\\
-\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;-\ln P_\Phi(\tilde{y}_\Phi(y)) + \lambda \mathrm{Dist}(y,\tilde{y}_\Phi(y))
-\left\{\begin{array}{l}\mbox{$y$ continuous} \\ \mbox{$\tilde{y}$ discrete}\end{array}\right.
-\end{eqnarray*}
-}
-
-\slide{Lossy Compression}
-
-Lossy compression combines compression for measuring cross-entropy with distortion for avoiding differential entropy.
-
-\vfill
-{\color{red}
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;-\ln P_\Phi(y) \\
-\\
-\Phi^* & = & \argmin_\Phi \;E_{y \sim \pop} \;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,\tilde{y}_\Phi(\tilde{z}_\Phi(y)))
-\end{eqnarray*}
-}
-
-
-
-\slide{Entropy and Compression}
-
-For a distribution $P(y)$ on a discrete set ${\cal Y}$, the entropy $H(P)$, when measured using $\log_2$ rather than $\ln$, gives the number of bits needed
-on average, when drawing from $P$, to represent the elements of ${\cal Y}$.
-
-\vfill
-The cross-entropy $H(P,Q)$ give the number of bits used to code for items drawn from $P$ but using the code defined by $Q$.
-
-\vfill
-Cross-entropy gives the ``data rate'' when transmitting codes for items drawn from $P$ but using the code defined by $Q$.
-
-\slide{Entropy and Compressibility}
-
-Let $S$ be a finite set.
-
-\vfill
-Let $z$ be a compression (or coding) function  assigning a bit string $z(y)$ to each $y \in S$.
-
-\vfill
-The compression function $z$ is called {\em prefix-free} if for $y' \not = y$ we have that $z(y')$ is not a prefix of $z(y)$.
-
-\slide{Prefix-Free Codes as Probabilities}
-
-A prefix-free code defines a binary branching tree --- branch on the first code bit, then the second, and so on.
-
-\vfill
-For a prefix-free code, only the leaves of this tree can be labeled with the elements of $S$.
-
-\vfill
-The code defines a probability distribution on $S$ by randomly selecting branches.
-
-\vfill
-We have $P_z(y) = 2^{-|z(y)|}$.
-
-\slide{Bits vs. Nats}
-
-We have that $|z(y)|$ is a number of bits.
-
-\vfill
-We can define entropy in units of bits by
-
-\vfill
-$$H_2(y) = E_y\; - \log_2 P(y) = H(y)/(\ln \;2)$$
-
-\vfill
-If $y$ is uniformly distributed over 8 values then $H_2(y)$ is 3 bits.
-
-\vfill
-We have that $H_2(y)$ is a number of bits while $H(y)$ is a number of ``nats''.
-
-\slide{The Source Coding (compression) Theorem}
-
-(1) There exists a prefix-free code $z$ such that
-$$|z(y)| <= (- \log_2 \mathrm{Pop}(y)) + 1$$
-and hence
-$$E_{y\sim \mathrm{Pop}} |z(y)| \leq H_2(\mathrm{Pop}) +1$$
-
-\vfill
-(2) For any prefix-free code $z$
-
-$$E_{y \sim \mathrm{Pop}}\;|z(y)| \geq H_2(\mathrm{Pop})$$
-
-\slide{Code Construction}
-
-\vfill
-We construct a code by iterating over $y \in S$ in order of decreasing probability (most likely first).
-
-\vfill
-For each $y$ select a code word $z(y)$ (a tree leaf) with length (depth)
-
-\vfill
-$$|z(y)| = \lceil - \log_2 \mathrm{Pop}(y)\rceil$$
-
-\vfill
-and where $z(y)$ is not an extension of (under) any previously selected code word.
-
-\slide{Code Existence Proof}
-
-At any point before coding all elements of $S$ we have
-$$\sum_{y \in \mathrm{Defined}} 2^{-|z(y)|} \leq \sum_{y \in \mathrm{Defined}} \mathrm{Pop}(y) < 1$$
-
-\vfill
-Therefore there exists an infinite descent into the tree that misses all previous code words.
-
-\vfill
-Hence there exists a code word $z(x)$ not under any previous code word with
-$|z(x)| = \lceil - \log_2 \mathrm{Pop}(y)\rceil$.
-
-\vfill
-Furthermore $z(x)$ is at least as long as all previous code words and hence $z(x)$ is not a prefix of any previously selected code word.
-
-\slide{No Better Code Exists}
-
-Let $z$ be an arbirtary coding.
-
-\begin{eqnarray*}
-E_y\;|z(y)| & = & E_y\; -\log_2 P_z(y) \\
-\\
- & = & H_2(\mathrm{Pop},P_z) \\
- \\
- &= & H_2(\mathrm{Pop}) + KL_2(\mathrm{Pop},P_z) \\
- \\
- &\geq & H_2(\mathrm{Pop})
-\end{eqnarray*}
- 
-\slide{Huffman Coding}
-
-Maintain a list of trees $T_1,\;\dots,\;T_N$.
-
-\vfill
-Inititally each tree is just one root node labeled with an element of $S$.
-
-\vfill
-Each tree $T_i$ has a weight equal to the sum of the probabilities of the nodes on the leaves of that tree.
-
-\vfill
-Repeatedly merge the two trees of lowest weight into a single tree until all trees are merged.
-
-\slide{Optimality of Huffman Coding}
-
-{\bf Theorem}: The Huffman code $T$ for $\mathrm{Pop}$ is optimal --- for any other tree $T'$ we have $H(\mathrm{Pop},T) \leq H(\mathrm{Pop},T')$.
-
-\vfill
-{\bf Proof}: The algorithm maintains the invariant that there exists an optimal tree including
-all the subtrees on the list.
-
-\vfill
-To prove that a merge operation maintains this invariant we consider any tree containing the given subtrees.
-
-\vfill
-Consider the two subtrees $T_i$ and $T_j$ of minimal weight.  Without loss of generality we can assume that $T_i$ is at least as deep as $T_j$.
-
-\vfill
-Lowering $T_j$ to be the sibling of $T_i$ while raising the old sibling of $T_i$ to $T_j$'s original position
-brings $T_i$ and $T_j$ together and can only improve the average depth.
-
-\slide{Differential Entropy}
-
-Consider a continuous density $p(x)$.  For example
-
-\vfill
-$$p(x) = \frac{1}{\sqrt{2\pi}\; \sigma}\; e^{\frac{-x^2}{2\sigma^2}}$$
-
-\vfill
-Differential entropy is often defined as
-
-\vfill
-$$H(p) \doteq \int \left(\ln \frac{1}{p(x)}\right) p(x) dx$$
-
-
-\slide{Differential Entropy Depends on the Choice of Units}
-
-\begin{eqnarray*}
-  H({\cal N}(0,\sigma)) & = &  + \int \left( \ln(\sqrt{2\pi} \sigma) + \frac{x^2}{2\sigma^2}\right) p(x) dx \\
-  \\
-  & = & \ln(\sigma) + \ln(\sqrt{2\pi}) + \frac{1}{2}
-\end{eqnarray*}
-
-\vfill
-But if we take $y \doteq x/2$ we get $H(y) = H(x) - \ln 2$.
-
-\vfill
-Also for $\sigma << 1$, we get $H(p) < 0$
-
-\vfill
-Hence differential entropy then depends on the choice of units --- a distributions on lengths will have a different entropy
-when measuring in inches than when measuring in feet.
-
-\slide{More Problems with Differential Entropy}
-
-There are also other problems with continuous entropy and cross-entropy.
-
-\vfill
-\begin{itemize}
-\item Finite continuous entropy violates the source coding theorem --- it takes an infinite number of bits to code a real number.
-
-\vfill
-\item Finite continuous entropy violates the data processing inequality that $H(f(x)) \leq H(x)$.  For a continuous random variable $x$ under finite continuous entropy we can have $H(f(x)) > H(x)$.
-\end{itemize}
-
-\vfill
-For these reasons it seems advisable to avoide differential entropy and differential cross entropy.
-
-\slide{Differential KL-divergence is Independent of Units}
-
-$$KL(p,q) = \int \left( \ln \frac{p(x)}{q(x)}\right) p(x) dx$$
-
-\vfill
-This integral can be computed by dividing the real numbers into bins and computing the $KL$ divergence between the distributions on bins.
-
-\vfill
-The KL divergence between the bin distribution often approaches a finite limit as the bin size goes to zero.
-
-
 \slide{Rate-Distortion Autoencoders}
 
 Given a continuous signal $y$ we can compress it into a (discrete) bit string $\tilde{z}_\Phi(y)$.
 
 \vfill
-We let $\tilde{y}_\Phi(\tilde{z}_\Phi(y))$ be the decompression of $\tilde{z}_\Phi(y)$.
+We let $y_\Phi(\tilde{z}_\Phi(y))$ be the decompression of $\tilde{z}_\Phi(y)$.
 
 \vfill
 We can then define a rate-distortion loss.
 
-{\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,\tilde{y}_\Phi(\tilde{z}_\Phi(y)))$$}
-
-\slide{The Rate-Distortion Tradeoff}
-
-{\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,\tilde{y}(\tilde{z}(y)))$$}
-
-\vfill
-The first term is as a rate measured in in bits per sample.
-
-\vfill
-The meta-parameter $\lambda$ has units of inverse distortion and controls the trade off between rate and distortion.
+{\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$}
 
 \slide{Common Distortion Functions}
 
-$$\Phi^* = \argmin_\Phi\;E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,\tilde{y}_\Phi(y))$$
+$$\Phi^* = \argmin_\Phi\;E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(y))$$
 
 \vfill
 It is common to take
 
-$$\mathrm{Dist}(y,\tilde{y}) = ||y-\tilde{y}||^2 \hspace{4em}(L_2)$$
+$$\mathrm{Dist}(y,y') = ||y-y'||^2 \hspace{4em}(L_2)$$
 
 \vfill
 or
 
-$$\mathrm{Dist}(y,\tilde{y}) = ||y-\tilde{y}||_1 \hspace{4em} (L_1)$$
+$$\mathrm{Dist}(y,y') = ||y-y'||_1 \hspace{4em} (L_1)$$
 
 \slide{A Case Study in Image Compression}
 
@@ -305,7 +48,7 @@ $$\mathrm{Dist}(y,\tilde{y}) = ||y-\tilde{y}||_1 \hspace{4em} (L_1)$$
 
 
 \vfill
-$${\color{red}y \hspace{5em}  \tilde{z}_\Psi(y) \hspace{4em} \tilde{z} \hspace{6em} \tilde{y}_\Phi(\tilde{z}) \hspace{4em}||y - \tilde{y}||^2}$$
+$${\color{red}y \hspace{5em}  \tilde{z}_\Psi(y) \hspace{4em} \tilde{z} \hspace{6em} y'_\Phi(\tilde{z}) \hspace{4em}||y - y'||^2}$$
 \centerline{\includegraphics[width=9in]{../images/Deconv}}
 
 \anaslide{JPEG at 4283 bytes or .121 bits per pixel}
@@ -340,44 +83,12 @@ $$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm
 \vfill
 Oops: Because of rounding, $\tilde{z}_\Phi(y)$ is discrete and the gradients are zero.
 
-\slide{Rate-Distortion Autoencoders}
-
-\begin{eqnarray*}
-\Phi^* & & = \argmin_\Phi {\cal L}_{\mathrm{rate}}(\Phi) + \lambda {\cal L}_{\mathrm{dist}} (\Phi) \\
-\\
-{\cal L}_{\mathrm{rate}}(\Phi) & = & E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| \\
-\\
-{\cal L}_{\mathrm{dist}}(\Phi) & = & E_{y \sim \mathrm{Pop}} \;\mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))
-\end{eqnarray*}
-
 \vfill
-We will consider differentiable approximations to both ${\cal L}_{\mathrm{rate}}$ and ${\cal L}_{\mathrm{dist}}$.
+We will train using a differentiable approximation.
 
-\slide{A Differentiable Approximation of ${\cal L}_{\mathrm{rate}}$}
+\slide{A Noise Model of Rounding}
 
-\begin{eqnarray*}
-{\cal L}_{\mathrm{rate}}(\Phi) & = & E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| 
-\end{eqnarray*}
-
-\vfill
-Recall that {\color{red} $\tilde{z}_\Phi(y)$} is a rounding of a continuous encoding {\color{red} $z_\Phi(y)$}.
-
-
-\vfill
-We can make the cross-entropy loss differentiable by approximating discrete entropy with differential entropy.
-
-\vfill
-$$|{\color{red} \tilde{z}_\Phi(y)}| \approx - \ln p_\Psi({\color{red} z_\Phi(y)})\;\;\;\;\;\;\;p_\Psi(z) \approx \sum_i \log_2 z_i$$
-
-
-\slide{Differential Entropy vs. Discrete Entropy}
-
-\bigskip
-\centerline{\includegraphics[height=5in]{../images/RateDist6}}
-
-\slide{A Differentiable Approximation of ${\cal L}_{\mathrm{dist}}$}
-
-We can make the the distortion loss differentiable by modeling rounding as the addition of noise.
+We can make distortion differentiable by modeling rounding as the addition of noise.
 
 \begin{eqnarray*}
 {\cal L}_{\mathrm{dist}}(\Phi) & = & E_{y \sim \mathrm{Pop}} \;\mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y))) \\
@@ -391,6 +102,31 @@ Here $\epsilon$ is a noise vector each component of which is drawn uniformly fro
 \slide{Noise vs. Rounding}
 
 \centerline{\includegraphics[height=5in]{../images/RateDist5}}
+
+
+\slide{A Differentiable Approximation of Code Length}
+
+\begin{eqnarray*}
+{\cal L}_{\mathrm{rate}}(\Phi) & = & E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| 
+\end{eqnarray*}
+
+\vfill
+Recall that {\color{red} $\tilde{z}_\Phi(y)$} is a rounding of a continuous encoding {\color{red} $z_\Phi(y)$}.
+
+
+\vfill
+We approximate the code length after rounding using a differentiable function of the value before rounding.
+
+\vfill
+{\color{red} $$|{\color{red} \tilde{z}_\Phi(y)}| \approx \sum_i (\log_2 {\color{red} z_\Phi(y)[i]})^+$$}
+
+This continuous value can be interpreted as a ``differential entropy''.
+
+\slide{Differential Entropy vs. Discrete Entropy}
+
+\bigskip
+\centerline{\includegraphics[height=5in]{../images/RateDist6}}
+
 
 \slide{Details}
 
@@ -449,19 +185,25 @@ is the mutual information between $y$ and $z_\Phi(y) + \epsilon$.
 
 {\color{red} $$I(y,z_\Phi(y)+\epsilon)$$}
 
-\slide{Noisy-Channel RDAs (TZ)}
+\slide{Noisy-Channel RDAs}
 
 We now consider {\color{red} $p_\Phi(z|y)$} as a generalization of {\color{red} $z_\Phi(y) + \epsilon$}.
 
 \vfill
 The channel capacity theorem motivates
 
+$${\color{red} p_\Phi(z) = E_{y \sim \pop}\;p_\Phi(z|y)}$$
+$${\color{red} I(y,z)} = H(z) - H(z|y) = {\color{red} E_{y \sim \pop}\;KL(p_\Phi(z|y),p_\Phi(z))}$$
+
+
 \vfill
 {\huge
 \begin{eqnarray*}
-{\color{red} \Phi^*} & = & {\color{red} \argmin_\Phi \left(\;I(y,z) + \;\lambda E_{y \sim \pop,z \sim p_\Phi(z|y)}\;\mathrm{Dist}(y,y_\Phi(z))\;\right)} \\
+{\color{red} \Phi^*} & = & \argmin_\Phi \left(\;{\color{red} I(y,z)} + \;\lambda E_{y \sim \pop,z \sim p_\Phi(z|y)}\;\mathrm{Dist}(y,y_\Phi(z))\;\right) \\
 \\
-& = & {\color{red} \argmin_\Phi  E_{y \sim \pop}\;\left(\;KL(p_\Phi(z|y),p_\Phi(z)) + \lambda E_{z \sim p_\Phi(z|y)}\; \mathrm{Dist}(y,y_\Phi(z))\;\right)} \\
+& = & {\color{red} \argmin_\Phi  E_{y \sim \pop}\;\left(\begin{array}{l}\;\;\;\;KL(p_\Phi(z|y),p_\Phi(z)) \\
+\\
++ \lambda E_{z \sim p_\Phi(z|y)}\; \mathrm{Dist}(y,y_\Phi(z))\end{array}\right)}
 \end{eqnarray*}
 }
 
@@ -484,33 +226,129 @@ I_\Phi(y,z) & = & E_{y \sim \pop}\; KL(p_\Phi(z|y),p_\Phi(z)) \\
 
 \slide{The Noisy-Channel RDA}
 
-{\huge {\color{red} $$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_y \;KL(p_\Phi(z|y),P_\Psi(z)) \;+\; \lambda \; E_{z\sim p_\Phi(z|y)}\;\mathrm{Dist}(y,\;y_\Phi(z))$$}}
+{\color{red} $$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{y\sim \pop} \left(\begin{array}{l}\;\;\;\;KL(p_\Phi(z|y),p_\Psi(z)) \\
+\\
++ \lambda \; E_{z\sim p_\Phi(z|y)}\;\mathrm{Dist}(y,\;y_\Phi(z))\end{array}\right)$$}
+
+
+\slide{Gaussian Noisy-Channel RDA}
+
+$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{y\sim \pop} \left(\begin{array}{l}\;\;\;\;KL(p_\Phi(z|y),p_\Psi(z)) \\
+\\
++ \lambda \; E_{z\sim p_\Phi(z|y)}\;\mathrm{Dist}(y,\;y_\Phi(z))\end{array}\right)$$
+
+{\color{red}
+\begin{eqnarray*}
+p_\Phi(z[i]\;|\;y) & = & {\cal N}(z_\Phi(y)[i],\sigma_\Phi(y)[i])) \\
+\\
+p_\Psi(z[i]) & = & {\cal N}(\mu_\Psi[i],\sigma_\Psi[i]) \\
+\\
+\mathrm{Dist}(y,y') & = & ||y-y'||^2
+\end{eqnarray*}
+}
+
+\slide{Closed Form KL-Divergence}
+
+\begin{eqnarray*}
+& & KL(p_\Phi(z|y),p_\Psi(z)) \\
+\\
+\\
+& = & \sum_i \;\frac{\sigma_\Phi(y)[i]^2 + (z_\Phi(y)[i]-\mu_\Psi[i])^2}{2 \sigma_\Psi[i]^2}
++ \ln\frac{\sigma_\Psi[i]}{\sigma_\Phi(y)[i]} - \frac{1}{2}
+\end{eqnarray*}
+
+
+\slide{Standardizing $p_\Psi(z)$}
+
+The KL-divergence term is
+    
+$$\sum_i \;\frac{{\color{red} \sigma}_\Phi(y)[i]^2 +({\color{red}
+z}_\Phi(y)[i] - {\color{red} \mu}_\Psi[i])^2}{2
+{\color{red} \sigma}_\Psi[i]^2}
++ \ln\frac{{\color{red} \sigma}_\Psi[i]}{{\color{red} \sigma}_\Phi(y)[i]}
+- \frac{1}{2}$$
 
 \vfill
-Here $\gamma$ has the same units as distortion and controls the trade-off between rate and distortion.
+We can adjust $\Phi$ to $\Phi'$ such that
+\begin{eqnarray*}
+z_{\Phi'}(y)[i] & = & z_\Phi(y)[i]/\sigma_\Psi[i] + \mu_\Psi[i] \\
+\sigma_{\Phi'}(y)[i] & = & \sigma_\Phi(y)[i]/\sigma_\Psi[i]
+\end{eqnarray*}
+
+\vfill
+We then get {\color{red} $KL(p_{\Phi'}(z|y),{\cal N}(0,I)) = KL(p_{\Phi}(z|y),p_\Psi(z))$}.
+
+\slide{Standardizing $p_\Psi(z)$}
+
+\vfill
+Without loss of generality the Gaussian noisy channel RDA becomes.
+
+{\color{red} $$\Phi^* = \argmin_{\Phi}\; E_{y \sim \pop}\left(\begin{array}{l}\;\;\;\;KL(p_\Phi(z|y),{\cal N}(0,I)) \\
+\\
++ \lambda E_{z \sim p_\Phi(z|y)}\;\mathrm{Dist}(y,y_\Phi(z))\end{array}\right) $$}
+
+\slide{Reparameterization Trick for Optimizing Distortion}
+
+$$p_\Phi(z[i]|y) = {\cal N}(z_\Phi(y)[i],\sigma_\Phi[i])$$
+
+\vfill
+\begin{eqnarray*}
+& & E_{\color{red} z \sim p_\Phi(z|y)} \;||y - y_\Phi(z)||^2 \\
+\\
+\\
+& = & E_{\color{red} \epsilon \sim {\cal N}(0,I)} \;{\color{red} z[i] = z_\Phi(y)[i] + \sigma_\Phi(y)[i]\epsilon[i]};\;\; \;||y -y_\Phi(z)||^2
+\end{eqnarray*}
+
+\slide{Sampling}
+
+\centerline{Sample {\color{red} $z \sim {\cal N}(0,I)$} and compute {\color{red} $y_\Phi(z)$}}
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/VariationalFaces}}
+\centerline{[Alec Radford]}
+
 
 \slide{Summary: Rate-Distortion}
 
-
-Rate-Distortion: $y$, continuous, $\tilde{z}$ a bit string,
+RDA: $y$ continuous, $\tilde{z}$ a bit string,
 
 {\color{red}
 \begin{eqnarray*}
-\Phi^* &  = &  \argmin_\Phi E_y \;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))
+\Phi^* &  = &  \argmin_\Phi E_{y \sim \pop} \;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))
 \end{eqnarray*}
 }
 
 \vfill
-Noisy Channel: {\color{red} $\tilde{z} = z_\Phi(y) + \sigma_\Phi(y) \odot \epsilon$,\hspace{2em} $\epsilon \sim {\cal N}(0,I)$}
+Gaussian RDA: {\color{red} $z = z_\Phi(y) + \sigma_\Phi(y) \odot \epsilon$,\hspace{2em} $\epsilon \sim {\cal N}(0,I)$}
 
 {\color{red}
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi E_y\; \;KL(p_\Phi(\tilde{z}|y),{\cal N}(0,I)) + E_{\tilde{z}\sim p_\Phi(\tilde{z}|y)}\;\lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}))
+\Phi^* & = & \argmin_\Phi E_{y \sim \pop}\left(\begin{array}{l}\;\;\; \;KL(p_\Phi(z|y),{\cal N}(0,I)) \\ \\ + \lambda E_{z\sim p_\Phi(z|y)}\; \mathrm{Dist}(y,y_\Phi(z)) \end{array}\right)
 \end{eqnarray*}
 }
+
+\vfill
+Issue: Do we expect compression to yield useful features?
 
 \slide{END}
 
 }
 \end{document}
+
+
+\slide{Gaussian Variational Autoencoder (Gaussian VAE)}
+
+{\huge  $$\Phi^* = \argmin_{\Phi}\;E_{y\sim \pop} \left(\begin{array}{l}\;\;\;\;\;\;KL(p_\Phi(z|y),{\cal N}(0,I)) \\
+\;+\; \; {\color{red} \frac{1}{2(\sigma^*(u))^2}} E_{z\sim p_\Phi(z|y)}\;\mathrm{Dist}(y,\;y_\Phi(z))\end{array}\;\right)$$
+
+\begin{eqnarray*}
+z[i] & = & z_\Phi(y)[i] + \sigma_\Phi(y)[i]\epsilon\;\;\;\;\epsilon \sim {\cal N}(0,1) \\
+p_\Psi(z[i]) & = & {\cal N}(\mu_\Psi[i],\sigma_\Psi[i]) \\
+\mathrm{Dist}(y,y') & = & ||y-y'||^2 \\
+\\
+{\color{red} \sigma^*(u)} & {\color{red} =} & {\color{red} \argmin_\sigma E_{y \sim \pop,z \sim p_\Phi(z|y)}\; \frac{1}{2\sigma^2}\mathrm{Dist}(y,y_\Phi(z)) + d \ln \frac{\sigma}{u}}
+\;\mbox{for $y \in \mathbb{R}^d$}
+\end{eqnarray*}
+
+\vfill
+\centerline{{\color{red} $u$} is the unit of measure for the components of $y$}
 
