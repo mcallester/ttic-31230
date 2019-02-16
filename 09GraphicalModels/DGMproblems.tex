@@ -3,8 +3,8 @@
 \parindent = 0em
 \parskip = 1ex
 
-%\newcommand{\solution}[1]{}
-\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+\newcommand{\solution}[1]{}
+%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
 
 \begin{document}
 
@@ -13,40 +13,12 @@
 
 \bigskip
 
-\centerline{\bf Problems for CTC.}
+\centerline{\bf Problems for Graphical Models.}
 
 \bigskip
 \bigskip
-{\bf Problem 1.} This problem is on a CTC-like algorithm for image labeling.
 
-Suppose that the training data consists of pairs $(I,S)$ where $I$ is an image and $S$
-is a set of object types occuring in the image.  For example $S$ might be $\{\mathrm{Person},\mathrm{Dog},\mathrm{Car}\}$.
-To be concrete we can take ${\cal C}$ to be the set of image labels used in CIFAR 100 and take $S$ to be a subset
-of ${\cal C}$ containing no more than five labels ($|S| \leq 5$).
-We want to do SGD on a model defining $P_\Phi(S\;|\;I)$.
-
-We will use a latent variable $z[X,Y]$ such that for pixel coordinates $(x,y)$ we have $z[x,y] \in {\cal C} \cup \{\bot\}$.
-For a given $z[X,Y]$ define $S(z[X,Y])$ to be the set of classes appearing in $z[X,Y]$, i.e.,
-$S(z[X,Y]) = \{c\;\exists\;x,y\;z(x,y) = c\}$. Here the ``semantic segmentation'' $Z[X,Y]$ is analogous to the phoneme
-sequence $z[T]$ in CTC. Unlike the CTC model, the label
-$S$ is a set rather than a sequence.
-
-We assume a CNN (with convolutions of stride 1 to preserve spatial dimensions) followed by
-a softmax at each pixel to get a probability
-$P_\Phi(z[x,y] = c)$ for each pixel location $(x,y)$ and each $c \in {\cal C} \cup \{\bot\}$ and where
-each pixel location has an independent probability distribution over classes. 
-To simplify notation we can reshape the pixel locations into a linear sequence
-and replace $z[X,Y]$ by $z[T]$ with $T = X \times Y$so we have $z[0],z[1],\ldots,z[T-1]$.
-
-Define
-$$S_t = \{c \in {\cal C}\;\exists t'\leq t\;z[t'] = c\}$$
-For $U \subseteq S$ define
-$$F[U,t] = P(S_t = U)$$
-Note that for $|S| \leq 5$ there are at most 32 possible values of $U$.
-Give dynamic programming equations defining $F[U,0]$ and defining $F[U,t+1]$ in term of $F[U',t]$ for various $U'$.
-
-\ignore{
-{\bf Problem}
+{\bf Problem 1}
 This problem is on Pseudolikelihood. Consider a graphical model with $N$ nodes numbered 1 through $N$ and where each node can take on one of the values $0$ or $1$.
 We let $\hat{x}$ be an assignment of a value to every node. We define the score of $\hat{x}$ by
 $$f(\hat{x}) = \sum_{i = 1}^{N-1} \mathbbm{1}[\hat{x}[i] = \hat{x}[i+1]]$$
@@ -76,7 +48,7 @@ $$Q_f(\hat{x}[i=1]\; |\;\hat{x}/i) = \frac{1}{1 + e^{-1}}$$
 This gives
 
 $$\tilde{Q}(\hat{x}) = (1 + e^{-1})^{-2}(1 + e^{-2})^{-(N-2)}$$
-}}
+}
 
 
 

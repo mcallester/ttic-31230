@@ -1,0 +1,60 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+\parskip = 1ex
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+
+\bigskip
+
+\centerline{\bf Problems for Latent Variables, EM, the ELBO and VAEs.}
+
+\bigskip
+\bigskip
+
+{\bf Problem 1.}  Assume a population distribution on pairs $(x,y)$ where $x$ is an image and $y$ is a semantic segmentation of $x$.
+The semantic segmentation $y$ assigns a class label $y[i] \in {\cal C}$ to each pixel $i$.  A sparse segmentation
+$\tilde{y}$ assigns a class label or a blank to each pixel with $\tilde{s}[i] \in {\cal C} \cup \{\bot\}$. We expect most pixels to
+be blank.  Suppose we want to learn a compression algorithm $\tilde{y}_\Phi(x,y)$ that compresses a given semantic segmentation
+$y$ into a sparse semantic segmentation $\tilde{y}_\Phi(x,y)$ and a decompression algorithm $y_\Phi(x,\tilde{y})$ that decompresses
+the sparse segmentation into a full segmentation.
+For two segmentation $y$ and $y'$ let $\mathrm{Dist}(y,y')$ be the Hamming distance between them --- the number of pixels on which they disagee.
+
+\medskip
+(a) Assume a representation of a spare coding as a list of pairs $(i,c)$ with $i$ a pixel and $c$ a semantic category.
+Assume there are $P$ pixels and $k$ semantic categories. Define a probability distribution $P(L)$ for lists of this form
+where $\ln P(L)$ is proportional to the length of the list $L$.
+
+\medskip
+(b) Use your answer to (a) to define a rate-distortion objective function for optimizing $\Phi$.
+
+\medskip
+(c) What advantage does this rate-distortion autoencoder architecture have over a graphical model?
+
+\medskip
+(d) What are the challenges in training this rate-distortion autoencoder.
+
+\bigskip
+{\bf Problem 2.}
+Consider a conditional latent variable model satisfying.
+$$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z,x)$$
+
+\medskip
+(a) Show
+$$E_{(x,y) \sim \pop} - \ln P_\Phi(y|x) = \inf_Q\; E_{(x,y) \sim \pop, \;z \sim Q(z|y,x)} - \ln \frac{P_\Phi(z,y|x)}{Q(z|y,x)}.$$
+The expression on the right hand is the negative of the ELBO --- the ELBO loss to be minimized.
+Hint: Since all probabilities involved are conditioned on $x$, we can essentially ignore $x$.
+
+\medskip
+(b) Consider the negative ELBO optimization problem
+$$\Phi^*, \Psi^* = \argmin_{\Phi,\Psi} \; E_{y \sim \pop, \;z \sim p_\Psi(z|y,x)} - \ln \frac{P_\Phi(z,y|x)}{P_\Psi(z|y,x)}$$
+What is the motivation for the ELBO optimization over the more direct optimization problem
+$$\Phi^* = \argmin_{\Phi} \; E_{y \sim \pop, \;z \sim p_\Phi(z|y,x)} - \ln P_\Phi(y|z,x)\;\;\;\mbox{?}$$
+
+\end{document}

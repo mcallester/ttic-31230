@@ -215,14 +215,29 @@ Unfortunately we cannot compute {\color{red} $p_\Phi(z) = E_{y \sim \pop}\;p_\Ph
 We now replace {\color{red} $p_\Phi(z)$} by a friendly (variational) model {\color{red} $p_\Psi(z)$}.
 
 \begin{eqnarray*}
-I_\Phi(y,z) & = & E_{y \sim \pop}\; KL(p_\Phi(z|y),p_\Phi(z)) \\
+ & & I_\Phi(y,z) \\
+ \\
+ & = & E_{y \sim \pop}\; KL(p_\Phi(z|y),p_\Phi(z)) \\
 \\
-& = & E_{y,z\sim P_\Phi(z|y)}\; \ln \frac{p_\Phi(z|y)}{{\color{red} p_\Psi(z)}} + \ln \frac{{\color{red} p_\Psi(z)}}{p_\Phi(z)} \\
+& = & E_{y,z\sim P_\Phi(z|y)}\; \left(\ln \frac{p_\Phi(z|y)}{{\color{red} p_\Psi(z)}} + \ln \frac{{\color{red} p_\Psi(z)}}{p_\Phi(z)}\right) \\
+\\
+& = & E_{y \sim \pop}\;KL(p_\Phi(z|y),p_\Psi(z)) + \left(E_{y \sim \pop,\;z\sim p_\Phi(z|y)}\;\ln \frac{p_\Psi(z)}{p_\Phi(z)}\right)
+\end{eqnarray*}
+
+\slide{A Variational Upper Bound}
+
+\begin{eqnarray*}
+ & & I(y,z) \\
+ \\
+ & = & E_{y \sim \pop}\;KL(p_\Phi(z|y),p_\Psi(z)) + \left(E_{\color{red} y \sim \pop,\;z\sim p_\Phi(z|y)}\;\ln \frac{p_\Psi(z)}{p_\Phi(z)}\right) \\
+\\
+& = & E_y\;KL(p_\Phi(z|y),p_\Psi(z)) + E_{\color{red} z\sim p_\Phi(z)}\;\ln \frac{p_\Psi(z)}{p_\Phi(z)} \\
 \\
 & = & E_y\;KL(p_\Phi(z|y),p_\Psi(z)) - KL(p_\Phi(z),p_\Psi(z)) \\
 \\
-& \leq & E_y\;KL(p_\Phi(z|y),p_\Psi(z))
+& \leq & E_{y \sim \pop}\; KL(p_\Phi(z|y),p_\Psi(z))
 \end{eqnarray*}
+
 
 \slide{The Noisy-Channel RDA}
 
