@@ -10,148 +10,90 @@
   \bigskip
   \centerline{David McAllester, Winter 2019}
   \vfill
-  \centerline{\bf Discrimination and Constrastive Estimation}
-  \vfill
   \centerline{\bf Generative Adversarial Networks (GANs)}
   \vfill
 \vfill
 \vfill
 
-\slide{Modeling Distributions: Discrimination}
+\slidetwo{Generative Adversarial Nets}{Goodfellow et al., June 2014}
 
-Consider a friendly negative sampling distribution $Q$.
+Let ${\color{red} \pop \uplus P_\Phi}$ be the distribution defined flipping an unbiased coin and, if heads, returning {\color{red} $(1,y)$} with
+{\color{red} $y \sim \pop$} and, if tails, returning {\color{red} $(-1,y)$} with {\color{red} $y \sim P_\Phi$}.
 
-\vfill
-Draw $i$ from the uniform distribution on $\{-1,1\}$.
-
-\vfill
-For $i = 1$ draw $y$ from $\pop$ and otherwise draw $y$ from $Q$.
-
-\vfill
-I will write this as {\color{red} $(i,y) \sim (\pop \uplus Q)$}.
+{\color{red} $$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y) \sim (\pop \uplus P_\Phi)} - \ln P_\Psi(i|y)$$}
+\centerline{/\hspace{2.5em} $\backslash$ \hspace{9.5em}~}
+\centerline{Generator \hspace{2em}Discriminator \hspace{8em}~}
 
 \vfill
-{\color{red} $$\Phi^* = \argmin_\Phi E_{(i,y) \sim (\pop \uplus Q)}\;-\ln D_\Phi(i|y)$$}
+Assuming Universality: {\color{red} $P_{\Phi^*} = \pop$}
 
-\slide{Discrimination}
-
-{\color{red} $$\Phi^* = \argmin_\Phi E_{(i,y) \sim (\pop \uplus Q)}\;-\ln D_\Phi(i|y)$$}
-
-Assuming Universality
-$$D_{\Phi^*}(1|y) = P(1|y) = \frac{P(1\;\mathrm{and}\; y)}{P(y)} = \frac{\frac{1}{2}\mathrm{Pop}(y)}{\frac{1}{2}\mathrm{Pop}(y) + \frac{1}{2}Q(y)}$$
-
-\vfill
-\vfill
-{\color{red} $$ \pop(y) = \frac{D_{\Phi^*}(1|y)Q(y)}{1-D_{\Phi^*}(1|y)}$$}
-
-\slide{Descrimination}
-
-The discrimination estimate of $\pop$ is poor when the discrimination problem is easy --- when the discrimination loss can be driven close to zero.
-
-\slide{Modeling Distributions: Contrastive Estimation}
-
-Consider a friendly negative sampling distribution $Q$.
-
-\vfill
-Draw one ``positive'' from $\pop$ and $k$ ``negatives'' from $Q$.
-
-\vfill
-Shuffle the drawn values into a sequence $y_1,\ldots,y_{k+1}$.
-
-\vfill
-Let $i$ be the index of the positive example $y_i$.
-
-\vfill
-I will write this as $(i,y_1,\ldots,y_{k+1}) \sim (\pop \uplus Q^k)$.
-
-{\color{red} $$\Phi^* = \argmin_\Phi\; E_{(i,y_1,\ldots,y_{k+1})\sim (\pop\uplus Q^k)} \;- \ln D_\Phi(i|y_1,\ldots,y_{k+1})$$}
-
-\slide{Constrastive Estimation}
-{\huge
-\begin{eqnarray*}
-{\color{red} P(i \;\mathrm{and}\;y_1,\ldots,y_{k+1})} & = & \frac{1}{k+1}\;\pop(y_i)\prod_{j \not = i}Q(y_j) \\
-\\
-& = & {\color{red} \alpha \frac{\pop(y_i)}{Q(y_i)}},\;\;\;\alpha = \frac{1}{k+1} \prod_i Q(y_i) \\
-\\
-\\
-{\color{red} P(i|y_1,\ldots,y_k)} & = & \frac{P(i\;\mathrm{and}\;y_1,\ldots,y_{k+1})}{\sum_i\; P(i\;\mathrm{and}\;y_1,\ldots,y_{k+1})} \\
-\\
-\\
-& = & {\color{red}  \frac{1}{Z}\;\;\frac{\pop(y_i)}{Q(y_i)}\;\;\;Z = \sum_i \frac{\pop(y_i)}{Q(y_i)}}
-\end{eqnarray*}
-}
-
-\slide{Constrastive Estimation}
-
-{\color{red} $$\Phi^* = \argmin_\Phi E_{(i,y_1,\ldots,y_{k+1}) \sim (\pop\uplus Q^k)} \;- \ln D_\Phi(i|y_1,\ldots,y_{k+1})$$}
-{\color{red} $$D_\Phi(i|y_1,\ldots,y_{k+1}) \doteq \softmax_i s_\Phi(y_i)$$}
-{\color{red} $$P(i|y_1,\ldots,y_k) \propto \frac{\pop(y_i)}{Q(y_i)}$$}
-
-Assuming universality:
-\begin{eqnarray*}
-s_{\Phi^*}(y) & = & \ln \frac{\pop(y)}{Q(y)} + C \;\;\;\mbox{for arbitrary $C$}\\
-\\
-{\color{red} \pop(y)} & {\color{red} =} & {\color{red} \softmax_y\;\;\; s_{\Phi^*}(y) - \ln Q(y)}
-\end{eqnarray*}
-
-\slide{Constrastive Estimation}
-
-The contrastor estimate of $\pop$ is poor when the contrastive problem is easy --- when the contrastive loss can be driven near zero.
-
-\slide{GANs, Goodfellow et al., 2014 (also Schmidhuber 1992)}
-
-Discriminator GAN:
-{\color{red} $$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y) \sim (\pop \uplus P_\Phi)} - \ln D_\Psi(i|y)$$}
-
-\vfill
-Contrastive GAN:
-{\color{red} $$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y_1,\ldots,y_{k+1}) \sim (\pop \uplus P_\Phi^k)} - \ln D_\Psi(i|y_1,\ldots,y_{k+1})$$}
-
-\vfill
-Assuming Universality:
-{\color{red} $$P_{\Phi^*} = \pop$$}
-
-\slide{Sampling}
+\slide{Sampling from the Generator}
 \centerline{$z\sim {\cal N}(0,I)$ \hspace{7em} $y\sim P_\Phi$}
 \centerline{\includegraphics[width=6in]{../images/halfdeconv}}
 
-\slide{Generated Bedrooms(DC GANS, Radford et al., ICLR 2016)}
+\slidetwo{Generative Adversarial Nets}{Goodfellow et al., June 2014}
+\centerline{\includegraphics[width = 9in]{../images/GAN2014}}
 
-\centerline{\includegraphics[width = 10in]{../images/Bedrooms}}
+\slidetwo{Unsupervised Representation Learning ... (DC GANS)}
+{Radford et al., Nov. 2015}
+
+\centerline{\includegraphics[width = 9in]{../images/GANDCa}}
+
+\slidetwo{Unsupervised Representation Learning ... (DC GANS)}
+{Radford et al., Nov. 2015}
+
+\centerline{\includegraphics[width = 9in]{../images/ImageFeatures}}
 
 \slide{Interpolated Faces}
 
 [Ayan Chakrabarti]
 
-\centerline{\includegraphics[width = 9in]{../images/interp}}
+\centerline{\includegraphics[height = 4.5in]{../images/interp}}
 
-\slideplain{Image Arithmetic (DC GANS, Radford et al., ICLR 2016)}
+\slide{Early GANs on ImageNet}
 
-\centerline{\includegraphics[width = 9in]{../images/ImageFeatures}}
-
-\slide{GANs on Imagenet}
-
-\centerline{\includegraphics[width = 9in]{../images/BadGAN}}
+\centerline{\includegraphics[height = 4.5in]{../images/BadGAN}}
 
 
 \slide{Conditional GANs}
 
 All distribution modeling methods apply to conditional distributions.
 
-$${\color{red} \Phi^* = \argmax_\Phi \; \min_\Psi \;\expectsub{(x,y,s) \sim (\mathrm{Pop}\; \uplus \;\mathrm{Pop}(x)P_\Phi(y|x))}
-  {-\log P_\Psi(s|x,y)}}$$
+$${\color{red} \Phi^* = \argmax_\Phi \; \min_\Psi \;\expectsub{i,x,y \sim (\mathrm{Pop}\; \uplus \;\mathrm{Pop}(x)P_\Phi(y|x))}
+  {-\ln P_\Psi(i|x,y)}}$$
 
-\slide{Image-to-Image Translation (Isola et al., 2016)}
+If $x$ is never repeated we can replace $P_\Phi(y|x)$ by a deterministic function $\hat{y}_\Phi(x)$.
+
+
+$${\color{red} \Phi^* = \argmax_\Phi \; \min_\Psi \;\expectsub{i,x,y \sim (\mathrm{Pop}\; \uplus \;(\mathrm{Pop}(x);\hat{y}(x)))}
+  {-\ln P_\Psi(i|x,y)}}$$
+
+
+\slide{Discrimination Loss can Augment Distortion Loss}
+
+$${\color{red} \Phi^* = \argmin_\Phi\; \expectsub{x,y \sim \mathrm{Pop}} \mathrm{Dist}(y,\hat{y}_\Phi(x))}$$
+
+This is the fundamental equation if {\color{red} $\mathrm{Dist}(y,\hat{y}_\Phi(x)) = -\ln P_\Phi(y|x)$}.
+
+\vfill
+$${\color{red} \Phi^* = \argmin_\Phi\;{\cal L}_{\mathrm{Dis{\color{black}t}}}(\Phi) + \lambda{\cal L}_{\mathrm{Dis{\color{black}c}}}(\Phi)}$$
+
+$${\color{red}  {\cal L}_{\mathrm{Dis{\color{black}t}}}(\Phi) =  \expectsub{x,y \sim \mathrm{Pop}} \mathrm{Dis{\color{black}t}}(y,\hat{y}_{\Phi}(x))}$$
+
+$${\color{red}  {\cal L}_{\mathrm{Dis{\color{black}c}}}(\Phi) = \max_\Psi \;\expectsub{i,x,y \sim (\mathrm{Pop}\; \uplus \;(\mathrm{Pop}(x);\hat{y}_\Phi(x)))}
+  {\ln P_\Psi(i|x,y)}}$$
+
+\slidetwo{Image-to-Image Translation (Pix2Pix)}
+{Isola et al., Nov. 2016}
+
+We assume a corpus of ``image translation pairs'' such as images paired with semantic segmentations.
 
 \centerline{\includegraphics[width = 8.0in]{../images/cGAN0}}
 
-\slide{U-Nets (Ronnenberger et al. 2015)}
+\slidetwo{Image-to-Image Translation (Pix2Pix)}
+{Isola et al., Nov. 2016}
 
-\centerline{\includegraphics[width = 8.0in]{../images/Unet}}
-
-\slide{Image-to-Image Translation (Isola et al., 2016)}
-
-\centerline{\includegraphics[width = 8.0in]{../images/cGAN1}}
+\centerline{\includegraphics[height = 4.5in]{../images/cGAN1}}
 
 \slide{Arial Photo to Map and Back}
 
@@ -165,10 +107,14 @@ $${\color{red} \Phi^* = \argmax_\Phi \; \min_\Psi \;\expectsub{(x,y,s) \sim (\ma
 
 \centerline{\includegraphics[width = 8.0in]{../images/cGAN4}}
 
-\slide{Cycle Gans (Zhu et al., 2017)}
+\slidetwo{Unpaired Image-to-Image Translation (Cycle GANs)}{Zhu et al., March 2017}
+
+We have two corpora of images, say images of zebras and unrelated images of horses, or photographs and unrelated paintings by Monet.
+
+\vfill
+We want to construct translations between the two classes.
 
 \centerline{\includegraphics[width = 8.0in]{../images/Cycle2}}
-
 
 \slide{Cycle Gans}
 
@@ -178,12 +124,12 @@ $${\color{red} \Phi^* = \argmax_\Phi \; \min_\Psi \;\expectsub{(x,y,s) \sim (\ma
 
 \centerline{\includegraphics[width = 6.0in]{../images/Cycle4}}
 
-\slidetwo{Cycle Training of Machine Translation}
-         {Lample et al, 2017, also Artetxe et al., 2017}
+\slidetwo{Unsupervised Machine Translation (UMT)}
+         {Lample et al, Oct. 2017, also Artetxe et al., Oct. 2017}
 
 \centerline{\includegraphics[width = 10.0in]{../images/Cycle5}}
 
-\slide{Text to Speech (Saito et al. 2017)}
+\slide{Text to Speech (Saito et al. Sept. 2017)}
 
 \centerline{\includegraphics[width = 3.0in]{../images/Txt2spchGAN}}
 
@@ -195,9 +141,29 @@ feature vector of the original.
 \vfill
 {\color{red}Perceptual Naturalness} can be enforced by a discriminator.
 
-\slideplain{Adversarial Domain Adaptation (Tzeng et al. 2017)}
+\slidetwo{Adversarial Discriminative Domain Adaptation}{Tzeng et al. Feb. 2017}
 
-\centerline{\includegraphics[width = 5.0in]{../images/AdvDomainAdapt}}
+\centerline{\includegraphics[width = 4.0in]{../images/AdvDomainAdapt}}
+
+A GAN is used to map target images to the source feature distribution.
+
+\slidetwo{Progressive Growing of GANs}{Karras et al., Oct. 2017}
+\centerline{\includegraphics[height = 4.5in]{../images/GANproga}}
+
+\slidetwo{Progressive Growing of GANs}{Karras et al., Oct. 2017}
+\centerline{\includegraphics[height = 4.5in]{../images/GANprogb}}
+
+\slidetwo{Progressive Growing of GANs}{Karras et al., Oct. 2017}
+\centerline{\includegraphics[height = 4.5in]{../images/GANprogc}}
+
+\slidetwo{Large Scale Gan Training}{Brock et al., Sept. 2018}
+\centerline{\includegraphics[width = 9in]{../images/GANclass}}
+
+\vfill
+This is a conditional GAN conditioned on the imagenet class label.
+
+\vfill
+This generates 512 X 512 images without using using progressive training.
 
 \slide{Issues}
 
@@ -221,7 +187,7 @@ feature vector of the original.
 
 Assuming Universality:
 \begin{eqnarray*}
-& & {\color{red} E_{(i,y) \sim (\pop\uplus Q)}\;-\ln D_{\Phi^*}(i|y)} \\
+& & {\color{red} E_{(i,y) \sim (\pop\uplus Q)}\;-\ln P_{\Phi^*}(i|y)} \\
 \\
 & = & E_{(i,y) \sim (\pop\uplus Q)}\;-\ln P(i|y) \\
 \\
@@ -234,14 +200,62 @@ Assuming Universality:
 \slide{Discrimination: Jensen-Shannon Divergence}
 
 \begin{eqnarray*}
-& & {\color{red} E_{(i,y) \sim (\pop\uplus Q)}\;-\ln D_{\Phi^*}(i|y)} \\
+& & {\color{red} E_{(i,y) \sim (\pop\uplus Q)}\;-\ln P_{\Psi^*}(i|y)} \\
 \\
 & = & (\ln 2) - \frac{1}{2} \left(\;KL\left(\pop,\frac{\pop+Q}{2}\right),\;KL\left(Q,\frac{\pop+Q}{2}\right)\right) \\
 \\
-& = & {\color{red} (\ln 2) - JSD(\pop,Q)}
+& = & (\ln 2) + JSD(\pop,Q) \\
+\\
+\Phi^* & = & \argmin_\Phi \; JSD(\pop,P_\Phi)
 \end{eqnarray*}
 
 {\color{red} $$0 \leq JSD(P,Q) \leq \ln 2$$}
+
+
+\slidetwo{Converting to Cross Entropy}{Goodfellow, 2014}
+
+In Goodfellow's original paper he expressed a preference for cross entropy loss (the fundamental equation) over Jensen-Shannon loss.
+
+$${\color{red} \Phi^* = \argmin_\Phi\;JSD(\pop,P_\Phi)}$$
+
+\centerline{vs.}
+\vspace{-2ex}
+$${\color{red} \Phi^* = \argmin_\Phi\;H(\pop,P_\Phi)}$$
+
+\vfill
+He presented a modification to the GAN adversarial objective that yields cross-entropy loss rather than Jensen-Shanon loss.
+
+\slidetwo{Converting to Cross Entropy}{Goodfellow, 2014}
+
+{\color{red} $$\Psi^*(\Phi) = \argmin_\Psi \;\expectsub{(i,y) \sim (\mathrm{Pop}\; \uplus \;P_\Phi)}{- \ln P_\Psi(i|y)}$$}
+
+\vfill
+$$\mbox{Assume:}\;\;\; P_{\Psi^*}(1|y) = \frac{\mathrm{Pop}(y)}{\mathrm{Pop}(y) + P_\Phi(y)}$$
+
+\vfill
+\begin{eqnarray*}
+  \mbox{Define:}\;\;\; {\color{red} f_{\Psi^*}(y)} & \doteq & \frac{P_{\Psi^*}(1|y)}{P_{\Psi^*}(-1|y)} \\
+\\
+& = & {\color{red} \frac{\mathrm{Pop}(y)}{P_\Phi(y)}}
+\end{eqnarray*}
+
+\slide{Converting to Cross Entropy}
+
+{\huge
+\begin{eqnarray*}
+ {\color{red} \Phi^*}& = & {\color{red} \argmax_\Phi\;E_{y \sim \pop} \;f_{\Psi^*}(y)} \\
+ \\
+ {\color{red} \nabla_\Phi \; E_{y \sim P_\Phi}\;  f_{\Psi^*}(y)}  & = & \nabla _\Phi \sum_y\; P_\Phi(y) f_{\Psi^*}(y) \\
+  \\
+  & = & \sum_y \; P_\Phi(y) f_{\Psi^*}(y) \nabla_\Phi \ln P_\Phi(y) \\
+  \\
+  & = & \sum_y \;\mathrm{Pop}(y) \nabla_\Phi \ln P_\Phi(y) \\
+  \\
+  & = & E_{y \sim \mathrm{Pop}} \; \nabla_\Phi \ln P_\Phi(y) \\
+  \\
+  & = & {\color{red} \nabla_\Phi \; E_{y \sim \mathrm{Pop}} \;\ln P_\Phi(y)}
+\end{eqnarray*}
+}
 
 \slide{Vanishing Gradients}
 
@@ -257,66 +271,32 @@ In this case the learning stops and the generator is blocked from minimizing $\m
 
 We continue to use
 
-$$\Psi^*(\Phi) = \argmin_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;P_\Phi)}{- \log P_\Psi(s|y)}$$
+$$\Psi^*(\Phi) = \argmin_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;P_\Phi)}{- \ln P_\Psi(s|y)}$$
 
 \vfill
 But switch the optimization for $\Phi$ from
-$$\Phi^* = \argmax_\Phi E_{y \sim P_\Phi}\; - \log P_\Psi(-1|y)$$
+$$\Phi^* = \argmax_\Phi E_{y \sim P_\Phi}\; - \ln P_\Psi(-1|y)$$
 
 to
-$$\Phi^* = \argmin_\Phi E_{y \sim P_\Phi}\;- \log P_\Psi(1|y)$$
+$$\Phi^* = \argmin_\Phi E_{y \sim P_\Phi}\;- \ln P_\Psi(1|y)$$
 
 \vfill
-It can be shown that $- \log P_\Psi(1|y)$ is essentially the margin of the binary classifier $\Psi$.
+It can be shown that $- \ln P_\Psi(1|y)$ is essentially the margin of the binary classifier $\Psi$.
 
-\slide{Converting to Cross Entropy (Goodfellow)}
 
-$$\Psi^*(\Phi) = \argmin_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;P_\Phi)}{- \log P_\Psi(s|y)}$$
+\slide{Mode Collapse a.k.a Mode Dropping}
 
-\vfill
-$$\mbox{Assume:}\;\;\; P_{\Psi^*}(1|y) = \frac{\mathrm{Pop}(y)}{\mathrm{Pop}(y) + P_\Phi(y)}$$
-
-\vfill
-\begin{eqnarray*}
-  \mbox{Define:}\;\;\; f_{\Psi^*}(y) & \doteq & \frac{P_{\Psi^*}(1|y)}{P_{\Psi^*}(-1|y)} \\
-\\
-& = & \frac{\mathrm{Pop}(y)}{P_\Phi(y)}
-\end{eqnarray*}
-
-\slide{Converting to Cross Entropy}
-
-\begin{eqnarray*}
- \nabla_\Phi \; E_{y \sim P_\Phi}\;  f_\Psi(y)  & = & \nabla _\Phi \sum_y\; P_\Phi(y) f_\Psi(y) \\
-  \\
-  & = & \sum_y \; P_\Phi(y) f_\Psi(y) \nabla_\Phi \ln P_\Phi(y) \\
-  \\
-  & = & \sum_y \;\mathrm{Pop}(y) \nabla_\Phi \ln P_\Phi(y) \\
-  \\
-  & = & E_{y \sim \mathrm{Pop}} \; \nabla_\Phi \ln P_\Phi(y) \\
-  \\
-  & = & \nabla_\Phi \; E_{y \sim \mathrm{Pop}} \;\ln P_\Phi(y)
-\end{eqnarray*}
-
-\slide{Unstable Training}
-
-Simultaneous gradient descent is not the same as nested max-min.
-
-\vfill
-$$\max_\Phi \min_\Psi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;P_\Phi)}{- \log P_\Psi(s|y)}$$
-
-\vfill
-vs.
-
-\vfill
-$$\min_\Psi \max_\Phi \;\expectsub{(y,s) \sim (\mathrm{Pop}\; \uplus \;P_\Phi)}{- \log P_\Psi(s|y)}$$
-
-\slide{A Synthetic Example}
+The generator distribution drops portions of the population.
 
 \centerline{\includegraphics[width=9in]{../images/Unstable1}}
 
-\slide{Another Example}
+\slide{Unstable Training}
 
-$${\color{red} \min_x \; \max_y xy}$$
+Joint SGD is not the same as nested max-min.
+
+\vfill
+Consider
+$${\color{red} \max_x \; \min_y\; xy}$$
 
 \vfill
 A Nash equilibrium is $x= y = 0$.
@@ -330,16 +310,126 @@ The generator distribution drops portions of the population.
 
 \centerline{\includegraphics[width=9in]{../images/Unstable1}}
 
-\slide{Measuring Performance}
+\slidetwo{Pros and Cons of GAN Evaluation Measures}{Borji, Oct 2018}
 
-Most evaluation of GANs is based on subjective judgments of naturalness.
+We would like a rate-distortion metric on distribution models.
 
 \vfill
-This is in contrast to language modeling where performance is directly measured by cross-entropy (bits per character or perplexity).
+This has not yet been achieved for GANs.
+
+\vfill
+Evaluation of GANs always involves, at least in part, subjective judgments of naturalness.
+
+\vfill
+Sometimes automated metrics are also used.
+
+\vfill
+The above paper discusses various proposed automated metrics of GAN performance.  Current automated metrics are questionable.
+
+\slide{}
+\vfill
+\centerline{\bf Contrastive GANS (TZ)}
+\vfill\vfill
+
+\slide{The Discriminator also Models the Population}
+
+Fix the generator at a ``noise distribution'' $Q$ where $Q(y)$ is computable, and train a discriminator.
+
+\vfill
+{\color{red} $$\Psi^* = \argmin_\Psi E_{(i,y) \sim (\pop \uplus Q)}\;-\ln P_\Psi(i|y)$$}
+
+\slide{The Discriminator also Models the Population}
+
+{\color{red} $$\Phi^* = \argmin_\Phi E_{(i,y) \sim (\pop \uplus Q)}\;-\ln P_\Phi(i|y)$$}
+
+Assuming Universality
+$$P_{\Phi^*}(1|y) = P(1|y) = \frac{P(1\;\mathrm{and}\; y)}{P(y)} = \frac{\frac{1}{2}\mathrm{Pop}(y)}{\frac{1}{2}\mathrm{Pop}(y) + \frac{1}{2}Q(y)}$$
+
+\vfill
+$$P_{\Phi^*}(1|y)(\pop(y) + Q(y)) = \pop(y)$$
+
+\vfill
+{\color{red} $$ \frac{\pop(y)}{Q(y)} = \frac{P_{\Phi^*}(1|y)}{1-P_{\Phi^*}(1|y)}$$}
+
+\slide{Discrimination}
+
+The discrimination estimate of the population distribution is poor when the discrimination problem is easy --- when the discrimination loss can be driven close to zero.
+
+\slidetwo{Noise Contrastive Estimation}{Gutmann and Hyv\"{a}rinen, 2010}
+
+Consider a population distribution $\pop$ and a fixed generating distribution $Q$ where $Q(y)$ is computable.
+
+\vfill
+Define the distribution {\color{red} $\pop\hookrightarrow Q^k$} to be the result of drawing one ``positive'' from $\pop$ and $k$ IID negatives from $Q$;
+then inserting the positive at a random position among the negatives; and returning $(i,y_1,\ldots,y_{k+1})$ where
+$i$ is the index of the positive.
+
+{\color{red} $$\Psi^* = \argmin_\Psi\; E_{(i,y_1,\ldots,y_{k+1})\sim (\pop\hookrightarrow Q^k)} \;- \ln P_\Psi(i|y_1,\ldots,y_{k+1})$$}
+
+\slide{Contrastive Estimation}
+
+{\color{red} $$\Psi^* = \argmin_\Psi\; E_{(i,y_1,\ldots,y_{k+1})\sim (\pop\hookrightarrow Q^k)} \;- \ln P_\Psi(i|y_1,\ldots,y_{k+1})$$}
+
+\vfill
+Note that $\pop\hookrightarrow Q^1$ requires a choice between two $y$'s while $\pop\uplus Q$ classifies a single $y$ --- these are different.
+
+\vfill
+The contrastive task gets more difficult as $k$ gets larger.
+
+
+\slide{Constrastive Estimation}
+
+$$\Psi^* = \argmin_\Psi E_{(i,y_1,\ldots,y_{k+1}) \sim (\pop\hookrightarrow Q^k)} \;- \ln P_\Psi(i|y_1,\ldots,y_{k+1})$$
+{\color{red} $$P_\Psi(i|y_1,\ldots,y_{k+1}) \doteq \softmax_i s_\Psi(y_i)$$}
+
+\vfill
+{\color{red} Theorem}: Assuming universality:
+\begin{eqnarray*}
+s_{\Psi^*}(y) & = & \left(\ln \frac{\pop(y)}{Q(y)}\right) + C \;\;\;\mbox{for arbitrary $C$}\\
+\\
+{\color{red} \pop(y)} & {\color{red} =} & {\color{red} \softmax_y\;\;\; s_{\Psi^*}(y) - \ln Q(y)}\;\;\mbox{$Z$ must be estimated}
+\end{eqnarray*}
+
+
+\slide{Proof}
+{\huge
+\begin{eqnarray*}
+{\color{red} P(i \;\mathrm{and}\;y_1,\ldots,y_{k+1})} & = & \frac{1}{k+1}\;\pop(y_i)\prod_{j \not = i}Q(y_j) \\
+\\
+& = & \alpha \frac{\pop(y_i)}{Q(y_i)},\;\;\;\alpha = \frac{1}{k+1} \prod_i Q(y_i) \\
+\\
+\\
+{\color{red} P(i\;|\;y_1,\ldots y_{k+1})} & = & \frac{P(i\;\mbox{and} \; y_1,\ldots,y_{k+})}{\sum_i \;P(i \;\mbox{and}\; y_1,\ldots,y_{k+})} \\
+\\
+\\
+& = & {\color{red} \softmax_i\; \left(\ln \frac{\pop(y_i)}{Q(y_i)}\right) + C}
+\end{eqnarray*}
+}
+
+\slide{Constrastive Estimation}
+
+Like the discrimination estimate, the contrastive estimate of $\pop$ is poor when the contrastive task is easy --- when the contrastive loss can be driven near zero.
+
+\vfill
+However, the contrastive task can be made more difficult by increasing $k$.
+
+\slide{Contrastive GANs (TZ)}
+
+Discriminative GAN:
+{\color{red} $$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y) \sim (\pop \uplus P_\Phi)} - \ln P_\Psi(i|y)$$}
+
+\vfill
+Contrastive GAN:
+{\color{red} $$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y_1,\ldots,y_{k+1}) \sim (\pop \hookrightarrow P_\Phi^k)} - \ln P_\Psi(i|y_1,\ldots,y_{k+1})$$}
+
+\vfill
+Assuming Universality:
+{\color{red} $$P_{\Phi^*} = \pop$$}
 
 \slide{Summary}
 
-GANs have not generally proved useful in discriminative tasks such as image segmentation, speech recognition, or machine translation.
+GANs have not generally proved useful for representation learning for discriminative tasks
+such as image segmentation, speech recognition, or machine translation.
 
 \vfill
 I predict that there will ultimately be better ways to model distributions (as in language modeling).
