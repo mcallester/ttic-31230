@@ -15,6 +15,11 @@
 \vfill
 \vfill
 
+\slide{Representing a Distribution with a Generator}
+\centerline{$z\sim {\cal N}(0,I)$ \hspace{7em} $y\sim P_\Phi$}
+\centerline{\includegraphics[width=6in]{../images/halfdeconv}}
+
+
 \slidetwo{Generative Adversarial Nets}{Goodfellow et al., June 2014}
 
 Let ${\color{red} \pop \uplus P_\Phi}$ be the distribution defined flipping an unbiased coin and, if heads, returning {\color{red} $(1,y)$} with
@@ -26,10 +31,6 @@ Let ${\color{red} \pop \uplus P_\Phi}$ be the distribution defined flipping an u
 
 \vfill
 Assuming Universality: {\color{red} $P_{\Phi^*} = \pop$}
-
-\slide{Sampling from the Generator}
-\centerline{$z\sim {\cal N}(0,I)$ \hspace{7em} $y\sim P_\Phi$}
-\centerline{\includegraphics[width=6in]{../images/halfdeconv}}
 
 \slidetwo{Generative Adversarial Nets}{Goodfellow et al., June 2014}
 \centerline{\includegraphics[width = 9in]{../images/GAN2014}}
@@ -76,12 +77,12 @@ $${\color{red} \Phi^* = \argmin_\Phi\; \expectsub{x,y \sim \mathrm{Pop}} \mathrm
 This is the fundamental equation if {\color{red} $\mathrm{Dist}(y,\hat{y}_\Phi(x)) = -\ln P_\Phi(y|x)$}.
 
 \vfill
-$${\color{red} \Phi^* = \argmin_\Phi\;{\cal L}_{\mathrm{Dis{\color{black}t}}}(\Phi) + \lambda{\cal L}_{\mathrm{Dis{\color{black}c}}}(\Phi)}$$
+$$\Phi^* = \argmin_\Phi\;{\cal L}_{\mathrm{Dis{\color{red}t}}}(\Phi) + \lambda{\cal L}_{\mathrm{Dis{\color{red}c}}}(\Phi)$$
 
-$${\color{red}  {\cal L}_{\mathrm{Dis{\color{black}t}}}(\Phi) =  \expectsub{x,y \sim \mathrm{Pop}} \mathrm{Dis{\color{black}t}}(y,\hat{y}_{\Phi}(x))}$$
+$${\cal L}_{\mathrm{Dis{\color{red}t}}}(\Phi) =  \expectsub{x,y \sim \mathrm{Pop}} \mathrm{Dis{\color{red}t}}(y,\hat{y}_{\Phi}(x))$$
 
-$${\color{red}  {\cal L}_{\mathrm{Dis{\color{black}c}}}(\Phi) = \max_\Psi \;\expectsub{i,x,y \sim (\mathrm{Pop}\; \uplus \;(\mathrm{Pop}(x);\hat{y}_\Phi(x)))}
-  {\ln P_\Psi(i|x,y)}}$$
+$${\cal L}_{\mathrm{Dis{\color{red}c}}}(\Phi) = \max_\Psi \;\expectsub{i,x,y \sim (\mathrm{Pop}\; \uplus \;(\mathrm{Pop}(x);\hat{y}_\Phi(x)))}
+  {\ln P_\Psi(i|x,y)}$$
 
 \slidetwo{Image-to-Image Translation (Pix2Pix)}
 {Isola et al., Nov. 2016}
@@ -163,7 +164,7 @@ A GAN is used to map target images to the source feature distribution.
 This is a conditional GAN conditioned on the imagenet class label.
 
 \vfill
-This generates 512 X 512 images without using using progressive training.
+This generates 512 X 512 images without using progressive training.
 
 \slide{Issues}
 
