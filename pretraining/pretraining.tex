@@ -23,9 +23,11 @@ This has been standard practice with Imagenet models since 2013.
 \vfill
 General Learning Algorithms vs. Learning General Knowledge.
 
-\slide{Example: R-CNN, Girshick et al., 2013}
+\slide{Example: R-CNN, Girshick et al., Nov. 2013}
 
 \centerline{\includegraphics[width=10.0 in]{../images/R-CNN}}
+
+Note that Alexnet appeared on the scene at the ImageNet evaluation (ILSVRC2012) Oct. 2012.
 
 \slide{Instagram Pretraining, Mahajan et al., May 2018}
 
@@ -62,7 +64,7 @@ We will consider inpainting and colorization.
 
 \slidetwo{Feature Learning by Inpainting}{Pathak et al., April 2016}
 
-$${\color{red} \Phi^* = \argmin_{\Phi}\; E_{(x,y) \sim \pop}\;||y - \hat{y}_\Phi(x)||^2 + \lambda \mathrm{Discr}(y,\hat{y}(x))}$$
+$${\color{red} \Phi^* = \argmin_{\Phi}\; E_{(x,y) \sim \pop}\;||y - \hat{y}_\Phi(x)||^2 + \lambda \mathrm{Discr}(y,\hat{y}_\Phi(x))}$$
 
 \centerline{\includegraphics[width = 3in]{../images/LearnRepInpa}}
 
@@ -101,7 +103,7 @@ $X$ --- pretraining used, $Y$ ---Pretrained with Labels, $C$ --- pretrained with
 \end{eqnarray*}
 
 \vfill
-This can be viewed as a an RDA with a discrimination distortion, or as a GAN with a rate-distortion objective.
+This can be viewed as an RDA with a discrimination distortion, or as a GAN with a rate-distortion objective.
 
 \slidetwo{Adding a Discrimination Loss}{to a Conditional Noisy-Channel RDA}
 
@@ -292,16 +294,16 @@ We will construct a layers of sequences of vectors $M[L,T,J]$.
 Given {\color{red} $M[\ell,T,J]$} we compute {\color{red} $M[\ell+1,T,J]$} as follows.
       
 \begin{eqnarray*}
-s[\ell,h,t] & = &\frac{1}{\sqrt{K}} \sum_k\;\left\{\begin{array}{ll}\;\;\left(\sum_j\;W^Q[\ell,h,k,j]M[t,j]\right) \\
-\times \left(\sum_j\;W^K[\ell,h,k,j]M[t,j]\right) \end{array}\right.\\
+s[\ell,h,t,t'] & = &\frac{1}{\sqrt{K}} \sum_k\;\left\{\begin{array}{ll}\;\;\left(\sum_j\;W^Q[\ell,h,k,j]M[\ell,t,j]\right) \\
+\times \left(\sum_j\;W^K[\ell,h,k,j]M[\ell,t',j]\right) \end{array}\right.\\
 \\
-{\color{red} \alpha[\ell,h,t]} & {\color{red} =} & {\color{red} \softmax_t \;s[\ell,h,t]}\;\;\;\mbox{the attention} \\
+{\color{red} \alpha[\ell,h,t,t']} & {\color{red} =} & {\color{red} \softmax_{t'}t \;s[\ell,h,t,t']}\;\;\;\mbox{the attention} \\
 \\
-V[\ell,h,i] & = & \sum_{t,j}\;\alpha[\ell,h,t]W^V[\ell,h,i,j]M[t,j]
+V[\ell,h,t,i] & = & \sum_{t',j}\;\alpha[\ell,h,t,t']W^V[\ell,h,i,j]M[\ell,t',j]
 \end{eqnarray*}
 
 \bigskip
-{\color{red} $$M[\ell+1,t,J] = V[\ell,1,J];V[\ell,2,I];\cdots;V[\ell,H,I] \;\;\;\; J = HI$$}
+{\color{red} $$M[\ell+1,t,J] = V[\ell,1,t,I];V[\ell,2,t,I];\cdots;V[\ell,H,t,I] \;\;\;\; J = HI$$}
 
 \slide{Encoding Positional Information}
 
@@ -411,9 +413,12 @@ While examining these bizarre creatures the scientists discovered that the creat
 
 Dr. Pérez believes that the unicorns may have originated in Argentina ... some believe that perhaps the creatures were created when a human and a unicorn met each other in a time before human civilization. ... However, Pérez also pointed out that it is likely that the only way of knowing for sure if unicorns are indeed the descendants of a lost alien race is through DNA. ...
 
-\slide{A Laguage Model Translating English to French}
+\slide{A Laguage Model Translating French to English}
 
-{\color{red} Continue from: Translate ... to French}
+{\color{red} Continue from: $<$French1$>$ = $<$English1$>$, ... ,$<$Frenchn$>$ = $<$Englishn$>$, $<$French$>$ =}
+
+\vfill
+Note that the translation pairs in the prompt do not influence the model parameters.
 
 \vfill
 \centerline{\includegraphics[width = 9in]{../images/GPT-2a}}
