@@ -388,16 +388,19 @@ This is a Transformer language model trained on a new text corpus, webText, scra
 Historically sampling text from a language model has yielded semantic gibberish.  This time things are different.
 
 \vfill
-\slide{The Model Predicts Following Words}
+\slide{Continuing from a Prompt}
 
-SYSTEM PROMPT (HUMAN-WRITTEN):
+{\color{red} Continue from:}
 
-\vfil
+\vfill
 In a shocking finding, scientist discovered a herd of unicorns living in a remote, previously unexplored valley, in the Andes Mountains. Even more surprising to the researchers was the fact that the unicorns spoke perfect English.
 
 \slide{The Predicted Continuation}
 
-MODEL COMPLETION (MACHINE-WRITTEN, 10 TRIES)
+{\color{red} Continuation excerpted from a single response, the response selected from 10 tries.}
+
+\bigskip
+
 The scientist named the population, after their distinctive horn, Ovid’s Unicorn. These four-horned, silver-white unicorns were previously unknown to science.
 
 Now, after almost two centuries, the mystery of what sparked this odd phenomenon is finally solved.
@@ -410,7 +413,7 @@ Dr. Pérez believes that the unicorns may have originated in Argentina ... some 
 
 \slide{A Laguage Model Translating English to French}
 
-Continue from: Translate ... to French
+{\color{red} Continue from: Translate ... to French}
 
 \vfill
 \centerline{\includegraphics[width = 9in]{../images/GPT-2a}}
