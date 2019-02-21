@@ -223,6 +223,16 @@ $${\color{red} \Phi^* = \argmin_\Phi\;JSD(\pop,P_\Phi)}$$
 \vspace{-2ex}
 $${\color{red} \Phi^* = \argmin_\Phi\;H(\pop,P_\Phi)}$$
 
+{\color{red}
+$$\begin{array}{lrcl}
+\mathrm{GAN:} & \Phi^* & = & \argmin_\Phi\;JSD(P_\Phi,\pop) \\
+\\
+\mathrm{GAN':} & \Phi^* & = & \argmin_\Phi H(\pop, P_\Phi) \\
+\\
+\mathrm{contrastiveGAN:} & \Phi^* & = & \argmin_\Phi KL(P_\Phi,\pop)
+\end{array}$$
+}
+
 \vfill
 He presented a modification to the GAN adversarial objective that yields cross-entropy loss rather than Jensen-Shanon loss.
 
