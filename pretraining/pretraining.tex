@@ -291,18 +291,30 @@ We will construct a layers of sequences of vectors $M[L,T,J]$.
 
 \slide{Multi-Headed Self Attention}
 
-Given {\color{red} $M[\ell,T,J]$} we compute {\color{red} $M[\ell+1,T,J]$} as follows.
+To compute {\color{red} $M[\ell+1,T,J]$} from {\color{red} $M[\ell,T,J]$} we first compute:
       
 \begin{eqnarray*}
-s[\ell,h,t,t'] & = &\frac{1}{\sqrt{K}} \sum_k\;\left\{\begin{array}{ll}\;\;\left(\sum_j\;W^Q[\ell,h,k,j]M[\ell,t,j]\right) \\
-\times \left(\sum_j\;W^K[\ell,h,k,j]M[\ell,t',j]\right) \end{array}\right.\\
+\mathrm{Query}[\ell,h,t,k] & = & \sum_j\;W^Q[\ell,h,k,j]M[\ell,t,j] \\
 \\
-{\color{red} \alpha[\ell,h,t,t']} & {\color{red} =} & {\color{red} \softmax_{t'}t \;s[\ell,h,t,t']}\;\;\;\mbox{the attention} \\
+\mathrm{Key}[\ell,h,t,k] & = & \sum_j\;W^K[\ell,h,k,j]M[\ell,t,j] \\
 \\
-V[\ell,h,t,i] & = & \sum_{t',j}\;\alpha[\ell,h,t,t']W^V[\ell,h,i,j]M[\ell,t',j]
+\mathrm{Value}[\ell,h,t,i] & = & \sum_j\;W^V[\ell,h,i,j]M[\ell,t,j]
 \end{eqnarray*}
 
-\bigskip
+\slide{Multi-Headed Self Attention}
+
+We then compute {\color{red} $M[\ell+1,T,J]$} as follows.
+
+{\color{red}
+\begin{eqnarray*}
+s[\ell,h,t,t'] & = &\frac{1}{\sqrt{K}} \sum_k\;\mathrm{Query}[\ell,h,t,k]\mathrm{Key}[\ell,h,t',k] \\
+\\
+{\color{red} \alpha[\ell,h,t,t']} & {\color{red} =} & {\color{red} \softmax_{t'} \;s[\ell,h,t,t']}\;\;\;\mbox{the attention} \\
+\\
+V[\ell,h,t,i] & = & \sum_{t'}\;\alpha[\ell,h,t,t']\mathrm{Value}[\ell,h,t',i]
+\end{eqnarray*}
+}
+
 {\color{red} $$M[\ell+1,t,J] = V[\ell,1,t,I];V[\ell,2,t,I];\cdots;V[\ell,H,t,I] \;\;\;\; J = HI$$}
 
 \slide{Encoding Positional Information}
