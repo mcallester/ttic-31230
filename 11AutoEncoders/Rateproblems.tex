@@ -26,13 +26,15 @@ Mutual information has an interpretation as a channel capacity.
 \medskip(a)
 Suppose that
 we draw a random bit $y \in \{0,1\}$ with $P(0) = P(1) = 1/2$ and send it across a noisy channel
-to a receiver who gets $y' = y + \epsilon$ where $\epsilon$ is random noise drawn from a Gaussian ${\cal N}(0,\sigma)$.
-Solve for the channel capacity $I(y,y')$ as a function of $\sigma$.
-This channel capacity, when measured in bits, has units of bits received per bit sent.
+to a receiver who gets $y' = y \oplus \epsilon$ where $\epsilon$ is an independent ``noise variable'' with $\epsilon \in\{0,1\}$, where
+$\oplus$ is exclusive or ($y$ gets flipped when $\epsilon = 1$),
+and where the ``noise'' $\epsilon$ has a probability $P$ of being 1.
+
+\medskip(a) Solve for the channel capacity $I(y,y')$ as a function of $P$ in units of bits.
+When measured in bits, this channel capacity has units of bits received per message sent.
 
 \medskip
-(b) Repeat (a) but for $y' = sy + \epsilon$.  Here $s$ can be interpreted as the signal strength
-and $s/\sigma$ as a signal to noise ratio.
+(b) Explain why your answer to part (a) makes sense in terms of what the receiver knows for $P = 1/2$ and when $P=1$.
 
 \bigskip
 {\bf Problem 2.}
