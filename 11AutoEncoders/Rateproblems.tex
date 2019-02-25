@@ -86,7 +86,7 @@ we add noise drawn uniformly from $[0,1]$ to each component of $z_\Phi(y)$.
 \medskip
 Define $p_\Psi(z)$ to be log-uniform in each dimension.  More specifically
 $p_\Psi(z)$ is defined by drawing $s[i]$ uniformly from the interval
-$[1,s_{\mathrm{max}}]$ and then setting $z[i] = e^s$ so that $\ln z[i]$ is uniformly distributed over the interval $[0,s_{\mathrm{max}}]$.
+$[0,s_{\mathrm{max}}]$ and then setting $z[i] = e^s$ so that $\ln z[i]$ is uniformly distributed over the interval $[0,s_{\mathrm{max}}]$.
 This gives
 \begin{eqnarray*}
   dz & = & e^sds  \;\;= \;zds\\
@@ -97,8 +97,8 @@ This gives
 \end{eqnarray*}
 
 \medskip
-Assume That we have that $z_\Phi(y) \in [0,e^{s_{\mathrm{max}} - 1}]^d$ so that with probability 1 over the draw of $\epsilon$
-$P_\Psi(z_\Phi(y) + \epsilon) > 0$.
+Assume That we have that $z_\Phi(y) \in [1,e^{s_{\mathrm{max}}}-1]^d$ so that with probability 1 over the draw of $\epsilon$ we have
+$\ln(z_\Phi(y) + \epsilon) \in [0,s_{\mathrm{max}}]$.
 
 \medskip
 (a) For $z \in [z_\Phi(y),z_\Phi(y)+1]$ what is $p_\Phi(z|y)$?
@@ -106,7 +106,8 @@ $P_\Psi(z_\Phi(y) + \epsilon) > 0$.
 \solution{1}
 
 \medskip
-(b) Solve for $KL(p_\Phi(z|y),p_\Psi(z))$ in terms of $z_\Phi(y)$ under the above specifications.
+(b) Solve for $KL(p_\Phi(z|y),p_\Psi(z))$ in terms of $z_\Phi(y)$ under the above specifications and simplify your answer
+for the case of $z_\Phi(y)[i] >> 1$.
 
 \solution{
 \begin{eqnarray*}
@@ -120,11 +121,13 @@ $P_\Psi(z_\Phi(y) + \epsilon) > 0$.
   \\
   & = & \left(\sum_i \int_{z_\Phi(y)[i]}^{z_\Phi(y)[i]+1} \ln z\; dz\right) + d \ln s_{\mathrm{max}} \\
   \\
-  & = & \left(\sum_i [z\ln z]_{z_\Phi(y)[i]}^{z_\Phi(y)[i]+1} \right) + d \ln s_{\mathrm{max}}
+  & = & \left(\sum_i [z\ln z - z]_{z_\Phi(y)[i]}^{z_\Phi(y)[i]+1} \right) + d \ln s_{\mathrm{max}}
   \\
-  & = & \left(\sum_i \ln (z_\Phi(y)[i] + 1) + z_\Phi(y)[i](\ln (z_\Phi(y)[i] + 1) - \ln z_\Phi(y)[i]) \right) + d \ln s_{\mathrm{max}} \\
+  & = & \left(\sum_i [z\ln z]_{z_\Phi(y)[i]}^{z_\Phi(y)[i]+1} \right) + d \ln s_{\mathrm{max}} - 1 \\
   \\
-  & = & \left(\sum_i \ln (z_\Phi(y)[i] + 1) + z_\Phi(y)[i]\ln \left(1+ \frac{1}{z_\Phi(y)[i]}\right) \right) + d \ln s_{\mathrm{max}} \\
+  & = & \left(\sum_i \ln (z_\Phi(y)[i] + 1) + z_\Phi(y)[i](\ln (z_\Phi(y)[i] + 1) - \ln z_\Phi(y)[i]) \right) + d \ln s_{\mathrm{max}} - 1 \\
+  \\
+  & = & \left(\sum_i \ln (z_\Phi(y)[i] + 1) + z_\Phi(y)[i]\ln \left(1+ \frac{1}{z_\Phi(y)[i]}\right) \right) + d \ln s_{\mathrm{max}} - 1 \\
   \\
   & \approx & \left(\sum_i \ln z_\Phi(y)[i] \right) + d \ln s_{\mathrm{max}} \;\;\;\mbox{for $z_\Phi(y)[i] >> 1$}
 \end{eqnarray*}
