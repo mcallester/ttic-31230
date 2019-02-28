@@ -492,7 +492,7 @@ Nondeterminism of the policy $\pi_\Phi$ provides for exploration.
 We can sample an episode and then do
 
 \begin{eqnarray*}
-  \Phi  &\pluseq & \sum_t \eta_1\left(\nabla_{\Phi}\;\ln \pi_{\Phi}(a_i|s_i)\right)Q_\Phi(s_t,a_t)\\
+  \Phi  &\pluseq & \sum_t \eta_1\left(\nabla_{\Phi}\;\ln \pi_{\Phi}(a_i|s_i)\right)(Q_\Phi(s_t,a_t) - V_\Phi(s_t))\\
   \Phi & \minuseq & \sum_t \eta_2 \;\nabla_{\Phi}\;\left(Q_\Phi(s_t,a_t) - \sum \!_{t' \geq t}\; r_{t'}\right)^2 \\
   \Phi & \minuseq & \sum_t \eta_3 \;\nabla_{\Phi}\;\left(V_\Phi(s_t) - Q_\Phi(s_t,a)\right)^2 \\
 \end{eqnarray*}
