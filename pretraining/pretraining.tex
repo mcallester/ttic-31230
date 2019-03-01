@@ -90,7 +90,7 @@ $${\color{red} \Phi^* = \argmin_{\Phi}\; E_{(x,y) \sim \pop}\;||y - \hat{y}_\Phi
 \centerline{\includegraphics[width = 5in]{../images/LearnRepColorc}}
 VGG-16, Pretrained on ImageNet evaluated on the PASCAL segmentation task.
 Images Counts: {\color{red} Instagram 3.5G, ImageNet 14M, Pascal 5.7k}.
-$X$ --- pretraining used, $Y$ ---Pretrained with Labels, $C$ --- pretrained with color.
+$X$ --- pretraining used, $Y$ ---pretrained with Labels, $C$ --- trained on PASCAL with color.
 
 \slidetwo{Adding a Discrimination Loss}{to a Noisy-Channel RDA}
 
@@ -169,7 +169,7 @@ By maximizing mutual information we are intuitively separating signal from noise
 
 \centerline{\includegraphics[height=3.5 in]{../images/LearnRepCTCc}}
 
-Train and test are both on Imagenet but labels are only used retraining the a final linear layer.
+Train and test are both on Imagenet but labels are only used retraining the final linear layer.
 
 \vfill
 Results are also give for speech recognition tasks and NLP tasks.
@@ -294,11 +294,11 @@ We will construct a layers of sequences of vectors $M[L,T,J]$.
 To compute {\color{red} $M[\ell+1,T,J]$} from {\color{red} $M[\ell,T,J]$} we first compute:
       
 \begin{eqnarray*}
-\mathrm{Query}[\ell,h,t,k] & = & \sum_j\;W^Q[\ell,h,k,j]M[\ell,t,j] \\
+\mathrm{Query}[\ell,h,t,k] & = & \sum_j\;{\color{red} W^Q}[\ell,h,k,j]M[\ell,t,j] \\
 \\
-\mathrm{Key}[\ell,h,t,k] & = & \sum_j\;W^K[\ell,h,k,j]M[\ell,t,j] \\
+\mathrm{Key}[\ell,h,t,k] & = & \sum_j\;{\color{red} W^K}[\ell,h,k,j]M[\ell,t,j] \\
 \\
-\mathrm{Value}[\ell,h,t,i] & = & \sum_j\;W^V[\ell,h,i,j]M[\ell,t,j]
+\mathrm{Value}[\ell,h,t,i] & = & \sum_j\;{\color{red} W^V}[\ell,h,i,j]M[\ell,t,j]
 \end{eqnarray*}
 
 \slide{Multi-Headed Self Attention}

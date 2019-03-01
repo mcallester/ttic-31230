@@ -87,26 +87,23 @@ Also, imitating experts will never exceed expert performance (consider AlphaZero
 
 \slide{Markov Decision Processes (MDPs)}
 
-For an RL problem we work with an action policy $\pi$
+An MDP consists of a set ${\cal S}$ of states, a set ${\cal A}$ of allowed actions, a reward function $R$
+and a next-state probability function $P_T$.  We will use the following notation.
 
 \vfill
-$s_t$ is the state at time $t$
+$s_t \in {\cal S}$ is the state at time $t$
 
 \vfill
-$r_t$ is the reward at time $t$
+$a_t \in {\cal A}$ is the action taken at time $t$.
 
 \vfill
-$a_t$ is the action taken at time $t$.
-\begin{eqnarray*}
-  r_t = R(s_t,a_t) & & \mbox{reward at time $t$} \\
-  P_T(s_{t+1}|s_t,a_t) & & \mbox{state transition probability}
-\end{eqnarray*}
+$r_t = R(s_t,a_t) \in \mathbb{R}$ is the reward at time $t$
+
+\vfill
+$P_T(s_{t+1}|s_t,a_t)$ is the probability of $s_{t+1}$ given $s_t$ and $a_t$.
 
 \vfill
 The function $R(s,a)$ can allow for a cost of the action $a$.
-
-\vfill
-This Data defines a {\bf Markov Decision Process} or {\bf MDP}.
 
 \slide{Optimizing Reward}
 
@@ -116,9 +113,9 @@ $$\pi^* = \argmax_\pi \;R(\pi)$$
 
 \vfill
 $$\begin{array}{rcll}
-  R(\pi) & = & \expect{\sum_{t=0}^T \;r_t} &\mbox{episodic reward (go)} \\
+  R(\pi) & = & E_\pi\;\sum_{t=0}^T \;r_t &\mbox{episodic reward (go)} \\
 \\
-& \mbox{or} & \expect{\sum_{t=0}^\infty \;\gamma^t r_t} &\mbox{discounted reward (financial planning)} \\
+& \mbox{or} & E_\pi\;\sum_{t=0}^\infty \;\gamma^t r_t &\mbox{discounted reward (financial planning)} \\
 \\
 & \mbox{or} & \lim_{T \rightarrow \infty}\;\frac{1}{T} \;\sum_{t=0}^T \;r_t &\mbox{asymptotic average reward (driving)}
 \end{array}$$
@@ -129,7 +126,7 @@ $$\begin{array}{rcll}
 For discounted reward:
 
 \begin{eqnarray*}
-  V^\pi(s) & = & \expect{\sum_t \;\gamma^t r_t  \;\;|\; \pi, \; s_0 = s} \\
+  V^\pi(s) & = & E_\pi\;\sum_t \;\gamma^t r_t  \;\;|\; \pi, \; s_0 = s \\
   \\
   V^*(s) & = & \sup_\pi \;V^\pi(s) \\
   \\
@@ -366,8 +363,8 @@ REINFORCE typically suffers from high variance of the gradient samples requiring
 \vfill
 We have to consider
 \begin{itemize}
-\item {\color{red} the variation over the choice of $s_t$ and $a_t$}
-\item {\color{red} the variation over $r_{t'}$ given $s_t$ and $a_t$}
+\item {\color{red} the variation over the choice of $a_t$}
+\item {\color{red} the variation over $r_{t'}$ given $a_t$}
 \end{itemize}
 
 
@@ -381,7 +378,7 @@ We have to consider
 We can reduce the variation over $r_{t'}$ given $s_t$ and $a_t$ by shifting to the following.
 
 \begin{eqnarray*}
-    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & E_{\pi_\Phi}\; \sum_{t,t'}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} E_{s_{t'},a_{t'}\;|\;s_t,a_t}\;r_{t'}}
+    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & E_{\pi_\Phi}\; \sum_{t,t'}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} E_{r_{t'}\;|\;s_t,a_t}\;r_{t'}}
 \end{eqnarray*}
 
 Before saying how this can be computationally approximated, we state the above expression somewhat differently.
@@ -436,23 +433,23 @@ The two updates typically apply to different (but perhaps overlapping) subsets o
 To address the variance due to the choice of $a_t$ we first make the following observation for any function $V(s)$ of states.
 
 \begin{eqnarray*}
- & & E_{\pi_\Phi} \; \sum_t\; \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ & & E_{\pi_\Phi} \;  \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
  \\
- & = & E_{\pi_\Phi} \; \sum_t\; \sum_{a_t} \left(\pi_\Phi(a_t|s_t) \;\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ & = & E_{\pi_\Phi} \;  \sum_{a_t} \left(\pi_\Phi(a_t|s_t) \;\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
  \\
- & = & E_{\pi_\Phi} \; \sum_t\; \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ & = & E_{\pi_\Phi} \;  \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) V(s_t) \\
  \\
- & = & E_{\pi_\Phi} \; \sum_t\; V(s_t) \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right)
+ & = & E_{\pi_\Phi} \;  V(s_t) \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right)
 \end{eqnarray*}
 
 \slide{Variance from the Choice of $a_t$}
 
 \begin{eqnarray*}
- & & E_{\pi_\Phi} \; \sum_t\; \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ & & E_{\pi_\Phi} \;  \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
  \\
- & = & E_{\pi_\Phi} \; \sum_t\; V(s_t) \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) \\
+ & = & E_{\pi_\Phi} \;  V(s_t) \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) \\
  \\
- & = & E_{\pi_\Phi} \; \sum_t\; V(s_t)\; \nabla_\Phi\; \sum_{a_t} \pi_\Phi(a_t|s_t) \\
+ & = & E_{\pi_\Phi} \;  V(s_t)\; \nabla_\Phi\; \sum_{a_t} \pi_\Phi(a_t|s_t) \\
  \\
  & = & 0
 \end{eqnarray*}
@@ -469,6 +466,7 @@ To address the variance due to the choice of $a_t$ we first make the following o
 \end{eqnarray*}
 
 
+\slide{Variance from the Choice of $a_t$}
 
 In particular we have
 
