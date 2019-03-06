@@ -83,7 +83,7 @@ the state distribution in the training data is different from that defined by th
 Imitating experts, such as expert fire eaters, can be dangersous.  ``Don't try this at home''.
 
 \vfill
-Also, imitating experts will never exceed expert performance (consider AlphaZero).
+Also, it is difficult to exceed expert performance by imitating experts.  But this can happen.
 
 \slide{Markov Decision Processes (MDPs)}
 
@@ -130,7 +130,7 @@ For discounted reward:
   \\
   V^*(s) & = & \sup_\pi \;V^\pi(s) \\
   \\
-  \pi^*(a|s) & = & \argmax_a\;\expectsub{s' \sim P_T(s'|s,a)}{V^*(s')} \\
+  \pi^*(a|s) & = & \argmax_a\;R(s,a) + \expectsub{s' \sim P_T(s'|s,a)}{V^*(s')} \\
   \\
   V^*(s) & = & \max_a\; R(s,a) + \gamma \expectsub{s' \sim P_T(\cdot|s,a)}{V^*(s')}
 \end{eqnarray*}
