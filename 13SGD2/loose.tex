@@ -1,30 +1,42 @@
+\input ../SlidePreamble
 \input ../preamble
+
 
 \begin{document}
 
 {\Huge
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2018}
+  \centerline{David McAllester, Winter 2019}
   \vfill
-  \centerline{\bf Gradients as Dual Vectors }
+  \centerline{\bf The Arbitraryness of the Gradient Direction}
   \vfill
-  \centerline{\bf Hessian-Vector Products}
+  \centerline{\bf The Direction from the Loss Hessian}
   \vfill
-  \centerline{\bf Information Geometry}
+  \centerline{\bf The Direction from the Gradient CoVariance}
+  \vfill
+  \centerline{\bf The Direction from Information Geometry}
 
-\slide{Coordinates}
+\slide{}
+\centerline{\bf Arbitraryness of the Gradient Direction}
 
-For a vector space we can make an arbitrary choice of basis vectors $b_1$, $\ldots$, $b_N$
+\vfill
+
+\slide{Vector Spaces and Coordinte Systems}
+
+A vector space consists of field of scalars (typically the real or complex numbers), a set of ``vectors'', and the operations of scalar multiplication and vector addition.
+
+\vfill
+A vector space has no ``canonical'' or ``natural'' coordinate system.
+
+\vfill
+A coordinate system is defined by a choice of basis vectors $b_1$, $\ldots$, $b_N$
 that are linearly independent and span the space.
 
 \vfill
 A basis defines coordinates $x[i]$ for each vector $x$.
 
 $$x = x[1]b_1 + \cdots + x[N] b_N$$
-
-\vfill
-The basis, and the induced coordinate system, is arbitrary.
 
 \slide{Orthogonality is Coordinate-Relative}
 
@@ -123,8 +135,20 @@ $$\frac{\partial f(\Phi)}{\partial \Phi[1]} = \frac{\sqrt{[\nabla_\Phi f(\Phi)]\
 \vfill
 $$\sum_i \Phi.\mathrm{grad}[i]\Phi[i]b_i = \frac{\sqrt{[\nabla_\Phi f(\Phi)]\Delta \Phi}}{\sqrt{\eta}}\;b_1 = \frac{\Delta \Phi}{\eta}$$
 
+
+\slide{Manifold SGD}
+
+$$\Phi_{t+1} \;=\; \Phi_t  -\eta_t H^{-1}_\Phi \hat{g}_t$$
+
+\vfill
+Under what conditions does the loss value converge and any limit point of $\Phi_t$ is a stationary point?
+
 \slide{}
-\centerline{\bf Coordinate-Free Versions of SGD}
+\centerline{\bf The Hessian of Loss Direction}
+\centerline{\bf (The Newton Direction)}
+
+\vfill
+\centerline{\bf Second Order Methods}
 \vfill
 \vfill
 
@@ -179,50 +203,180 @@ for $\eta \in (0,1)$ where $\eta$ is naturally dimensionless.
 \vfill
 Most second order methods attempt to approximate making updates in the Newton direction.
 
-\slide{The Gradient Covariance Martix}
+\slide{Quasi-Newton Methods}
+
+It is often faster and more effective to approximate the Hessian.
+
+\vfill
+Maintain an approximation $M \approx H^{-1}$.
+
+\vfill
+Repeat:
+
+\vfill
+\begin{itemize}
+\item $\Phi \;\minuseq \; \eta M \nabla_\Phi \;f(\Phi)$ ($\eta$ is often optimized in this step).
+
+\vfill
+\item Restimate $M$.
+\end{itemize}
+
+\vfill
+The restimation of $M$ typically involves a finite difference
+
+\vfill
+$$\left(\nabla_\Phi \;f(\Phi)\;|_{\Phi_{t+1}}\right) - \left(\nabla_\Phi \;f(\Phi)\;|_{\Phi_t}\right)$$
+
+\vfill
+As a numerical approximation of $H \Delta \Phi$.
+
+\slide{Quasi-Newton Methods}
+
+Conjugate Gradient
+
+\vfill
+BFGS
+
+\vfill
+Limited Memory BFGS
+
+\slide{Issues with Quasi-Newton Methods}
+
+In SGD the gradients are random even when $\Phi$ does not change.
+
+\vfill
+We cannot use
+
+\vfill
+$$\left(\nabla_\Phi \;f_{t+1}(\Phi)|_{\Phi_{t+1}}\right) - \left(\nabla_\Phi \;f_t(\Phi)\;|_{\Phi_t}\right)$$
+
+\vfill
+as an estimate of $H \Delta \Phi$.
+
+\slide{}
+
+\centerline{\bf The Gradient Covariance Direction}
+
+\vfill
+
+\slide{The Gradient Covariance Direction}
 
 $$\Sigma \doteq E_t \;(\hat{g}_t - g)(\hat{g}_t - g)^\top$$
 
-\vfill
 $$\Phi_{t+1} = \Phi_t - \eta \Sigma^{-1} \nabla_\Phi \mathrm{Loss}(\Phi,x_t,y_y)$$
 
 \vfill
-This is related to RMSProp.
+In the limit $\eta \rightarrow 0$, the stationary Langevin distribution of this update is Gibbs!
 
-\slide{Information Geometry and the Natural Gradient}
+$$p(\Phi) \propto e^{-\beta {\cal L}(\Phi)}\;\;\;\mbox{with}\;\;\;\beta \propto \frac{1}{\eta}$$
 
-We consider the case where loss is determined by a probability distribution.  For example $- \log P(y)$.
+\slide{Newton Direction vs. Gradient Covariance Direction}
 
-\vfill
-The set of all distributions $P$ forms a manifold.
-
-\vfill
-For a given point (distribution) $P$ we can consider the ball
+The Newton direction is motivated by moving directly toward the nearest local optimum.
 
 \vfill
-$$B_\epsilon(P) = \{Q \;|\; KL(P,Q) \leq \epsilon\}$$
-
-$$\Delta P = \argmin_{\Delta P \in B_\epsilon(P)} f(P + \Delta P)$$
-
-\slide{Distance Functions Define a Point-Wise Inner Product}
+The gradient covariance direction is motivated by improving exploration of SGD viewed as an MCMC process.
 
 \vfill
-For any smooth (doubly differentiable) function $d(x,y)$ with $d(x,y) \geq 0$ and $d(x,x) = 0$
-we must have
+Both directions are difficult (infeasible?) to compute.  But see the discussion of Levenberg-Marquart below.
+
+\slide{}
+\centerline{\bf The Information Geometry Direction}
+\centerline{\bf (Amari's Natural Gradient)}
+\vfill
+
+\slide{KL Divergence as a Geometric Distance}
+
+We consider the case where loss is determined by a probability distribution.  For example $- \ln P_\Phi(y)$.
 
 \vfill
-$$\nabla_{\Delta x} \;d(x,x+ \Delta x)|_{\Delta x = 0} = 0$$
+We consider a ball around $\Phi$ determined by the KL divergence between $P_{\Phi}$ and $P_{\Phi'}$
+
+$$B(\Phi,\epsilon) = \{\Phi' \;|\; KL(P_\Phi,P_{\Phi'}) \leq \epsilon\}$$
+
+\vfill
+Note that this ball is defined by the set of distributions of the form $P_\Phi$ independent of the choice of the coordinates for $\Phi$.
+
+\slide{Proximal Gradient Descent}
+
+Proximal gradient descent is defined by a distance measure.
+
+\vfill
 \begin{eqnarray*}
-d(x,x + \Delta x) \approx \Delta x^\top H \Delta x \\
+\Phi_{t+1} & = & \argmin_{\Phi' \in B(\Phi,\;\epsilon)}\;E_{(x,y) \sim \mathrm{Train}}\;- \ln P_{\Phi'}(y|x) \\
 \\
-H \doteq \nabla_{\Delta x} \nabla_{\Delta x} d(x,x+\Delta x)|_{\Delta x = 0}
+& = & \argmin_{\Phi' \in B(\Phi,\;\epsilon)}\;{\cal L}(\Phi')
 \end{eqnarray*}
 
 \vfill
-The coordinate-independent gradient direction defined by $d(x,y)$ is then
+Here $\epsilon$ plays the role of the learning rate $\eta$ for {\bf total} gradient descent (stochastic proximal descent does not work).
 
 \vfill
-$$H^{-1} \nabla _x f(x)$$
+This update is independent of the choice of coordinates for $\Phi$.
+
+\vfill
+This is Amari's ``natural gradient''.
+
+\slide{Distances and Metrics}
+
+We now consider an arbitrary smooth distance function $d$ with $d(\Phi,\Phi) = 0$ and $d(\Phi,\Phi') \geq 0$.
+
+\vfill
+\centerline{Assuming smoothness, $d(\Phi, \Phi+\Delta \Phi)$ is locally quadratic in $\Delta \Phi$.}
+
+\begin{eqnarray*}
+d(\Phi,\Phi + \Delta \Phi) \approx \;\frac{1}{2} \Delta \Phi^\top H \Delta \Phi \\
+\\
+H \doteq \nabla_{\Delta \Phi} \nabla_{\Delta \Phi} \;\;d(\Phi,\Phi+\Delta \Phi)|_{\Delta \Phi = 0}
+\end{eqnarray*}
+
+\vfill
+For proximal gradient descent we then have
+$$\begin{array}{rcll}
+\Delta \Phi^* & \approx & \argmin {\cal L}(\Phi + \Delta \Phi) &\mbox{subject to}\; \Delta \Phi^\top H \Delta \Phi \leq 2\epsilon
+\end{array}$$
+
+Again ${\cal L}(\Phi)$ is the total gradient.
+
+\slide{Distances and Metrics}
+
+$$\begin{array}{rcll}
+\Delta \Phi^* & \approx & \argmin \hat{g}^\top \Delta \Phi &\mbox{subject to}\; \Delta \Phi^\top H \Delta \Phi \leq 2\epsilon
+\end{array}$$
+
+\vfill
+Setting the gradient of the objective to be proprtional to the gradient of the constraint (KTT conditions) we get
+
+\begin{eqnarray*}
+H\Delta \Phi & = & - \lambda g \\
+\\
+\Delta \Phi & = & - \lambda H^{-1} g
+\end{eqnarray*}
+
+\slide{Distances and Metrics}
+
+$$\Delta \Phi = - \eta H^{-1} g$$
+
+\begin{eqnarray*}
+(\eta H^{-1} g)^\top H (\eta H^{-1}g) = 2 \epsilon \\
+\\
+\eta = \sqrt{\frac{2\epsilon}{g^\top H^{-1} g}}
+\end{eqnarray*}
+
+\vfill
+$g$ is the total gradient.
+
+\slide{Conversion to SGD}
+
+$$\Delta \Phi = - \eta H^{-1} g$$
+
+\vfill
+Can now do this stochastically with
+
+$$\Delta \Phi_t = - \eta H^{-1} \hat{g}_t$$
+
+\vfill
+Hence information geometry provides a third ``natural'' gradient direction in addition to the Hessian of the loss and the covariance of gradient vectors.
 
 \slideplain{Information Geometry and Gradient Descent}
 
@@ -237,24 +391,22 @@ Although $KL$ is not symmetric, $H$ happens to be the same for $KL(P,P+\Delta P)
 
 \slide{Hessian-Vector Products}
 
-$$H \Delta \Phi = \nabla_\Phi \left((\nabla_\Phi\; f^t(\Phi))\cdot \Delta \Phi\right)$$
+$$H v = \nabla_\Phi \left((\nabla_\Phi\; f^t(\Phi))^\top v\right)$$
 
 \vfill
 This is supported in PyTorch --- in PyTorch $\Phi.\mathrm{grad}$ is a variable while $\Phi.\mathrm{grad}.\mathrm{data}$ is a tensor.
 
 \slide{Hessian-Vector Products}
 For backpropagation to be efficient it is important that the value of the graph is a scalar (like a loss).  But note that for $v$ fixed we have that
-$$(\nabla_\Phi\; f^t(\Phi))\cdot v$$
+$$(\nabla_\Phi\; f^t(\Phi))^\top v$$
 is a scalar and hence its gradient with respect to $\Phi$, which is $Hv$, can be computed efficiently.
-
-{
 
 \slide{Complex-Step Differentiation}
 
 Consider a function $f:\reals \rightarrow \reals$ defined by a computer program.
 
 \vfill
-For C code on a CPU we can run program the program on complex numbers simply by changing the data type of $x$.
+For C code on a CPU we can run a program on complex numbers simply by changing the data type of $x$.
 
 \vfill
 James Lyness and Cleve Moler, Numerical Differentiation of Analytic Functions SIAM J. of Numerical Analysis, 1967.
@@ -332,108 +484,6 @@ We are interested in computing $H_t v$ for $v = (\eta \odot \hat{g})$.
 \end{eqnarray*}
 
 
-\slide{Second Order SGD}
-
-
-\centerline{\includegraphics[width = 6in]{../images/momentum}}
-\centerline{\Large Rudin's blog}
-
-\vfill
-Focusing on the Hessian.
-
-\slide{Quasi-Newton Methods}
-
-It is often faster and more effective to approximate the Hessian.
-
-\vfill
-Maintain an approximation $M \approx H^{-1}$.
-
-\vfill
-Repeat:
-
-\vfill
-\begin{itemize}
-\item $\Phi \;\minuseq \; \eta M \nabla_\Phi \;f(\Phi)$ ($\eta$ is often optimized in this step).
-
-\vfill
-\item Restimate $M$.
-\end{itemize}
-
-\vfill
-The restimation of $M$ typically involves a finite difference
-
-\vfill
-$$\left(\nabla_\Phi \;f(\Phi)\;|_{\Phi_{t+1}}\right) - \left(\nabla_\Phi \;f(\Phi)\;|_{\Phi_t}\right)$$
-
-\vfill
-As a numerical approximation of $H \Delta \Phi$.
-
-\slide{Quasi-Newton Methods}
-
-Conjugate Gradient
-
-\vfill
-BFGS
-
-\vfill
-Limited Memory BFGS
-
-\slide{Issues with Quasi-Newton Methods}
-
-In SGD the gradients are random even when $\Phi$ does not change.
-
-\vfill
-We cannot use
-
-\vfill
-$$\left(\nabla_\Phi \;f_{t+1}(\Phi)|_{\Phi_{t+1}}\right) - \left(\nabla_\Phi \;f_t(\Phi)\;|_{\Phi_t}\right)$$
-
-\vfill
-as an estimate of $H \Delta \Phi$.
-
-\slide{Issues}
-
-\vfill
-\begin{itemize}
-\item {\bf Gradient Estimation.} The accuracy of $\hat{g}$ as an estimate of $g$.
-
-  \vfill
-\item {\bf Gradient Drift (second order structure).} The fact that $g$ changes as the parameters change.
-
-  \vfill
-\item {\bf Convergence.} To converge to a local optimum the learning rate must be gradually reduced toward zero.
-\end{itemize}
-
-\slide{The Classical Convergence Theorem}
-
-$$\Phi_{t+1} \;=\; \Phi_t - \eta_t \nabla_\Phi\;\mathrm{loss}(\Phi,x_t,y_t)$$
-
-\vfill
-For sufficiently smooth loss functions, {\color{red} and holding the coordinate system constant through time}, and for
-
-$$\eta_t > 0\;\;\;\;\mbox{and}\;\;\;\;\lim_{t \rightarrow \infty} \;\eta_t = 0\;\;\;\;\mbox{and}\;\;\;\;\sum_t \eta_t = \infty,$$
-
-\vfill
-the loss value of SGD converges.
-
-\ignore{  This is still wrong.
-\slide{More General Convergence Theorem}
-
-$$\Phi_{t+1} \;=\; \Phi_t - \Delta \Phi_t$$
-
-\vfill
-$$\tilde{\Delta} f_t \;\doteq\; \left[E_{x_t,y_t} \nabla_\Phi \mathrm{Loss}(\Phi,x_t,y_t)\right]E_{x_t,y_t}\;\Delta \Phi_t(x_t,y_t)$$
-
-$$\mbox{If}\;\;\;\tilde{\Delta}f_t > 0\;\;\;\;\mbox{and}\;\;\;\;\lim_{t \rightarrow \infty} \;\tilde{\Delta}f_t = 0
-\;\;\;\;\mbox{and}\;\;\;\;\sum_t \tilde{\Delta}f_t = \infty,$$
-
-\vfill
-then the loss value of SGD converges.
-
-\vfill
-{\large Warning: I don't know a reference for this.}
-}
-
 \slide{Structure From Motion}
 
 \centerline{See the Videos}
@@ -445,54 +495,74 @@ http://www.mada.org.il/brain/Shape/shape.html
 \slide{The Levenberg-Marquart Algorithm (Bundle Adjustment)}
 
 \begin{eqnarray*}
-  \mathrm{Loss} & = & E_{(x,y) \sim \mathrm{Train}}\;\frac{1}{2}||f_\Phi(x) - y||^2 \\
+  \mathrm{Loss}_\Phi(x,y) & = & \sum_i \frac{1}{2}||f_\Phi(x_i) - y_i||^2 \\
   \\
   \\
-  f_{\Phi + \Delta \Phi}(x_t) & \approx & f_\Phi(x_t) + J_t\Delta \Phi \\
+  f_{\Phi + \Delta \Phi}(x_i) & \approx & f_\Phi(x_i) + J_i\Delta \Phi \\
   \\
-  J_t & = & \nabla_\Phi \;f_\Phi(x_t) \\
+  J_i & = & \nabla_\Phi \;f_\Phi(x_i) \\
   \\
-  \hat{g}_t & = & (f_\Phi(x_t) - y_t) J_t \;\;= r_tJ_t \\
+  \hat{g}_i & = & (f_\Phi(x_i) - y_i) J_i \;\;= r_iJ_i \\
   \\
-  r_t & = & f_\Phi(x_t) - y_t 
+  r_i & = & f_\Phi(x_i) - y_i 
 \end{eqnarray*}
 
 \slide{The Levenberg-Marquart Algorithm}
 
 \begin{eqnarray*}
-    \mathrm{Loss}(\Phi + \Delta \Phi) & \approx & E_t\;\;\frac{1}{2}||r_t + J_t\Delta\Phi||^2
+    \mathrm{Loss}(\Phi + \Delta \Phi) & \approx & \sum_i\;\;\frac{1}{2}||r_i + J_i\Delta\Phi||^2
 \end{eqnarray*}
 
 \vfill
 Minimizing this squared error over the choice of $\Delta \Phi$ is a least squares regression problem.
 
+\slide{The Levenberg-Marquart Algorithm}
 \begin{eqnarray*}
-  0 & = & E_t\; (r_t + J_t \Delta \Phi)J_t \\
-  \\
-  0 & = & (E_t\;r_tJ_t) + E_t \;J_t^\top J_t \Delta \Phi \\
-  \\
-  (E_t\; J_t^\top J_t) \Delta \Phi & = & - E_t\; \hat{g}_t \\
-  \\
-  \Delta \Phi & = & - (E_t\; J_t^\top J_t)^{-1} (E_t\; \hat{g}_t)
+    \mathrm{Loss}(\Phi + \Delta \Phi) & \approx & \sum_i\;\;\frac{1}{2}||r_i + J_i\Delta\Phi||^2
 \end{eqnarray*}
 
+{\huge
+\begin{eqnarray*}
+  0 & = & \sum_i\; (r_i + J_i \Delta \Phi)J_i \\
+  \\
+  0 & = & (\sum_i\;r_iJ_i) + \sum_i \;J_i^\top J_i \Delta \Phi \\
+  \\
+  (\sum_i\; J_i^\top J_i) \Delta \Phi & = & - \sum_i\; \hat{g}_i \\
+  \\
+  \Delta \Phi & = & - (\sum_i\; J_i^\top J_i)^{-1} (\sum_i\; \hat{g}_i)
+\end{eqnarray*}
+}
+
+\ignore{
 \slideplain{A General Loss Function}
 
 \begin{eqnarray*}
-  \mathrm{Loss}_t(f(\Phi + \Delta \Phi))  & \approx & L_t + \hat{g}_t^\top \Delta \Phi + (J_t\Delta \Phi)^\top H_t\;J_t \Delta \Phi \\
+  \mathrm{Loss}_i(f(\Phi + \Delta \Phi))  & \approx & L_i + \hat{g}_i^\top \Delta \Phi + (J_i\Delta \Phi)^\top H_i\;J_i \Delta \Phi \\
   \\
-  J_t & \doteq & \nabla_\Phi \; f(\Phi) \\
+  J_i & \doteq & \nabla_\Phi \; f(\Phi) \\
   \\
-  H_t & \doteq & \nabla_f \nabla_f \; \mathrm{Loss}_t(f)
+  H_i & \doteq & \nabla_f \nabla_f \; \mathrm{Loss}_i(f)
 \end{eqnarray*}
 
 \vfill
 Setting the gradient to zero and solving for $\Delta \Phi$:
 
 \begin{eqnarray*}
-\Delta \Phi_t & = & - (E_t \;\; J_t^\top H_t\; J_t)^{-1} \hat{g}_t
+\Delta \Phi_i & = & - (\sum_i \;\; J_i^\top H_i\; J_i)^{-1} \hat{g}_i
 \end{eqnarray*}
+}
 
+\slide{Levenberg-Marquart for Information Geometry}
+
+$${\cal L}'_t(\Phi+ \Delta \Phi) = {\cal L}_t(\Phi) + \lambda \mathrm{KL}(P_\Phi, P_{\Phi + \Delta \Phi})$$
+
+\vfill
+We consider only the second order structure in the KL divergence.
+
+\vfill
+This will control the step size.
+
+\ignore{
 
 \slide{The Levenberg-Marquart Algorithm for Log Loss}
 
@@ -507,8 +577,8 @@ H_t & = & E_{y \sim Q_{f_t}}(\delta_y - Q_{f_t})(\delta_y -Q_{f_t})^\top \\
 \\
 & = & \mathrm{Diag}(Q_{f_t}) - Q_{f_t}Q_{f_t}^T
 \end{eqnarray*}
-
+}
 
 \slide{END}
 
-} \end{document}
+\end{document}

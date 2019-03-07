@@ -71,10 +71,11 @@ $$\Phi \;\minuseq \; \eta_t \nabla_\Phi\;\mathrm{loss}(\Phi,x_t,y_t)$$
 For ``sufficiently smooth'' non-negative loss with
 
 \vfill
-$$\eta_t > 0\;\;\;\;\mbox{and}\;\;\;\;\lim_{t \rightarrow \infty} \;\eta_t = 0\;\;\;\;\mbox{and}\;\;\;\;\sum_t \eta_t = \infty,$$
+$$\eta_t \geq 0\;\;\;\;\mbox{and}\;\;\;\;\lim_{t \rightarrow \infty} \;\eta_t = 0\;\;\;\;\mbox{and}\;\;\;\;\sum_t \eta_t = \infty,$$
 
 \vfill
-we have that the training loss $E_{(x,y) \sim \mathrm{Train}} \mathrm{loss}(\Phi,x,t)$ converges to a limit.
+we have that the training loss $E_{(x,y) \sim \mathrm{Train}}\; \mathrm{loss}(\Phi,x,t)$ converges to a limit and any limit point of the sequence $\Phi_t$
+is a stationary point in the sense that {\huge  $\nabla_\Phi \; E_{(x,y) \sim \mathrm{Train}} \;\mathrm{loss}(\Phi,x,t) = 0$}.
 
 \vfill
 {\Large
@@ -83,6 +84,7 @@ we have that the training loss $E_{(x,y) \sim \mathrm{Train}} \mathrm{loss}(\Phi
 
 \vfill
 {\bf Rigor Police:} This theorem is usually stated with an additional condition that $\sum_t \;\eta_t^2 < \infty$.  I believe that this additional condition is not required.
+Any help resolving this issue is welcome.
 
 }
 
