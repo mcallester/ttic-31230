@@ -74,7 +74,7 @@ $$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,z) \sim \mathrm{Replay},\;a \sim \pi}\;\
 {\bf Problem 2}
 We consider replacing the policy network $\pi_\Phi$ with a $Q$-value network $Q_\Phi$ so that each node $s$ stores the $Q$-values $Q_\Phi(s,a)$ rather than
 the policy probabilities $\pi_\Phi(s,a)$.  We then replace (1) with
-$$U(s,a) =  \left\{\begin{array}{ll}\lambda Q_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda Q_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1')$$
+$$U(s,a) =  \left\{\begin{array}{ll}(1 + \delta) Q_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + (1 + \delta) Q_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1')$$
 and leave (2) and (3) unchanged.  Rewrite (4) to train $Q_\Phi(s,a)$ by minimizing a squared ``Bellman Error'' between $Q_\Phi(s,a)$ and the outcome $z$ over actions drawn from the replay buffer's stored policy.
 Presumably this version does not work as well.
 
@@ -83,13 +83,19 @@ Presumably this version does not work as well.
 We consider replacing the policy network $\pi_\Phi$ with an advantage network $A_\Phi$ so that each node $s$ stores the $A$-values $A_\Phi(s,a)$ rather than
 the policy probabilities $\pi_\Phi(s,a)$.  We now have each node $s$ also store $\hat{\mu}(s)$ which equals the average value of the simulations that go through state $s$.
 We then replace (1) with
-$$U(s,a) =  \left\{\begin{array}{ll}\lambda A_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda A_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1')$$
-and leave (2) and (3) unchanged.  Rewrite (4) to train $A_\Phi(s,a)$ by minimizing a squared ``Bellman Error'' between $A_\Phi(s,a)$ and $\hat{A}(s,a)$ defined as follows
-$$\hat{A}(s,a) =  \left\{\begin{array}{ll}A_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) - \hat{\mu}(s) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(5)$$
-This presumably also does not work as well.
+$$U(s,a) =  \left\{\begin{array}{ll}(1+\delta)(A_\Phi(s,a) + V_\Phi(s)) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + (1+\delta)(A_\Phi(s,a) + V_\Phi(s))/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1'')$$
+and leave (2) unchanged and replace (3) by
 
-\bigskip
-It is interesting to contemplate the magic of (1) through (4) as used in AlphaZero.
+\medskip
+\centerline{a replay buffer of tuples $(s_{\mathrm{root}},\pi_{s_{\mathrm{root}}},z,\hat{\mu}(s_{\mathrm{root}}),\hat{\mu}(s_{\mathrm{root}},\cdot))$ \hspace{2em}$(3')$}
+
+\medskip
+Rewrite (4) to train $A_\Phi(s,a)$ by minimizing a squared ``Bellman Error'' between $A_\Phi(s,a)$ and $\hat{A}(s,a)$ defined as follows
+$$\hat{A}(s,a) =  \left\{\begin{array}{ll}A_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) - \hat{\mu}(s) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(5)$$
+
+\medskip
+Although a valiant attempt, this version presumably also does not work as well.
+It is interesting to contemplate the magic of (1) through (4) as used in AlphaZero (in spite of the seemingly ill-formed semantics of (1)).
 
 \end{document}
 

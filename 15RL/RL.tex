@@ -331,16 +331,16 @@ $$\Phi^* = \argmax_\Phi\; E_{\pi_\Phi} \; R$$
 \slide{Policy Gradient Theorem}
 
 \begin{eqnarray*}
-    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,t'}\;E_{\pi_\Phi}\; \nabla_\Phi\;\ln \pi_\Phi(a_{t}|s_{t})\;\;r_{t'}
+    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,t'}\;E_{s_t,a_t,r_{t'}}\;\; \nabla_\Phi\;\ln \pi_\Phi(a_{t}|s_{t})\;\;r_{t'}
     \end{eqnarray*}
 For $t' < t$ we have
 {\huge
 \begin{eqnarray*}
-    E_{\pi_\Phi} r_{t'} \nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)  & =  & E_{s_0,a_0,\ldots,s_t}\; r_{t'}  \;\sum_{a_t} \; \pi_\Phi(a_t|s_t)\; \nabla_\Phi\;\ln \pi_\Phi(a_t|s_t) \\
+    E_{r_{t'},s_t,a_t}\;\; r_{t'} \nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)  & =  & E_{r_{t'},s_t}\; r_{t'}  \;\sum_{a_t} \; \pi_\Phi(a_t|s_t)\; \nabla_\Phi\;\ln \pi_\Phi(a_t|s_t) \\
     \\
-    & =  & E_{s_0,a_0,\ldots,s_t}\; r_{t'}  \;\sum_{a_t}\; \nabla_\Phi\; \pi_\Phi(a_t|s_t) \\
+    & =  & E_{r_{t'},s_t}\; r_{t'}  \;\sum_{a_t}\; \nabla_\Phi\; \pi_\Phi(a_t|s_t) \\
     \\
-    & =  & E_{s_0,a_0,\ldots,s_t}\; r_{t'}  \;\nabla_\Phi\; \sum_{a_t}\;\pi_\Phi(a_t|s_t) \\
+    & =  & E_{r_{t'},s_t}\; r_{t'}  \;\nabla_\Phi\; \sum_{a_t}\;\pi_\Phi(a_t|s_t) \\
     \\
     & = & 0
 \end{eqnarray*}
@@ -443,23 +443,23 @@ The two updates typically apply to different (but perhaps overlapping) subsets o
 To address the variance due to the choice of $a_t$ we first make the following observation for any function $V(s)$ of states.
 
 \begin{eqnarray*}
- & & E_{\pi_\Phi} \;  \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ & & E_{s_t,a_t} \;  \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
  \\
- & = & E_{\pi_\Phi} \;  \sum_{a_t} \left(\pi_\Phi(a_t|s_t) \;\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ & = & E_{s_t} \;  \sum_{a_t} \left(\pi_\Phi(a_t|s_t) \;\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
  \\
- & = & E_{\pi_\Phi} \;  \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ & = & E_{s_t} \;  \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) V(s_t) \\
  \\
- & = & E_{\pi_\Phi} \;  V(s_t) \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right)
+ & = & E_{s_t} \;  V(s_t) \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right)
 \end{eqnarray*}
 
 \slide{Variance from the Choice of $a_t$}
 
 \begin{eqnarray*}
- & & E_{\pi_\Phi} \;  \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ & & E_{s_t,a_t} \;  \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
  \\
- & = & E_{\pi_\Phi} \;  V(s_t) \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) \\
+ & = & E_{s_t} \;  V(s_t) \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) \\
  \\
- & = & E_{\pi_\Phi} \;  V(s_t)\; \nabla_\Phi\; \sum_{a_t} \pi_\Phi(a_t|s_t) \\
+ & = & E_{s_t} \;  V(s_t)\; \nabla_\Phi\; \sum_{a_t} \pi_\Phi(a_t|s_t) \\
  \\
  & = & 0
 \end{eqnarray*}
@@ -468,9 +468,9 @@ To address the variance due to the choice of $a_t$ we first make the following o
 
 
 \begin{eqnarray*}
- & & E_{\pi_\Phi}\; \sum_t\; \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right)(Q^{\pi_\Phi}(s_t,a_t) - V(s_t)) \\
+ & & E_{s_t,a_t}\; \sum_t\; \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right)(Q^{\pi_\Phi}(s_t,a_t) - V(s_t)) \\
  \\
- & = & E_{\pi_\Phi} \; \sum_t\; \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right)Q^{\pi_\Phi}(s_t,a_t) \\
+ & = & E_{s_t,a_t} \; \sum_t\; \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right)Q^{\pi_\Phi}(s_t,a_t) \\
  \\
  & = & \nabla_\Phi \; E_{\pi_\Phi}\;R
 \end{eqnarray*}
