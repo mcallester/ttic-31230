@@ -281,7 +281,7 @@ Return $V[J]$
 \slide{Multi-Layer, Multi-Headed Attention}
 
 \vfill
-Let $\ell$ ranger over layers --- each level will be computed from the previous level.
+Let $\ell$ ranger over layers --- each layer will be computed from the previous layer.
 
 \vfill
 Let $h$ range over ``heads'' --- each head is computing an attention for a different purpose.
@@ -294,11 +294,11 @@ We will construct a layers of sequences of vectors $M[L,T,J]$.
 To compute {\color{red} $M[\ell+1,T,J]$} from {\color{red} $M[\ell,T,J]$} we first compute:
       
 \begin{eqnarray*}
-\mathrm{Query}[\ell,h,t,k] & = & \sum_j\;{\color{red} W^Q}[\ell,h,k,j]M[\ell,t,j] \\
+\mathrm{Query}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
 \\
-\mathrm{Key}[\ell,h,t,k] & = & \sum_j\;{\color{red} W^K}[\ell,h,k,j]M[\ell,t,j] \\
+\mathrm{Key}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^K}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
 \\
-\mathrm{Value}[\ell,h,t,i] & = & \sum_j\;{\color{red} W^V}[\ell,h,i,j]M[\ell,t,j]
+\mathrm{Value}[\ell,h,t,{\color{red} i}] & = & \sum_j\;{\color{red} W^V}[\ell,h,{\color{red} i,j}]M[\ell,t,{\color{red} j}]
 \end{eqnarray*}
 
 \slide{Multi-Headed Self Attention}

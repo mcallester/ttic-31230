@@ -130,7 +130,7 @@ For discounted reward:
   \\
   V^*(s) & = & \sup_\pi \;V^\pi(s) \\
   \\
-  \pi^*(a|s) & = & \argmax_a\;R(s,a) + \expectsub{s' \sim P_T(s'|s,a)}{V^*(s')} \\
+  \pi^*(a|s) & = & \argmax_a\;R(s,a) + \gamma \expectsub{s' \sim P_T(s'|s,a)}{V^*(s')} \\
   \\
   V^*(s) & = & \max_a\; R(s,a) + \gamma \expectsub{s' \sim P_T(\cdot|s,a)}{V^*(s')}
 \end{eqnarray*}
@@ -188,9 +188,19 @@ For discounted reward:
   Q^*(s,a) & = & R(s,a) + \gamma \expectsub{s' \sim P_T(\cdot|s,a)}{\max_{a'}\; Q^*(s',a')}
 \end{eqnarray*}
 
+\slide{$Q$ Function Iteration}
+
+It is possible to define $Q$-iteration by analogy with value iteration, but this is generally not discussed.
+
+\vfill
+Value iteration is typically done for finite state spaces.  Let $S$ be the number of states and $A$ be the number of actions.
+
+\vfill
+One update of a $Q$ table takes $O(S^2A^2)$ time while one update of value iteration is $O(S^2A)$.
+
 \slide{$Q$-Learning}
 
-We will assume a parameterized $Q$ function $Q_\Phi(s,a)$.
+When learning by updating the $Q$ function we typically assume a parameterized $Q$ function $Q_\Phi(s,a)$.
 \vfill
 {\bf Bellman Error:}
 {\huge $$\mathrm{Bell}_\Phi(s,a) \doteq \left(Q_\Phi(s,a) - \left(R(s,a) + \gamma\;\expectsub{s' \sim P_T(s'|s,a)}{\max_{a'}\;Q_\Phi(s',a')}\right)\right)^2$$}
