@@ -254,7 +254,7 @@ This data is collected in a replay buffer.
 Learning is done from this replay buffer using the following objective on a single dual-head network.
 
 \vfill
-$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,z) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (v_\Phi(s) - z)^2 \\ \\ - \lambda_1\log \pi_\Phi(a|s) \\ \\ + \lambda_2||\Phi||^2\end{array}\right)$$
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,z) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - z)^2 \\ \\ - \lambda_1\log \pi_\Phi(a|s) \\ \\ + \lambda_2||\Phi||^2\end{array}\right)$$
 
 \slide{Selecting Root Moves}
 

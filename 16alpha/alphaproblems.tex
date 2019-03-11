@@ -1,0 +1,95 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+\bigskip
+\centerline{\bf AlphaZero Problems.}
+
+\bigskip
+\bigskip
+{\bf Backgound.}
+A version of AlphaZero can be defined as follows.
+
+\medskip
+To select a move in the game, first construct a search tree over possible moves to evaluate options.
+
+\medskip
+The tree is grown by running ``simulations''.  Each simulation descends into the tree from the root selecting a move from each position
+until the selected move has not been explored before.  When the simulation reaches an unexplored move it expands the tree by adding a node for that move.
+Each simulation returns the value $V_\Phi(s)$ for the newly added node $s$.
+
+\medskip
+Each node in the search tree represents a board position $s$ and stores the following information which can be initialized
+by running the value and policy networks on position $s$.
+
+\begin{itemize}
+\item $V_\Phi(s)$ --- the value network value for the position $s$.
+\item For each legal move $a$ from $s$, the policy network probability $\pi_\Phi(s,a)$.
+\item For each legal move $a$ from $s$, the number $N(s,a)$ of simulations that have taken move $a$ from $s$. This is initially zero.
+\item For each legal move $a$ from $s$ with $N(s,a) > 0$, the average $\hat{\mu}(s,a)$ of the values of the simulations that have
+  taken move $a$ from position $s$.
+\end{itemize}
+
+\medskip
+In descending into the tree, simulations select the move $\argmax_a U(s,a)$ where we have
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1)$$
+
+\medskip
+When the search is completed, we must select a move from the root position.  For this we use a post-search stochastic policy
+$$\pi_{s_{\mathrm{root}}}(a) \propto N(s_{\mathrm{root}},a)^\beta\;\;\;\;\;(2)$$
+where $\beta$ is temperature hyperparameter.
+
+\medskip
+For training we construct
+
+\medskip
+\centerline{a replay buffer of triples $(s_{\mathrm{root}},\pi_{s_{\mathrm{root}}},z)$ \hspace{2em}$(3)$}
+
+\medskip
+accumulated from self play where $s_{\mathrm{root}}$ is a root position from a search during a game,
+$\pi_{s_{\mathrm{root}}}$ is the post-search policy constructed for $s_{\mathrm{root}}$, and $z$ is the outcome of that game.
+
+\medskip
+Training is then done by SGD on the following objective function.
+
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,z) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - z)^2 \\ \\ - \lambda_1\log \pi_\Phi(a|s) \\ \\ + \lambda_2||\Phi||^2\end{array}\right)\;\;\;\;(4)$$
+
+\bigskip
+{\bf Problem 1.}
+    
+\medskip
+(a) Consider the case of $\lambda < 1$ vs. $\lambda > 1$ in (1).  Which value of $\lambda$ leads to more diversity in the choice of actions during different simulations?  Explain your answer.
+
+\medskip
+(b) Which of $\lambda < 1$ or $\lambda > 1$ in (1) is more consistent with viewing $U(s,a)$ as a form of ``upper bound'' in the upper confidence bound (UCB) bandit algorithm?  Explain your answer.
+
+\bigskip
+{\bf Problem 2}
+We consider replacing the policy network $\pi_\Phi$ with a $Q$-value network $Q_\Phi$ so that each node $s$ stores the $Q$-values $Q_\Phi(s,a)$ rather than
+the policy probabilities $\pi_\Phi(s,a)$.  We then replace (1) with
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda Q_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda Q_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1')$$
+and leave (2) and (3) unchanged.  Rewrite (4) to train $Q_\Phi(s,a)$ by minimizing a squared ``Bellman Error'' between $Q_\Phi(s,a)$ and the outcome $z$ over actions drawn from the replay buffer's stored policy.
+Presumably this version does not work as well.
+
+\bigskip
+{\bf Problem 3.}
+We consider replacing the policy network $\pi_\Phi$ with an advantage network $A_\Phi$ so that each node $s$ stores the $A$-values $A_\Phi(s,a)$ rather than
+the policy probabilities $\pi_\Phi(s,a)$.  We now have each node $s$ also store $\hat{\mu}(s)$ which equals the average value of the simulations that go through state $s$.
+We then replace (1) with
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda A_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda A_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1')$$
+and leave (2) and (3) unchanged.  Rewrite (4) to train $A_\Phi(s,a)$ by minimizing a squared ``Bellman Error'' between $A_\Phi(s,a)$ and $\hat{A}(s,a)$ defined as follows
+$$\hat{A}(s,a) =  \left\{\begin{array}{ll}A_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) - \hat{\mu}(s) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(5)$$
+This presumably also does not work as well.
+
+\bigskip
+It is interesting to contemplate the magic of (1) through (4) as used in AlphaZero.
+
+\end{document}
+
