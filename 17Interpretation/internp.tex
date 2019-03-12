@@ -48,46 +48,31 @@ Consider a swiss chocolate bar of $3 \times 5$ little squares.
 \vfill
 How many breaks does it take to reduce this to fifteen unconnected squares?
 
-\slide{Why Open the Box?}
-
-Insight for improving system design.
-
-  \vfill
-Insight into the reasons for system decisions.
-
-  \vfill
-Convincing people to accept system decisions.
-
 \slide{Dimensionality Reduction}
 
 \centerline{\includegraphics[width = 9.5in]{../images/t-SNE}}
 \centerline{[Stanford CS231]}
 
 \slide{t-SNE}
-
-Consider high dimensional points $x_1$, $\ldots$, $x_N$.
+Consider high dimensional data $x_1,\;\ldots,\;x_N$ with $x \in \mathbb{R}^d$.
 
 \vfill
 $$P(j|i) = \frac{1}{Z_i} \exp\left(\frac{-||x_i -x_j||^2}{2\sigma_i^2}\right)$$
 
 \vfill
-Set $\sigma_i$ such that $H(P_i(:|i)) = H(P(:|j))$ for all $i$, $j$.
+Set $\sigma_i$ such that $H(P(j|i)) = \ln k$ (soft $k$ nearest neighbors).
 
 \vfill
-$$P(\{i,j\}) = \frac{P(i|j) +P(j|i)}{2N}$$
-
-\vfill
-$$\mbox{we have}\;\; \sum_j P(\{i,j\}) \geq \sum_j \frac{P(j|i)}{2N} = \frac{1}{2N}$$
+$$P(i,j) = P(i)P(j|i) = \frac{1}{N}\;P(j|i)$$
 
 \slide{t-SNE}
-
-Consider low dimensional points $y_1$, $\ldots$, $y_N$.
-
-\vfill
-$$Q(\{i,j\}) = \frac{1}{Z} \left(\frac{1}{1 + ||y_i -y_j||^2}\right)$$
+Let $Y = \{y_i\ldots,y_N\}$ be an assignment of a vector with $y_i \in \mathbb{R}^2$ to each high dimensional point $x_i$.
 
 \vfill
-$$Y^* = \argmin_Y H(P,Q)$$
+$$Q_Y(i,j) = \frac{1}{Z}\;\left(\frac{1}{1 + ||y_i -y_j||^2}\right)$$
+
+\vfill
+$$Y^* = \argmin_Y \;\mathrm{KL}(P,Q_Y)$$
 
 \slide{t-SNE vs. Projection Modeling}
 
@@ -96,14 +81,6 @@ t-SNE --- $y(x)$ is defined by a table on the data points.
 \vfill
 In PCA or Isomap we have $y_\Phi(x) \in \mathbb{R}^2$ for a parameterized function $y_\Phi$.
 
-\vfill
-Assume a (nearest neighbor) distribution on pairs $(x_1,x_2)$ and consider random variables $y_1 = y_\Phi(x_1)$ and $y_2 = y_\Phi(x_2)$.
-
-\vfill
-An idea (not PCA or Isomap) :
-
-\vfill
-$$\Phi^* = \argmax_\Phi I(y_1,y_2)$$
 \slide{Visualizing the Filters}
 
 \centerline{\includegraphics[width = 9.5in]{../images/Filters}}
@@ -143,7 +120,7 @@ The backpropagation at activation functions is modified.
 \vfill
 For a neuron $y$ with $y = s(x)$ for activation function $s$:
 
-$$x.\mathrm{ggrad} = I[y.\mathrm{ggrad} > 0] \;y.\mathrm{ggrad}\; ds/dx$$
+$$x.\mathrm{ggrad} = \mathbf{1}[y.\mathrm{ggrad} > 0] \;y.\mathrm{ggrad}\; ds/dx$$
 
 
 \slide{Guided Backpropagation}
@@ -152,10 +129,21 @@ $$x.\mathrm{ggrad} = I[y.\mathrm{ggrad} > 0] \;y.\mathrm{ggrad}\; ds/dx$$
 
 \slide{Guided Backpropagation}
 
+\centerline{[Zeigler and Fergus 2013]}
+
 \centerline{\includegraphics[width = 4in]{../images/DeconvUnguided} \hfill \includegraphics[width=4in]{../images/DeconvGuided}}
 
 \centerline{[Zeigler and Fergus 2013]}
 
+\slide{Neural Network Neuroscience}
+
+\centerline{[Zeigler and Fergus 2013]}
+
+\vfill
+Take a neuron (linear threshold unit) and select the images causing the greatest response of that Neuron.
+
+\vfill
+Do guided backpropagation from that neuron onto the image.
 
 \slide{Guided Backpropagation Layer 2}
 
@@ -224,10 +212,10 @@ The Karnaugh map, also known as the K-map, is a method to simplify boolean algeb
 \centerline{Wheel or Face}
 
 \vfill
-\centerline{Hand or Flower \hspace{1in} Hand or Flower}
+\centerline{Hand or Flower \hspace{2.5in} Hand or Flower}
 
 \vfill
-\centerline{Leg or Tree \hspace{1in} Leg or Tree}
+\centerline{Leg or Tree  \includegraphics[height=1.5in]{../images/StickFig} Leg or Tree}
 }
 
 \vfill
@@ -325,6 +313,63 @@ L1 regularization gives a {\color{red} square loss of 0.235} and uses {\color{re
 \vfill
 In the regression experiment squared error was not significantly reduced at layers 3 through 5 even without regularization. 
 
+\slidetwo{SVCCA Analysis}
+{Raghu et al., November 2017}
+
+Consider a matrix $W[i,j]$ used in some model as
+
+\vfill
+$$y[i] = \sigma\left(\sum_j W[i,j] x[j] + b[i]]\right)$$
+
+\vfill
+We want to understand the meaning of the matrix $W[i,j]$ and the vector $y[I]$.
+
+\slide{SVCCA}
+
+$$y[i] = \sigma\left(\sum_j W[i,j] x[j] + b[i]\right)$$
+
+\vfill
+We can collect a set $y[t,I]$  of vectors $y$ computed from $x[t,J]$
+
+\vfill
+$$y[t,i] = \sigma\left(\sum_j W[i,j] x[t,j] + b[i]\right)$$
+
+Here $t$ can range over different inputs to the entire network, or different image locations where the filter $W$ is used,
+or different times with a single RNN execution.
+
+\slide{PCA on the matrix outputs}
+
+\vfill
+We can then perform PCA over the vectors $y[t,I]$ to find a a reduced set of covariance eigenvectors $B[k,I]$.
+and represent $y$ by its projection on the eigenvectors.
+
+$$\tilde{y}[t,k] = B[k,I]^\top (y[t,I] - \mu[I])$$
+
+\vfill
+PCA can be defined by
+
+\vfill
+$$B^* = \argmin_B \sum_t \left|\left|y[t,I] - \mu[I] + \sum_j \;\tilde{y}[t,k]B[k,I]\right|\right|^2$$
+
+\slide{PCA reduction}
+
+Now consider a layer that uses $y[I]$ and the tensor {\bf before the nonlinearity}.
+
+\vfill
+$$z[t,v] = \sum_i W'[v,i]y[i] + B'[v]$$
+
+\vfill
+This layer can now be redefined to use the $\tilde{y}$
+
+\vfill
+$$z[t,v] = \sum_i W''[v,k]\tilde{y}[t,k] + B''[v]$$
+
+\vfill
+$$W''[v,k] = \sum_i W'[v,i]B[k,i]$$
+
+\slide{Reduction}
+
+\centerline{\includegraphics[height=3.5in]{../images/SVCCA}}
 
 \slide{Attention as Explanation}
 
