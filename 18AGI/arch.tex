@@ -182,11 +182,6 @@ The CPU computes a ``key'' $k^h$ for each head $h$ and an attention $\alpha_j^h$
 
 \slide{Reading from Memory}
 
-Once the read address vectors (attentions) have been computed we read a value for each read head.
-
-\vfill
-$$v^h = \sum_j \;\alpha^h_j M[j]$$
-
 After reading from memory the machine computes a key and attention for each write head.
 
 \vfill
