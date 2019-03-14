@@ -126,12 +126,16 @@
 
 \newcommand{\subproves}[1]{\,\;\vdash\!\!_{#1}\;\,}
 
-\def\irule#1#2#3#4{
-\begin{tabbing}
-#2 \parbox{.75in}{\noindent \hrule ~} $#3$ \\ #4
-\end{tabbing}}
+\def\ant#1{\\ \> $#1$}
 
-\def\ant#1{$#1$ \\}
+\def\unnamed#1#2{
+\parbox{2.0in}{
+\begin{tabbing}
+\hspace{1em}\= #1 \\ \> \parbox{.75in}{\noindent \hrule ~} #2
+\end{tabbing}
+}}
+
+\newcommand{\type}{\mathbf{Type}}
 
 \newcommand{\abs}{\text{\emph{abs}}}
 
