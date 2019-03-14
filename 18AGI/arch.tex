@@ -61,7 +61,7 @@ Consider continuous functions $f: [0,1]^N \rightarrow \reals$
 \vfill
 Given the corner values, the interior can be filled.
 
-$$f(x_1,\ldots,x_N) = \prod_{y_1,\ldots,y_n,\;y_i \in \{0,1\}} f(y_1,\ldots,y_n) \prod_{i=1}^N (x_iy_i + (1-x_i)(1-y_i))$$
+$$f(x_1,\ldots,x_N) = E_{y_1,\ldots,y_N \sim \mathrm{Round}(x_1,\ldots,x_N)}\;f(y_1,\ldots,y_n)$$
 
 \vfill
 Hence each of the $2^N$ corners has an independent value.
@@ -80,13 +80,13 @@ $$f(x_1,\;\ldots,\;x_N)=\sum _{{i=1}}^{{2N+1}} \sigma_i \left(\sum_{j=1}^N\;w_{i
 \slide{A Simpler, Similar Theorem}
 
 For (possibly discontinuous) $f: [0,1]^N \rightarrow \reals$ there exists (possibly discontinuous)
-$g, h_i: \reals \rightarrow \reals$.
+$\sigma, w_i: \reals \rightarrow \reals$.
 
 \vfill
-$$f(x_1,\;\ldots,\;x_N) = g\left(\sum_i h_i(x_i)\right)$$
+$$f(x_1,\;\ldots,\;x_N) = \sigma\left(\sum_i w_i(x_i)\right)$$
 
 \vfill
-Proof: Select $h_i$ to spread out the digits of its argument so that $\sum_i h_i(x_i)$ contains all the digits of all the $x_i$.
+Proof: Select $w_i$ to spread out the digits of its argument so that $\sum_i w_i(x_i)$ contains all the digits of all the $x_i$.
 
 \slide{Cybenko's Universal Approximation Theorem (1989)}
 
