@@ -31,7 +31,7 @@
   No domain-specific innate knowledge is required.}
 \end{minipage}
 
-\slide{Function Representation as a Learning Bias}
+\slide{Review: The Free Lunch Theorem}
 
 Consider any fixed language for naming functions. For example C++. (or English?)
 
@@ -69,14 +69,12 @@ Hence each of the $2^N$ corners has an independent value.
 \slide{The Kolmogorov-Arnold representation theorem (1956)}
 
 For continuous $f: [0,1]^N \rightarrow \reals$ there exists continuous
-$g_i,h_{i,j} : \reals \rightarrow \reals$ such that
+``activation functions'' $\sigma_i: \mathbb{R} \rightarrow \mathbb{R}$ and continuous $w_{i,j} : \reals \rightarrow \reals$ such that
 
 
 \vfill
-$$f(x_1,\;\ldots,\;x_N)=\sum _{{i=1}}^{{2N+1}} g_i \left(\sum_{j=1}^N\;h_{i,j}(x_j)\right)$$
+$$f(x_1,\;\ldots,\;x_N)=\sum _{{i=1}}^{{2N+1}} \sigma_i \left(\sum_{j=1}^N\;w_{i,j}(x_j)\right)$$
 
-\vfill
-$$f(x_1,x_2) = \left\{\begin{array}{ll}& g_1(h_{1,1}(x_1) + h_{1,2}(x_2)) \\ + & g_2(h_{2,1}(x_1) + h_{2,2}(x_2)) \\ \vdots \\ + & g_5(h_{5,1}(x_1) + h_{5,2}(x_2))\end{array}\right.$$
 
 
 \slide{A Simpler, Similar Theorem}
