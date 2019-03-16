@@ -57,90 +57,23 @@ AlphaGo Zero was a fundamental algorithmic advance for general RL.
 \vfill
 The general RL algorithm of AlphaZero is essentially the same as that of AlphaGo Zero.
 
-\slide{AlphaGo}
+\slide{}
 
-AlphaGo trains:
-
-\begin{enumerate}
-\item a fast rollout policy.
-
-\item an imitation policy network.
-
-\item a self-play policy network.
-
-\item a value network trained to predict self-play rollout values.
-\end{enumerate}
+\centerline{\bf Some Background}
 
 \vfill
-No tree search is used in training --- in (3) and (4) ``self-play'' is just policy network rollouts.
 
-\slide{1. Fast Rollout Policy}
-
-Softmax of linear combination of (hand designed) pattern features.
-
-\vfill
-An accuracy of 24.2\%, using just 2 $\mu$s to select an action, rather than 3 ms for the policy network.
-
-\slide{2. Imitation Policy Network}
-
-\centerline{\includegraphics[height=3.0in]{../images/alphagoArchitecture2}}
-
-\centerline{[Silver et al.]}
-
-\vfill
-Networks have 13 Layers of $5\times 5$ filters on 256 channels
-
-\vfill
-The immatation policy network is trained from from 30 million positions from the KGS Go Server.
-
-\slide{3. Self-Play Policy Network}
-
-Build a replay buffer by runing the self-play network against versions of itself to get (expensive) rollouts $a_1,b_1,a_2,b_2,\ldots,a_N,b_N$ with value $z$.
-
-\vfill
-``Self-play'' just draws moves from the policies --- there is no tree search in training.
-
-\vfill
-Draw rollouts from the replay buffer and update the network with REINFORCE.
-
-$$\mathrm{for}\;t\;\;\;\;\;\;\;\Theta_\pi \;\pluseq\; \eta \;z\; \nabla_{\Theta_\pi} \;\ln \pi(a_t|s_t;\Theta_\pi)$$
-
-\slide{4. Value Network}
-
-Using self-play of the final self-play network policy we generate a database of 30 million pairs $(s,z)$ where $s$ is a board position and $z \in \{-1,1\}$ is an outcome
-and each pair is from a different game.
-
-\vfill
-Again, ``self-play'' just selects moves from the policies --- there is no tree search in training.
-
-\vfill
-We then train the value network on the pairs $(s,z)$ in this database.
-
-\vfill
-$$\Theta^* = \argmin_\Theta \expectsub{(s,z)}{(V(s,\Theta) - z)^2}$$
-
-\slide{Tournament Play uses Tree Search}
-
-Rollout position evaluation (Bruegmann, 1993)
-
-\vfill
-Monte Carlo Tree Search (MCTS) (Bruegmann, 1993)
-
-\vfill
-Upper Confidence Bound (UCB) Bandit Algorithm (Lai and Robbins 1985)
-
-\vfill
-Upper Confidence Tree Search (UCT) (Kocsis and Szepesvari, 2006)
-
-\slide{Rollouts and MCTS (1993)}
+\slidetwo{Monte-Carlo Tree Search (MCTS)}
+{Brugmann (1993)}
 
 To estimate the value of a position (who is ahead and by how much)
 run a cheap stochastic policy to generate a sequence of moves (a rollout) and see who wins.
 
 \vfill
-Do a selective tree search using rollout averages for position evaluation.
+Select the move with the best rollout value.
 
-\slide{(One Armed) Bandit Problems}
+\slidetwo{(One Armed) Bandit Problems}
+{Robbins (1952)}
 
 Consider a set of choices (different slot machines).
 
@@ -152,7 +85,8 @@ We can select a choice and get a reward as often as we like.
 \vfill
 We would like to determine which choice is best and also to get reward as quickly as possible.
 
-\slide{The Upper Confidence Bound (UCB) Algorithm}
+\slidetwo{The Upper Confidence Bound (UCB) Algorithm}
+{Lai and Robbins (1985)}
 
 For each choice (bandit) $a$ construct a confidence interval for its average reward.
 
@@ -167,7 +101,8 @@ Always select
 
 $$\argmax_a \hat{\mu}(a) + U(N(a))$$
 
-\slide{The Upper Confidence Tree (UCT) Algorithm}
+\slidetwo{The Upper Confidence Tree (UCT) Algorithm}
+{Kocsis and Szepesvari (2006), Gelly and Silver (2007)}
 
 The UCT algorithm grows a tree by running ``simulations''.
 
@@ -180,126 +115,168 @@ In the UTC algorithm each move choice at each position is treated as a bandit pr
 \vfill
 We select the child (bandit) with the the lowest upper bound as computed from revious simulations selecting that child.
 
-\slide{More Details}
 
-When a leaf is expanded each new leaf is assigned a value, originally by averaging random rollouts.
+\slidetwo{Bootstrapping from Game Tree Search}
+{Vaness, Silver, Blair and Uther, NeurIPS 2009}
 
-\vfill
-In AlphaGo each new leaf $s$ is assigned the value
-$$\lambda V_\Phi(s) + (1-\lambda)V'(s)$$
-where $V_\Phi(s)$ is the value of the value network and $V'(s)$ is the value of a fast rollout from $s$.
+In bootstrapped tree search we do a tree search to compute a min-max value $V_{\mathrm{mm}}(s)$
+using tree search with a static evaluator $V_\Phi(s)$.  We then try to fit the static value to the min-max value.
 
 \vfill
-Each new leaf is considered to have be ``visited'' once by a simulation which assigned it the above value.
+$$\Delta \Phi = - \eta \nabla_\Phi \left(V_\Phi(s) - V_{\mathrm{mm}}(s)\right)^2$$
 
 \vfill
-The simulation returns as a value to its parent nodes the largest value of the new leaves.
+This is similar to minimizing a Bellman error between $V_\Phi(s)$ and a rollout estimate of the value of $s$ but where the rollout
+estimate is replaced by a min-max tree search estimate.
 
-\slide{More Details}
+\slide{}
 
-At a non-leaf node an AlphaGo simulation selects the move
-
-$$\argmax_a \;\hat{\mu}(s,a) + \lambda \pi_\Phi(a|s)\frac{\sqrt{N(s)}}{N(s,a)}$$
-
-\vfill
-$N(s,a) \geq 1$ is the number of sims that have visited $(s,a)$.
+\centerline{\bf The AlphaZero Algorithm}
+\bigskip
+\centerline{\bf Silver et al. (2017)}
 
 \vfill
-$N(s)$ is the number of sims that have visited $s$.
+
+\slide{The AlphaZero Algorithm}
+
+The AlphaZero algorithm is an RL learning method for the case where state transitions are determined by actions.
 
 \vfill
-$\hat{\mu}(s,a)$ is the average value of the sims that have visited $(s,a)$.
+In principle, the AlphaZero algorithm could be applied to the problem of direct optimization of the BLEU score in machine translation.
 
+\slide{Tree Search}
+
+To select an action, first construct a search tree over possible action sequences to evaluate options.
 
 \vfill
-$\pi_\Phi(a|s)$ is the {\bf imitation learned} action probability.
+As in UTC, the tree is grown by running simulations.  Each simulation descends into the tree from the root selecting an action at each state until a new leaf is created.
 
 \vfill
-Eventually we select the root move $\argmax_a\;N(s,a)$.
+In an adversarial game we simulate opponent actions using the same algorithm but where rewards are reversed for opponent actions.
 
-\slide{AlphaGo Zero}
+\slide{Simulations}
+
+Each node of the search tree is a state and each node has a set of possible actions allowed from that state.
+
+\vfill
+Initially the tree is just a single starting state and all actions from that state are untried.
+
+\vfill
+A simulation descends into the tree from the root selecting an action at each state.
+
+\vfill
+When an untried action is selected the tree is expanded with a new leaf state and the simulation stops.
+
+\vfill
+Each simulation returns the value $V_\Phi(s)$ for the new state $s$.
+
+\slide{The Data Structures}
+
+\vfill
+Each node (state) in the search stores the following information which can be initialized
+by running the value and policy networks on state $s$.
 
 \begin{itemize}
-\item There is no fast rollout policy or imitation policy --- just a self-play policy network and a self-play value network.
-
-\vfill
-\item No rollouts are ever used --- just self-play UCT with leaf values computed by the value network alone.
-
-\vfill
-\item The networks are replaced with Resnet.
-
-\vfill
-\item A single dual-head network is used for both policy and value.  
+\item $V_\Phi(s)$ --- the value network value for the position $s$.
+\item The policy probabilities $\pi_\Phi(s,a)$ for each legal action $a$.
+\item The number $N(s,a)$ of simulations that have tried move $a$ from $s$. This is initially zero.
+\item For $N(s,a) > 0$, the average $\hat{\mu}(s,a)$ of the values of the simulations that have
+  tried move $a$ from position $s$.
 \end{itemize}
 
-\slide{Learning from Tree Search}
+\slide{Simulations and Upper Confidence Bounds}
 
-UTC tree search is used to generate a complete self-play game.
-
-Move selection during simulations is done using
-
-$$\argmax_a \;\hat{\mu}(s,a) + \lambda \frac{\pi_\Phi(a|s)}{N(s,a)}$$
+In descending into the tree, a simulation selects the move $\argmax_a U(s,a)$ where we have
 
 \vfill
-Each self-play game has a final outcome $z$ and generates data $(s,\pi,z)$ for each position $s$ in the game where
-$$\pi(a) \propto N(s,a)^\beta$$
-where $\beta$ is a temperature hyperparameter and $z$ is the final value of the game.
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \;\pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\  \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.$$
+
+\slide{Upper Confidence Bounds}
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \; \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.$$
 
 \vfill
-This data is collected in a replay buffer.
-
-\slide{Learning from Tree Search}
+The hyperparameter $\lambda_u$ should be selected so that $U(s,a)$ will typically {\bf decrease} as $N(s,a)$ increases.
 
 \vfill
-Learning is done from this replay buffer using the following objective on a single dual-head network.
+In this regime for $\lambda_u$, we can think of $U(s,a)$ as an upper confidence bound in the UBT algorithm.
+
+\slide{Root Action Selection}
+
+When the search is completed, we must select a move from the root position.  For this we use a post-search stochastic policy
 
 \vfill
-$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,z) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - z)^2 \\ \\ - \lambda_1\log \pi_\Phi(a|s) \\ \\ + \lambda_2||\Phi||^2\end{array}\right)$$
+$$\pi_{s_{\mathrm{root}}}(a) \propto N(s_{\mathrm{root}},a)^\beta$$
 
-\slide{Selecting Root Moves}
+\vfill
+where $\beta$ is temperature hyperparameter.
 
-During self-play we have two forms of move selection.
+\slide{Constructing a Replay Buffer}
 
+We run a large number of tree-search guided episodes  --- episodes (games) with actions selected by tree search.
+
+\vfill
+We then construct a replay buffer of triples $(s,\pi_{s},R)$ where
+
+\vfill
 \begin{itemize}
-\item Selecting a child during a simulation as part of tree-growth.
-\item Selecting a root move to make progress in the actual play of the game.
+\item $s$ is a root position of a tree search.
+
+\vfill
+\item $\pi_{s}$ is the distribution on $a$ defined by $P(a) \propto N(s,a)^\beta$.
+
+\vfill
+\item $R$ is the reward of the episode for the root player (the final outcome of the tree-search guided game).
 \end{itemize}
 
-\vfill
-In AlphaGo root moves were selected by $\argmax_a N(s,a)$.
+\slide{The Loss Function}
 
 \vfill
-In AlphaZero self-play, exploration is maintained by selecting root moves in proportion to $N(s,a)$ for the first 30 moves and then
-selecting $\argmax_a\;N(s,a)$ beyond 30 moves.
+Training is done by SGD on the following loss function.
+
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ - \lambda_\pi\log \pi_\Phi(a|s) \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)$$
 
 \vfill
-Throughout the game a random root move is used with probability $\epsilon << 1$.
+The replay buffer is periodically updated with new self-play games.
+
+\slide{}
+
+\centerline{\bf Empirical Results}
+ \vfill
+
+\slide{The Go-Chess-Shogi Networks}
+
+\centerline{\includegraphics[height=3.0in]{../images/alphagoArchitecture2}}
+
+\vfill
+In AlphaZero the networks are either 20 block or 40 block ResNets and either separate networks or one dual-headed network.
 
 \slide{Training Time}
 
-4.9 million games of self-play
+Single 20 block dual-headed ResNet on Go.
+
+\vfill
+4.9 million Go games of self-play
 
 \vfill
 0.4s thinking time per move
 
 \vfill
-About 8 years of thinking time in training.
+About 8 years of Go thinking time in training was completed in three days
 
 \vfill
-Training took just under 3 days --- about 1000 fold parallelism.
+About 1000 fold parallelism.
 
-\slide{Elo Learning Curve}
+\slide{Elo Learning Curve for Go}
 
 \centerline{\includegraphics[height = 5in]{../images/alphalearning1}}
 
-\slide{Learning Curve for Predicting Human Moves}
+\slide{Learning Curve for Predicting Human Go Moves}
 
 \centerline{\includegraphics[height = 5in]{../images/alphalearning2}}
 
 \slide{Ablation Study for Resnet and Dual-Head}
 
 \centerline{\includegraphics[height = 5in]{../images/alphaablation}}
-
 
 \slide{Increasing Blocks and Training}
 
@@ -309,39 +286,13 @@ Increasing the number of Resnet blocks form 20 to 40.
 Increasing the number of training days from 3 to 40.
 
 \vfill
-Gives an Elo rating over 5000.
+Gives a Go Elo rating over 5000.
 
-\slide{Final Elo Ratings}
+\slide{Final Go Elo Ratings}
 
 \centerline{\includegraphics[height = 5in]{../images/alpha40}}
 
-\slide{AlphaZero --- Chess and Shogi}
-
-Essentially the same algorithm with the input image and output images modified to represent to game position and move options respective.
-
-\vfill
-Minimal representations are used --- no hand coded features.
-
-\vfill
-Three days of training.
-
-\vfill
-Tournaments played on a single machine with 4 TPUs.
-
-\slide{Alpha vs. Stockfish}
-
-From white Alpha won 25/50 and lost none.
-
-\vfill
-From black Alpha won 3/50 and lost none.
-
-\vfill
-Alpha evaluates 70 thousand positions per second.
-
-\vfill
-Stockfish evaluates 80 million positions per second.
-
-\slide{Checkers is a Draw}
+\slide{Is Chess a Draw?}
 
 In 2007 Jonathan Schaeffer at the University of Alberta showed that checkers is a draw.
 
@@ -352,7 +303,69 @@ Using alpha-beta and end-game dynamic programming, Schaeffer computed drawing st
 This was listed by Science Magazine as one of the top 10 breakthroughs of 2007.
 
 \vfill
-Is chess also a draw?
+It is generally believed that chess is a draw.  It was even conjectured that Stockfish could not be defeated ...
+
+\slide{AlphaZero vs. Stockfish in Chess}
+
+From white Alpha won 25/50 and lost none.
+
+\vfill
+From black Alpha won 3/50 and lost none.
+
+\vfill
+AlphaZero evaluates 70 thousand positions per second.
+
+\vfill
+Stockfish evaluates 80 million positions per second.
+
+\slide{}
+
+\centerline{\bf Analysis}
+
+\vfill
+
+\slide{Analysis}
+
+Simulations select $\argmax_a\;U(s,a)$.
+
+{\huge
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \; \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right. \;\;\;\;(1)$$
+
+\vfill
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ - \lambda_\pi\log \pi_\Phi(a|s) \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)\;\;\;\;(2)$$
+}
+\vfill
+Equation (2) establishes the meaning of $\pi_\Phi(a|s)$ as a stochastic policy.
+
+\slide{Analysis}
+
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \; \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right. \;\;\;\;(1)$$
+
+\vfill
+But equation (1) then seems ill-typed --- how can we add a reward and a probability?
+
+\slide{Analysis}
+
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \; \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right. \;\;\;\;(1)$$
+
+\vfill
+The types would work if we use $Q_\Phi(s,a)$ rather than $\pi_\Phi(s,a)$.
+
+\slide{Analysis}
+
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ - \lambda_\pi\log \pi_\Phi(a|s) \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)\;\;\;\;(2)$$
+
+\vfill
+But $\pi_\Phi(s,a)$ can model good moves accurately while modeling bad moves only well enough to determine that they are poor.
+
+\vfill
+This seems difficult to duplicate with a $Q$ function
+trained on some form of Bellman error such as the training of $V_\Phi(s)$.
+
+
+\slide{}
+\centerline{\bf What Happened to alpha-beta?}
+\vfill
 
 \slide{Grand Unification}
 
@@ -396,6 +409,52 @@ def MinValue(s,alpha,beta):
    return value
 \end{verbatim}
 
+\slideplain{Strategies}
+
+
+An optimal alpha-beta tree is the union of a root-player strategy and an opponent strategy.
+
+\vfill
+A strategy for the root player is a selection of a single action for each root-player move and a response for each possible action
+of the opponent.
+
+\vfill
+A strategy for the opponent is a selection of a single action for each opponent move and a response for each possible action
+of the root player.
+
+\slide{Proposal}
+
+Simulations should be divided into root-player strategy simulations and opponent strategy simulations.
+
+\vfill
+A root-player strategy simulation is optimistic for the root player and pessimistic for the opponent.
+
+\vfill
+An opponent strategy simulation is optimistic for the opponent player and pessimistic for the root-player.
+
+\slide{Proposal}
+
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \; \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$}
+\\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right. \;\;\;\;(1)$$
+
+\vfill
+$\lambda_u$ should be divided into $\lambda_u^+$ and $\lambda_u^-$ with $\lambda_u^+ > \lambda_u^-$.
+
+\vfill
+Simulations should be divided into two types --- optimistic and pessimistic.
+
+\vfill
+In optimistic simulations we use $\lambda_u^+$ for root-player moves and $\lambda_u^-$ for opponent moves.
+
+\vfill
+In pessimistic simulations we use $\lambda_u^-$ for root-player moves and $\lambda_u^+$ for opponent moves.
+
+\slide{END}
+
+}
+\end{document}
+
+\ignore{
 \slideplain{Conspiracy Numbers}
 
 Conspiracy Numbers for Min-Max search, McAllester, 1988
@@ -415,6 +474,7 @@ can be changed to $V$.
 
 \vfill
 Repeatedly select some $N$ and $V$ such that $L(N,V)$ is non empty and expand some leaf in $L(N,V)$.
+}
 
 \ignore{
 \slide{Simulation}
@@ -432,10 +492,4 @@ At a min node select any child $s$ with $V(s) < U$.
 
 Let the static evaluator associate leaf nodes with values $U(s,N)$ and $L(s,N)$
 }
-
-\slide{END}
-
-}
-\end{document}
-
 

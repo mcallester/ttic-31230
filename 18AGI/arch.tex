@@ -473,7 +473,7 @@ Furthermore, ``proof irrelevance'' is essential to dynamic programming.
 
 \centerline{\includegraphics[height = 5.3in]{../images/StandardModel}}
 
-\slide{The 14 Fundamental Constructs of Mathematics}
+\slide{17 Fundamental Constructs of Mathematics}
 
   $$
   \begin{array}{|l|c|c|c|c|}
@@ -483,8 +483,22 @@ Furthermore, ``proof irrelevance'' is essential to dynamic programming.
     \mbox{atoms} & ~~P(e)~~~ & ~~ e_1 \doteq e_2 ~~~~ & e_1 =_\sigma e_2 \\ \hline
     \mbox{formulas} & \neg \Phi &  \Phi_1 \vee \Phi_2 & \forall \intype{x}{\sigma}\; \Phi[x] \\ \hline
     \mbox{types}   & \Sigma_{\intype{x\;}{\;\sigma}}\;\tau[x] & \Pi_{\intype{x\;}{\;\sigma}}\;\tau[x] & S_{\intype{x\;}{\;\sigma}}\;\Phi[x]  \\ \hline
+    \mbox{type constants} & \mathrm{Bool} & \mathrm{Set} & \mathrm{Type} \\ \hline
   \end{array}
   $$
+
+
+\slide{The Base Case}
+
+The base case is given by $\bool$, $\mathbf{Set}$ and $\mathbf{Type}$ with $\intype{\bool}{\mathbf{Type}}$ and $\intype{\mathbf{Set}}{\mathbf{Type}}$.
+
+
+\begin{eqnarray*}
+\sigma \times \tau & \doteq & \Sigma_{\intype{\alpha\;}{\;\sigma}}\;\tau \;\;\;\alpha\;\mbox{not in}\;\tau\\
+\\
+\\
+\mathbf{Graph} & \doteq & \Sigma_{\intype{\alpha\;}{\;\mathbf{Set}}}\;(\alpha \times \alpha) \rightarrow \bool
+\end{eqnarray*}
 
 \slide{The Substitution of Isomorphics}
 
