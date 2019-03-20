@@ -53,8 +53,6 @@ parameter gradients are averaged over the batch and where the batch size is $B$.
 \\
 \mbox{for}\; b,j,k\;W^{x,R}.\grad[j,k] & \pluseq & \frac{1}{B}\;x[b,k]\tilde{R}_t.\grad[b,j] \\
 \\
-\mbox{for}\; b,j,k\; h_{t-1}.\grad[b,j] & \pluseq & W^{x,R}[j,k]\tilde{R}_t.\grad[b,j] \\
-\\
 \mbox{for}\;b,j\;B^R.\grad[j] & \minuseq & \frac{1}{B}\;\tilde{R}_t.\grad[b,j]
 \end{eqnarray*}
 }

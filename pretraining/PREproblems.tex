@@ -22,7 +22,7 @@ of a particular dimension of the vector at layer $\ell$ and time $t$.
 We also let $h$ range over ``heads'' --- each head is computing an attention for a different purpose.
 
 \medskip
-We compute compute $M[\ell+1,T,J]$ from $M[\ell,T,J]$ as follows:
+We compute $M[\ell+1,T,J]$ from $M[\ell,T,J]$ as follows:
       
 \begin{eqnarray*}
 \mathrm{Query}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\

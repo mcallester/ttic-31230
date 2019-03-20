@@ -1,0 +1,243 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning, Winter 2019}
+\centerline{\bf Final Exam}
+
+\bigskip
+{\bf Problem 1. 25 points.}  Consider a population distribution $\pop$ and subset $S$ of its support. Let $\pop_S$ be the restriction of $\pop$ to the set $S$.
+\begin{eqnarray*}
+  \pop_S(y) & = & \frac{1}{\pop(S)}\left\{\begin{array}{ll} \pop(y) & \mbox{for $y \in S$} \\ 0 & \mbox{otherwise} \end{array}\right.
+\end{eqnarray*}
+We also consider the Jensen-Shannon divergence
+$$\mathrm{JS}(P,Q) = \frac{1}{2}\left(\mathrm{KL}\left(P,\frac{P+Q}{2}\right) + \mathrm{KL}\left(Q,\frac{P+Q}{2}\right)\right)$$
+Where for distributions $P$ and $Q$ we define $P+Q$ by the equation $(P+ Q)(y) = P(y)+Q(y)$.
+
+\medskip
+(a) 10 points. Solve for
+$$\mathrm{KL}\left(\pop_S,\frac{\pop+\pop_S}{2}\right)$$
+in terms of the probability mass $\pop(S)$ of the set $S$.  Your solution should have the form
+$\ln 2 - \ln (1 + \epsilon)$ where $\epsilon$ is a function of $P(S)$ with $0 \leq \epsilon \leq 1$.
+
+\solution{
+  \begin{eqnarray*}
+    \mathrm{KL}\left(\pop_S,\frac{\pop+\pop_S}{2}\right) & = & E_{y \sim \pop_S}\;\ln \frac{2\pop_S(y)}{\pop(y) + \pop_S(y)} \\
+    \\
+    & = & E_{y \sim \pop_S}\;\ln \frac{\frac{2\pop(y)}{\pop(S)}}{\pop(y) + \frac{\pop(y)}{\pop(S)}} \\
+    \\
+    & = & \ln \frac{2}{\pop(S) + 1} \\
+    \\
+    & = & \ln 2 - \ln (1 + P(S)) \\
+  \end{eqnarray*}
+}
+
+(b) 5 points. Solve for
+$$\mathrm{KL}\left(\pop,\frac{\pop+\pop_S}{2}\right)$$
+in terms of the probability mass $\pop(S)$ of the set $S$.  Your solution should have the form $\ln 2 - \epsilon \ln (\epsilon + 1)/\epsilon$
+for $\epsilon$ a function of  $P(S)$ with $0 \leq \epsilon \leq 1$.
+Hint: Write the KL-divergence as $P(S)E_{y \sim P(y|y\in S)} [\ldots] + (1-P(S))E_{y \sim \pop(y|y \not \in S)}\;[\ldots]$.
+
+\solution{
+  \begin{eqnarray*}
+    & & \mathrm{KL}\left(\pop,\frac{\pop+\pop_S}{2}\right) \\
+    \\
+    & = & E_{y \sim \pop}\;\ln \frac{2\pop(y)}{\pop(y) + \pop_S(y)} \\
+    \\
+    & = & \pop(S)E_{y \sim \pop(y|y \in S)}\;\ln \frac{2\pop(y)}{\pop(y) + \frac{\pop(y)}{\pop(S)}}
+    +(1-\pop(S))E_{y \sim \pop(y|y \not \in S)} \ln \frac{2\pop(y)}{\pop(y)} \\
+    \\
+    & = & \pop(S)\;\ln \frac{2\pop(S)}{\pop(S)+1} + (1- \pop(S)) \ln 2 \\
+    \\
+    & = & \ln 2 - \pop(S)\;\ln \frac{\pop(S)+1}{\pop(S)} 
+  \end{eqnarray*}
+}
+
+\medskip
+(c) 5 points. For $\epsilon << 1$ we have $\ln(1+ \epsilon) \approx \epsilon$ and $\ln(1+ \epsilon)/\epsilon \approx \ln(1/\epsilon)$.  Apply these approximation
+to get an approximate value for $\mathrm{JS}(\pop_S,\pop)$ for small values of $P(S)$.
+
+\solution{
+  \begin{eqnarray*}
+    \mathrm{JS}(\pop_S,\pop,Q) & =  &\frac{1}{2}\left(\mathrm{KL}\left(\pop_S,\frac{\pop_S+\pop}{2}\right) + \mathrm{KL}\left(\pop,\frac{\pop_S+\pop}{2}\right)\right) \\
+    \\
+    & \approx & \frac{1}{2}\left(\ln 2 - \epsilon + \ln 2 - \epsilon \ln \frac{1}{\epsilon}\right) \\
+    \\
+    & = & \ln 2 - \frac{\epsilon}{2}\left(1 + \ln \frac{1}{\epsilon}\right) \\
+    \\
+    \epsilon & = & \pop(S)
+  \end{eqnarray*}
+}
+
+\medskip
+(d) 5 points. Given Your answer to (c), does the Jensen-Shannon divergence analysis of GANs indicate that the generator will suffer from collapse to a low-probability mode $S$.
+Explain your answer.
+
+\solution{
+  The analysis in part (c) indicates that any serious mode collapse will lead to a nearly maximal JS-divergence.  So mode collapse should not occur.  But the JS analysis is highly suspect ---
+  copying the training data is a serious mode collapse and would fool the discriminator.
+
+  \medskip
+  As the real situation is unclear and any attempt to answer this receives full credit for thinking about it.}
+
+\bigskip
+{\bf Problem 2. 25 points.} This problem is on pseudo-likelihood.  Consider a semantic segmentation $\hat{y}[i]$ on pixels $i$ with $\hat{y}[i]$
+a semantic class label in $\{C_1,\ldots,C_K\}$.  We also assume a scoring function $s_\Phi$ on semantic segmentations defining
+$$P_\Phi(\hat{y}) = \softmax_{\hat{y}}\;s_\Phi(\hat{y})$$
+Recall that pseudo-likelihood is defined by
+\begin{eqnarray*}
+  \tilde{P}_\Phi(\hat{y}) & = & \prod_i P_\Phi(\hat{y}[i] | \hat{y}\backslash i) \\
+  \\
+  & = & \prod_i \frac{P_\Phi(\hat{y})}{\sum_c P_\Phi(\hat{y}[i:=c])}
+\end{eqnarray*}
+where $\hat{y}\backslash i$ assigns a class to every pixel other than $i$, and $\hat{y}[i:=c]$ is the semantic segmentation identical to $\hat{y}$ except that pixel $i$ is labeled with semantic class $c$.
+
+\medskip
+(a) 10 points. show
+$$\frac{P_\Phi(\hat{y})}{\sum_c P_\Phi(\hat{y}[i:=c])} = (\softmax_c s_\Phi(\hat{y}[i:=c])[\hat{y}[i]]$$
+
+\solution{
+\begin{eqnarray*}
+  \frac{P_\Phi(\hat{y})}{\sum_c P_\Phi(\hat{y}[i:=c])} & = & \frac{\frac{1}{Z} e^{s_\Phi(\hat{y})}}{\sum_c \frac{1}{Z} e^{s_\Phi(\hat{y}[i:=c])}} \\
+  \\
+  & = & \frac{e^{s_\Phi(\hat{y})}}{\sum_c e^{s_\Phi(\hat{y}[i:=c])}} \\
+  \\
+  & = & (\softmax_c\;s_\Phi(\hat{y}[i:=c]))[\hat{y}[i]]
+\end{eqnarray*}
+}
+
+\medskip
+(b) 5 points. How many scores need to be computed in the worst case for computing $P_\Phi(\hat{y})$.  Given the result of part (a), how many for computing $\tilde{P}_\Phi(\hat{y})$?
+
+\solution{$K^N$ for $P_\Phi$ and $KN$ for $\tilde{P}_\Phi$.}
+
+\medskip
+(c) 5 points. Consider a distribution on semantic segmentations where for each pixel the class assigned to that pixel is determined by the other pixels.
+Can this distribution be defined by a softmax over scores?  Explain your answer.
+
+\solution{
+  No. Since $e^s > 0$ for any finite $s$, all semantic segmentations must have nonzero probability.
+}
+
+\medskip
+(d) 5 points. If $P_\Phi$ is a distribution defined in some other way such that the class of each pixel is completely determined by the other pixels,
+given a simple expression for $\tilde{P}_\Phi(\hat{y})$ in the case where $\hat{y}$ has nonzero probability under $P_\Phi$.
+
+\solution{We have $P_\Phi(\hat{y}|\hat{y}\backslash i) = 1$ which implies $\tilde{P}(\hat{y}) = 1$.}
+    
+\bigskip
+{\bf Problem 3. 25 Points:}
+This problem is on the transformer.
+
+\medskip
+{\bf Background:} The Transformer computes layers of sequences of vectors $M[\ell,t,j]$ where
+$\ell$ ranger over layers, $t$ ranges over ``time'' (the index into the sequence), and $j$ is the index
+of a particular dimension of the vector at layer $\ell$ and time $t$.
+
+\medskip
+We also let $h$ range over ``heads'' --- each head is computing an attention for a different purpose.
+
+\medskip
+We compute $M[\ell+1,T,J]$ from $M[\ell,T,J]$ as follows:
+      
+\begin{eqnarray*}
+\mathrm{Query}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
+\\
+\mathrm{Key}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^K}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
+\\
+\mathrm{Value}[\ell,h,t,{\color{red} i}] & = & \sum_j\;{\color{red} W^V}[\ell,h,{\color{red} i,j}]M[\ell,t,{\color{red} j}]
+\\
+s[\ell,h,t,t'] & = &\frac{1}{\sqrt{K}} \sum_k\;\mathrm{Query}[\ell,h,t,k]\mathrm{Key}[\ell,h,t',k] \\
+\\
+{\color{red} \alpha[\ell,h,t,t']} & {\color{red} =} & {\color{red} \softmax_{t'} \;s[\ell,h,t,t']}\;\;\;\mbox{the attention} \\
+\\
+V[\ell,h,t,i] & = & \sum_{t'}\;\alpha[\ell,h,t,t']\mathrm{Value}[\ell,h,t',i]
+\end{eqnarray*}
+
+
+$$M[\ell+1,t,J] = V[\ell,1,t,I];V[\ell,2,t,I];\cdots;V[\ell,H,t,I] \;\;\;\; J = HI$$
+
+\medskip
+(a) 15 points. Just as CNNs can be done in two dimensions for vision and in one dimension for language, the Transformer can be done in two dimensions for vision --- the so-called spatial transformer.
+Rewrite the above so as to define a spatial transformer on images with attentions computes between spatial locations.
+
+\solution{
+        
+\begin{eqnarray*}
+\mathrm{Query}[\ell,h,x,y,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,x,y,{\color{red} j}] \\
+\\
+\mathrm{Key}[\ell,h,x,y,{\color{red} k}] & = & \sum_j\;{\color{red} W^K}[\ell,h,{\color{red} k,j}]M[\ell,x,y,{\color{red} j}] \\
+\\
+\mathrm{Value}[\ell,h,x,y,{\color{red} i}] & = & \sum_j\;{\color{red} W^V}[\ell,h,{\color{red} i,j}]M[\ell,t,{\color{red} j}]
+\\
+s[\ell,h,x,y,x',y'] & = &\frac{1}{\sqrt{K}} \sum_k\;\mathrm{Query}[\ell,h,x,y,k]\mathrm{Key}[\ell,h,x',y',k] \\
+\\
+{\color{red} \alpha[\ell,h,x,y,x',y']} & {\color{red} =} & {\color{red} \softmax_{x',y'} \;s[\ell,h,x,y,x',y'']}\;\;\;\mbox{the attention} \\
+\\
+V[\ell,h,x,y,i] & = & \sum_{x',y'}\;\alpha[\ell,h,x,y,x',y']\mathrm{Value}[\ell,h,x',y',i]
+\end{eqnarray*}
+
+$$M[\ell+1,x,y,J] = V[\ell,1,x,y,I];V[\ell,2,x,y,I];\cdots;V[\ell,H,x,y,I] \;\;\;\; J = HI$$
+}
+
+(b) 10 points. Assuming that summations can be computed in logarithmic time in parallel, what is the parallel order of run time of the spatial transformer
+as a function of the dimensions $L$, $I$, $J$, $K$, $X$ and $Y$.
+
+\solution{  $O(L\log JKXY)$ }
+
+\bigskip
+{\bf Problem 4. 25 points.}
+This problem is on AlphaZero.
+
+\medskip
+{\bf Backgound.}
+A version of AlphaZero can be defined as follows.
+
+\medskip
+To select a move in the game, first construct a search tree over possible moves to evaluate options.
+The tree is grown by running ``simulations''. 
+In descending into the tree, simulations select the move $\argmax_a U(s,a)$ where we have
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u\; \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1)$$
+where $N(s,a)$ is the number of simulations that reached state $s$ and then selected action $a$ from there.
+
+\medskip
+When the search is completed, we select an action from the root position.  For this we use a post-search stochastic policy
+$$\pi_{s_{\mathrm{root}}}(a) \propto N(s_{\mathrm{root}},a)^\beta\;\;\;\;\;(2)$$
+where $\beta$ is temperature hyperparameter.
+
+\medskip
+The value function $V_\Phi(s)$ and the policy $\pi_\Phi(a|s)$ are trained from a replay buffer containing triples $(s,\pi,R)$ where $s$ is a position from which a tree search was done,
+$\pi$ is the root probability distribution over actions computed as above from the tree search, and $R$ is the final reward of the game in which this position occurred.
+The parameters $\Phi$ are trained by SGD on the following objective defined on the replay buffer.
+
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ - \lambda_\pi\;\log \pi_\Phi(a|s) \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)\;\;\;\;(2)$$
+  
+(a) 20point. Rewrite (1) and (2) above to replace the policy $\pi_\Phi(a|s)$ with an advantage function $A_\Phi(s,a)$ so that the expected value of an action $a$ in state $s$ (the $Q$-value)
+  is modeled by $V_\Phi(s) + A(s,a)$.
+
+  \solution{
+    $$U(s,a) =  \left\{\begin{array}{ll}\lambda_u\; (V_\Phi(s) + A_\Phi(s,a)) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda_u\; (V_\Phi(s) + A_\Phi(s,a))/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1)$$
+    or
+
+    $$U(s,a) =  \left\{\begin{array}{ll}V_\Phi(s) + A_\Phi(s,a) + \lambda_u &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + (V_\Phi(s) + A_\Phi(s,a) + \lambda_u)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1)$$
+
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ \lambda_A\;(A_\Phi(s,a) - (R - V_\Phi(s))^2 \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)\;\;\;\;(2)$$
+  }
+
+  \medskip
+  (b) 5 points: Will the training procedure you defined in (a) effectively train $A_\Phi(s,a)$ for off-policy actions $a$?  If not, is that a problem and does this problem arise
+  in the original version in terms of $\pi_\Phi(a|s)$?  Explain your answer.
+
+  \solution{The solution to (a) does not train $A_\Phi(s,a)$ on off-policy actions.  However, the original formulation in terms of the policy $\pi_\Phi(a|s)$ drives down the probability of
+    off-policy actions so as to place large probability on the on-policy actions. This would seem to be more effective.
+
+    \medskip
+    But any answer gets full credit for thinking about it.}
+  
+\end{document}
