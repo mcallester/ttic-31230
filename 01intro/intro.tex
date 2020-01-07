@@ -31,7 +31,7 @@ The Perceptrons book greatly discourages work in artificial neural networks.  Sy
 {\bf 1980}: Fukushima introduces the neocognitron (a form of CNN)
 
 \vfill
-{\bf 1984}: Valiant defines PAC learnability and stimulates learning theory. Wins Turing Award in 2010.
+{\bf 1984}: Valiant defines PAC learnability and stimulates learning theory. Wins the Turing Award in 2010.
 
 \vfill
 {\bf 1985}: Hinton and Sejnowski introduce the Boltzman machine
@@ -62,14 +62,18 @@ Both developments come out of Hinton's group in Toronto.
 \vfill
 {\bf 2013}: Refinement of AlexNet continues to dramatically improve computer vision.
 
-\vfill
+\slide{Current Era}
+
 {\bf 2014}: Neural machine translation appears (Seq2Seq models).
 
 \vfill
 Variational auto-encoders (VAEs) appear.
 
 \vfill
-Graph networks for molecular property prediction appear.
+Generative Adversarial Networks (GANs) appear.
+
+\vfill
+Graph neural networks appear (GNNs) revolutionizing the prediction of molecular properties.
 
 \vfill
 Dramatic improvement in computer vision and speech recognition continues.
@@ -79,10 +83,7 @@ Dramatic improvement in computer vision and speech recognition continues.
 {\bf 2015}: Google converts to neural machine translation leading to dramatic improvements.
 
 \vfill
-ResNet appears.  This makes yet another dramatic improvement in computer vision.
-
-\vfill
-Generative Adversarial Networks (GANs) appear.
+ResNet (residual connections) appear.  This makes yet another dramatic improvement in computer vision.
 
 \vfill
 {\bf 2016}: Alphago defeats Lee Sedol.
@@ -95,13 +96,20 @@ Generative Adversarial Networks (GANs) appear.
 Unsupervised machine translation is demonstrated.
 
 \vfill
-Progressive GANs.
+Progressive GANs demonstrate high resolution realistic face generation.
 
-\vfill
+\slide{Current Era}
+
 {\bf 2018}: Unsupervised pre-training significantly improves a broad range of NLP tasks including question answering (but dialogue remains unsolved).
 
 \vfill
 AlphaFold revolutionizes protein structure prediction.
+
+\vfill{\bf 2019}:
+Vector quantized VAEs (VQ-VAE) demstrate that VAEs can be competative with GANs for high-resolution image generation.
+
+\vfill
+Super-human performance is achieved on the GLUE natural langauge understanding benchmark.
 
 \slide{2019: Natural Language Understanding}
 
@@ -174,7 +182,6 @@ and a parameter vector $\Phi \in \reals^d$.}
 
 \vfill
 For $\Phi \in \reals^d$ and $x \in {\cal X}$ and $y \in {\cal Y}$ a deep network computes a probability {\color{red} $P_\Phi(y|x)$}.
-
 
 \slide{The Fundamental Equation of Deep Learning}
 
@@ -548,18 +555,32 @@ H(P,Q) & \doteq & E_{x \sim P} \;-\ln Q(x) \\
 \slideplain{Appendix: The Rearrangement Trick}
 
 \begin{eqnarray*}
-H(P,Q) & = & H(P) + KL(P,Q) \\
+KL(P,Q) & = & E_{x \sim P} \ln \;\frac{P(x)}{Q(x)} \\
 \\
-KL(P,Q) & = & H(P,Q) - H(P)
+& = & E_{x \sim P} \left[(- \ln Q(x)) - (- \ln P(x))\right] \\
+\\
+& = & (E_{x\sim P} \;-\ln Q(x)) - (E_{x \sim P}\;-\ln P(x)) \\
+\\
+& = & H(P,Q) - H(P)
 \end{eqnarray*}
 
+\vfill
+In general $E_{x \sim P} \;\ln \left(\prod_i A_i\right) = E_{x \sim P} \;\sum_i \ln A_i$ 
+
+\slideplain{Appendix: The Rearrangement Trick}
+
+\begin{eqnarray*}
+\mathrm{ELBO} & = & E_{z \sim P_\Psi(z|y)} \ln \;\frac{P_\Phi(z,y)}{P_\Psi(z|y)} \\
+\\
+\\
+ & = & E_{z \sim P_\Psi(z|y)} \ln \;\frac{P_\Phi(z)P_\Phi(y|z)}{P_\Psi(z|y)} \\
+\\
+\\
+ & = & E_{z \sim P_\Psi(z|y)} \ln \;\frac{P_\Phi(y)P_\Phi(z|y)}{P_\Psi(z|y)} \\
+\end{eqnarray*}
 
 \vfill
-The rearrangement trick applies to any expression of the form
-
-\vfill
-$$E_{x \sim P} \;\ln \left(\prod_i A_i\right) = E_{x \sim P} \;\sum_i \ln A_i$$
-
+Each of the last two expressions can be grouped three different ways leading to six ways of writing the ELBO.
 \slideplain{END}
 
 }

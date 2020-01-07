@@ -130,7 +130,7 @@ The framework generates the training code automatically from the model definitio
 
 \vfill
 {\color{red} Optimization is almost always done with some form of stochastic gradient descent (SGD) and the gradient is computed
-by back-propagation on the model definition.}
+by backpropagation on the model definition.}
 
 \slide{Stochastic Gradient Descent (SGD)}
 $$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; {\cal L}(x,y,\Phi).$$
@@ -282,7 +282,7 @@ For now assume all values are scalars (single numbers rather than arrays).
 \medskip
 We will ``backpopagate'' the assignments the reverse order.
 
-\anaslide{Back-Propagation (Scalar Values)}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -294,7 +294,7 @@ We will ``backpopagate'' the assignments the reverse order.
 \medskip
 {\color{red} ${\partial {\cal L}}/{\partial u} = 1$}
 
-\anaslide{Back-Propagation (Scalar Values)}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -309,7 +309,7 @@ ${\partial {\cal L}}/{\partial u} = 1$
 \medskip
 {\color{red} ${\partial {\cal L}}/{\partial z} = ({\partial h}/{\partial z})\; ({\partial {\cal L}}/{\partial u})$} (this uses the value of $z$)
 
-\anaslide{Back-Propagation (Scalar Values)}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -327,7 +327,7 @@ ${\partial {\cal L}}/{\partial z} = ({\partial h}/{\partial z}) \; ({\partial {\
 \medskip
 {\color{red} ${\partial {\cal L}}/{\partial y} = ({\partial g}/{\partial y}) \; ({\partial {\cal L}}/{\partial z})$} (this uses the value of $y$ and $x$)
 
-\anaslide{Back-Propagation (Scalar Values)}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f({\color{red} x}) \\
@@ -348,7 +348,7 @@ ${\partial {\cal L}}/{\partial y} = ({\partial g}/{\partial y}) \;({\partial {\c
 \medskip
 {\color{red} ${\partial {\cal L}}/{\partial x} =$ ???} Oops, we need to add up multiple occurrences.
 
-\anaslide{Back-Propagation (Scalar Values)}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f({\color{red} x}) \\
@@ -367,7 +367,7 @@ Each framework program variable denotes an {\color{red} object} (in the sense of
 Values are computed ``forward'' while gradients are computed ``backward''.
 
 
-\anaslide{Back-Propagation (Scalar Values)}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -386,7 +386,7 @@ We initialize the loss gradient to 1: {\color{red} $u.\grad = 1$}
 \medskip
 {\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
 
-\anaslide{Back-Propagation (Scalar Values)}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -410,7 +410,7 @@ $z.\grad\;\pluseq\;  ({\partial h}/{\partial z}) * u.\grad$
 \medskip
 {\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
 
-\anaslide{Back-Propagation (Scalar Values)}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
@@ -440,7 +440,7 @@ $x.\grad \;\pluseq\; ({\partial g}/{\partial x}) * z.\grad$
 \medskip
     {\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
 
-\anaslideplain{Back-Propagation (Scalar Values)}
+\anaslideplain{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   {\color{red} y} & {\color{red} =} & {\color{red} f(x)} \\
@@ -524,7 +524,7 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 
 \slide{Loop Notation}
 
-We will define back-propagation on tensor computations by first compiling them to loop notation.
+We will define backpropagation on tensor computations by first compiling them to loop notation.
 Loop notation assumes all computed tensors are initialized to zero.
 
 \vfill
@@ -541,7 +541,7 @@ $$\begin{array}{llrcl}
 & \mathrm{for}\;j & {\color{red} h[j]} & = & \sigma(\tilde{h}[j]) \\
 \end{array}$$
 
-\slideplain{Back-Propagation on Loop Notation}
+\slideplain{Backpropagation on Loop Notation}
 We backpropagate the body of the loop.
 
 $$\begin{array}{lrcl}
@@ -549,7 +549,7 @@ $$\begin{array}{lrcl}
 \end{array}$$
 
 \vfill
-The body of the loop is just a product of scalars.  A product of scalars has a trivial back-propagation:
+The body of the loop is just a product of scalars.  A product of scalars has a trivial backpropagation:
 
 $$\begin{array}{lrcl}
 \mathrm{for}\;i,j & {\color{red} W.\grad[j,i]} & \pluseq & {\color{red} x[i]\tilde{h}.\grad[j]} \\
@@ -598,7 +598,7 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
   {\color{red} P_\Phi[b,\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[b,\hat{y}]}
 \end{eqnarray*}
 
-\slideplain{Back-Propagation with Minibatching}
+\slideplain{Backpropagation with Minibatching}
 \vspace{-3ex}
 \begin{eqnarray*}
   \mathrm{for}\;b,i,j\;\;\;\tilde{y}[b,j] & \pluseq & W[j,i]\;x[b,i]
