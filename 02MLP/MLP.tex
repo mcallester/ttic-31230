@@ -29,32 +29,36 @@ A framework also typically provides support for managing large training sets and
 \slide{Some Frameworks}
 
 \begin{itemize}
-  
-\item Kaffe
-
-\vfill
-
-\item Tensorflow
-
-\vfill
-
-\item DyNet
-
-  \vfill
-\item Chainer
-
-\vfill
 
 \item PyTorch
 
-  \vfill
+\vfill
+\item Tensorflow
 
-\item EDF (Educational Framework in Python for this class).
-\end{itemize}
+\vfill
+\item Keras
+
+\vfill
+\item Microsoft Cogntive Toolkit
+
+\vfill
+\item Chainer
 
 $\vdots$
 
-\slide{An Example: Multi-Layer Perceptron Models for MNIST}
+\item EDF (Educational Framework in Python/NumPy for earlier versions of this class).
+\end{itemize}
+
+
+
+\slide{}
+
+\centerline{\bf An Example}
+
+\vfill
+\centerline{\bf A Multi-Layer Perceptron (MLP) for MNIST}
+
+\slide{}
 
 We consider the problem of taking an input $x$ (such as an image of a hand written digit) and classifying it into some small number of classes (such as the digits $0$ through $9$).
 
@@ -75,16 +79,17 @@ For MNIST $k = 10$.
 Let $\mathrm{Train}$ be a sample $(x_0,y_0),\;\ldots,\;(x_{N-1},y_{N-1})$ drawn IID from the population.
 
 \slide{A Multi Layer Perceptron (MLP)}
-
-$$\Phi = (W^0,\;b^0,\;W^1,\;b^1)$$
-
 \begin{eqnarray*}
   {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - b^0\right) \\
-  \\
   {\color{red} s} & = & \sigma\left(W^1{\color{red} h} - b^1 \right) \\
-  \\
   {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
 \end{eqnarray*}
+
+\vfill
+$W^1$ and $W^2$ are matrices. $b_1$ and $b_2$ are vectors.
+
+\vfill
+$\sigma$ is a scalar-to-scalar activation function applied to each component of a vector.
 
 \slide{Activation Functions}
 
@@ -100,26 +105,11 @@ other common activation functions are
 \centerline{{\color{red} $\mathrm{ReLU}(u) = \max(0,u)$}\includegraphics[width=1.5in]{../images/relu},
 {\color{red} $\mathrm{tanh}(u) = 2\sigma(u)-1$}\includegraphics[width=1.5in]{../images/tanh}}
 
-\slide{Einstein Notation}
+\slide{}
 
-$${\color{red} h} = \sigma\left(W^0{\color{red} x} - b^0\right)$$
+\centerline{\bf Stochastic Gradient Descent (SGD)}
 
-\vfill
-is an abbreviation for
-\begin{eqnarray*}
-  {\color{red} h[j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[i]}\right) - b^0[j]\right) 
-\end{eqnarray*}
-
-\vfill
-Think of this as a separate assignment statement for each {\color{red} $j$}.
-
-\vfill
-Each {\color{red} $h[j]$} is the output of a ``linear threshold unit''.
-
-\vfill
-Einstein notation makes all indeces and summations explicit.
-
-\slide{Optimization}
+\slide{}
 
 Once we have specified our model $P_\Phi(y|x)$ in high level equations (such as on the previous two slides) we need to train it.
 
@@ -132,7 +122,7 @@ The framework generates the training code automatically from the model definitio
 {\color{red} Optimization is almost always done with some form of stochastic gradient descent (SGD) and the gradient is computed
 by backpropagation on the model definition.}
 
-\slide{Stochastic Gradient Descent (SGD)}
+\slide{}
 $$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; {\cal L}(x,y,\Phi).$$
 
 \vfill
@@ -160,9 +150,10 @@ One pass through the training data is called an Epoch.
 \vfill
 One typically imposes a random suffle of the training data before each epoch.
 
-\slide{SGD for MLPs}
+\slide{}
+\centerline{\bf Backpropagation (backprop)}
 
-$$\Phi = (W^0,\;b^0,\;W^1,\;b^1)$$
+\slide{}
 
 \begin{eqnarray*}
   {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - b^0\right) \\
@@ -173,38 +164,8 @@ $$\Phi = (W^0,\;b^0,\;W^1,\;b^1)$$
 \end{eqnarray*}
 
 \vfill
-We now need to automatically compute $\nabla_\Phi {\cal L}(x,y,\Phi)$.
-
-
-
-\ignore{
-\slide{Total Gradient Descent}
-
-$${\cal L}_{\mathrm{Train}}(\Phi) = \frac{1}{N}\sum_n {\cal L}(\Phi,x_n,y_n)$$
-
-\vfill
-\centerline{We want: \hspace{3ex} $\Phi^*  =  \argmin_\Phi {\cal L}_{\mathrm{Train}}(\Phi)$}
-
-\vfill
-$$\Phi \;\;\;\mbox{\tt -=}\;\;\; \eta \nabla_\Phi {\cal L}_\mathrm{Train}(\Phi)$$
-
-
-\slide{Stochastic Gradient Descent (SGD) on the Training set.}
-
-\vfill
-\vfill
-repeat:  Select $n$ at random. $\Phi \;\;\minuseq\;\; \eta \;\nabla_\Phi \; {\cal L}(x_n,y_n,\Phi)$
-
-\begin{eqnarray*}
-  \expectsub{n}{\nabla_\Phi \; {\cal L}(x_n,y_n,\Phi)} & = & \sum_n P(n) \nabla_\Phi\;{\cal L}_{\mathrm{Train}}(x_n,y_n,\Phi) \\
-  \\
-  \\ & = & \frac{1}{N} \sum_n \nabla_\Phi\;{\cal L}_{\mathrm{Train}}(x_n,y_n,\Phi) \\
-  \\
-    \\ & = & \nabla_\Phi \frac{1}{N} \sum_n \;{\cal L}_{\mathrm{Train}}(x_n,y_n,\Phi) \\
-  \\
-  &  = & \nabla_\Phi\;{\cal L}_{\mathrm{Train}}(\Phi)
-\end{eqnarray*}
-}
+We now need to automatically compute $\nabla_\Phi \; {\cal L}(x,y,\Phi)$
+where $\Phi = (W^0,\;b^0,\;W^1,\;b^1)$.
 
 \slideplain{Computation Graphs (Framework Source Code)}
 
@@ -507,13 +468,81 @@ Each array {\color{red} $W$} is an object with attributes {\color{red} $W.\mathr
 
 \vfill
 An array with more than two indeces is called a {\color{red} tensor}.
+\slide{}
 
-\slide{Einstein Notation}
+\centerline{\bf Linear Algebra and Einstein Notation}
 
-\centerline{$i$ --- input feature index \hspace{1em} $j$  --- hidden layer index, \hspace{1em} $\hat{y}$ --- possible label}
-$$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
+\slide{}
+
+$y = Wx$ \hfill abbreviates \hfill $y[i] = \sum_j \;W[i,j]x[j]$.
 
 \vfill
+
+$y = x^\top\;W$ \hfill abbreviates \hfill $y[j] = \sum_i \;W[i,j]x[i]$.
+
+\vfill $i$ is a ``row index'' and $j$ is a ``column index'' of $W$.
+
+\vfill
+Linear algebra suppresses indeces.
+
+\vfill
+Einstein notation uses explicit indeces.
+
+\slide{Vector Transpose in Linear Algebra} 
+
+Why do we use transpose on vectors?
+
+\vfill
+Why not just write $xW$ to sum over the first (row) index and write $Wx$ to sum over the column index?
+
+\vfill
+Because then $W^1xW^2$ can mean either $W^1(xW^2)$ or $(W_1x)W_2$.
+
+\vfill
+So we adopt the convention that $x$ associates to its left while $x^\top$ associates to its right --- $W^1xW^2$ and $W^1x^\top W^2$ become well defined.
+
+\vfill
+Dirac Bra-Ket notation solves this by writing $x$ as $x| \rangle$ and $x^\top$ as $\langle |x$.
+
+\slide{Inner and Outer Products in Linear Algebra}
+
+For vectors $x[i]$ and $y[j]$
+
+\vfill
+$x^\top y = \langle|xy|\rangle$ is the inner product $\sum_i \;x[i]y[i]$.
+
+\vfill
+$xy^\top = x|\rangle\langle|y$ is the outer product $(xy^\top)[i,j] = x[i]y[j]$.
+
+\slide{Why Einstein Notation?}
+
+We will need to work with tensors --- arrays with more than two indeces.
+
+\vfill
+For 2D CNNS the weight tensor and the data tensor each have four indeces (including the batch index).
+
+\vfill
+For higher order tensors suppressing indeces becomes confusing.
+
+\vfill
+Einstein went back to explicit index notation (Einstein notation) when working with the higher order tensors in his theory of gravitation.
+
+\slide{Why Einstein Notation?}
+
+Also, the indeces of tensors generally have types such as a ``time index'', ``x coordinate'', ``y coordinate'', ``batch index'', or ``feature index''.
+
+\vfill
+Writing a matrix as $W[t,i]$ where $t$ is a time index and $i$ is a feature index makes the type of the matrix $W$ clear and clarifies
+the order of the indeces (disambiguates $W$ from $W^\top$).
+
+\vfill
+Even when working only with vectors and matrices, Einstein notation is clearer when formulating backpropagation, as we will see.
+
+\slide{}
+\centerline{\bf Backpropagation on Tensor Expressions}
+
+\slide{An MLP in Einstein Notation}
+
 \begin{eqnarray*}
   {\color{red} h[j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[i]}\right) - b^0[j]\right) \\
   \\
@@ -522,45 +551,47 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
   {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
 \end{eqnarray*}
 
+\vfill
+Think of this as a separate assignment for each {\color{red} $h[j]$} and {\color{red} $s[\hat{y}]$}.
+
 \slide{Loop Notation}
 
-We will define backpropagation on tensor computations by first compiling them to loop notation.
 Loop notation assumes all computed tensors are initialized to zero.
 
 \vfill
 $$\begin{array}{llrcl}
 
-\mathrm{Vector:} & & {\color{red} h} & = & {\color{red} \sigma(Wx -B)} \\
+\mathrm{Einstein} & & {\color{red} \tilde{h}[j]} & = & {\color{red} \sum_i\;W[j,i] \;x[i]} \\
 \\
-\mathrm{Einstein:} & &  {\color{red} h[j]} & = & {\color{red} \sigma\left(\left(\sum_i\;W[j,i] \;x[i]\right) - B[j]\right)} \\
+& &  {\color{red} h[j]} & = & {\color{red} \sigma\left(\tilde{h}[j] - B[j]\right)} \\
   \\
-\mathrm{Loop:} & \mathrm{for}\;i,j & {\color{red} \tilde{h}[j]} & \pluseq & {\color{red} W[j,i]x[i]} \\
+\mathrm{Loop:} & \mathrm{for}\;j,i & {\color{red} \tilde{h}[j]} & \pluseq & {\color{red} W[j,i]x[i]} \\
 \\
-& \mathrm{for}\;j & {\color{red} \tilde{h}[j]} & \minuseq & {\color{red} B[j]} \\
-  \\
-& \mathrm{for}\;j & {\color{red} h[j]} & = & \sigma(\tilde{h}[j]) \\
+& \mathrm{for}\;j & {\color{red} h[j]} & = & {\color{red} \sigma(\tilde{h}[j] - B[j])} \\
+
 \end{array}$$
 
 \slideplain{Backpropagation on Loop Notation}
 We backpropagate the body of the loop.
 
 $$\begin{array}{lrcl}
-\mathrm{for}\;i,j & {\color{red} \tilde{h}[j]} & \pluseq & {\color{red} W[j,i]x[i]}
+\mathrm{for}\;j,i & {\color{red} \tilde{h}[j]} & \pluseq & {\color{red} W[j,i]x[i]}
 \end{array}$$
 
 \vfill
 The body of the loop is just a product of scalars.  A product of scalars has a trivial backpropagation:
 
 $$\begin{array}{lrcl}
-\mathrm{for}\;i,j & {\color{red} W.\grad[j,i]} & \pluseq & {\color{red} x[i]\tilde{h}.\grad[j]} \\
+\mathrm{for}\;j,i & {\color{red} W.\grad[j,i]} & \pluseq & {\color{red} x[i]\tilde{h}.\grad[j]} \\
 \\
 & {\color{red} x.\grad[i]} & \pluseq & {\color{red} W[j,i]\tilde{h}.\grad[j]} \\
 \end{array}$$
 
-\vfill For 2D CNNS the weight tensor and the data tensor each have four indeces (including the batch index).
-Vector notation becomes unwieldy while loop notation remains trivial.
+\slide{}
 
-\slideplain{Minibatching}
+\centerline{\bf Minibatching}
+
+\slideplain{}
 
 Training time is greatly improved by minibatching.
 
@@ -573,7 +604,7 @@ For NumPy minibatching is not so much about parallelism as about making the vect
 the slowness of Python.  On a GPU minibatching allows parallelism over the batch elements.
 \vfill
 
-\slide{Minibatching}
+\slide{}
 \vfill
 With minibatching each input value and each computed value is actually a batch of values.
 
@@ -612,19 +643,11 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 
 \vfill
 $B$ is the number of batch elements.  By convention parameter gradients are averaged over the batch.
-\slide{Framework Summary}
 
-A framework provides a high level language for writing models $P_\Phi(y|x)$.
+\slide{}
+\centerline{\bf The Educational Framework (EDF)}
 
-\vfill
-A framework compiles a model into an optimization algorithm.
-\vfill
-{\color{red} $$\Phi^* \approx \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; -\ln P_\Phi(y|x)$$}
-
-\vfill
-A framework also typically provides support for managing large training sets and pre-trained model parameter values (also called ``models'').
-
-\slide{The Educational Framework (EDF)}
+\slide{}
 
 The educational frameword (EDF) is 150 lines of Python-NumPy that implement a deep learning framework.
 
