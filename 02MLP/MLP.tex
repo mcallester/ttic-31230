@@ -502,17 +502,17 @@ Because then $W^1xW^2$ can mean either $W^1(xW^2)$ or $(W_1x)W_2$.
 So we adopt the convention that $x$ associates to its left while $x^\top$ associates to its right --- $W^1xW^2$ and $W^1x^\top W^2$ become well defined.
 
 \vfill
-Dirac Bra-Ket notation solves this by writing $x$ as $x| \rangle$ and $x^\top$ as $\langle |x$.
+Dirac Bra-Ket notation solves this by writing $x$ as $|x \rangle$ and $x^\top$ as $\langle x|$.
 
 \slide{Inner and Outer Products in Linear Algebra}
 
 For vectors $x[i]$ and $y[j]$
 
 \vfill
-$x^\top y = \langle|xy|\rangle$ is the inner product $\sum_i \;x[i]y[i]$.
+$x^\top y = \langle x|y\rangle$ is the inner product $\sum_i \;x[i]y[i]$.
 
 \vfill
-$xy^\top = x|\rangle\langle|y$ is the outer product $(xy^\top)[i,j] = x[i]y[j]$.
+$xy^\top = |x\rangle \langle y|$ is the outer product $(xy^\top)[i,j] = x[i]y[j]$.
 
 \slide{Why Einstein Notation?}
 
@@ -820,9 +820,9 @@ class Sigmoid:
   \tilde{y}.\mathrm{grad}[b,j] &\pluseq & y.\mathrm{grad}[b,j] \\
   B.\mathrm{grad}[j] & \minuseq & \frac{1}{B} \sum_b\;y.\mathrm{grad}[b,j] \\
   \\
-  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;y.\mathrm{grad}[b,j]W[i,j] = yW^\top\\
+  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;\tilde{y}.\mathrm{grad}[b,j]W[i,j] = yW^\top\\
   \\
-  W.\mathrm{grad}[i,j] & \pluseq & \frac{1}{B} \sum_b\;y.\mathrm{grad}[b,j]x[b,i] =\; ???
+  W.\mathrm{grad}[i,j] & \pluseq & \frac{1}{B} \sum_b\;\tilde{y}.\mathrm{grad}[b,j]x[b,i] =\; ???
 \end{eqnarray*}
 }
 
