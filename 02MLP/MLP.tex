@@ -334,18 +334,13 @@ Values are computed ``forward'' while gradients are computed ``backward''.
   y & = & f(x) \\
   z & = & g(y,x) \\
   u & = & h(z) \\
-  {\color{red} {\cal L}} &  {\color{red} =} & {\color{red}  u}
+  {\color{red} {\cal L}} &  {\color{red} =} & {\color{red}  u} \\
+  {\color{red} z.\grad} & {\color{red} =} & {\color{red} y.\grad = x.\grad = 0} \\
+  {\color{red} u.\grad} & {\color{red} =} & {\color{red} 1} \\
 \end{eqnarray*}
 
-
-\bigskip
-We initialize {\color{red} $x.\mathrm{grad}$} to zero: {\color{red} $z.\grad = y.\grad = x.\grad = 0$}
-
-\bigskip
-We initialize the loss gradient to 1: {\color{red} $u.\grad = 1$}
-
-\medskip
-{\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
+\vfill
+{\bf Invariant}: The gradients are correct for the red program.
 
 \anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
@@ -353,81 +348,44 @@ We initialize the loss gradient to 1: {\color{red} $u.\grad = 1$}
   y & = & f(x) \\
   z & = & g(y,x) \\
   {\color{red} u} & {\color{red} =} & {\color{red} h(z)} \\
-  {\color{red} {\cal L}} & {\color{red}  =} &  {\color{red} u}
+  {\color{red} {\cal L}} &  {\color{red} =} & {\color{red}  u} \\
+  {\color{red} z.\grad} & {\color{red} =} & {\color{red} y.\grad = x.\grad = 0} \\
+  {\color{red} u.\grad} & {\color{red} =} & {\color{red} 1} \\
+  {\color{red} z.\grad} & {\color{red} \pluseq} & {\color{red} ({\partial h}/{\partial z}) * u.\grad}
 \end{eqnarray*}
 
-{\color{red}
-\medskip
-$z.\grad = y.\grad = x.\grad = 0$
-
-\medskip
-$u.\grad = 1$
-
-\medskip
-$z.\grad\;\pluseq\;  ({\partial h}/{\partial z}) * u.\grad$
-
-}
-
-\medskip
-{\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
+\vfill
+{\bf Invariant}: The gradients are correct for the red program.
 
 \anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   y & = & f(x) \\
-  {\color{red} z} & {\color{red} =} & {\color{red} g(y,x)} \\
+  {\color{red} z} & {\color{red} =} & {\color{red} g(y,x)} \\ 
   {\color{red} u} & {\color{red} =} & {\color{red} h(z)} \\
-  {\color{red} {\cal L}} & {\color{red} =} & {\color{red}  u}
+  {\color{red} {\cal L}} &  {\color{red} =} & {\color{red}  u} \\
+  {\color{red} z.\grad} & {\color{red} =} & {\color{red} y.\grad = x.\grad = 0} \\
+  {\color{red} u.\grad} & {\color{red} =} & {\color{red} 1} \\
+  {\color{red} z.\grad} & {\color{red} \pluseq} & {\color{red} ({\partial h}/{\partial z}) * u.\grad} \\
+  {\color{red} y.\grad} & {\color{red} \pluseq} & {\color{red} ({\partial g}/{\partial y}) * z.\grad} \\
+  {\color{red} x.\grad} & {\color{red} \pluseq} & {\color{red} ({\partial g}/{\partial x}) * z.\grad} \\
 \end{eqnarray*}
 
-{\color{red}
-\medskip
-$z.\grad = y.\grad = x.\grad = 0$
 
-\medskip
-$u.\grad = 1$
-
-\medskip
-$z.\grad\;\pluseq\; ({\partial h}/{\partial z}) * u.\grad$
-
-\medskip
-$y.\grad \;\pluseq\; ({\partial g}/{\partial y}) * z.\grad$
-
-\medskip
-$x.\grad \;\pluseq\; ({\partial g}/{\partial x}) * z.\grad$
-
-}
-
-\medskip
-    {\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial {\cal L}/\partial w$ as defined by the set of assignments already processed.
-
-\anaslideplain{Backpropagation (Scalar Values)}
+\anaslide{Backpropagation (Scalar Values)}
 \vspace{-3ex}
 \begin{eqnarray*}
   {\color{red} y} & {\color{red} =} & {\color{red} f(x)} \\
-  {\color{red} z} & {\color{red} =} & {\color{red} g(y,x)} \\
+  {\color{red} z} & {\color{red} =} & {\color{red} g(y,x)} \\ 
   {\color{red} u} & {\color{red} =} & {\color{red} h(z)} \\
-  {\color{red} {\cal L}} & {\color{red} =} & {\color{red} u}
+  {\color{red} {\cal L}} &  {\color{red} =} & {\color{red}  u} \\
+  {\color{red} z.\grad} & {\color{red} =} & {\color{red} y.\grad = x.\grad = 0} \\
+  {\color{red} u.\grad} & {\color{red} =} & {\color{red} 1} \\
+  {\color{red} z.\grad} & {\color{red} \pluseq} & {\color{red} ({\partial h}/{\partial z}) * u.\grad} \\
+  {\color{red} y.\grad} & {\color{red} \pluseq} & {\color{red} ({\partial g}/{\partial y}) * z.\grad} \\
+  {\color{red} x.\grad} & {\color{red} \pluseq} & {\color{red} ({\partial g}/{\partial x}) * z.\grad} \\
+  {\color{red} x.\grad} & {\color{red} \pluseq} & {\color{red} ({\partial f}/{\partial x}) * y.\grad}
 \end{eqnarray*}
-{\color{red}
-\medskip
-$z.\grad = y.\grad = x.\grad = 0$
-
-\medskip
-$u.\grad = 1$
-
-\medskip
-$z.\grad\;\pluseq\; ({\partial h}/{\partial z}) * u.\grad$
-
-\medskip
-$y.\grad \;\pluseq\; ({\partial g}/{\partial y}) * z.\grad$
-
-\medskip
-$x.\grad \;\pluseq\; ({\partial g}/{\partial x}) * z.\grad$
-
-\medskip
-$x.\grad \;\pluseq\; ({\partial f}/{\partial x}) * y.\grad$
-}
 
 \ignore{
 \anaslide{The Vector-Valued Case}
@@ -565,7 +523,9 @@ $$\begin{array}{llrcl}
 \\
 & &  {\color{red} h[j]} & = & {\color{red} \sigma\left(\tilde{h}[j] - B[j]\right)} \\
   \\
-\mathrm{Loop:} & \mathrm{for}\;j,i & {\color{red} \tilde{h}[j]} & \pluseq & {\color{red} W[j,i]x[i]} \\
+\mathrm{Loop:}  & \mathrm{for}\;j & {\color{red} \tilde{h}[j]} & = & 0 \\
+\\
+& \mathrm{for}\;j,i & {\color{red} \tilde{h}[j]} & \pluseq & {\color{red} W[j,i]x[i]} \\
 \\
 & \mathrm{for}\;j & {\color{red} h[j]} & = & {\color{red} \sigma(\tilde{h}[j] - B[j])} \\
 
