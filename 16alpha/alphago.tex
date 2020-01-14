@@ -110,10 +110,10 @@ The UCT algorithm grows a tree by running ``simulations''.
 Each simulation descends into the tree to a leaf node, expands that leaf, and returns a value.
 
 \vfill
-In the UTC algorithm each move choice at each position is treated as a bandit problem.
+In the UCT algorithm each move choice at each position is treated as a bandit problem.
 
 \vfill
-We select the child (bandit) with the the lowest upper bound as computed from revious simulations selecting that child.
+We select the child (bandit) with the lowest upper bound as computed from revious simulations selecting that child.
 
 
 \slidetwo{Bootstrapping from Game Tree Search}
@@ -149,7 +149,7 @@ In principle, the AlphaZero algorithm could be applied to the problem of direct 
 To select an action, first construct a search tree over possible action sequences to evaluate options.
 
 \vfill
-As in UTC, the tree is grown by running simulations.  Each simulation descends into the tree from the root selecting an action at each state until a new leaf is created.
+As in UCT, the tree is grown by running simulations.  Each simulation descends into the tree from the root selecting an action at each state until a new leaf is created.
 
 \vfill
 In an adversarial game we simulate opponent actions using the same algorithm but where rewards are reversed for opponent actions.
@@ -198,7 +198,7 @@ $$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \; \pi_\Phi(s,a) &\mbox{if $N(s,a)
 The hyperparameter $\lambda_u$ should be selected so that $U(s,a)$ will typically {\bf decrease} as $N(s,a)$ increases.
 
 \vfill
-In this regime for $\lambda_u$, we can think of $U(s,a)$ as an upper confidence bound in the UBT algorithm.
+In this regime for $\lambda_u$, we can think of $U(s,a)$ as an upper confidence bound in the UCT algorithm.
 
 \slide{Root Action Selection}
 
@@ -225,7 +225,7 @@ We then construct a replay buffer of triples $(s,\pi_{s},R)$ where
 \item $\pi_{s}$ is the distribution on $a$ defined by $P(a) \propto N(s,a)^\beta$.
 
 \vfill
-\item $R$ is the reward of the episode for the root player (the final outcome of the tree-search guided game).
+\item $R \in \{-1,1\}$ is the reward of the episode for the root player (the final outcome of the tree-search guided game).
 \end{itemize}
 
 \slide{The Loss Function}
@@ -385,7 +385,7 @@ But are the algorithmic insights of chess algorithms really irrelevant?
 The first min-max computer chess program was described by Claude Shannon in 1950.
 
 \vfill
-Alpha-beta pruning was invented by various people independently, including John McCarthy, about 1956-1960.
+Alpha-beta pruning was invented by various people independently, including John McCarthy in the late 1950s.
 
 \vfill
 Alpha-beta has been the cornerstone of all chess algorithms until AlphaZero.
