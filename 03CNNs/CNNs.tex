@@ -127,7 +127,18 @@ If the input is padded but the output is not padded then $\Delta x$ and $\Delta 
 
 \centerline{\includegraphics[width = 8.0in]{../images/VGG}}
 
-\slide{Strides}
+
+\slide{Reducing Spatial Dimensions: Max Pooling}
+
+\centerline{\includegraphics[width = 2.5in]{../images/Convolution}}
+
+\vfill
+$$L_{{\ell+1}}[b,{\color{red}x},{\color{red}y},i] = {\color{red} \max_{\Delta x, \Delta y}}\; L_{{\ell}}[b,{\color{red} s*x} + \Delta x,\; {\color{red} s*y} + \Delta y,\; i]$$
+
+\vfill
+This is typically done with a stride greater than one so that the image dimension is reduced.
+
+\slide{Reducing Spatial Dimensions: Strided Convolution}
 
 We can move the filter by a ``stride'' $s$ for each spatial step.
 
@@ -138,13 +149,6 @@ $$\hspace{-1em}\sigma\left(\left(\sum_{\Delta x,\Delta y,i}\;W[\Delta x, \Delta 
 
 \vfill
 For strides greater than 1 the spatial dimention is reduced.
-
-\slide{Max Pooling}
-
-$$L_{{\ell+1}}[b,{\color{red}x},{\color{red}y},i] = {\color{red} \max_{\Delta x, \Delta y}}\; L_{{\ell}}[b,{\color{red} s*x} + \Delta x,\; {\color{red} s*y} + \Delta y,\; i]$$
-
-\vfill
-This is typically done with a stride greater than one so that the image dimension is reduced.
 
 
 \slide{Fully Connected (FC) Layers}
@@ -230,20 +234,24 @@ To implement a fully convolutional CNN we can ``dilate'' the filters by a dilati
 An alternative to dilation and fully convolutional networks is hypercolumns.
 
 \vfill
-$$L_{\ell+1}[b,x,y] = L_1[b,x,y];\cdots;L_n[b,x/W_\ell,y/W_\ell];\cdots;L_N[b]$$
+$$L[b,x,y] = L_1[b,x,y];\cdots;L_\ell[b,\floor{x/W_\ell},\floor{y/H_\ell}];\cdots;L_{\cal L}[b]$$
 
 \vfill
-where x;y denotes the concatenation of vectors $x$ and $y$.
+where $$L_\ell[b,\floor{x/W_\ell},\floor{y/H_\ell}]\;;\;L_{\ell+1}[b,\floor{x/W_{\ell+1}},\floor{y/H_{\ell+1}}]$$ denotes the concatenation of vectors $$L_\ell[b,\floor{x/W_\ell},\floor{y/H_\ell}]$$ and $$L_{\ell+1}[b,x/W_{\ell+1},y/H_{\ell+1}].$$
 
 \slide{Grouping}
 
-$$L_{\ell+1}[b,x,y] = L^1_{\ell+1}[b,x,y];\cdots;L^G_{\ell+1}[b,x,y]$$
+$$L_{\ell+1}[b,x,y] = L^0_{\ell+1}[b,x,y];\cdots;L^{G-1}_{\ell+1}[b,x,y]$$
 
 \vfill
-$$\tilde{L}^g_{{\ell+1}}[b,x,y,j] = \left(\sum_{\Delta x, \Delta y, i} W^g[\Delta x, \Delta y, i, j] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[j]$$
+\begin{eqnarray*}
+& & L^g_{{\ell+1}}[b,x,y,j] \\
+\\
+& = & \left(\sum_{\Delta x, \Delta y, i} W^g[\Delta x, \Delta y, i, j] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; g+i]\right) + B[j]
+\end{eqnarray*}
 
 \vfill
-For a fixed number of features $j$ in the total output $L_{\ell+1}[b,x,y,j]$ using $G$ groups reduces the number of weight parameters by a factor of $G$.
+For a fixed number of features $j$ in the total output, using $G$ groups reduces the number of weight parameters by a factor of $G$.
 
 
 \slide{2D CNN in PyTorch}
@@ -300,12 +308,7 @@ s[1000] & = & \relu(\mathrm{FC}(L_{10},\Phi_s)) \;\;\mbox{class scores}
 \end{eqnarray*}
 }
 
-\slideplain{VGG, Zisserman, 2014}
-
-\centerline{\includegraphics[width = 9.0in]{../images/VGG}}
-\centerline{\large Davi Frossard}
-
-\slide{VGG}
+\slideplain{VGG}
 \centerline{\includegraphics[height=4.5in]{../images/VGGStack}}
 \centerline{\large Stanford CS231}
 
