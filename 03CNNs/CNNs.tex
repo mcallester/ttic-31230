@@ -7,7 +7,7 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2019}
+  \centerline{David McAllester, Winter 2020}
 
     \vfill
   \centerline{\bf Convolutional Neural Networks (CNNs)}
@@ -15,55 +15,81 @@
   \vfill
 
 
-\slidetwo{What is a CNN?}
+\slide{Imagenet Classification}
+
+1000 kinds of objects.
+
+\vfill
+\centerline{\includegraphics[height=4.2in]{../images/IVLSRC}}
+2016 is 3.0\%, is 2017 2.25\%
+
+\medskip
+SOTA as of January 2020 is 1.3\%
+
+\slidetwoplain{What is a CNN?}
 {VGG, Zisserman, 2014}
 
 \centerline{\includegraphics[width = 8.0in]{../images/VGG}}
 \centerline{\large Davi Frossard}
 
-\slide{Review: Einstein Notation for Linear Threshold Layer}
-
-$${\color{red} y} = \sigma\left(W{\color{red} x} - B\right)$$
-
-\vfill
-is an abbreviation for
-\begin{eqnarray*}
-  {\color{red} y[b,j]} & = & \sigma\left(\left(\sum_i\;W[j,i] \;{\color{red} x[b,i]}\right) - B[j]\right) 
-\end{eqnarray*}
-
-\vfill
-Think of this as a separate assignment statement for each {\color{red} $(b,j)$}.
-
-\vfill
-Each {\color{red} $y[b,j]$} is the output of a ``linear threshold unit''.
-
-\vfill
-Einstein notation makes all indeces and summations explicit.
-
-\slideplain{A Convolution Layer}
-
-\centerline{\includegraphics[width = 2.5in]{../images/Convolution}}
-\centerline{$W[\Delta x,\Delta y,i,j]$\hspace{6ex}$L_{\mathrm{IN}}[b,x,y,i]$\hspace{6ex}$L_{\mathrm{out}}[b,x,y,j]$}
-\centerline{\large River Trail Documentation}
-
-\vfill
-{\tt Procedure CONV}$(W[\Delta x, \Delta y, i, j], B[j], L_{\mathrm{in}}[b,x,y,i])$
-\begin{eqnarray*}
- & &  \mbox{Return}\;\;L_{\mathrm{out}}[b,x,y,j] \\
- & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{\mathrm{in}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)
-\end{eqnarray*}
 
 \slideplain{A Convolution Layer}
 \centerline{\includegraphics[height = 2.0in]{../images/VGG}}
 
-Each box is a tensor $L[b,x,y,i]$
-\begin{eqnarray*}
- & &  L_{\mathrm{out}}[b,x,y,j] \\
- & = & \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{\mathrm{in}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)
-\end{eqnarray*}
+\vfill
+Each box is a tensor $L_\ell[b,x,y,i]$
 
 \vfill
-Each $L_{\mathrm{out}}[b,x,y,j]$ is the output of a single linear threshold unit.
+For a convolution layer, each $L_{{\ell+1}}[b,x,y,j]$ is the output of a single linear threshold unit computed from $L_\ell[b,x,y,i]$.
+
+\slideplain{A Convolution Layer}
+
+\centerline{\includegraphics[width = 2.5in]{../images/Convolution}}
+\centerline{$W[\Delta x,\Delta y,i,j]$\hspace{6ex}$L_{{\ell}}[b,x,y,i]$\hspace{6ex}$L_{{\ell+1}}[b,x,y,j]$}
+\centerline{\large River Trail Documentation}
+
+\vfill
+\begin{eqnarray*}
+ & &  L_{{\ell+1}}[b,x,y,j] \\
+ \\
+ & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)
+\end{eqnarray*}
+
+\slide{Many ``Neurons'' (Linear Threshold Units)}
+
+Each $L_{{\ell+1}}[b,x,y,j]$ is the output of a single linear threshold unit.
+
+\bigskip
+\begin{eqnarray*}
+ & &  L_{{\ell+1}}[b,x,y,j] \\
+ \\
+ & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)
+\end{eqnarray*}
+
+\slide{2D CNN in PyTorch}
+
+conv2d({\bf input, weight, bias, stride, padding, dilation, groups})
+
+\bigskip
+{\bf input} – tensor (minibatch,in-channels,iH,iW)
+
+\medskip
+{\bf weight} – filters (out-channels, in-channels/groups, in-channels,kH,kW)
+
+\medskip
+{\bf bias} – tensor (out-channels) . Default: None
+
+\medskip
+{\bf stride} – Single number or (sH, sW). Default: 1
+
+\medskip
+{\bf padding} – Single number or (padH, padW). Default: 0
+
+\medskip
+{\bf dilation} – Single number or (dH, dW). Default: 1
+
+\medskip
+{\bf groups} – split input into groups. Default: 1
 
 \slide{Padding}
 
@@ -86,20 +112,16 @@ padded[p:W+p, p:H+p] = x
 
 \slide{Padding}
 
-{\tt Procedure CONV}$(\Phi,\; L_{\mathrm{in}}[b,x,y,i],\;\mathrm{padding}\;p)$
+$L'_{{\ell}} = \mathrm{Padd}(L_{{\ell}},\;p)$
 
 \vfill
-$L'_{\mathrm{in}} = \mathrm{Padd}(L_{\mathrm{in}},\;p)$
+$L_{{\ell+1}}[b,x,y,j] =$
 
 \vfill
-$L_{\mathrm{out}}[b,x,y,j] =$
+$\;\;\;\sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\;L'_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j] \right)$
 
 \vfill
-$\;\;\;\sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\;L'_{\mathrm{in}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j] \right)$
-
-
-\vfill
-Return $L_{\mathrm{out}}[b,x,y,j]$
+If the input is padded but the output is not padded then $\Delta x$ and $\Delta y$ are non-negative.
 
 \slide{Reducing Spatial Dimention}
 
@@ -110,16 +132,16 @@ Return $L_{\mathrm{out}}[b,x,y,j]$
 We can move the filter by a ``stride'' $s$ for each spatial step.
 
 \vfill
-$L_{\mathrm{out}}[b,{\color{red}x},{\color{red}y},j] =$
+$L_{{\ell+1}}[b,{\color{red}x},{\color{red}y},j] =$
 
-$$\hspace{-1em}\sigma\left(\left(\sum_{\Delta x,\Delta y,i}\;W[\Delta x, \Delta y, i, j] L_{\mathrm{in}}[b,{\color{red} s*x} + \Delta x, {\color{red} s*y} + \Delta y, i]\right) - B[j]\right)$$
+$$\hspace{-1em}\sigma\left(\left(\sum_{\Delta x,\Delta y,i}\;W[\Delta x, \Delta y, i, j] L_{{\ell}}[b,{\color{red} s*x} + \Delta x, {\color{red} s*y} + \Delta y, i]\right) - B[j]\right)$$
 
 \vfill
 For strides greater than 1 the spatial dimention is reduced.
 
 \slide{Max Pooling}
 
-$$L_{\mathrm{out}}[b,{\color{red}x},{\color{red}y},i] = {\color{red} \max_{\Delta x, \Delta y}}\; L_{\mathrm{in}}[b,{\color{red} s*x} + \Delta x,\; {\color{red} s*y} + \Delta y,\; i]$$
+$$L_{{\ell+1}}[b,{\color{red}x},{\color{red}y},i] = {\color{red} \max_{\Delta x, \Delta y}}\; L_{{\ell}}[b,{\color{red} s*x} + \Delta x,\; {\color{red} s*y} + \Delta y,\; i]$$
 
 \vfill
 This is typically done with a stride greater than one so that the image dimension is reduced.
@@ -132,10 +154,132 @@ This is typically done with a stride greater than one so that the image dimensio
 
 \slide{Fully Connected (FC) Layers}
 
-We reshape $L_{\mathrm{in}}[b,x,y,i]$ to $L_{\mathrm{in}}[b,i']$ and then
+We reshape $L_{{\ell}}[b,x,y,i]$ to $L_{{\ell}}[b,i']$ and then
 
 \vfill
-$$L_{\mathrm{out}}[b,j] = \sigma\left(\left(\sum_{i'} \;W[j,i']\;L_{\mathrm{in}}[b,i']\right) - B[j]\right)$$
+$$L_{{\ell+1}}[b,j] = \sigma\left(\left(\sum_{i'} \;W[j,i']\;L_{{\ell}}[b,i']\right) - B[j]\right)$$
+
+\slideplain{Image to Column (Im2C)}
+
+Reduce convolution to matrix multiplication
+
+\vfill
+more space but faster.
+
+\vfill
+\begin{eqnarray*}
+  & & \tilde{L}_{{\ell+1}}[b,x,y,j] \\
+  \\
+  & = & \left(\sum_{\Delta x, \Delta y, i} W[\Delta x, \Delta y, i, j] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[j]
+  \end{eqnarray*}
+
+\vfill
+We make a bigger tensor $\tilde{L}$ with two additional indeces.
+
+$$\tilde{L}_{{\ell}}[b,x,y,\Delta x,\Delta y,i] = L_{{\ell}}[b,x+\Delta x,y+\Delta y,i]$$
+
+\slideplain{Image to Column (Im2C)}
+
+\begin{eqnarray*}
+  & & \tilde{L}_{{\ell+1}}[b,x,y,j] \\
+  \\
+  & = & \left(\sum_{\Delta x, \Delta y, i} W[\Delta x, \Delta y, i, j] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[j] \\
+  \\
+      & = & \left(\sum_{\Delta x, \Delta y, i} \begin{array}{l}
+                                              \tilde{L}_{{\ell}}[b,x,y,\Delta x,\Delta y,i]
+                                              * W[\Delta x, \Delta y, i, j] \\
+  \end{array}\right) + B[j] \\
+  \\
+    & = & \left(\sum_{(\Delta x, \Delta y, i)} \begin{array}{l}
+                                              \tilde{L}_{{\ell}}[(b,x,y),(\Delta x,\Delta y,i)]
+                                              * W[(\Delta x, \Delta y, i), j] \\
+                                           \end{array}\right) + B[j]
+\end{eqnarray*}
+
+\slideplain{Dilation}
+
+A CNN for image classification typically reduces an $N \times N$ image to a single feature vector.
+
+\vfill
+Dilation is a trick for treating the whole CNN as a ``filter'' that can be passed over an $M \times M$ image with $M > N$.
+
+\vfill
+\centerline{\includegraphics[width = 2.5in]{../images/Convolution}}
+
+\vfill
+An output tensor with full spatial dimension can be useful in, for example, image segmentation.
+
+\slide{Dilation}
+
+\centerline{\includegraphics[width=8.0in]{../images/dilation}}
+
+\vfill
+This is called a ``fully convolutional'' CNN.
+
+\slide{Dilation}
+
+To implement a fully convolutional CNN we can ``dilate'' the filters by a dilation parameter $d$.
+
+\vfill
+\begin{eqnarray*}
+\tilde{L}_{{\ell+1}}[b,x,y,j] & = &  W[\Delta x, \Delta y, i, j] L_{{\ell}}[b,x + {\color{red} d*\Delta x}, y + {\color{red} d*\Delta y}, i] + B[j]
+\end{eqnarray*}
+
+\slide{Hypercolumns}
+
+An alternative to dilation and fully convolutional networks is hypercolumns.
+
+\vfill
+$$L_{\ell+1}[b,x,y] = L_1[b,x,y];\cdots;L_n[b,x/W_\ell,y/W_\ell];\cdots;L_N[b]$$
+
+\vfill
+where x;y denotes the concatenation of vectors $x$ and $y$.
+
+\slide{Grouping}
+
+$$L_{\ell+1}[b,x,y] = L^1_{\ell+1}[b,x,y];\cdots;L^G_{\ell+1}[b,x,y]$$
+
+\vfill
+$$\tilde{L}^g_{{\ell+1}}[b,x,y,j] = \left(\sum_{\Delta x, \Delta y, i} W^g[\Delta x, \Delta y, i, j] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[j]$$
+
+\vfill
+For a fixed number of features $j$ in the total output $L_{\ell+1}[b,x,y,j]$ using $G$ groups reduces the number of weight parameters by a factor of $G$.
+
+
+\slide{2D CNN in PyTorch}
+
+conv2d({\bf input, weight, bias, stride, padding, dilation, groups})
+
+\bigskip
+{\bf input} – tensor (minibatch,in-channels,iH,iW)
+
+\medskip
+{\bf weight} – filters (out-channels, in-channels/groups, in-channels,kH,kW)
+
+\medskip
+{\bf bias} – tensor (out-channels) . Default: None
+
+\medskip
+{\bf stride} – Single number or (sH, sW). Default: 1
+
+\medskip
+{\bf padding} – Single number or (padH, padW). Default: 0
+
+\medskip
+{\bf dilation} – Single number or (dH, dW). Default: 1
+
+\medskip
+{\bf groups} – split input into groups. Default: 1
+
+\slide{Modern Trends}
+
+Modern Convolutions use 3X3 filters.  This is faster and has fewer parameters.  Expressive power is preserved by increasing depth with many stride 1 layers.
+
+\vfill
+Max pooling and dilation seem to have disappeared.
+
+\vfill
+Resnet and resnet-like architectures are now dominant (next lecture).
 
 \slide{Alexnet}
 {\huge
@@ -171,132 +315,49 @@ s[1000] & = & \relu(\mathrm{FC}(L_{10},\Phi_s)) \;\;\mbox{class scores}
 \vfill
 \centerline{\includegraphics[width = 3.5in]{../images/inception2}}
 
+
+\slide{Models for Image Classification in PyTorch}
+
+{\Large
+\begin{itemize}
+
+\item AlexNet
+
+\item VGG
+
+\item ResNet
+
+\item SqueezeNet
+
+\item DenseNet
+
+\item Inception v3
+
+\item GoogLeNet
+
+\item ShuffleNet v2
+
+\item MobileNet v2
+
+\item ResNeXt
+
+\item Wide ResNet
+
+\item MNASNet
+\end{itemize}
+}
+
 \slide{Imagenet Classification}
 
 1000 kinds of objects.
 
 \vfill
-\centerline{\includegraphics[height=4.5in]{../images/IVLSRC}}
-2016 error rate is 3.0\% \hspace{1.0in} 2017 error rate is 2.25\%
+\centerline{\includegraphics[height=4.2in]{../images/IVLSRC}}
+2016 is 3.0\%, is 2017 2.25\%
 
-\slideplain{Review of The Swap Rule}
-\vspace{-3ex}
-\begin{eqnarray*}
-  {\color{red} \tilde{y}[b,j]} & {\color{red}  =} & {\color{red} \sum_i\;W[j,i]\;x[b,i]} \\
-  \\
-  y[b,j] & = & \sigma(\tilde{y}[b,j] - B[j]) \\
-  \end{eqnarray*}
+\medskip
+SOTA as of January 2020 is 1.3\%
 
-\vspace{-5ex}
-{\color{red} 
-  \begin{eqnarray*}
-  \\
-  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;\tilde{y}.\mathrm{grad}[b,j]W[j,i] \\
-  \\
-  W.\mathrm{grad}[j,i] & \pluseq & \sum_b\;\tilde{y}.\mathrm{grad}[b,j]x[b,i]
-\end{eqnarray*}
-}
-
-\slide{Alternative Swap Rule}
-Intialize all computed tensors to zero and write the program using only $\pluseq$.
-
-$$
-\begin{array}{lrcl}
-{\color{red} \mathrm{for}\;b,i,j} & \tilde{y}[b,j] & \pluseq & W[j,i]\;x[b,i] \\
-  \\
-{\color{red} \mathrm{for}\;b,i,j} &  x.\mathrm{grad}[b,i] & \pluseq & \tilde{y}.\mathrm{grad}[b,j]W[j,i] \\
-  \\
-{\color{red} \mathrm{for}\;b,i,j} &  W.\mathrm{grad}[j,i] & \pluseq & \tilde{y}.\mathrm{grad}[b,j]x[b,i]
-\end{array}
-$$
-
-\vfill
-one swaps the output with one of the inputs inside the body of the loop.
-
-\slide{Alternative Swap Rule for Convolution}
-
-\vfill
-{\color{red} $\mathrm{for}\;b,x,y,i,j,\Delta x, \Delta y$}
-$$\tilde{L}_{\mathrm{out}}[b,x,y,j] \;\pluseq\; W[\Delta x, \Delta y, i, j]\;L_{\mathrm{in}}[b,x + \Delta x, y + \Delta y, i]$$
-
-\vfill
-{\color{red} $\mathrm{for}\;b,x,y,i,j,\Delta x, \Delta y$ }
-$$\;\;\;W.\mathrm{grad}[\Delta x, \Delta y,i,j] \; \pluseq \; \tilde{L}_{\mathrm{out}}.\grad[b,x,y,j]\;L_{\mathrm{in}}[b,x + \Delta x,y+ \Delta y,i]$$
-
-\vfill
-{\color{red} $\mathrm{for}\;b,x,y,i,j,\Delta x, \Delta y$}
-$$\;{\color{red} L_{\mathrm{in}}.\grad[b,x+\Delta x,y+\Delta y,i,j]} \;\pluseq \; \tilde{L}_{\mathrm{out}}.\grad[b,x,y,j]\;W[\Delta x, \Delta y, i, j]$$
-
-
-\slide{Image to Column (Im2C)}
-
-Reduce convolution to matrix multiplication ---  more space but faster.
-{\huge
-  $$L_{\mathrm{in}}[b,x,y,\Delta x,\Delta y,i] = L_{\mathrm{in}}[b,x+\Delta x,y+\Delta y,i]$$
-
-\begin{eqnarray*}
-  & & \tilde{L}_{\mathrm{out}}[b,x,y,j] \\
-  \\
-  & = & \left(\sum_{\Delta x, \Delta y, i} W[\Delta x, \Delta y, i, j] *L_{\mathrm{in}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[j] \\
-  \\
-      & = & \left(\sum_{\Delta x, \Delta y, i} \begin{array}{l}
-                                              L_{\mathrm{in}}[b,x,y,\Delta x,\Delta y,i]
-                                              * W[\Delta x, \Delta y, i, j] \\
-  \end{array}\right) + B[j] \\
-  \\
-    & = & \left(\sum_{(\Delta x, \Delta y, i)} \begin{array}{l}
-                                              L_{\mathrm{in}}[(b,x,y),(\Delta x,\Delta y,i)]
-                                              * W[(\Delta x, \Delta y, i), j] \\
-                                           \end{array}\right) + B[j]
-\end{eqnarray*}
-}
-
-\slideplain{Fully Convolutional Networks}
-
-\centerline{\includegraphics[width=8.0in]{../images/dilation}}
-
-\slide{Dilation}
-
-We can ``dilate'' the filter by introducing an image step size $d$ for each step in the filter coordinates.
-
-\vfill
-\begin{eqnarray*}
-\tilde{L}_{\mathrm{out}}[b,x,y,j] & = &  W[\Delta x, \Delta y, i, j] L_{\mathrm{in}}[b,x + {\color{red} d*\Delta x}, y + {\color{red} d*\Delta y}, i] + B[j]
-\end{eqnarray*}
-
-This is used for ``fully convolutional'' CNNs.
-
-
-\slide{Summary}
-
-\begin{itemize}
-\item Convolution
-
-\vfill
-\item Padding
-
-  \vfill
-\item Stides
-
-  \vfill
-\item Max Pooling
-
-  \vfill
-\item Fully Connected Layers
-
-  \vfill
-\item Dilation
-\end{itemize}
-
-\slide{Modern Trends}
-
-Modern Convolutions use 3X3 filters.  This is faster and has fewer parameters.  Expressive power is preserved by increasing depth with many stride 1 layers.
-
-\vfill
-Max pooling and dilation seem to have disappeared.
-
-\vfill
-Resnet and resnet-like architectures are now dominant (next lecture).
 
 
 \slideplain{END}
