@@ -7,9 +7,11 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2019}
+  \centerline{David McAllester, Winter 2020}
   \vfill
   \centerline{\bf Language Modeling}
+  \vfill
+  \centerline{\bf Recurrent Nerual Networks (RNNs)}
   \vfill
   \centerline{\bf Machine Translation}
   \vfill
@@ -18,6 +20,252 @@
   \centerline{\bf Beam Search}
   \vfill
   \centerline{\bf Statistical Machine Translation}
+
+\slide{Natural Language Understanding}
+
+GLUE: General Language Understanding Evaluation
+
+\vfill
+
+\centerline{\normalsize ArXiv 1804.07461}
+\centerline{\includegraphics[width= 7in]{\images/GLUE}}
+
+\slide{BERT and GLUE}
+
+\centerline{\includegraphics[width= 7in]{\images/GLUELeader}}
+
+\slide{BERT and SuperGLUE}
+
+\centerline{\includegraphics[width= 9in]{\images/SuperLeader}}
+
+\slide{ Language Modeling}
+
+The recent progress on NLP benchmarks is due to pretraining on language modeling.
+
+\vfill
+Langauge modeling is based on unconditional cross-entropy minimiztion.
+
+\vfill
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;-\ln Q_\Phi(y)$$
+
+\vfill
+In language modeling $y$ is a sentence (or fixed length block of text).
+
+\slide{Autoregressive Models}
+
+A structured object, such as a sentence or an image, has an exponentially small probability.
+
+\vfill
+An autoregressive model computes conditional probability for each part given ``earlier'' parts.
+
+\vfill
+This can be done for the words of a sentence or the pixels of an image.
+
+\vfill
+Warning: BERT is not autoregressive.  But we will study autoregressive models first.
+
+\slide{Langauge Modeling}
+
+Let $W$ be some finite vocabulary of tokens (words).
+
+\vfill
+Let $\mathrm{Pop}$ be a population distribution over $W^*$ (sentences).
+
+\vfill
+We want to train a model $Q_\Phi(y)$ for sentences $y$
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \; E_{y \sim \mathrm{Pop}}\;-\ln Q_\Phi(y)
+\end{eqnarray*}
+
+\slide{The End of Sentence Token {\tt <EOS>}}
+
+We want to define a probability distribution over sentence of different length.
+
+\vfill
+For this we require that each sentence is ``terminated'' with an end of sentence token {\tt <EOS>}.
+
+\vfill
+We requite $w_T = \mbox{\tt <EOS>}$ and $w[t] \not = \mbox{\tt <EOS>}$ for $t < T$.
+
+\vfill
+This allows
+
+$$P(w_0, w_1, \cdots, w_T) = \prod_{t=0}^T\;P(w_t\;|\;w_1,\ldots,w_{t-1})$$
+
+To handle sentences of different length.
+
+\slide{Recurrent Neural Network (RNN) Language Modeling}
+
+
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+A typical neural language model has the form
+
+$$Q_\Phi(w_t\;|\;w_1,\cdots,w_{t-1}) = \softmax_{w_t} e(w_t)^\top h_{t-1}$$
+
+\vfill
+{\bf Word Embeddings:} Here each word $w$ is associated with a vector $e(w)$ called the embedding of word $w$.
+
+
+\slide{Standard Measures of Performance}
+
+{\bf Bits per Character:}
+For character language models performance is measured in bits per character.  Typical numbers are slightly over one bit per character.
+
+\vfill
+{\bf Perplexity:}
+It would be natural to measure word language models in bits per word.  However, it is traditional to measure them in perplexity which is defined to be
+$2^b$ where $b$ is bits per word.  Perplexities of about 60 were typical until the past couple years.  Today's large language models (ELMO, GPT-2) give
+perplexities of about 30.
+
+\vfill
+According to Quora there are 4.79 letters per word.  1 bit per character (including space characters) gives a perplexity of $2^{5.79}$ or $55.3$.
+
+\slide{}
+
+\centerline{\bf Recurrent Neural Networks (RNNs)}
+
+\slide{Vanilla RNNs}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+A Vanilla RNN uses two-input linear threshold units.
+
+{\huge
+$${\color{red} h[b,t,j]} = \sigma\left(\left(\sum_i\;W^{h,h}[j,i]{\color{red} h[b,t-1,i]}\right) + \left(\sum_k W^{x,h}[j,k]{\color{red} x[b,t,k]}\right) - B[j]\right)$$
+}
+\vfill
+$$\mathrm{Parameter}\;{\color{red} \Phi = (W^{h,h}[J,J],\;W^{x,h}[J,K],\;B[J])}$$
+
+
+\slide{Exploding and Vanishing Gradients}
+
+\vfill
+If we avoid saturation of the activation functions then we get exponentially growing or shrinking eigenvectors of the weight matrix.
+
+\vfill
+Note that if the forward values are bounded by sigmoids or tanh then they cannot explode.
+
+\vfill
+However the gradients can still explode.
+
+\slide{Exploding Gradients: Gradient Clipping}
+
+\vfill
+We can dampen the effect of exploding gradients by clipping them before applying SGD.
+
+\vfill
+$$W.\mathrm{grad'} = \left\{\begin{array}{l} W.\mathrm{grad} \;\;\;\mbox{if $||W.\mathrm{grad}|| \leq n_{\mathrm{max}}$} \\
+                                                      \\ \\
+                                                      n_{\mathrm{max}} \; W.\mathrm{grad} / ||W.\mathrm{grad}|| \;\; \mbox{otherwise}
+\end{array} \right.$$
+
+\vfill
+See {\tt torch.nn.utils.clip\_grad\_norm}
+
+\slide{Time as Depth}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+\vfill
+We would like the RNN to {\color{red} remember and use} information from much earlier inputs.
+
+
+\vfill
+All the issues with depth now occur through time.
+
+\vfill
+However, for RNNs {\color{red} at each time step we use the same model parameters.}
+
+\vfill
+In CNNs {\color{red} at each layer uses its own model parameters.}
+
+\slide{Skip Connections Through Time}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+\vfill
+We would like to add {\color{red} skip connections through time}.
+
+\vfill
+However, We have to handle the fact that the same model parameters are used at every time step.
+
+
+\slideplain{Gated RNNs}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+$$h[b,t,j] =  {\color{red} G_t[b,t,j]}h[b,t\!-\!1,j] + {\color{red} (1-G[b,t,j])}R[b,t,j]$$
+
+\vfill
+Rather than add the diversion $R[b,t,j]$ to $h[b,t\!-\!1,j]$ we take a convex combination determined by a computed ``gate'' $G[b,t,j] \in [0,1]$.
+
+\vfill
+For $G[b,t,j] =1$ we pass feature $j$ through unchanged.
+
+For $G[b,t,j] = 0$ we completely replace feature $j$.
+
+\slideplain{Update Gate RNN (UGRNN)}
+
+{\huge
+\begin{eqnarray*}
+R[b,t,j] & = & \mathrm{tanh}\left(\left(\sum_i\;W^{h,R}[j,i]{\color{red} h[b,t\!-\!1,i]}\right) + \left(\sum_k W^{x,R}[j,k]{\color{red} x[b,t,k]}\right) - B^R[j]\right) \\
+\\
+G[b,t,j] & = & \sigma\left(\left(\sum_i\;W^{h,G}[j,i]{\color{red} h[b,t\!-\!1,i]}\right) + \left(\sum_k W^{x,G}[j,k]{\color{red} x[b,t,k]}\right) - B^G[j]\right) \\
+\\
+h[b,t,j] & = & {\color{red} G[b,t,j]}h[b,t\!-\!1,j] + {\color{red} (1-G[b,t,j])}R[b,t,j] \\
+\\
+{\color{red} \Phi} & {\color{red} =} & {\color{red} (W^{h,R},W^{x,R},B^R,W^{h,G},W^{x,G},B^G)}
+\end{eqnarray*}
+}
+
+\slide{Hadamard product}
+
+$$h[b,t,j] =  {\color{red} G[b,t,j]}h[b,t\!-\!1,j] + {\color{red} (1-G[b,t,j])}R[b,t,j]$$
+
+\vfill
+is sometimes written as
+
+$$h[b,t,J] =  G[b,t,J]{\color{red} \odot} h[b,t\!-\!1,J] + (1-G[b,t,J]){\color{red} \odot} R[b,t,J]$$
+
+\vfill
+$\odot$ is the Hadamard product (componentwise product) on vectors.
+
+\slide{Gated Recurrent Unity (GRU) by Cho et al. 2014}
+
+\centerline{\includegraphics[width=4.0in]{../images/GRU}}
+\centerline{{\huge [Christopher Olah]}}
+
+\vfill
+The right half is a UGRNN.
+
+\vfill
+The GRU adds a gating on $h_{t-1}$ before the tanh.
+
+\slide{Long Short Term Memory (LSTM)}
+\centerline{\includegraphics[width=3.5in]{../images/LSTM}}
+\centerline{{\large [figure: Christopher Olah]}}
+
+\centerline{\Large [LSTM: Hochreiter\&Shmidhuber, 1997]}
+
+\slide{UGRNN vs. GRUs vs. LSTMs}
+
+\vfill
+In class projects from previous years, GRUs consistently outperformed LSTMs.
+
+\vfill
+A systematic study [Collins, Dickstein and Sussulo 2016] states:
+
+\begin{quotation}
+  Our results point to the GRU as being the most learnable of gated RNNs for shallow architectures, followed by the UGRNN.
+\end{quotation}
 
 \slide{RNN for a generic CELL Procedure}
 As usual, we use capital letter indeces to denote whole tensors or slices and lower case letters to denote particular index values.
@@ -46,7 +294,6 @@ Return $h[T,J]$
 \mbox{for}\;t\;\;h[t,2J] & = & \vec{h}[t,J];\cev{h}[t,J]\;\;\mbox{where $x;y$ is vector concatenation}
 \end{eqnarray*}
 
-
 \slide{Multi-Layer RNNs}
 
 \centerline{\includegraphics[width = 2in]{../images/RNNstack}}
@@ -72,122 +319,11 @@ h[0,T,J] & = & \mathrm{RNN}_{\Phi[0]}(x[T,I]) \\
 \vfill
 This is used in Google translation.
 
-\slide{ Language Modeling}
+\slide{}
 
-Let $W$ be some finite vocabulary of tokens (words).
+\centerline{\bf Neural Machine Translation}
 
-\vfill
-Let $\mathrm{Pop}$ be a population distribution over $W^*$ (sentences).
-
-\vfill
-We will write a sequence $w[1],\ldots,w[t]$ as $w[T]$.
-
-\vfill
-We want to train a model $P_\Phi(w[T])$.
-
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \; E_{\mathrm{Pop}}\;-\ln P_\Phi(w[T])
-\end{eqnarray*}
-
-\slide{The End of Sentence Token}
-
-\vfill
-We assume a special toeken {\tt <EOS>} called the end of sentence token.
-
-\vfill
-Let $t_{\mathrm{final}}$ be the last time index allowed for $T$.
-
-\vfill
-We requite $w[t_{\mathrm{final}}] = \mbox{\tt <EOS>}$ and $w[t] \not = \mbox{\tt <EOS>}$ for $t < t_{\mathrm{final}}$.
-
-\vfill
-This gives:
-
-$$P(w[T]) = \prod_t\;P(w[t]\;|\;w[1],\ldots,w[t-1])$$
-
-\slide{Autoregressive Models are Friendly}
-
-I will call a model $P_\Phi(y)$ ``friendly'' if we can efficiently sample from $P_\Phi$ and we can also efficiently compute $P_\Phi(y)$ for any given $y$.
-
-\vfill
-Multiclass classification models for small $K$ are friendly.
-
-\vfill
-Gaussian distributions are friendly.
-
-\vfill
-Autoregressive language models are friendly --- they are a special case of friendly graphical models.
-
-\vfill
-General graphical models are often unfriendly.
-
-
-\slide{Word Embeddings}
-
-We will use a word embedding tensor $e[W,I]$ which should be interpreted as assigning a vector $e[w,I]$ to each word $w$.
-
-\vfill
-The word embedding tensor $e[W,I]$ is a parameter of language models (and many other kinds of NLP models).
-
-\slide{Autoregressive Language Modeling}
-
-Procedure $P_\Phi(w[T])$ ;; {\color{red} $w[T]$ given}
-
-\vfill
-{\huge \begin{eqnarray*}
-x[t,I] & = & (\Phi.\mathrm{embed})[w[t],I] \\
-\\
-h[T,J] & = & \mathrm{RNN}_{\Phi.\mathrm{RNN}}(x[T,J])\;\;J \geq I \\
-\\
-s[0,w] & = & (\Phi.\mathrm{embed}[w,I]) \cdot (\Phi.\mathrm{init}[I]) \\
-\\
-\mathrm{for}\;t > 0\;\;s[t,w] & = & (\Phi.\mathrm{embed}[w,I]) \cdot h[t-1,I] \;\;\mbox{$h$ truncated to $I$} \\
-\\
-p[t,w] & = & \softmax_w\;s[t,w]
-\end{eqnarray*}
-}
-
-\vfill
-Return $\prod_t p[t,w[t]]$
-
-\slide{Language Model Loss Decomposition}
-
-\begin{eqnarray*}
-\Phi^* &  = & \argmin_\Phi\; E_{\mathrm{Pop}} \;-\ln\;P_\Phi(w[T]) \\
-\\
-\\
-\\
-& = & \argmin_\Phi\;E_{\mathrm{Pop}}\;\sum_t\; -\ln\;p[t,w[t]]
-\end{eqnarray*}
-
-\slide{Standard Measures of Performance}
-
-{\bf Bits per Character:}
-For character language models performance is measured in bits per character.  Typical numbers are slightly over one bit per character.
-
-\vfill
-{\bf Perplexity:}
-It would be natural to measure word language models in bits per word.  However, it is traditional to measure them in perplexity which is defined to be
-$2^b$ where $b$ is bits per word.  Perplexities of about 60 are typical.
-
-\vfill
-According to Quora there are 4.79 letters per word.  1 bit per character (including space characters) gives a perplexity of $2^{5.79}$ or $55.3$.
-
-\slide{Sampling From an Autoregressive Model}
-
-To sample a sentence
-\vfill
-$$w_1,\ldots, w_T, \mbox{\tt <eos>}$$
-\vfill
-we sample $w_t$ from
-\vfill
-$$P_\Phi(w_t|w_1,\ldots,w_{t-1})$$
-
-\vfill
-until we get {\tt <eos>}.
-
-\slide{Machine Translation}
-
+\slide{}
 %\centerline{\includegraphics[width = 4in]{../images/SeqToSeq}}
 
 %\centerline{\large [Figure from Luong et al.]}
