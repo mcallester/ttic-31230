@@ -323,7 +323,7 @@ This is used in Google translation.
 
 \centerline{\bf Neural Machine Translation}
 
-\slide{}
+\slide{Machine Translation}
 %\centerline{\includegraphics[width = 4in]{../images/SeqToSeq}}
 
 %\centerline{\large [Figure from Luong et al.]}
@@ -336,6 +336,9 @@ Translation is a {\bf sequence to sequence} (seq2seq) task.
 
 \vfill
 {\bf Sequence to Sequence Learning with Neural Networks}, Sutskever, Vinyals and Le, NIPS 2014, arXiv Sept 10, 2014.
+
+\vfill
+We describe a simplification of the paper.
 
 \slide{Machine Translation}
 
@@ -362,27 +365,13 @@ $$P_\Phi\left(w_{\mathrm{out}}[T_{\mathrm{out}}]\;|\; w_{\mathrm{in}}[T_\mathrm{
 \slide{A Simple RNN Translation Model}
 
 \vfill
-We construct a conditional language model
-
-\begin{eqnarray*}
-\mathrm{Init}[J] & = & {\color{red} \cev{\mathrm{RNN}}_{\Phi.\mathrm{in}}(w_{\mathrm{in}}[T_{\mathrm{in}}])\;[0,J]} \\
-\\
-P_\Phi(w_{\mathrm{out}}[T_{\mathrm{out}}]\; | \; w_{\mathrm{in}}[T_{\mathrm{in}}]) & = & P_{\Phi.\mathrm{out}}(w_{\mathrm{out}}[T_{\mathrm{out}}] \;|\;\mathrm{Init}[J])
-\end{eqnarray*}
+The final state of a right-to-left RNN is used as the initial hidden state of a left-to-right RNN language model for the output.
 
 \vfill
-Here {\color{red} $\cev{\mathrm{RNN}}_{\Phi.\mathrm{in}}(w_{\mathrm{in}}[T_{\mathrm{in}}])\;[0,J]$} is used as the initial hidden state of an RNN language model for the output.
+The final right-to-left state {\color{red} $\cev{\mathrm{RNN}}_{\Phi.\mathrm{in}}(w_{\mathrm{in}}[T_{\mathrm{in}}])\;[0,J]$} is a ``thought vector'' representation of the input sentence.
 
 \vfill
-{\color{red} $\cev{\mathrm{RNN}}_{\Phi.\mathrm{in}}(w_{\mathrm{in}}[T_{\mathrm{in}}])\;[0,J]$} is a ``thought vector'' representation of the input sentence.
-
-\slide{Reverse Order Encoding}
-
-Having the encoding run in the reverse order of the decoding helps in training by making it easier to start the translation correctly
-(assuming that the languages have similar word orders).
-
-\vfill
-In the original paper the encoding was done left to right and the decoding was done right to left.
+Taking a right-to-left thought vector from the beginning of the input sentence facilitates getting a good start in left-to-right modeling of the output.
 
 \slide{Machine Translation Decoding}
 
@@ -407,18 +396,11 @@ These are not the same.
 
 \slide{Attention-Based Translation}
 
-{\bf Neural Machine Translation by Jointly Learning to Align and Translate}
+{\bf Neural Machine Translation by Jointly Learning to {\color{red} Align} and Translate}
 Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio, ICLR 2015 (arXiv Sept. 1, 2014)
 
 \vfill
-There are many ways to construct attention-based translation models.
-
-\vfill
-Details are often unimportant.
-
-\vfill
-The model presented in these slides has been optimized for simplicity.
-
+We describe a simplification of the paper.
 
 \slide{Representing Sentences by Vector Sequences}
 
@@ -433,7 +415,7 @@ The input sentence is now represented by a sequence of vectors.
 \end{eqnarray*}
 
 \vfill
-We still use {\color{red} $\cev{\mathrm{RNN}}_{\Phi.\mathrm{RNN}}(w_{\mathrm{in}}[T_{\mathrm{in}}])\;[0,J]$} as the initial state of a decoding RNN.
+We still use the final state of an RNN run on the input as the initial state of a decoding RNN.
 
 \vfill
 But the decoding RNN now has access to the entire sequence of hidden states for the input.
@@ -523,6 +505,15 @@ This can be used to produce a list of $k$ ``best'' decodings which can then be c
 the most likely one.
 
 \slideplain{Phrase Based Statistical Machine Translation (SMT)}
+
+
+Phrase based SMT dominanted machine translation before deep Seq2Seq models.
+
+\vfill
+SMT is still used for low resource languages, such as regional African languages, and in unsupervised machine translation.
+
+\slide{Phrase Based Statistical Machine Translation (SMT)}
+
 
 Step I:   Learn a phrase table --- a set of triples $(p,q,s)$ where
 
