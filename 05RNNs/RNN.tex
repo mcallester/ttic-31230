@@ -411,40 +411,27 @@ The input sentence is now represented by a sequence of vectors.
  & & P_\Phi(w_{\mathrm{out}}[T_{\mathrm{out}}] \;|\; w_{\mathrm{in}}[T_{\mathrm{in}}]) \\
  \\
 & = & P_{\Phi.\mathrm{out}}(w_{\mathrm{out}}[T_{\mathrm{out}}]\;|\;
-{\color{red} \cev{\mathrm{RNN}}_{\Phi.\mathrm{RNN}}(w_{\mathrm{in}}[T_{\mathrm{in}}])})
+{\color{red} M[T_\mathrm{in},J]})
 \end{eqnarray*}
 
 \vfill
-We still use the final state of an RNN run on the input as the initial state of a decoding RNN.
+{\color{red} $M[T_{\mathrm{in}},J]$} is the sequence of hidden states of an RNN
+(for some RNN architecture) on the input sentence.
 
 \vfill
-But the decoding RNN now has access to the entire sequence of hidden states for the input.
+{\color{red} $M[t,J]$} is the $t$th hidden vector for the input sentence.
 
-\slidetwo{Attention-Based Translation}{Memory-Based Language Modeling}
+\slide{Attention-Based (Memory-Based) Translation Decoding}
 
-Procedure $P_\Phi(w[T] \;|\; {\color{red} M[T_M,J]})$ ;;{\color{red} $w[T]$ given}
-{\huge \begin{eqnarray*}
-x[t,I] & = & (\Phi.\mathrm{embed})[w[t],I] \\
-h[T,J] & = & \mathrm{RNN}_{\Phi.\mathrm{RNN}}(x[T,I] \;|\;{\color{red} M[T_M,J]})\;\;J \geq I \\
-s[0,w] & = & (\Phi.\mathrm{embed}[w,I])\cdot (\Phi.\mathrm{init}[I]) \\
-\mathrm{for}\;t > 0\;\;s[t,w] & = & (\Phi.\mathrm{embed}[w,I]) \cdot h[t-1,I] \;\;\mbox{$h$ truncated to $I$}\\
-p[t,w] & = & \softmax_w\;s[t,w]
-\end{eqnarray*}
-}
-Return $\prod_t p[t,w[t]]$
 
-\slide{Attention-Based (Memory-Based) Conditional RNN}
+$$h[-1,J] =  M[0,J]$$
 
-Procedure $\mathrm{RNN}_\Phi(x[T_x,I] \;|\; {\color{red} M[T_M,J]})$
+\vfill
+$$P(w_{t+1}\;|\;w_0,\cdots,w_t) = \softmax_{w_{t+1}}\;e(w_{t+1})^\top h[t,J]$$
 
-\begin{eqnarray*}
-h[0,J] & = & \mathrm{CELL}_\Phi({\color{red} M[0,J]};x[t,I];{\color{red} 0[J]}) \\
-\\
-\mbox{for}\;t > 0\;\\
-h[t,J] & = & \mathrm{CELL}_\Phi(\;{\color{red} h[t-1,J]};x[t,I];{\color{red}\mathrm{Lookup}(h[t-1,J],M[T,J])}\;)\\
-\end{eqnarray*}
-
-Return $h[T,I]$
+\vfill
+$$h[t+1,J] = \mathrm{CELL}_\Phi
+(\;{\color{red} h[t,J]};e(w_{t+1});{\color{red}\mathrm{Lookup}(h[t,J],M[T,J])}\;)$$
 
 \slide{Attention as a Key-Value Memory Mechanism}
 
@@ -452,11 +439,10 @@ Procedure $\mathrm{Lookup}(\mathrm{key}[J],\;M[T,J])$
 
 \bigskip
 \begin{eqnarray*}
-s[t] & = &\mathrm{key}[J]^\top M[t,J] \\
+\alpha[t]& =& \softmax_t \;\mathrm{key}[J]^\top M[t,J]\\
 \\
-{\color{red} \alpha[t]} & {\color{red} =} & {\color{red} \softmax_t \;s[t]\;\mbox{; the attention}} \\
 \\
-{\color{red} V[J]} & {\color{red} =} & {\color{red} \sum_t\;\alpha[t]M[t,J]}
+V[J]& =& \sum_t\;\alpha[t]M[t,J]
 \end{eqnarray*}
 
 \bigskip
