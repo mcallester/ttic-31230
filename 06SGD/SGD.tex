@@ -16,7 +16,7 @@
   \vfill
   \centerline{Momentum, RMSProp, and Adam}
   \vfill
-  \centerline{Hyperparameter Conjugacy}
+  \centerline{Decoupling SGD Hyperparameters}
 
 \slide{Vanilla SGD}
 
@@ -71,7 +71,7 @@ $$\Phi \;\minuseq \; \eta_t \nabla_\Phi\;\mathrm{loss}(\Phi,x_t,y_t)$$
 For ``sufficiently smooth'' non-negative loss with
 
 \vfill
-$$\eta_t \geq 0\;\;\;\;\mbox{and}\;\;\;\;\lim_{t \rightarrow \infty} \;\eta_t = 0\;\;\;\;\mbox{and}\;\;\;\;\sum_t \eta_t = \infty,$$
+$$\eta_t \geq 0\;\;\;\;\;\;\;\;\lim_{t \rightarrow \infty} \;\eta_t = 0\;\;\;\;\;\;\;\;\sum_t \eta_t = \infty \;\;\;\;\;\;\sum_t \;\eta_t^2 < \infty$$
 
 \vfill
 we have that the training loss $E_{(x,y) \sim \mathrm{Train}}\; \mathrm{loss}(\Phi,x,t)$ converges to a limit and any limit point of the sequence $\Phi_t$
@@ -81,10 +81,6 @@ is a stationary point in the sense that {\huge  $\nabla_\Phi \; E_{(x,y) \sim \m
 {\Large
 \vfill
 {\bf Rigor Police:} One can construct cases where $\Phi$ diverges to infinity, converges to a saddle point, or even converges to a limit cycle.
-
-\vfill
-{\bf Rigor Police:} This theorem is usually stated with an additional condition that $\sum_t \;\eta_t^2 < \infty$.  I believe that this additional condition is not required.
-Any help resolving this issue is welcome.
 
 }
 
@@ -107,124 +103,30 @@ But since $\sum_t \eta_t = \infty$, no matter how small the learning rate gets, 
 \centerline{\includegraphics[height= 4in]{../images/AnnealingSGD}}
 \centerline{\Large Gao Huang et. al., ICLR 2017}
 
-\slide{}
-\centerline{\bf Standard Non-Vanilla SGD Algorithms}
-\vfill
-\vfill
+\slide{Decoupling the Learning Rate $\eta$ from the Batch Size $B$}
 
-\slideplain{Digression on Running Averages}
-Consider a sequence $x_1$, $x_2$, $x_3$, $\ldots$.
-\vfill
-For $t \geq N$, consider the average of the $N$ most recent values.
-$$\tilde{\mu} = \frac{1}{N} \sum_{s=t-N+1}^t x_s$$
+Vanilla SGD:
+
+
+$$\Phi_{t+1} \;\minuseq\; \eta \hat{g}_t$$
 
 \vfill
-This can be approximated more efficiently with
-\begin{eqnarray*}
-\hat{\mu}_0 & = & 0 \\
-\\
-\hat{\mu}_t & = & \left(1-\frac{1}{N}\right)\hat{\mu}_{t-1} + \left(\frac{1}{N}\right)x_t\;\;\;t \geq 1 \\
-\\
-\hat{\mu}_t & \approx & \tilde{\mu}_t \;\;\; t >N
-\end{eqnarray*}
-
-\slide{Running Averages}
-
-More explicitly, for $\hat{\mu}_0 = 0$, the update
-
-$$\hat{\mu}_t = \left(1-\frac{1}{N}\right)\hat{\mu}_{t-1} + \left(\frac{1}{N}\right)x_t$$
+$$\hat{g}_t = \frac{1}{B} \sum_b \hat{g}_{t,b}$$
 
 \vfill
-gives
-
-$$\hat{\mu}_t = \frac{1}{N} \sum_{1 \leq s \leq t} \left(1-\frac{1}{N}\right)^{t-s} x_s$$
+Where $\hat{g}_{t,b}$ is the gradient of the element $b$ of the batch.
 
 \vfill
-where we have
-
-$$\sum_{n\geq 0} \left(1-\frac{1}{N}\right)^{-n} = N$$
-
-\slide{Momentum}
-
-\begin{eqnarray*}
-  {\color{red} v_t} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_g}\right) v_{t-1} + \eta * \hat{g}_t} \;\;\;\mbox{$N_g$ is typically 10 or 100}\\
-  \\
-  {\color{red} \Phi_{t+1}} & {\color{red} =} & {\color{red} \Phi_t -  v_t} \\
-\end{eqnarray*}
-
-The theory of momentum is generally given in terms of second order structure.
-
-
-\centerline{\includegraphics[width = 4in]{../images/momentum}}
-\centerline{\Large Rudin's blog}
-
-\slideplain{Momentum}
-
-However, second order analyses are controversial in Deep Learning.
+Here the effect of $\hat{b}_{t,b}$ on $\Phi$ is $\frac{\eta}{B}\hat{g}_{t,b}$.
 
 \vfill
-We can perhaps get insight by reparameterizing the momentum equations.
+To make the effect of $\hat{g}_{t,b}$ independent of $B$ we can use
+{\color{red} $$\eta = B\eta_0$$}
+where $\eta_0$ is optimal for vanilla SGD with $B = 1$.
 
-\slide{We are Entering a Twilight Zone (TZ)}
+\slide{Decoupling $\eta$ from $B$}
 
-\centerline{\includegraphics[width = 6in]{../images/Twilight}}
-
-\vfill
-The twilight zone is material for which I do not know of a reference. 
-
-\slide{Conjugacy of SGD Hyperparameters}
-
-For an objective function $f(x,y)$ we say that $x$ and $y$ are conjugate if changing $x$ does effect the loss gradient for $y$.
-
-\vfill
-In other words if
-
-{\color{red} $$\frac{\partial f(x,y)}{\partial x \partial y} = 0$$}
-
-\vfill
-We are seeking a nonlinear transformation on hyperparameters yielding robust conjugacy.
-
-\slide{Solving for $\eta$ in terms of $N_g$ (TZ)}
-
-Let $\eta'$ be a learning rate that is appropriate without momentum ($N_g = 1$).
-
-\vfill
-We will solve for a learning rate $\eta$ as a function of $N_g$ so as to minimize the perturbation of SGD
-as we increase $N_g$.
-
-\slide{An Equivalent Formulation of Momentum}
-
-\begin{eqnarray*}
-{\color{red} v_t} & = & \left(1-\frac{1}{N_g}\right) v_{t-1} + \eta \hat{g}_t \\
-\\
-& = & \left(1-\frac{1}{N_g}\right) v_{t-1} + \frac{1}{N_g}({\color{red} N_g\eta \hat{g}_t}) \\
-\\
-{\color{red} v_t} & = & {\color{red} N_g\eta\mu_t}\;\;\mbox{for}\;{\color{red} \mu_t = \left(1-\frac{1}{N_g}\right)\mu_{t-1} + \frac{1}{N_g} \hat{g}_t} \\
-\\
-\Phi_{t+1} & = & \Phi_t - v_t \\
-\\
-{\color{red} \Phi_{t+1}} & {\color{red} =} & {\color{red} \Phi_t - N_g\eta\mu_t} 
-\end{eqnarray*}
-
-\slide{Solving for $\eta$ (TZ)}
-
-\begin{eqnarray*}
-\mu_t & = &  \left(1-\frac{1}{N_g}\right)\mu_{t-1} + \frac{1}{N_g} \hat{g}_t \\
-\\
-\mbox{we have}\;\Phi_{t+1}& = & {\color{red} \Phi_t - N_g\eta\;\mu_t} \\
-\\
-\mbox{unperturbed is}\;\Phi_{t+1}& = & {\color{red} \Phi_t - \eta'\mu_t}
-\end{eqnarray*}
-
-\vfill
-This gives {\color{red} $\eta = \eta'/N_g$}.
-
-\vfill
-We expect that that $\eta'$ and $N_g$ exhibit more independence (conjugacy) than $\eta$, $N_g$.
-
-\slide{Scaling $\eta$ and $N_g$ with Batch Size}
-
-Recent work has show that scaling hyper-parameters with the batch size can lead to effective learning with very large (highly parallel)
+Recent work has show that using $\eta = B\eta_0$ leads to effective learning with very large (highly parallel)
 batches.
 
 \vfill
@@ -233,107 +135,229 @@ batches.
 \vfill
 {\bf Don't Decay the Learning Rate, Increase the Batch Size}, Smith et al., 2018
 
-
-\slide{Solving for $\eta$ as a Function of $B$}
-
-Let $\eta'$ be a learning rate appropriate for $N_g = 1$ and $B = 1$.
-
-\vfill
-We will solve for $\eta$ as a function of $\eta'$ and $B$ so as to minimize the perturbation of SGD as we increase $B$.
-
-\slide{Solving for $\eta$ as a function of $B$}
-
-Consider two consecutive updates for a batch size of 1 with learning rate $\eta'$.
+\slideplain{Momentum}
 
 \begin{eqnarray*}
-  \Phi_{t+1} & = & \Phi_t - \eta' \nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t) \\
+  {\color{red} v_t} & {\color{red} =} & {\color{red} \mu v_{t-1} + \eta * \hat{g}_t} \;\;\;\mbox{$\mu$ is typically .9 or .99}\\
   \\
-  \Phi_{t+2} & = & \Phi_{t+1} - \eta' \nabla_\Phi \mathrm{loss}({\color{red} \Phi_{t+1}},x_{t+1},y_{t+1}) \\\
-  \\
-  & \approx & \Phi_{t+1} - \eta' \nabla_\Phi \mathrm{loss}({\color{red} \Phi_t},x_{t+1},y_{t+1}) \\
-  \\
-  & = & \Phi_t - \eta'((\nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t)) + (\nabla_\Phi \mathrm{loss}(\Phi_t,x_{t+1},y_{t+1})))
+  {\color{red} \Phi_{t+1}} & {\color{red} =} & {\color{red} \Phi_t -  v_t} \\
 \end{eqnarray*}
 
-\slide{Solving for $\eta$ as a function of $B$}
+The theory of momentum is generally given in terms of second order structure and total gradients (GD rather than SGD).
 
-Let $\eta$ be the learning rate for batch size $B$.
+
+\centerline{\includegraphics[width = 4in]{../images/momentum}}
+\centerline{\Large Rudin's blog}
+
+
+\slideplain{Momentum}
+
+GD analyses seem unlikely to apply to SGD.
 
 \vfill
+Second order analyses are of questionable value for SDG in very large dimension.
+
+\vfill
+But momentum is widely used in SGD.
+
+\vfill
+To better understand momentum we will rewrite it as a running average.
+
+\slide{Running Averages}
+Consider a sequence $x_1$, $x_2$, $x_3$, $\ldots$.
+\vfill
+For $t \geq N$, consider the average of the $N$ most recent values.
+$$\overline{x}_t = \frac{1}{N} \sum_{\tilde{t} = t-N+1}^t x_{\tilde{t}}$$
+
+\vfill
+This can be approximated efficiently with
 \begin{eqnarray*}
-  \Phi_{t+2} & \approx & \Phi_t - \eta'((\nabla_\Phi \mathrm{loss}(\Phi_t,x_t,y_t)) + (\nabla_\Phi \mathrm{loss}(\Phi_t,x_{t+1},y_{t+1}))) \\
-  \\
-  & = & \Phi_t - 2\eta'\;\hat{g}\;\;\;\mathrm{for}\;\;B=2
+\tilde{x}_0 & = & 0 \\
+\\
+\tilde{x}_t & = & \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t
+\end{eqnarray*}
+
+\slide{Deep Learning Convention for Running Averages}
+
+In deep learning a running average
+
+$$\tilde{x}_t = \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t$$
+
+\vfill
+is written as
+
+$$\tilde{x}_t = \beta\tilde{x}_{t-1} + (1-\beta)x_t$$
+
+\vfill
+where
+$$\beta = 1 - 1/N$$
+
+\vfill
+Typical values for $\beta$ are .9, .99 or .999 corresponding to $N$ being 10, 100 or 1000.
+
+\vfill
+It will be convenient here to use $N$ rather than $\beta$.
+
+\slide{Momentum as a Running Average}
+
+\begin{eqnarray*}
+v_t & = & \mu v_{t-1} + {\color{red} \eta \hat{g}_t} \\
+\\
+& = & \left(1-\frac{1}{N_g}\right) v_{t-1} + {\color{red} \frac{1}{N_g}(N_g\eta \hat{g}_t)}
 \end{eqnarray*}
 
 \vfill
-We have {\color{red} $\Phi \;\minuseq \; \eta\;\hat{g}$}
+Here we rewrite this in terms of a direct running average of the gradient.
+
+$$\tilde{g}_t = \left(1-\frac{1}{N_g}\right)\tilde{g}_{t-1} + \frac{1}{N_g} \hat{g}_t$$
 
 \vfill
-unperturbed is {\color{red} $\Phi \;\minuseq \; B\eta'\;\hat{g}$}
+Since averaging is a linear operation, we get
+
+$$v_t = N_g \eta \tilde{g}_t$$
+
+\slideplain{Momentum as a Running Average}
+
+We have now shown that the momentum update is
+
+$$\Phi_{t+1}  =  \Phi_t - v_t  = \Phi_t - N_g\eta\tilde{g}_t$$
 
 \vfill
-This gives {\color{red} $\eta = B \eta'$}.
+Hence momentum can be written as
+
+\begin{eqnarray*}
+\tilde{g}_t & = & \left(1-\frac{1}{N_g}\right)\tilde{g}_{t-1} + \frac{1}{N_g} \hat{g}_t \\
+\\
+\Phi_{t+1} & = &  \Phi_t - \tilde{\eta}\tilde{g}_t \\
+\\
+\tilde{\eta} & = & N_g\eta
+\end{eqnarray*}
+
+\slideplain{Generalizing $\eta = B\eta_0$}
+
+We will use the general principle that the effect of a single batch element $\hat{g}_{t,b}$ on the model should be $\eta_0\hat{g}_{t,b}$ where $\eta_0$ is the optimal learning rate
+for Vanilla SGD with batch size 1.
 
 \vfill
-We expect conjugacy for the parameters $\eta'$ and $B$.
-
-\slide{Solving for $N_g$ as a Function of $B$}
-
-Let $N'_g$ be a momentum parameter appropriate for $B=1$.
+This is consisting with the empirically validated scaling of $\eta$ with batch size.
 
 \vfill
-We will solve for $N_g$ as a function of $B$ so as to minimize the perturbation of SGD as we increase $B$.
+It is also intuitively motivated by the idea that the model is changing slowly and delaying the effect of $\hat{g}_{t,b}$ does not change the total effect it should have.
+
+\slide{Decoupling $\eta$ from $N_g$}
+
+\begin{eqnarray*}
+\tilde{g}_t & = & \left(1-\frac{1}{N_g}\right)\tilde{g}_{t-1} + \frac{1}{N_g} \hat{g}_t \\
+\\
+\Phi_{t+1} & = &  \Phi_t - \tilde{\eta}\tilde{g}_t
+\end{eqnarray*}
+
+For $\Delta t >> N_g$, the effect of $\hat{g}_t$ on $\Phi_{t+\Delta t}$ is approximately
+
+$$\frac{\tilde{\eta}\hat{g}_t}{N_g}\sum_{i = 0}^\infty \;\left(1 - \frac{1}{N_g}\right)^i = \frac{\tilde{\eta}\hat{g}_t}{N_g}\;N_g = \tilde{\eta}\hat{g}_t$$
 
 \vfill
-For batch size $B$, $\hat{\mu}_t$ is an average of $\hat{g}$ over $N_gB$ gradient values.
+{\color{red} So the effect of $\hat{g}_t$ on the model is $\tilde{\eta}\hat{g}_t$ independent of $N_g$.}
 
 \vfill
-SGD seems minimally perturbed by
-$$N_gB = N'_g\;\;\;\mbox{or}\;\;\;{\color{red} N_g = N'_g/B}$$
+This suggests that the optimal value of $\tilde{\eta}$ is independent of $N_g$.
+
+\slide{Decoupling $\eta$ from $N_g$}
+
+Using the same value of $\tilde{\eta}$ independent of $N_g$ gives
+
+$$\tilde{\eta} = B\eta_0 = N_g\eta$$
+
+where, as before, $\eta_0$ is the optimal learning rate for Vanilla SGD with $B = 1$.
 
 \vfill
-We expect conjugacy for the parameters $N'_g$ and $B$.
+Solving for $\eta$ we get
+{\color{red} $$\eta = \frac{B\eta_0}{N_g}$$}
+
+\slide{The Twilight Zone (TZ)}
+\centerline{\includegraphics[width = 2 in]{../images/Twilight}}
+
+\vfill
+{\color{red} $$\eta = \frac{B\eta_0}{N_g}$$}
+
+\vfill
+The above value for $\eta$ is twilight zone material.
+
+\vfill
+This is material for which I do not know of a reference. 
+
+\slide{Decoupling $N_g$ from $B$}
+
+Let $N^0_g$ be a momentum parameter appropriate for $B=1$.
+
+\vfill
+Momentum is based on a moving average of gradients
+
+$$\tilde{g}_{t+1} = \left(1-\frac{1}{N_g}\right)\tilde{g}_t + \frac{1}{N_g}\hat{g}_t$$
+
+In the presence of minibatching this is (approximately) averaging over $N_g$ minibatches.
+
+\vfill
+But to average over $N^0_g$ individual gradients we should use
+
+{\color{red} $$N_g = \frac{N^0_g}{B}$$}
 
 \slide{Putting It Together (TZ)}
 
-{\color{red}
 \begin{eqnarray*}
-N_g & = & \min(1,N'_g/B) \\
+N_g & = & \min\left(1,N^0_g/B\right) \\
 \\
-\eta & = & B\eta'/N_g
+\eta & = & \frac{B\eta_0}{N_g}
 \end{eqnarray*}
-}
+
+We can take $B$ to be as large as memory allows and then tune $N^0_g$ and $\eta_0$ rather than $N_g$ and $\eta$.
 
 \vfill
-We expect conjugacy for $\eta'$, $N'_g$ and $B$.
+The optimal values for $N^0_g$ and $\eta_0$ should be relatively independent of the batch size $B$.
+
+\slide{RMSProp and Adam}
+
+RMSProp and Adam are ``adaptive'' SGD methods --- the effective learning rate is computed from statistics of the data rather than set as a fixed hyper-parameter (although
+the adaptation algorithm itself still has hyper-parameters).
+
+\vfill
+Different effective learning rates are used for different model parameters.
+
+\vfill
+Adam is typically used in NLP while Vanilla SGD is typically used in vision.  This may be related to the fact that batch normalization is used in vision but not in NLP.
 
 \slide{RMSProp}
 
-RMSProp is based on a running average of $\hat{g}[i]^2$ for each real-valued model parameter $i$.
+RMSProp is based on a running average of $\hat{g}[i]^2$ for each scalar model parameter $i$.
 
 \begin{eqnarray*}
 {\color{red} s_t[i]} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
 \\
-{\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i] + \epsilon}}\;\; \hat{g}_t[i]}
+{\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i]} + \epsilon}\;\; \hat{g}_t[i]}
 \end{eqnarray*}
-
 
 \slide{RMSProp}
+The second moment of a scalar random variable $x$ is $E\;x^2$
+
+\vfill
+The variance $\sigma^2$ of $x$ is $E \;(x - \mu)^2$ with $\mu = E\;x$.
+
+\vfill
+RMSProp uses an estimate $s[i]$ of the second moment of the random scalar $\hat{g}[i]$.
+
+\vfill
+For $g[i]$ small $s[i]$ approximates the variance of $\hat{g}[i]$.
+
+\vfill
+There is a ``centering'' option in PyTorch RMSProp that switches from the second moment to the variance.
+
+\slide{RMSProp Motivation}
 \begin{eqnarray*}
-{\color{red} s_t[i]} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
-\\
-{\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i] + \epsilon}}\;\; \hat{g}_t[i]}
+{\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i]} + \epsilon}\;\; \hat{g}_t[i]}
 \end{eqnarray*}
 
 \vfill
-For $B = 1$ we have $s[i] \approx E\;\hat{g}[i]^2  =  g[i]^2 + \sigma[i]^2$
-
-\vfill
-We should expect $\sigma[i] >> g[i]$.
-
-\vfill
-We can therefore think of RMSProp as {\color{red} $\Phi[i] \;\minuseq\; \eta(\hat{g}[i]/\sigma[i])$}
+One interpretation of RMSProp is that a low variance gradient has less statistical uncertainty and hence needs less averaging before making the update.
 
 \slide{RMSProp is Theoretically Mysterious}
 
@@ -348,82 +372,49 @@ has no dependence on the choice of the weight unit.
 
 \vfill
 Consistent with the dimensional analysis, many theoretical analyses support (2) over (1) contrary to apparent empirical performance.
-
-\slide{Scaling $\eta$ with Batch Size for RMSProp (TZ)}
-
-Current RMSProp framework implementations do not scale well with batch size.
-
-\vfill
-The meaning of  $\hat{g}_i^2$ changes when increasing $B$.
-
-\vfill
-$\hat{g}_i$ is an average over a batch --- averaging reduces variance.
-
-\begin{eqnarray*}
-{\color{red} E\; \hat{g}_i^2} & {\color{red} =} & {\color{red} = \; \mu_i^2 + \frac{\sigma_i^2}{B}}
-\end{eqnarray*}
-
-
-\slide{Scaling $\eta$ with Batch Size for RMSProp (TZ)}
-
-\begin{eqnarray*}
-{\color{red} E\; \hat{g}_i^2} & {\color{red} = } &{\color{red} \mu_i^2 + \frac{\sigma_i^2}{B}}
-\end{eqnarray*}
-
-\vfill
-To preserve the behavior of RMSProp while increasing $B$ we need a running average of $g_{b,i}^2$ for individual batch elements $b$.
-
-\vfill
-This requires augmenting backpropagation to compute an average (or sum) of $g_{b,i}^2$ as well as an average of
-$g_{b,i}$ within each batch.
-
 \slide{Adam --- Adaptive Momentum}
 
-Adam combines momentum and RMSProp.
+Adam combines momentum and RMSProp (although PyTorch RMSProp also supports momentum).
 
 \vfill
-It also uses ``bias correction'' of running averages.
+Adam also uses ``bias correction'' which probably accounts for it's popularity over RMSProp in practice.
 
-\slide{A Digression on Bias Correction of Running Averages}
+\slide{Bias Correction}
 
-Consider a sequence $x_1,\;x_2,\;x_3,\ldots$ and consider the following for $N$ large.
+Consider a standard moving average.
 
 \begin{eqnarray*}
-\hat{\mu}_0 & = & 0 \\
+\tilde{x}_0 & = & 0 \\
 \\
-\hat{\mu}_t & = & \left(1-\frac{1}{N}\right)\hat{\mu}_{t-1} + \left(\frac{1}{N}\right)x_t
+\tilde{x}_t & = & \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t
 \end{eqnarray*}
 
 \vfill
-For $\mu \doteq E\;x$ we have $E\;\hat{\mu}_1 = \mu/N$.
+For $t < N$ the average $\tilde{x}_t$ will be strongly biased toward zero.
 
-\vfill
-For $t << N$ we have $E\;\hat{\mu}_t \approx (t/N)\mu$.
+\slide{Bias Correction}
 
-\slide{Bias Correction of Running Averages}
-
-The following running average maintains the invariant that $\hat{\mu}_t$ is exactly the average of $x_1,\ldots,x_t$.
+The following running average maintains the invariant that $\tilde{x}_t$ is exactly the average of $x_1,\ldots,x_t$.
 
 \begin{eqnarray*}
-\hat{\mu}_0 & = & 0 \\
-\\
-\hat{\mu}_t & = & \left(\frac{t-1}{t}\right)\hat{\mu}_{t-1} + \left(\frac{1}{t}\right)x_t \\
+\tilde{x}_t & = & \left(\frac{t-1}{t}\right)\tilde{x}_{t-1} + \left(\frac{1}{t}\right)x_t \\
 \\
 \\
-& = & \left(1-\frac{1}{t}\right)\hat{\mu}_{t-1} + \left(\frac{1}{t}\right)x_t
+& = & \left(1-\frac{1}{t}\right)\tilde{x}_{t-1} + \left(\frac{1}{t}\right)x_t
 \end{eqnarray*}
+
+\vfill
+We now have $\tilde{x}_1 = x_1$ independent of any $x_0$.
 
 \vfill
 But this fails to track a moving average for $t >> N$.
 
-\slide{Bias Correction of Running Averages}
+\slide{Bias Correction}
 
 The following avoids the initial bias toward zero while still tracking a moving average.
 
 \begin{eqnarray*}
-\hat{\mu}_0 & = & 0 \\
-\\
-\hat{\mu}_t & = & \left(1-\frac{1}{\min(N,t)}\right)\hat{\mu}_{t-1} + \left(\frac{1}{\min(N,t)}\right)x_t
+\tilde{x}_t & = & \left(1-\frac{1}{\min(N,t)}\right)\tilde{x}_{t-1} + \left(\frac{1}{\min(N,t)}\right)x_t
 \end{eqnarray*}
 
 \vfill
@@ -432,14 +423,68 @@ The published version of Adam has a more obscure form of bias correction which y
 \slide{Adam (simplified)}
 
 \begin{eqnarray*}
-  \mu_0[i] & = & s_0[i] = 0 \\
+  \tilde{g}_{t}[i] & = & \left(1-\frac{1}{\min(t,N_g)}\right)\tilde{g}_{t-1}[i] + \frac{1}{\min(t,N_g)} \hat{g}_t[i] \\
   \\
-  \mu_{t}[i] & = & \left(1-\frac{1}{\min(t,N_g)}\right)\mu_{t-1}[i] + \frac{1}{\min(t,N_g)} \hat{g}_t[i] \\
   \\
   s_{t}[i] & = & \left(1-\frac{1}{\min(t,N_s)}\right)s_{t-1}[i] + \frac{1}{\min(t,N_s)} \hat{g}_t[i]^2 \\
   \\
-\Phi_{t+1}[i] & =  & \Phi_t - \frac{\eta}{\sqrt{s_{t}[i] + \epsilon}}\;\;\mu_{t}[i]
+  \\
+\Phi_{t+1}[i] & =  & \Phi_t - \frac{\eta}{\sqrt{s_{t}[i]} + \epsilon}\;\;\tilde{g}_{t}[i]
 \end{eqnarray*}
+
+\slide{Decoupling Hyperparametera}
+
+Because Adam directly formulates momentum using a running average of gradients, $\eta$ is already decoupled from $N_g$.
+
+However the following reparameterization should be helpful.
+
+\begin{eqnarray*}
+N_g & = & min(1,N^0_g/B) \\
+\\
+\eta & = & \epsilon B \eta_0
+\end{eqnarray*}
+
+\vfill
+We then set $B$ to be as large as memory allows and tune $N_s$, $N^0_g$, $\epsilon$, and $\eta_0$.
+
+\vfill
+$N_s$ should also be adapted to $B$ but this is problematic --- see the next slide.
+
+\slide{Making $s_t[i]$ batch size invariant (TZ)}
+
+rather than
+$$s_t[i] = \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2$$
+\vfill
+we would like
+\begin{eqnarray*}
+s_t[i] & = &  \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \left(\frac{1}{B} \sum_b \hat{g}_{t,b}[i]^2\right) \\
+\\
+\\
+N_s & = & \min\left(1,N^0_s/B\right)\;\;\;\mbox{$N^0_s$ optimal for $B=1$}
+\end{eqnarray*}
+
+\slide{Making $s_t[i]$ batch size invariant (TZ)}
+
+In PyTorch this is difficult because ``optimizers'' are defined as a function of $\hat{g}_t$.
+
+\vfill
+$\hat{g}_t[i]$ is not sufficient for computing $\sum_b \;\hat{g}_{t,b}[i]^2$.
+
+
+\vfill
+To compute $\sum_b \;\hat{g}_{t,b}[i]^2$ we need to modify the backward method of all PyTorch objects!
+
+\slide{Summary}
+
+We have considered Vanilla SGD, Momentum, RMSProp and Adam.
+
+\vfill
+Vanilla tends to be used in vision while Adam tends to be used in NLP.
+
+\vfill
+Reparameterization of the PyTorch hyperparameters can decouple hyperparameters simplifying hyperparameter search.
+
+
 \slide{END}
 
 } \end{document}

@@ -1,14 +1,12 @@
 \input ../SlidePreamble
 \input ../preamble
 
-\newcommand{\solution}[1]{\bigskip {\bf Solution}: #1}
-
 \begin{document}
 
 {\Huge
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2019}
+  \centerline{David McAllester, Winter 2020}
   \vfill
   \centerline{\bf Stochastic Gradient Descent (SGD)}
   \vfill
@@ -111,7 +109,7 @@ We take a second order Taylor expansion.
 \begin{eqnarray*}
 {\cal L}(\Phi) & = & E_i\;{\cal L}_i(\Phi) \\
 \\
-{\cal L}_i(\Phi^* + \Delta \Phi) & = & {\cal L}_i + g_i \Delta \Phi + \frac{1}{2} \Delta\Phi^\top H_i \Delta\Phi \\
+{\cal L}_i(\Phi^* + \Delta \Phi) & = & {\cal L}_i(\Phi^*) + g_i \Delta \Phi + \frac{1}{2} \Delta\Phi^\top H_i \Delta\Phi \\
 \\
 E_i\; g_i & = & 0\\
 \\
@@ -123,7 +121,7 @@ E_i\; H_i & & \mbox{is positive definite}
 \begin{eqnarray*}
 {\cal L}(\eta) & = & \;\;\; E_{\Delta \Phi \sim P_\eta}\;E_i \;\;\;\; {\cal L}_i + g_i\Delta _\Phi + \frac{1}{2}\;\Delta \Phi^\top H_i \Delta \Phi \\
 \\
-& = & E_i\; {\cal L}_i + E_{\Delta \Phi \sim P_\eta} \;\;\;\;(E_i\;g_i) \;\Delta \Phi + \frac{1}{2}\;\Delta \Phi^\top (E_i\; H_i) \Delta \Phi \\
+& = & E_i\; {\cal L}_i(\Phi^*) + E_{\Delta \Phi \sim P_\eta} \;\;\;\;(E_i\;g_i) \;\Delta \Phi + \frac{1}{2}\;\Delta \Phi^\top (E_i\; H_i) \Delta \Phi \\
 \\
 & = & {\cal L}(\Phi^*)\;\; + \;\; E_{\Delta \Phi \sim P_\eta}\;\;\;\frac{1}{2}\;\Delta \Phi^\top (E_i\;H_i) \Delta \Phi
 \end{eqnarray*}
