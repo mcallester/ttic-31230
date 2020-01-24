@@ -48,7 +48,7 @@ run on a sentence $w_1,\ldots,w_T$?  Explain your answer.
 }
 
 \bigskip
-~{\bf Problem.} A UGRNN cell for computing $h[b,t,J]$ from $h[b,t-1,J]$ and $x[b,t,J]$ can be written as
+~{\bf Problem 2.} A UGRNN cell for computing $h[b,t,J]$ from $h[b,t-1,J]$ and $x[b,t,J]$ can be written as
 
 \begin{eqnarray*}
 G[b,t,j] & = & \sigma\left(W^{h,G}[j,I] h[b,t\!-\!1,I] +  W^{x,G}[j,K] x[b,t,K] - B^G[j]\right) \\
@@ -81,7 +81,7 @@ Modify the above equations so that they correspond to the following diagram for 
 
 \bigskip
 \bigskip
-~{\bf Problem 2.} This problem considers ``blank language modeling'' which is used in BERT.
+~{\bf Problem 3.} This problem considers ``blank language modeling'' which is used in BERT.
 For blank language modelng we draw a sentence $w_1,\ldots,w_T$ from a corpose and blank out a word at random
 and ask the system to predict the blanked word.  The cross-entropy loss for blank language modeling can be written as
 $$\Phi^* = \argmin_\Phi\;E_{w_1,\ldots,w_T \sim \mathrm{Train}, t \sim \{1,\ldots,T\}}\;\;- \ln P_\Phi(w_t| w_1,\ldots,w_{t-1},w_{t+1},\ldots,w_T)$$
@@ -104,6 +104,35 @@ You can assume whatever tensor parameters you want.
   \end{eqnarray*}
 }
 
+~ {\bf Problem 4.} In machine translation with attention the translation is generated from an autoregressive language model for the target langauge translation given the source language sentence.
+The source sentence is converted to an initial hidden vector $h[0,J]$ for the decoding (usually the final hidden vector of a right-to-left RNN run on the input), plus the sequence
+$M[T_{\mathrm{in}},J]$ of hidden vectors computed by the RNN on the source sentence where $T$ is the length of the source sentence.  We then define an autoregressive conditional language model
+$$P_\Phi(w_1,\ldots,w_{T_\mathrm{out}}\;|\; h[0,J],\;M[T_{\mathrm{in}},J])$$
+An autoregressive conditional language model with attention can be defined by
+\begin{eqnarray*}
+P(w_t\;|\;w_0,\cdots,w_{t-1}) & = & \softmax_{w_t}\;e[w_t,I]W^{\mathrm{auto}}[I,J]h[t-1,J] \\
+\\
+\alpha[t_{\mathrm{in}}]& =& \softmax_{t_\mathrm{in}} \;h[t\!-\!1,J_1]W^{\mathrm{key}}[J_1,J_2]M[t_{\mathrm{in}},J_2]\\
+\\
+V[J]& = & \sum_{t_{\mathrm{in}}}\;\alpha[t_{\mathrm{in}}]M[t_{\mathrm{in}},J] \\
+\\
+h[t,J] & = & \mathrm{CELL}_\Phi (h[t-1,J],\;V[J],\;e[w_t,I])
+\end{eqnarray*}
+Here $\mathrm{CELL}$ is some function taking (objects for) two vectors of dimensions J and one vector of dimension I and returning (an object for) a vector of dimension $J$.
 
+\medskip
+Rewrite these equations for image captioning where instead of $M[t_{\mathrm{in}},J]$ we are given an image feature tensor $M[x,y,K]$
+
+\solution{
+\begin{eqnarray*}
+P(w_t\;|\;w_0,\cdots,w_{t-1}) & = & \softmax_{w_t}\;e[w_t,I]W^{\mathrm{auto}}[I,J]h[t-1,J] \\
+\\
+\alpha[x,y]& =& \softmax_{x,y} \;h[t\!-\!1,J]W^{\mathrm{key}}[J,K]M[x,y,K]\\
+\\
+V[K]& = & \sum_{x,y}\;\alpha[x,y]M[x,y,K] \\
+\\
+h[t,J] & = & \mathrm{CELL}_\Phi (h[t-1,J],\;V[K],\;e[w_t,I])
+\end{eqnarray*}
+}
 
 \end{document}
