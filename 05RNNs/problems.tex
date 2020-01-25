@@ -26,7 +26,7 @@ We will adopt the convention, similar to true Einstein notation, that repeated c
 the inner product $e[w,I]^\top h[t,I]$ simply as $e[w,I]h[t,I]$ without the need for the (meaningless) transpose operation.
 
 \medskip
-~{\bf Problem 1.}  Consider an autoregressive RNN neural language model with $P_\Phi(w_{t+1}|w_1,\ldots,w_t)$ defined by
+~{\bf Problem 1. RNN parallel run time.}  Consider an autoregressive RNN neural language model with $P_\Phi(w_{t+1}|w_1,\ldots,w_t)$ defined by
 $$P_\Phi(w_t| w_1,\ldots,w_{t-1}) = \softmax_{w_{t+1}}\;\;e[w_t,I]h[t-1,I]$$
 Here $e[w,I]$ is the word vector for word $w$, $h[t,I]$ is the hidden state vector at time $t$ of a left-to-right RNN, and as described above $e[w,I]h[t,I]$
 is the inner prodcut of these two vectors where we have assumed that they have the same dimension.
@@ -48,7 +48,7 @@ run on a sentence $w_1,\ldots,w_T$?  Explain your answer.
 }
 
 \bigskip
-~{\bf Problem 2.} A UGRNN cell for computing $h[b,t,J]$ from $h[b,t-1,J]$ and $x[b,t,J]$ can be written as
+~{\bf Problem 2. Translating diagrams into equations.} A UGRNN cell for computing $h[b,t,J]$ from $h[b,t-1,J]$ and $x[b,t,J]$ can be written as
 
 \begin{eqnarray*}
 G[b,t,j] & = & \sigma\left(W^{h,G}[j,I] h[b,t\!-\!1,I] +  W^{x,G}[j,K] x[b,t,K] - B^G[j]\right) \\
@@ -81,7 +81,7 @@ Modify the above equations so that they correspond to the following diagram for 
 
 \bigskip
 \bigskip
-~{\bf Problem 3.} This problem considers ``blank language modeling'' which is used in BERT.
+~{\bf Problem 3. Blank Language modeling.} This problem considers ``blank language modeling'' which is used in BERT.
 For blank language modelng we draw a sentence $w_1,\ldots,w_T$ from a corpose and blank out a word at random
 and ask the system to predict the blanked word.  The cross-entropy loss for blank language modeling can be written as
 $$\Phi^* = \argmin_\Phi\;E_{w_1,\ldots,w_T \sim \mathrm{Train}, t \sim \{1,\ldots,T\}}\;\;- \ln P_\Phi(w_t| w_1,\ldots,w_{t-1},w_{t+1},\ldots,w_T)$$
@@ -104,7 +104,7 @@ You can assume whatever tensor parameters you want.
   \end{eqnarray*}
 }
 
-~ {\bf Problem 4.} In machine translation with attention the translation is generated from an autoregressive language model for the target langauge translation given the source language sentence.
+~ {\bf Problem 4. Image Captioning as Translation with Attention.} In machine translation with attention the translation is generated from an autoregressive language model for the target langauge translation given the source language sentence.
 The source sentence is converted to an initial hidden vector $h[0,J]$ for the decoding (usually the final hidden vector of a right-to-left RNN run on the input), plus the sequence
 $M[T_{\mathrm{in}},J]$ of hidden vectors computed by the RNN on the source sentence where $T$ is the length of the source sentence.  We then define an autoregressive conditional language model
 $$P_\Phi(w_1,\ldots,w_{T_\mathrm{out}}\;|\; h[0,J],\;M[T_{\mathrm{in}},J])$$
@@ -134,5 +134,64 @@ V[K]& = & \sum_{x,y}\;\alpha[x,y]M[x,y,K] \\
 h[t,J] & = & \mathrm{CELL}_\Phi (h[t-1,J],\;V[K],\;e[w_t,I])
 \end{eqnarray*}
 }
+
+\medskip
+{\bf Problem 5. Gated CNNs}
+
+A UGRNN is defined by the following equations.
+
+\begin{eqnarray*}
+\tilde{R}_t[b,j] & = & \left(\sum_i\;W^{h,R}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,R}[j,k]{\color{red} x_t[b,k]}\right) - B^R[j] \\
+\\
+R_t[b,j] & = & \mathrm{\tanh}(\tilde{R}_t[b,j]) \\
+\\
+\tilde{G}_t[b,j] & = & \left(\sum_i\;W^{h,G}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,G}[j,k]{\color{red} x_t[b,k]}\right) - B^G[j] \\
+\\
+G_t[b,j] & = & \mathrm{\sigma}(\tilde{G}_t[b,j]) \\
+\\
+{\color{red} h_t[b,j]} & = & G_t[b,j]{\color{red} h_{t-1}[b,j]} + (1-G_t[b,j])R_t[b,j]
+\end{eqnarray*}
+
+Modify these to form a data-dependent data-flow CNN for vision --- an Update-Gate CNN (UGCNN).
+More specifically, give equations analogous to those for UGRNN for computing a CNN ``box'' $L_{\ell+1}[b,x,y,j]$ from $L_\ell[b,x,y,i]$ (stride 1) using a computed ``gate box'' $G_{\ell+1}[b,x,y,j]$ and an ``update box'' $R_{\ell+1}[b,x,y,j]$.
+$$\Phi = (W^{L,R}_{\ell+1}[\Delta x, \Delta y,j,j'], B^R_{\ell+1}[j], W^{L,G}_{\ell+1}[\Delta x, \Delta y,j,j'],\;B^G_{\ell+1}[j])$$
+
+\solution{
+  \begin{eqnarray*}
+    R_{\ell+1}[b,x,y,j] & = & \mathrm{tanh}\left(\left(\sum_{\Delta x,\Delta y,j'}\;W^{L,R}_{\ell+1}[\Delta x, \Delta y, j',j]
+    L_{\ell}[b,x+\Delta x,\;y+\Delta y,\;j']\right) - B^R_{\ell+1}[j]\right) \\
+    \\
+    G_{\ell+1}[b,x,y,j] & = & \sigma\left(\left(\sum_{\Delta x,\Delta y,i}\;W^{L,G}_{\ell+1}[\Delta x, \Delta y, i,j']
+    L_{\ell}[b,x+\Delta x,\;y+\Delta y,\;j']\right) - B^G_{\ell+1}[j]\right) \\
+    \\
+    L_{\ell+1}[b,x,y,j] & = & G_{\ell+1}[b,x,y,j]L_\ell[b,x,y,j] + (1-G_t[b,x,y,j])R_t[b,x,y,j]
+  \end{eqnarray*}
+}
+
+{\bf Problem 4. Language CNNs.}
+This problem is on CNNs for sentences.  We consider a model with parameters
+$$\Phi = (e[w,i], W_1[\Delta t,i,i'], B_1[i],\ldots,W_L[\Delta t,i,i'],B_L[i])$$
+The matrix $e$ is the word embedding matrix where $e[w,I]$ is the vector embedding of word $w$.
+
+\medskip
+(a) Give an equation for the convolution layer $L_0[b,t,i]$ as a function of the word embeddings and the input sentence $w_1,\ldots,w_T$.
+
+\solution{
+  $$L_0[b,t,i] = e[w[t],i]$$}
+
+\medskip
+(b) Give an equation for $L_{\ell+1}[b,t,i]$ as a function of $L_\ell[b,t,i]$ and the parameters $W_{\ell+1}[\Delta t,i',i]$ and $B_{\ell+1}[i]$
+and where $L_{\ell+1}$ is computed stride 2.
+
+\solution{
+$$L_{\ell+1}[b,t,i] = \sigma\left(\left(\sum_{\Delta t,i'}\;W_{\ell+1}[\Delta t,i',i]L_\ell[2t + \Delta t,i']\right) - B_{\ell+1}[i]\right)$$
+}
+  
+\medskip
+(c) Assuming all computations can be done in parallel as soon the inputs have been computed, what is the {\bf parallel} order
+of run time for this convolutional model as a function of the input length $T$ and the number of layers $L$ (assume all parameter tensors
+of size $O(1)$). Compare this with the parallel run time of an RNN.
+
+\solution{The CNN has $O(L)$ parallel run time while the RNN is $O(T)$ or $O(T+L)$ with $L$ layers of RNN.}
 
 \end{document}
