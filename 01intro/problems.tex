@@ -16,7 +16,29 @@
 Assume that probability distributions $P(y)$ are discrete with $\sum_y\;P(y) = 1$.
 
 \bigskip
-{\bf Problem 1:} The problem of population density estimation is defined by the following equation.
+{\bf Problem 1: Joint Entropy and Conditional Entropy}
+We define conditional entropy $H(y|x)$ as follows
+$$H(y|x) = E_{x,y} \;-\log P(y|x).$$
+Given a distribution $P(x,y)$ show
+$$H(P) = H(x) + H(y|x).$$
+
+\solution{
+\begin{eqnarray*}
+  H(P) & = &  E_{(x,y) \sim P}\;-\ln P(x,y) \\
+  \\
+  & = & E_{(x,y) \sim P}\;-\ln P(x)P(y|x) \\
+  \\
+  & = & E_{(x,y) \sim P}\;\left(-\ln P(x) - \ln P(y|x)\right) \\
+  \\
+  & = & \left(E_{(x,y) \sim P}\;-\ln P(x)\right) + \left(E_{(x,y) \sim P}\;- \ln P(y|x)\right) \\
+  \\
+  & = & H(x) + H(y|x)
+\end{eqnarray*}
+}
+
+\bigskip
+~{\bf Problem 2: Unmeasurability of KL divergence and Population Entropy} The problem
+of population density estimation is defined by the following equation.
 $$\Phi^* = \argmin_\Phi\;H(\mathrm{Pop},Q_\Phi) = E_{y \sim \mathrm{Pop}}\;-\ln\;Q_\Phi(y)$$
 This equation is used for language modeling --- estimating the probability distribution over the population of English sentences that appear, say, in the New York Times.
 
@@ -60,7 +82,7 @@ the conditional (labeling) case (imagenet).
 }
 
 \bigskip
-{\bf Problem 2:} Consider the objective
+{\bf Problem 3: Asymmetry of cross entropy and KL-divergene} Consider the objective
 \begin{equation}
   \label{revH}
   P^* = \argmin_P\;H(P,Q)
@@ -126,8 +148,9 @@ When we optimize a model $Q_\Phi$ under the objective $KL(Q_\Phi,Q)$ we can get 
 while optimizing $Q_\Phi$ under the objective $KL(Q,Q_\Phi)$ we will tend to get that $Q_\Phi$ covers all of $Q$.  The two directions are very different even though both
 are minimized at $P = Q$.
 
+
 \bigskip
-{\bf Problem 3.}
+{\bf Problem 4. Data Processing Inequality}
 Prove the data processing inequality that for any function $f$ with $z = f(y)$ we have $H(z) \leq H(y)$.
 
 \medskip
@@ -143,7 +166,7 @@ increases or decrease its differential entropy respectively.
 }
 
 \bigskip
-{\bf Problem 4:} Consider a joint distribution $P(x,y)$ on discrete random variables $x$ and $y$.
+{\bf Problem 5: Mutual Information} Consider a joint distribution $P(x,y)$ on discrete random variables $x$ and $y$.
 We define the marginal distributions $P(x)$ and $P(y)$ as follows.
 \begin{eqnarray*}
   P(x) & = & \sum_y\;P(x,y) \\
@@ -202,7 +225,56 @@ Warning: This data processing equality does not apply to continuous density func
 }
 
 \bigskip
-{\bf Problem 5:}
+{\bf Problem 6: The ELBO}
+We consider a model distribution $Q_\Phi(z,y)$ with marginal distribution
+$$Q_\Phi(y) = \sum_z Q_\Phi(z,y).$$
+We are interested in minimizing the unconditional (or unsupervised) cross-entropy of this model.
+$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Train}} - \ln Q_\Phi(y)$$
+For many models of interest $Q_\Phi(z,y)$ can be efficiently computed as $Q_\Phi(z)Q_\Phi(y|z)$ but $Q_\Phi(y)$ is intractable to compute.
+In a variational auto-encoder we train a second model $\tilde{Q}_\Psi(z|y)$ and use the following inequality
+\begin{eqnarray*}
+\ln Q_\Phi(y) & \geq & \mathrm{ELBO}\\
+& = & E_{z \sim \tilde{Q}(z|y)} \;\ln \frac{Q_\Phi(z,y)}{\tilde{Q}_\Psi(z|y)}
+\end{eqnarray*}
+Rather than minimize the cross entropy we can maximize the ELBO (the Evidence Lower BOund) which corresponds to minimizing an upper bound on the cross entropy.
+Maximization of the ELBO with respect to model parameters $\Phi$ and $\Psi$ define a variational auto encoder (VAE).
+We will consider this in much more detail later in the class.  For now we just consider the formal equations.
+
+\bigskip
+{\bf a.} The ELBO can be written as
+$$\mathrm{ELBO} = E_{z \sim \tilde{Q}(z|y)} \;\ln \frac{Q_\Phi(y)Q_\Phi(z|y)}{\tilde{Q}_\Psi(z|y)}.$$
+Here we have that the ELBO is the expectation of a log of a product of three terms. Separate all three terms and express
+the terms other than $\ln Q_\Phi(y)$ as entropies or cross entropies.
+
+\solution{
+  \begin{eqnarray*}
+    ELBO & = & E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{Q_\Phi(y)Q_\Phi(z|y)}{\tilde{Q}_\Psi(z|y)} \\
+    \\
+    & = & \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln Q_\Phi(y)\right) +
+    \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln Q_\Phi(z|y)\right)
+    + \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{1}{\tilde{Q}_\Psi(z|y)}\right) \\
+    & = & \ln Q_\Phi(y) - H(\tilde{Q}_\Psi(z|y),Q_\Phi(z|y)) +  H(\tilde{Q}(z|y))
+  \end{eqnarray*}
+}
+
+\bigskip
+{\bf b.}  Now rewrite the ELBO by separating it into one the term for $P_\Phi(y)$ and one term for the other two combined and write the combined term
+as a KL divergence.  Explain why your expression implies that the ELBO is a lower bound on $\ln Q_\Phi(y)$.
+
+\solution{
+  \begin{eqnarray*}
+    ELBO & = & E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{Q_\Phi(y)Q_\Phi(z|y)}{\tilde{Q}_\Psi(z|y)} \\
+    \\
+    & = & \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln Q_\Phi(y)\right) +
+    \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{Q_\Phi(z|y)}{\tilde{Q}_\Psi(z|y)}\right) \\
+    & = & \ln Q_\Phi(y) - KL(\tilde{Q}_\Psi(z|y),Q_\Phi(z|y))
+  \end{eqnarray*}
+
+  The lower bound property follows from the fact that KL divergence is non-negative.
+}
+
+\bigskip
+{\bf Problem 7: The Donsker-Varadhan Bound}
 (a) For three distributions $P$, $Q$ and $G$ show the following equality.
 $$KL(P,Q) =  \left(E_{y \sim P} \;\ln \frac{G(y)}{Q(y)}\right) + KL(P,G)$$
 
@@ -243,60 +315,5 @@ $$KL(P,Q) =  \sup_s \;E_{y \sim P}\; s(y) - \ln E_{y \sim Q} \;e^{s(y)}$$
 This is the Donsker-Varadhan variational representation of KL-divergence.
 This can be used in cases where we can sample from $P$ and $Q$ but cannot compute $P(y)$ or $Q(y)$.
 Instead we can use a model score $s_\Phi(y)$ where $s_\Phi(y)$ can be computed.
-
-\ignore{
-\bigskip
-Problems in continuous information theory.
-
-\bigskip
-{\bf Problem 6.}
-Calculate the differential entropy of a Gaussian distribution
-$$p(x) = \frac{1}{\sigma\sqrt{2\pi}}e^{\frac{-x^2}{2\sigma^2}}.$$
-Use the natural logarithm in your definition of entropy.
-
-\solution{
-\begin{eqnarray*}
-H(p) & = & E_{x \sim P} -\ln p(x) \\
-\\
-& = & E_{x \sim P}\; \frac{x^2}{2 \sigma^2} + \ln \sigma + \ln \sqrt{2\pi} \\
-\\
-& = & \frac{\sigma^2}{2\sigma^2} + \ln \sigma + \frac{1}{2}\ln 2\pi \\
-\\
-& = & \ln \sigma + \frac{1}{2}(1 + \ln 2\pi)
-\end{eqnarray*}
-}
-
-\bigskip
-{\bf Problem 7.} Let the ``signal'' $x$ be a Gaussian random variable with variance $\sigma_x$ and let the ``noise'' $\epsilon$ be an independent Gaussian random variable with
-variance $\sigma_\epsilon$.  Let $z = x + \epsilon$.  Use the fact that a sum of independent Gaussians is Gaussian with $\sigma^2_z = \sigma^2_x + \sigma^2_\epsilon$
-to compute the differential mutual information $I(x,z)$.  Express your answer in terms of the signal to noise ratio $\sigma^2_x/\sigma^2_\epsilon$.
-Hint: select a convenient expression for mutual information and use the answer to problem 5.
-
-\solution{
-\begin{eqnarray*}
-I(z,x) & = & H(z) - H(z|x) \\
-\\
-& = & \ln (\sigma^2_x + \sigma^2_\epsilon) - \ln \sigma^2_\epsilon \\
-\\
-& = & \ln \left(\frac{\sigma^2_x + \sigma^2_\epsilon}{\sigma^2_\epsilon}\right) \\
-\\
-& = & \ln \left(1 + \frac{\sigma^2_x}{\sigma^2_\epsilon} \right)
-\end{eqnarray*}
-}
-
-\bigskip
-{\bf Problem 8.} For both the differential entropy in problem 5,  and the mutual information in problem 6, say whether the numerical value depends on the choice of units.
-
-\solution{
-          The numerical value of differential entropy is sensitive to the units we choose for $\sigma$.  As long as $\sigma_x$ and $\sigma_\epsilon$
-          are measured in the same units, the numerical value of the mutual information is units-independent. This is consistent with the fact
-          that differential entropy is not directly meaningful while mutual information can be written as a KL-divergence and differential KL-divergence
-          is meaningful.
-          }
-
-\bigskip
-{\bf Problem 9.} Calculate the KL divergence between one dimensional Gaussians with the same variance but different means.
-
-}
 
 \end{document}
