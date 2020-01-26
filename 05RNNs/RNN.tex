@@ -14,12 +14,6 @@
   \centerline{\bf Recurrent Nerual Networks (RNNs)}
   \vfill
   \centerline{\bf Machine Translation}
-  \vfill
-  \centerline{\bf Attention}
-  \vfill
-  \centerline{\bf Beam Search}
-  \vfill
-  \centerline{\bf Statistical Machine Translation}
 
 \slide{Natural Language Understanding}
 
@@ -95,6 +89,7 @@ $$P(w_0, w_1, \cdots, w_T) = \prod_{t=0}^T\;P(w_t\;|\;w_1,\ldots,w_{t-1})$$
 
 To handle sentences of different length.
 
+
 \slide{Recurrent Neural Network (RNN) Language Modeling}
 
 
@@ -128,6 +123,14 @@ According to Quora there are 4.79 letters per word.  1 bit per character (includ
 
 \centerline{\bf Recurrent Neural Networks (RNNs)}
 
+\slide{Review of Implicit Summation Notation}
+
+Capital letter indeces are used to indicate subtensors (slices) so that, for example,  $M[I,J]$ denotes a matrix
+while $M[i,j]$ denotes one element of the matrix, $M[i,J]$ denotes the $i$th row, and $M[I,j]$ denotes the $j$th collumn.
+
+\vfill
+We will adopt the convention, similar to true Einstein notation, that repeated capital indeces in a product of tensors are implicitly summed.  For example, we can write the inner product $e[w,I]^\top h[t,I]$ simply as $e[w,I]h[t,I]$ without the need for the (meaningless) transpose operation.
+
 \slide{Vanilla RNNs}
 
 \centerline{\includegraphics[width=3.5in]{../images/RNN}}
@@ -136,13 +139,17 @@ According to Quora there are 4.79 letters per word.  1 bit per character (includ
 A Vanilla RNN uses two-input linear threshold units.
 
 {\huge
-$${\color{red} h[b,t,j]} = \sigma\left(\left(\sum_i\;W^{h,h}[j,i]{\color{red} h[b,t-1,i]}\right) + \left(\sum_k W^{x,h}[j,k]{\color{red} x[b,t,k]}\right) - B[j]\right)$$
+\begin{eqnarray*}
+& & {\color{red} h[b,t,j]} \\
+\\
+& = & \sigma\left(\left(\sum_i\;W^{h,h}[j,i]{\color{red} h[b,t-1,i]}\right) + \left(\sum_k W^{x,h}[j,k]{\color{red} x[b,t,k]}\right) - B[j]\right) \\
+\\
+\\
+& = & \sigma\left(W^{h,h}[j,I]{\color{red} h[b,t-1,I]} + W^{x,h}[j,K]{\color{red} x[b,t,K]} - B[j]\right)
+\end{eqnarray*}
 }
-\vfill
-$$\mathrm{Parameter}\;{\color{red} \Phi = (W^{h,h}[J,J],\;W^{x,h}[J,K],\;B[J])}$$
 
-
-\slide{Exploding and Vanishing Gradients}
+\slideplain{Exploding and Vanishing Gradients}
 
 \vfill
 If we avoid saturation of the activation functions then we get exponentially growing or shrinking eigenvectors of the weight matrix.
@@ -365,34 +372,33 @@ $$P_\Phi\left(w_{\mathrm{out}}[T_{\mathrm{out}}]\;|\; w_{\mathrm{in}}[T_\mathrm{
 \slide{A Simple RNN Translation Model}
 
 \vfill
-The final state of a right-to-left RNN is used as the initial hidden state of a left-to-right RNN language model for the output.
+The final state of a right-to-left RNN, $\cev{h}_{\mathrm{in}}[1,J]$, is viewed as a ``thought vector'' representation of the input sentence.
 
 \vfill
-The final right-to-left state {\color{red} $\cev{\mathrm{RNN}}_{\Phi.\mathrm{in}}(w_{\mathrm{in}}[T_{\mathrm{in}}])\;[0,J]$} is a ``thought vector'' representation of the input sentence.
+We use the input thought vector $\cev{h}_{\mathrm{in}}[1,J]$ as the initial hidden state a left-to-right RNN language model
+generating the output sentence.
 
 \vfill
-Taking a right-to-left thought vector from the beginning of the input sentence facilitates getting a good start in left-to-right modeling of the output.
+Taking a the thought vector at the beginning of the input sentence facilitates getting a good start in left-to-right modeling of the output.
 
 \slide{Machine Translation Decoding}
 
-We can sample from $P_{\Phi.\mathrm{out}}(w[T]\;|\;H[J])$.
+We can sample a translation
+
+$$w_t \sim P(w_t\;|\;\cev{h}_{\mathrm{in}}[1,J],\;w_1,\ldots,w_{t-1})$$
 
 \vfill
-But we might prefer
+or we can do greedy decoding
+
+$$w_t = \argmax_{w_t}\; P(w_t\;|\;\cev{h}_{\mathrm{in}}[1,J],\;w_1,\ldots,w_{t-1})$$
+
+\vfill
+or we might try maximize total probability.
 
 \begin{eqnarray*}
-w_{\mathrm{out}}[T_{\mathrm{out}}]
-& = & \argmax_{w_{\mathrm{out}}[T_{\mathrm{out}}]} \;P_\Phi\left(w_{\mathrm{out}}[T_{\mathrm{out}}] \;|\; w_{\mathrm{in}}[T_{\mathrm{in}}] \right)
+w_1,\ldots,w_{T_{\mathrm{out}}}
+& = & \argmax_{w_1,\ldots,w_{T_{\mathrm{out}}}} \;P_\Phi\left(w_1,\ldots,w_{T_{\mathrm{out}}} \;|\; \cev{h}_{\mathrm{in}}[1,J]\right)
 \end{eqnarray*}
-
-\vfill
-This is typically approximated with greedy decoding:
-
-\vfill
-$$w_{\mathrm{out}}[t+1] = \argmax_w\; p_{\mathrm{out}}[t+1,w]$$
-
-\vfill
-These are not the same.
 
 \slide{Attention-Based Translation}
 
@@ -424,14 +430,18 @@ The input sentence is now represented by a sequence of vectors.
 \slide{Attention-Based (Memory-Based) Translation Decoding}
 
 
+
 $$h[-1,J] =  M[0,J]$$
 
-\vfill
-$$P(w_{t+1}\;|\;w_0,\cdots,w_t) = \softmax_{w_{t+1}}\;e(w_{t+1})^\top h[t,J]$$
-
-\vfill
-$$h[t+1,J] = \mathrm{CELL}_\Phi
-(\;{\color{red} h[t,J]};e(w_{t+1});{\color{red}\mathrm{Lookup}(h[t,J],M[T,J])}\;)$$
+\begin{eqnarray*}
+P(w_t\;|\;w_0,\cdots,w_{t-1}) & = & \softmax_{w_t}\;e[w_t,I]W^{\mathrm{auto}}[I,J]h[t-1,J] \\
+\\
+\alpha[t_{\mathrm{in}}]& =& \softmax_{t_\mathrm{in}} \;h[t\!-\!1,J_1]W^{\mathrm{key}}[J_1,J_2]M[t_{\mathrm{in}},J_2]\\
+\\
+V[J]& = & \sum_{t_{\mathrm{in}}}\;\alpha[t_{\mathrm{in}}]M[t_{\mathrm{in}},J] \\
+\\
+h[t,J] & = & \mathrm{CELL}_\Phi (h[t-1,J],\;V[J],\;e[w_t,I])
+\end{eqnarray*}
 
 \slide{Attention as a Key-Value Memory Mechanism}
 

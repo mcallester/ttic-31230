@@ -52,10 +52,28 @@ Each value $L_\ell[b,x,y,j]$ (for $\ell > 0$) is the output of a single linear t
 \begin{eqnarray*}
  & &  L_{{\ell+1}}[b,x,y,j] \\
  \\
- & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)
+ & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)\end{eqnarray*}
+
+\slide{Review of Implicit Summation Notation}
+
+Capital letter indeces are used to indicate subtensors (slices) so that, for example,  $M[I,J]$ denotes a matrix
+while $M[i,j]$ denotes one element of the matrix, $M[i,J]$ denotes the $i$th row, and $M[I,j]$ denotes the $j$th collumn.
+
+\vfill
+We will adopt the convention, similar to true Einstein notation, that repeated capital indeces in a product of tensors are implicitly summed.  For example, we can write the inner product $e[w,I]^\top h[t,I]$ simply as $e[w,I]h[t,I]$ without the need for the (meaningless) transpose operation.
+
+\slide{Convolution in Implicit Summation Notation}
+
+\begin{eqnarray*}
+ & &  L_{{\ell+1}}[b,x,y,j] \\
+ \\
+ & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right) \\
+ \\
+ \\
+  & = &   \sigma\left(W[\Delta X, \Delta Y, I,j]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, I] - B[j]\right)
 \end{eqnarray*}
 
-\slide{Many ``Neurons'' (Linear Threshold Units)}
+\slideplain{Many ``Neurons'' (Linear Threshold Units)}
 
 Each $L_{{\ell+1}}[b,x,y,j]$ is the output of a single linear threshold unit.
 
@@ -230,31 +248,15 @@ To implement a fully convolutional CNN we can ``dilate'' the filters by a dilati
 \end{eqnarray*}
 
 
-\slide{Hypercolumns}
-
-An alternative to dilation and fully convolutional networks is hypercolumns.
-
-\vfill
-To define hypercolumns we first introduce some notation.
-
-\vfill
-I will use capital letters for the index dimension.
-
-\vfill
-A capital letter used as an index leaves the value unspecified.
-
-\vfill
-For example $L[b,x,y,J]$ denotes a vector of dimension $J$ for the given indeces $b$, $x$ and $y$.
-
 \slide{Vector Concatenation}
 
 We will write
 
 \vfill
-$$L[b,x,y,J_1+J_2] = L_1[b,x,y,J_1]\;;L(b,x,y,J_2]$$
+$$L[b,x,y,J_1+J_2] = L_1[b,x,y,J_1]\;;L[b,x,y,J_2]$$
 
 \vfill
-To mean that the vector $L(b,x,y,J_1+J_2]$ is the concatenation of the vectors $L_1[b,x,y,J_1]$ and $L_2[b,x,y,J_2]$.
+To mean that the vector $L[b,x,y,J_1+J_2]$ is the concatenation of the vectors $L_1[b,x,y,J_1]$ and $L_2[b,x,y,J_2]$.
 
 \slide{Hypercolumns}
 

@@ -428,7 +428,7 @@ Each array {\color{red} $W$} is an object with attributes {\color{red} $W.\mathr
 An array with more than two indeces is called a {\color{red} tensor}.
 \slide{}
 
-\centerline{\bf Linear Algebra and Einstein Notation}
+\centerline{\bf Einstein Notation}
 
 \slide{}
 
@@ -446,31 +446,36 @@ Linear algebra suppresses indeces.
 \vfill
 Einstein notation uses explicit indeces.
 
-\slide{Vector Transpose in Linear Algebra} 
 
-Why do we use transpose on vectors?
+\slide{Implicit Summation}
 
-\vfill
-Why not just write $xW$ to sum over the first (row) index and write $Wx$ to sum over the column index?
-
-\vfill
-Because then $W^1xW^2$ can mean either $W^1(xW^2)$ or $(W_1x)W_2$.
+Capital letter indeces will be used to indicate subtensors (slices) so that, for example,  $M[I,J]$ denotes a matrix
+while $M[i,j]$ denotes one element of the matrix, $M[i,J]$ denotes the $i$th row, and $M[I,j]$ denotes the $j$th collumn.
 
 \vfill
-So we adopt the convention that $x$ associates to its left while $x^\top$ associates to its right --- $W^1xW^2$ and $W^1x^\top W^2$ become well defined.
+We will adopt the convention, similar to true Einstein notation, that repeated capital indeces in a product of tensors are implicitly summed.  For example, we can write the inner product $e[w,I]^\top h[t,I]$ simply as $e[w,I]h[t,I]$ without the need for the (meaningless) transpose operation.
+
+\slide{Implicit Summation}
+
+$y = Wx$ \hfill abbreviates \hfill $y[i] = \sum_j \;W[i,j]x[j] = W[i,J]x[J]$
 
 \vfill
-Dirac Bra-Ket notation solves this by writing $x$ as $|x \rangle$ and $x^\top$ as $\langle x|$.
 
-\slide{Inner and Outer Products in Linear Algebra}
+$y = x^\top\;W$ \hfill abbreviates \hfill $y[j] = \sum_i \;W[i,j]x[i] = W[I,j]x[I]$
 
-For vectors $x[i]$ and $y[j]$
+
+\slide{An MLP in Einstein Notation}
+
+\begin{eqnarray*}
+  {\color{red} h[j]} & = & \sigma\left(W^0[j,I] \;{\color{red} x[I]} - b^0[j]\right) \\
+  \\
+  {\color{red} s[\hat{y}]} & = & \sigma\left(W^1[\hat{y},J]\;{\color{red} h[J]} - b^1[\hat{y}]\right) \\
+  \\
+  {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
+\end{eqnarray*}
 
 \vfill
-$x^\top y = \langle x|y\rangle$ is the inner product $\sum_i \;x[i]y[i]$.
-
-\vfill
-$xy^\top = |x\rangle \langle y|$ is the outer product $(xy^\top)[i,j] = x[i]y[j]$.
+Think of this as a separate assignment for each {\color{red} $h[j]$} and {\color{red} $s[\hat{y}]$}.
 
 \slide{Why Einstein Notation?}
 
@@ -490,7 +495,7 @@ Einstein went back to explicit index notation (Einstein notation) when working w
 Also, the indeces of tensors generally have types such as a ``time index'', ``x coordinate'', ``y coordinate'', ``batch index'', or ``feature index''.
 
 \vfill
-Writing a matrix as $W[t,i]$ where $t$ is a time index and $i$ is a feature index makes the type of the matrix $W$ clear and clarifies
+Writing a matrix as $W[T,I]$ where $T$ is a time index and $I$ is a feature index makes the type of the matrix $W$ clear and clarifies
 the order of the indeces (disambiguates $W$ from $W^\top$).
 
 \vfill
@@ -499,19 +504,6 @@ Even when working only with vectors and matrices, Einstein notation is clearer w
 \slide{}
 \centerline{\bf Backpropagation on Tensor Expressions}
 
-\slide{An MLP in Einstein Notation}
-
-\begin{eqnarray*}
-  {\color{red} h[j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[i]}\right) - b^0[j]\right) \\
-  \\
-  {\color{red} s[\hat{y}]} & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;{\color{red} h[j]}\right) - b^1[\hat{y}]\right) \\
-  \\
-  {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
-\end{eqnarray*}
-
-\vfill
-Think of this as a separate assignment for each {\color{red} $h[j]$} and {\color{red} $s[\hat{y}]$}.
-
 \slide{Loop Notation}
 
 Loop notation assumes all computed tensors are initialized to zero.
@@ -519,7 +511,7 @@ Loop notation assumes all computed tensors are initialized to zero.
 \vfill
 $$\begin{array}{llrcl}
 
-\mathrm{Einstein} & & {\color{red} \tilde{h}[j]} & = & {\color{red} \sum_i\;W[j,i] \;x[i]} \\
+\mathrm{Einstein:} & & {\color{red} \tilde{h}[j]} & = & w[j,I]x[I] = {\color{red} \sum_i\;W[j,i] \;x[i]} \\
 \\
 & &  {\color{red} h[j]} & = & {\color{red} \sigma\left(\tilde{h}[j] - B[j]\right)} \\
   \\
@@ -582,9 +574,9 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 
 \vfill
 \begin{eqnarray*}
-  {\color{red} h[b,j]} & = & \sigma\left(\left(\sum_i\;W^0[j,i] \;{\color{red} x[b,i]}\right) - b^0[j]\right) \\
+  {\color{red} h[b,j]} & = & \sigma\left(W^0[j,I] \;{\color{red} x[b,I]} - b^0[j]\right) \\
   \\
-  {\color{red} s[b,\hat{y}]} & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;{\color{red} h[b,j]}\right) - b^1[\hat{y}]\right) \\
+  {\color{red} s[b,\hat{y}]} & = & \sigma\left(W^1[\hat{y},J]\;{\color{red} h[b,J]} - b^1[\hat{y}]\right) \\
   \\
   {\color{red} P_\Phi[b,\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[b,\hat{y}]}
 \end{eqnarray*}
