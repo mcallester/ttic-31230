@@ -67,15 +67,15 @@ Modify the above equations so that they correspond to the following diagram for 
 \solution{
 
   \begin{eqnarray*}
-    G_1[b,t,j] & = & \sigma\left(W^{h,G_1}[j,I] h[b,t\!-\!1,I] +  W^{x,G_1}[j,K] x[b,t,K] - B^G[j]\right) \\
+    G_1[b,t,j] & = & \sigma\left(W^{h,G_1}[j,I] h[b,t\!-\!1,I] +  W^{x,G_1}[j,K] x[b,t,K] - B^{G_1}[j]\right) \\
     \\
-    \tilde{h}[b,t,j] & = & G_1[b,t,j]x[b,t,j] \\
+    h'[b,t,j] & = & G_1[b,t,j]x[b,t,j] \\
     \\
-    G_2[b,t,j] & = & \sigma\left(W^{h,G_2}[j,I] h[b,t\!-\!1,I] +  W^{x,G_2}[j,K] x[b,t,K] - B^G[j]\right) \\
+    G_2[b,t,j] & = & \sigma\left(W^{h,G_2}[j,I] h[b,t\!-\!1,I] +  W^{x,G_2}[j,K] x[b,t,K] - B^{G_2}[j]\right) \\
     \\
-    R[b,t,j] & = & \mathrm{tanh}\left(W^{h,R}[j,I] \tilde{h}[b,t\!-\!1,I] + W^{x,R}[j,K] x[b,t,K] - B^R[j]\right) \\
+    R[b,t,j] & = & \mathrm{tanh}\left(W^{h,R}[j,I] \tilde{h}[b,t\!-\!1,I] + W^{x,R}[j,K] h'[b,t,K] - B^R[j]\right) \\
     \\
-    h[b,t,j] & = & G_2[b,t,j]h[b,t\!-\!1,j] + (1-G_2[b,t,j])R[b,t,j]
+    h[b,t,j] & = & (1-G_2[b,t,j])h[b,t\!-\!1,j] + G_2[b,t,j]R[b,t,j]
   \end{eqnarray*}
 }
 
@@ -161,8 +161,8 @@ $$\Phi = (W^{L,R}_{\ell+1}[\Delta x, \Delta y,j,j'], B^R_{\ell+1}[j], W^{L,G}_{\
     R_{\ell+1}[b,x,y,j] & = & \mathrm{tanh}\left(\left(\sum_{\Delta x,\Delta y,j'}\;W^{L,R}_{\ell+1}[\Delta x, \Delta y, j',j]
     L_{\ell}[b,x+\Delta x,\;y+\Delta y,\;j']\right) - B^R_{\ell+1}[j]\right) \\
     \\
-    G_{\ell+1}[b,x,y,j] & = & \sigma\left(\left(\sum_{\Delta x,\Delta y,i}\;W^{L,G}_{\ell+1}[\Delta x, \Delta y, i,j']
-    L_{\ell}[b,x+\Delta x,\;y+\Delta y,\;j']\right) - B^G_{\ell+1}[j]\right) \\
+    G_{\ell+1}[b,x,y,j] & = & \sigma\left(\left(\sum_{\Delta x,\Delta y,i}\;W^{L,G}_{\ell+1}[\Delta x, \Delta y, i,j]
+    L_{\ell}[b,x+\Delta x,\;y+\Delta y,\;i]\right) - B^G_{\ell+1}[j]\right) \\
     \\
     L_{\ell+1}[b,x,y,j] & = & G_{\ell+1}[b,x,y,j]L_\ell[b,x,y,j] + (1-G_t[b,x,y,j])R_t[b,x,y,j]
   \end{eqnarray*}

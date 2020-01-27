@@ -84,7 +84,7 @@ $$\mbox{for}\;b,i,j\;\;y[b,j] \;\pluseq\; W[j,i]x[b,i]$$
 (b) Write a for-loop representation for computing $W.\grad[b,i,j]$ where this is the derivative of loss with respect to $W[i,j]$ for batch element $b$.
 
 \solution{
-  $$\mbox{for}\;b,i,j\;\;w.\grad[b,j,i] \pluseq \frac{1}{B}\;y.\grad[b,j]x[b,i]$$
+  $$\mbox{for}\;b,i,j\;\;w.\grad[b,j,i] \pluseq \;y.\grad[b,j]x[b,i]$$
 }
 
 \medskip
