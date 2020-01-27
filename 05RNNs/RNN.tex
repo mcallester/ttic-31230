@@ -335,9 +335,8 @@ This is used in Google translation.
 
 %\centerline{\large [Figure from Luong et al.]}
 
-$$w^{\mathrm{in}}_1,\ldots,w^{\mathrm{in}}_{t_{\mathrm{in}}} \Rightarrow w^{\mathrm{out}}_1,\ldots,w^{\mathrm{out}}_{t_{\mathrm{out}}}$$
+$$w_1,\ldots,w_{T_{\mathrm{in}}} \Rightarrow \tilde{w}_1,\ldots,\tilde{w}_{T_{\mathrm{out}}}$$
 
-$$w_{\mathrm{in}}[T_{\mathrm{in}}] \Rightarrow w_{\mathrm{out}}[T_{\mathrm{out}}]$$
 \vfill
 Translation is a {\bf sequence to sequence} (seq2seq) task.
 
@@ -353,17 +352,15 @@ We describe a simplification of the paper.
 
 %\centerline{\large [Figure from Luong et al.]}
 
-$$w_{\mathrm{in}}[T_{\mathrm{in}}] \Rightarrow w_{\mathrm{out}}[T_{\mathrm{out}}]$$
-
 \vfill
 We define a model
 
 \vfill
-$$P_\Phi\left(w_{\mathrm{out}}[T_{\mathrm{out}}]\;|\; w_{\mathrm{in}}[T_\mathrm{in}]\right)$$
+$$P_\Phi\left(\tilde{w}_1,\ldots,\tilde{w}_{T_{\mathrm{out}}}\;|\; w_1,\ldots,w_{T_{\mathrm{in}}}\right)$$
 
 \vfill
 \begin{eqnarray*}
-\Phi^*  & = & \argmin_\Phi\; E_{\mathrm{Pop}} \;-\ln\;P_\Phi(w_{\mathrm{out}}[T_{\mathrm{out}}] \;|\; w_{\mathrm{in}}[T_{\mathrm{in}}]) \\
+\Phi^*  & = & \argmin_\Phi\; E_{\mathrm{Pop}} \;-\ln\;P_\Phi\left(\tilde{w}_1,\ldots,\tilde{w}_{T_{\mathrm{out}}}\;|\; w_1,\ldots,w_{T_{\mathrm{in}}}\right) \\
 \\
 & = & \argmin_\Phi \; E_{\mathrm{Pop}} \; -\ln P_\Phi(y|x)
 \end{eqnarray*}
@@ -400,7 +397,7 @@ w_1,\ldots,w_{T_{\mathrm{out}}}
 & = & \argmax_{w_1,\ldots,w_{T_{\mathrm{out}}}} \;P_\Phi\left(w_1,\ldots,w_{T_{\mathrm{out}}} \;|\; \cev{h}_{\mathrm{in}}[1,J]\right)
 \end{eqnarray*}
 
-\slide{Attention-Based Translation}
+\slide{Machine Translation with Attention}
 
 {\bf Neural Machine Translation by Jointly Learning to {\color{red} Align} and Translate}
 Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio, ICLR 2015 (arXiv Sept. 1, 2014)
@@ -409,56 +406,27 @@ Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio, ICLR 2015 (arXiv Sept. 1, 2014)
 We describe a simplification of the paper.
 
 \slide{Representing Sentences by Vector Sequences}
-
-The input sentence is now represented by a sequence of vectors.
-
-\vfill
-\begin{eqnarray*}
- & & P_\Phi(w_{\mathrm{out}}[T_{\mathrm{out}}] \;|\; w_{\mathrm{in}}[T_{\mathrm{in}}]) \\
- \\
-& = & P_{\Phi.\mathrm{out}}(w_{\mathrm{out}}[T_{\mathrm{out}}]\;|\;
-{\color{red} M[T_\mathrm{in},J]})
-\end{eqnarray*}
+We first run a right-to-left (backward) RNN on the
+input sentence to get a sequence $\cev{h}[T_{\mathrm{in}},J]$ of hidden vectors $\cev{h}[t,J]$ for $1 \leq t \leq T_{\mathrm{in}}$.
 
 \vfill
-{\color{red} $M[T_{\mathrm{in}},J]$} is the sequence of hidden states of an RNN
-(for some RNN architecture) on the input sentence.
+We then define an autoregressive conditional output language model
+$$P_\Phi(w_1,\ldots,w_{T_\mathrm{out}}\;|\; \cev{h}[T_{\mathrm{in}},J])$$
 
-\vfill
-{\color{red} $M[t,J]$} is the $t$th hidden vector for the input sentence.
-
-\slide{Attention-Based (Memory-Based) Translation Decoding}
-
-
-
-$$h[-1,J] =  M[0,J]$$
-
+\slide{Machine Translation with Attention}
 \begin{eqnarray*}
-P(w_t\;|\;w_0,\cdots,w_{t-1}) & = & \softmax_{w_t}\;e[w_t,I]W^{\mathrm{auto}}[I,J]h[t-1,J] \\
+  \vec{h}[0,J] & = & \cev{h}[1,J] \\
+  \\
+  \mbox{for $t$ from $1$ to $T_{\mathrm{out}}$: \vspace{3.0 in} ~} \\
+  \\
+P(w_t\;|\;w_0,\cdots,w_{t-1}) & = & \softmax_{w_t}\;e[w_t,I]\;W^{\mathrm{auto}}[I,J]\;\vec{h}[t-1,J] \\
 \\
-\alpha[t_{\mathrm{in}}]& =& \softmax_{t_\mathrm{in}} \;h[t\!-\!1,J_1]W^{\mathrm{key}}[J_1,J_2]M[t_{\mathrm{in}},J_2]\\
+\alpha[t_{\mathrm{in}}]& =& \softmax_{t_\mathrm{in}} \;h[t\!-\!1,J_1]\;W^{\mathrm{key}}[J_1,J_2]\;\cev{h}[t_{\mathrm{in}},J_2]\\
 \\
-V[J]& = & \sum_{t_{\mathrm{in}}}\;\alpha[t_{\mathrm{in}}]M[t_{\mathrm{in}},J] \\
+V[J]& = & \sum_{t_{\mathrm{in}}}\;\alpha[t_{\mathrm{in}}]\;\cev{h}[t_{\mathrm{in}},J] \\
 \\
-h[t,J] & = & \mathrm{CELL}_\Phi (h[t-1,J],\;V[J],\;e[w_t,I])
+\vec{h}[t,J] & = & \mathrm{CELL}(\vec{h}[t-1,J],\;V[J],\;e[w_t,I])
 \end{eqnarray*}
-
-\slide{Attention as a Key-Value Memory Mechanism}
-
-Procedure $\mathrm{Lookup}(\mathrm{key}[J],\;M[T,J])$
-
-\bigskip
-\begin{eqnarray*}
-\alpha[t]& =& \softmax_t \;\mathrm{key}[J]^\top M[t,J]\\
-\\
-\\
-V[J]& =& \sum_t\;\alpha[t]M[t,J]
-\end{eqnarray*}
-
-\bigskip
-Return $V[J]$
-
-
 
 \slideplain{Attention in Image Captioning}
 
