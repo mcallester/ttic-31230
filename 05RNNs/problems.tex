@@ -69,11 +69,11 @@ Modify the above equations so that they correspond to the following diagram for 
   \begin{eqnarray*}
     G_1[b,t,j] & = & \sigma\left(W^{h,G_1}[j,I] h[b,t\!-\!1,I] +  W^{x,G_1}[j,K] x[b,t,K] - B^{G_1}[j]\right) \\
     \\
-    h'[b,t,j] & = & G_1[b,t,j]x[b,t,j] \\
+    h'[b,t,j] & = & G_1[b,t,j]h[b,t\!-\!1,j] \\
     \\
     G_2[b,t,j] & = & \sigma\left(W^{h,G_2}[j,I] h[b,t\!-\!1,I] +  W^{x,G_2}[j,K] x[b,t,K] - B^{G_2}[j]\right) \\
     \\
-    R[b,t,j] & = & \mathrm{tanh}\left(W^{h,R}[j,I] \tilde{h}[b,t\!-\!1,I] + W^{x,R}[j,K] h'[b,t,K] - B^R[j]\right) \\
+    R[b,t,j] & = & \mathrm{tanh}\left(W^{h,R}[j,I] h'[b,t\!-\!1,I] + W^{x,R}[j,K] x[b,t,K] - B^R[j]\right) \\
     \\
     h[b,t,j] & = & (1-G_2[b,t,j])h[b,t\!-\!1,j] + G_2[b,t,j]R[b,t,j]
   \end{eqnarray*}
@@ -177,7 +177,7 @@ The matrix $e$ is the word embedding matrix where $e[w,I]$ is the vector embeddi
 (a) Give an equation for the convolution layer $L_0[b,t,i]$ as a function of the word embeddings and the input sentence $w_1,\ldots,w_T$.
 
 \solution{
-  $$L_0[b,t,i] = e[w[t],i]$$}
+  $$L_0[b,t,i] = e[w[b,t],i]$$}
 
 \medskip
 (b) Give an equation for $L_{\ell+1}[b,t,i]$ as a function of $L_\ell[b,t,i]$ and the parameters $W_{\ell+1}[\Delta t,i',i]$ and $B_{\ell+1}[i]$

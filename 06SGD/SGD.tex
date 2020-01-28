@@ -132,9 +132,6 @@ batches.
 \vfill
 {\bf Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour}, Goyal et al., 2017.
 
-\vfill
-{\bf Don't Decay the Learning Rate, Increase the Batch Size}, Smith et al., 2018
-
 \slideplain{Momentum}
 
 \begin{eqnarray*}
@@ -274,17 +271,19 @@ where, as before, $\eta_0$ is the optimal learning rate for Vanilla SGD with $B 
 Solving for $\eta$ we get
 {\color{red} $$\eta = \frac{B\eta_0}{N_g}$$}
 
-\slide{The Twilight Zone (TZ)}
-\centerline{\includegraphics[width = 2 in]{../images/Twilight}}
-
 \vfill
+{\bf Don't Decay the Learning Rate, Increase the Batch Size}, Smith et al., 2018
+
+\slide{Decoupling $\eta$ from $N_g$}
+
 {\color{red} $$\eta = \frac{B\eta_0}{N_g}$$}
 
-\vfill
-The above value for $\eta$ is twilight zone material.
 
 \vfill
-This is material for which I do not know of a reference. 
+One should set $\beta$ to be large enough so as to saturate the hardware (your GPUs should be running at maximum FLOPs).
+
+\vfill
+The optimnal value of $\eta_0$ should be fairly insensitive to the choice of $B$ and $N_g$.
 
 \slide{Decoupling $N_g$ from $B$}
 
@@ -302,7 +301,7 @@ But to average over $N^0_g$ individual gradients we should use
 
 {\color{red} $$N_g = \frac{N^0_g}{B}$$}
 
-\slide{Putting It Together (TZ)}
+\slide{Putting It Together}
 
 \begin{eqnarray*}
 N_g & = & \min\left(1,N^0_g/B\right) \\
@@ -434,9 +433,7 @@ The published version of Adam has a more obscure form of bias correction which y
 
 \slide{Decoupling Hyperparametera}
 
-Because Adam directly formulates momentum using a running average of gradients, $\eta$ is already decoupled from $N_g$.
-
-However the following reparameterization should be helpful.
+The following reparameterization should be helpful for Adam.
 
 \begin{eqnarray*}
 N_g & = & min(1,N^0_g/B) \\
@@ -445,12 +442,15 @@ N_g & = & min(1,N^0_g/B) \\
 \end{eqnarray*}
 
 \vfill
-We then set $B$ to be as large as memory allows and tune $N_s$, $N^0_g$, $\epsilon$, and $\eta_0$.
+Empirically, tuning $\epsilon$ is important.
+
+\vfill
+Some coupling remains between $\eta_0$ and $\epsilon$.
 
 \vfill
 $N_s$ should also be adapted to $B$ but this is problematic --- see the next slide.
 
-\slide{Making $s_t[i]$ batch size invariant (TZ)}
+\slide{Making $s_t[i]$ batch size invariant}
 
 rather than
 $$s_t[i] = \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2$$
@@ -463,7 +463,7 @@ s_t[i] & = &  \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \left(\fra
 N_s & = & \min\left(1,N^0_s/B\right)\;\;\;\mbox{$N^0_s$ optimal for $B=1$}
 \end{eqnarray*}
 
-\slide{Making $s_t[i]$ batch size invariant (TZ)}
+\slide{Making $s_t[i]$ Batch Size Invariant}
 
 In PyTorch this is difficult because ``optimizers'' are defined as a function of $\hat{g}_t$.
 
