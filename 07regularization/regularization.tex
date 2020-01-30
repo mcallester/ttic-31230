@@ -355,13 +355,13 @@ $$L(Q) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{L}(Q) + \frac{\lambda \lm
 
 \slide{$L_1$ Regularization and Sparse Weights}
 
-$$p(\Phi) \propto e^{-||\Phi||_1} \;\;\;\;\;\;\;\;||\Phi||_1 = \sum_i |\Phi_i|$$
+$$p(\Phi) \propto e^{-\lambda ||\Phi||_1} \;\;\;\;\;\;\;\;||\Phi||_1 = \sum_i |\Phi_i|$$
 
-$$\Phi^* = \argmin_\Phi \; \;\;\hat{\cal L}(\Phi) \;+ \; \;\lambda||\Phi||_1$$
+$$\Phi^* = \argmin_\Phi \; \;\;\hat{\cal L}(\Phi) \;+ \; \;\frac{\lambda}{N_{\mathrm{train}}}||\Phi||_1$$
 
 \begin{eqnarray*}
   \Phi & \minuseq & \eta \nabla_\Phi \; {\cal L}_{\mathrm{train}}(\Phi) \\
-  \Phi_i & \minuseq & \eta\lambda\; \mathrm{sign}(\Phi_i) \;\;\;\;\;\;\mbox{(shrinkage)}
+  \Phi_i & \minuseq & (\eta\lambda/N_{\mathrm{train}})\; \mathrm{sign}(\Phi_i) \;\;\;\;\;\;\mbox{(shrinkage)}
 \end{eqnarray*}
 
 \vfill
@@ -369,7 +369,7 @@ At equilibrium \hfill (sparsity is difficult to achieve with SGD)
 
 $$\begin{array}{rcll}
 \Phi_i &  = & 0  & \;\;\;\;\;\mbox{if} \;\left|\partial {\cal L} /\partial \Phi_i\right| <  \lambda \\
-\partial {\cal L} /\partial \Phi_i & = &  -\lambda \mathrm{sign}(\Phi_i) &\;\;\;\;\; \mbox{otherwise}
+\partial {\cal L} /\partial \Phi_i & = &  -(\lambda/N_{\mathrm{train}}) \mathrm{sign}(\Phi_i) &\;\;\;\;\; \mbox{otherwise}
 \end{array}$$
 
 
@@ -820,6 +820,7 @@ KL(Q_{\alpha,\Phi},\;Q_{\alpha,0}) & = & \expectsub{\mu \sim P_\alpha, \epsilon 
 $$L(Q_{\alpha,\Phi}) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{L}(Q_{\alpha,\Phi}) + \frac{\lambda \lmax}{N}\parens{\frac{1-\alpha}{2}||\Phi||^2 + \ln \frac{1}{\delta}}}$$
 }
 
+
 \slide{Non-Vacuous Generalization Guarantees}
 
 Model compression has recently been used to achieve ``non-vacuous'' PAC-Bayes generalization guarantees for ImageNet classification
@@ -834,6 +835,20 @@ Wenda Zhou, Victor Veitch, Morgane Austern, Ryan P. Adams, Peter Orbanz
 \bigskip
 ICLR 2019
 
+\slide{Double Descent}
+
+{\huge
+Reconciling modern machine learning practice and the bias-variance trade-off
+
+\bigskip
+Mikhail Belkin, Daniel Hsu, Siyuan Ma, Soumik Mandal, arXiv December 2018.
+
+\vfill
+Deep Double Descent: Where Bigger Models and More Data Hurt
+
+\bigskip
+Preetum Nakkiran, Gal Kaplun, Yamini Bansal, Tristan Yang, Boaz Barak, Ilya Sutskever, ICLR 2020
+}
 
 \slide{Double Descent}
 
