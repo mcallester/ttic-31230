@@ -9,7 +9,7 @@
 
 \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
 \bigskip
-\centerline{David McAllester, Winter 2019}
+\centerline{David McAllester, Winter 2020}
 
 \vfill
 \centerline{\bf Generalization and Regularization}
@@ -49,7 +49,7 @@ Consider a classifier $f$ written in C++ with an arbitrarily large standard libr
 Let $|f|$ be the number of bits needed to represent $f$.
 
 \vfill
-Let $\hat{E}(f)$ be the error rate on an IID training set and let $E(f)$ be the population error rate.
+Let $\hat{E}(f) \in [0,1]$ be the error rate on an IID training set and let $E(f)$ be the population error rate.
 
 \vfill
 Theorem: With probability at least $1-\delta$ over the draw of the training data the following holds simultaneously for all $f$.
@@ -63,23 +63,7 @@ Good performance on training data does not guarantee good performance on test da
 \vfill
 An nth order polynomial can fit any n (pure noise) data points.
 
-\vfill
-For each order $n$ we can fit a polynomial to the training data and select the order $n$ with the best performance on validation data.
-
-\vfill
-Ultimately performance should be measured on test data not used in any way during learning.
-
-\slide{Train Data, Validation Data and Test Data}
-
-In general one designs algorithms and tunes hyper-parameters by training on training data and evaluating on validation data.
-
-\vfill
-This is sometimes called graduate student descent.
-
-\vfill
-Kaggle withholds test data until the final contest evaluation.
-
-\slideplain{Loss Vs. Error Rate (or BLEU Score)}
+\slide{Loss Vs. Error Rate (or BLEU Score)}
 While SGD is generally done on cross entropy loss, one often wants minimum classification error or BLEU Score (for translation).
 
 \vfill
@@ -110,6 +94,17 @@ One stops training when the validation error stops improving.
 \vfill
 Empirically, loss reaches a minimum sooner than error.
 
+\slide{Training Data, Validation Data and Test Data}
+
+In general one designs algorithms and tunes hyper-parameters by training on training data and evaluating on validation data.
+
+\vfill
+But it is possible to over-fit the validation data (validation loss becomes smaller than test loss).
+
+\vfill
+Kaggle withholds test data until the final contest evaluation.
+
+
 \slide{Over Confidence}
 
 \centerline{\includegraphics[height = 2in]{../images/Early}}
@@ -131,75 +126,60 @@ This over-confidence occurs before the stopping point and damages validation los
 There is never harm in doing early stopping --- one should always do early stopping.
 
 \vfill
-Regularization is a modification to the training algorithm motivated by reducing the training-validation gap and, in this way, improving overall performance.
+Regularization is a modification to the training algorithm designed to reduce the training-validation gap and, in this way, improving overall performance.
 
-\slide{$L_2$ Regularization (Weight Decay or Shrinkage)}
+\slide{$L_2$ Regularization}
 
-We will later theoretically motivate the following where $N$ is the number of training examples.
+Will first give a Bayesian derivation. We put a prior probability on $\Phi$ and maximize the posteriori probability (MAP).
 
 \vfill
-{\color{red}
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \left(\;E_{(x,y) \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y)\right) + \frac{\lambda}{2N}||\Phi||^2 \\
+\Phi^* & = & \argmax_\Phi\;p(\Phi | \tuple{x_1,y_1},\ldots,\tuple{x_n,y_n}) \\
 \\
-& = & \argmin_\Phi\;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{\lambda}{2N}||\Phi||^2\right)
+ & = & \argmax_\Phi\;p(\Phi,\;\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n}) \\
+ \\
+ & = & \argmax_\Phi \; p(\Phi)\;\prod_i P_\Phi(y_i|x_i) \\
+ \\
+ & = & \argmin_\Phi -\ln  p(\Phi) + \sum_i - \ln P_\Phi(y_i|x_i)
+ \end{eqnarray*}
+
+\slide{$L_2$ Regularization}
+
+Take a Gaussian prior {\color{red} $$p(\Phi) \propto \exp\left(-\frac{||\Phi||^2}{2\sigma^2}\right)$$}
+
+\vfill
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \sum_i - \ln P_\Phi(y_i|x_i) -\ln  p(\Phi)  \\
+\\
+& = & \argmin_\Phi \sum_{i = 1}^n - \ln P_\Phi(y_i|x_i) + \frac{||\Phi||^2}{2\sigma^2}  \\
+\\
+& = & \argmin_\Phi E_{\tuple{x,y}\sim \mathrm{Train}}\;-\ln P(y|x) + \frac{1}{2N\sigma^2} ||\Phi||^2
 \end{eqnarray*}
-}
-
-This objective corresponds to a Gaussian prior bias
-
-{\color{red} $$p(\Phi) \propto \exp\left(-\frac{1}{2}||\Phi||^2\right)$$}
 
 \slide{Applying SGD}
 
-{\color{red} $$\Phi^* = \argmin_\Phi \;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{\lambda}{2N}||\Phi||^2\right)$$}
 \begin{eqnarray*}
-  & & \nabla_\Phi \;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{\lambda}{2N}||\Phi||^2\right) \\
+  & & \nabla_\Phi \;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{||\Phi||^2}{2N\sigma^2}\right) \\
   \\
-  & = & E_{(x,y) \sim \mathrm{Train}} \;\left(g(\Phi,x,y) + \frac{\lambda}{N} \Phi\right)
+  \\
+  & = & E_{(x,y) \sim \mathrm{Train}} \;\left(g(\Phi,x,y) + \frac{||\Phi||^2}{2N\sigma^2}\right)
 \end{eqnarray*}
 
 \vfill
-{\color{red} $$\Phi \;\minuseq\; \eta\left(\hat{g} +\frac{\lambda}{N}\Phi\right)$$}
+{\color{red} $$\Phi \;\minuseq\; \eta\hat{g} +\frac{\eta}{N\sigma^2}\Phi$$}
 
-\slide{Conjugacy Considerations (TZ)}
+\slide{Decoupling Hyperparameters}
 
-The update
-{\color{red} $$\Phi \;\minuseq\; \eta\left(\hat{g} +\frac{\lambda}{N}\Phi\right)$$}
-
-\vfill
-is typically parameterized as
-
-{\color{red} $$\Phi \;\minuseq \; \eta \hat{g} + \gamma \Phi$$}
+$${\color{red} \Phi_{t+1}} = \Phi_t - \eta\hat{g} - \frac{\eta}{N\sigma^2}\Phi_t\;\;\;\; = {\color{red} \Phi_t - \eta\hat{g} - \gamma\Phi_t}$$
 
 \vfill
-where $\gamma$ is the weight decay parameter.
+We can the PyTorch shinkage parameter $\gamma$ to be 
+\vfill
+{\color{red} $$\gamma = \frac{\eta}{N_{\mathrm{Train}}\sigma^2} = \frac{B\eta_0}{N_gN_{\mathrm{Train}}\sigma^2}$$}
 
 \vfill
-However, the $\eta$, $\lambda$, $N$ parameterization seems more conjugate (independently optimizable) than $\eta$, $\gamma$.
-
-\slide{Batch Scaling (TZ)}
-
-{\color{red} $$\Phi \;\minuseq\; \eta\left(\hat{g} +\frac{\lambda}{N}\Phi\right)$$}
-
-\vfill
-Setting {\color{red} $\eta = B\eta'$} will now handle batch size scaling using the batch size independent learning rate {\color{red} $\eta'$}.
-
-\slide{Efficiency and Numerical Stability}
-
-{\color{red} $$\Phi \;\minuseq\; \eta\left(\hat{g} +\frac{\lambda}{N}\Phi\right)$$}
-
-\vfill
-For $N$ large the shrinkage is very small.
-
-\vfill
-We can improve efficiency and numerical stability
-by separating shrinkage from SGD and performing
-
-{\color{red} $$\Phi \;\minuseq\; \eta\Phi$$}
-
-\vfill
-once for every $N/\lambda$ steps of SGD.
+The decoupled shrinkage parameter $\sigma$ should then be decoupled from the bath size $B$, the decoupled learning rate $\eta_0$, the momentum parameter $N_g$ and
+the size of the training corpus $N_{\mathrm{Train}}$.
 
 \slide{Shrinkage meets Early Stopping}
 
@@ -209,19 +189,18 @@ Early stopping can limit $||\Phi||$.
 But early stopping more directly limits $||\Phi - \Phi_\mathrm{init}||$.
 
 \vfill
-Theoretical guarantees also work for $||\Phi - \Phi_{\mathrm{init}}||^2$.
+It seems better to take the prior on $\Phi$ to be
 
+\vfill
+{\color{red} $$p(\Phi) \propto \exp\left(-\frac{||\Phi - \Phi_{\mathrm{init}}||^2}{2\sigma^2}\right)$$}
 
+\vfill
+giving
 
-{\color{red}
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \left(\;E_{(x,y) \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y)\right) + \frac{\lambda}{2N}||\Phi-\Phi_{\mathrm{init}}||^2 \\
-\\
-& = & \argmin_\Phi\;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{\lambda}{2N}||\Phi-\Phi_{\mathrm{init}}||^2\right)
-\end{eqnarray*}
-}
+\vfill
+$$\Phi_{t+1} = \Phi_t - \eta\hat{g} - \gamma(\Phi_t - \Phi_{\mathrm{init}})$$
 
-\slide{A Generalization Guarantee Motivating Shrinkage}
+\slide{A Generalization Guarantee}
 
 Assume $0 \leq {\cal L}(\Phi,x,y) \leq \lmax$.
 
@@ -237,8 +216,7 @@ Define:
 Theorem: With probability at least $1-\delta$ over the draw of training data the following holds {\bf simultaneously} for all $\Phi$.
 \begin{eqnarray*}
    {\color{red} {\cal L}(\Phi)} & {\color{red} \leq} & {\color{red} \frac{10}{9}\parens{\hat{{\cal L}}(\Phi)
-   + \frac{5 \lmax}{N}\parens{\frac{||\Phi-\Phi_{\mathrm{init}}||^2}{2\sigma^2} + \ln \frac{1}{\delta}}}}
-   \;\;\;\lambda = \frac{5\lmax}{\sigma^2}
+   + \frac{5 \lmax}{N_{\mathrm{train}}}\parens{\frac{||\Phi-\Phi_{\mathrm{init}}||^2}{2\sigma^2} + \ln \frac{1}{\delta}}}}
 \end{eqnarray*}
 
 
@@ -477,13 +455,21 @@ Any stochastic learning algorithm, such as SGD, determines a stochastic mapping 
 The algorithm can implicitly incorporate a preference or bias for models.
 
 \vfill
-For example, solving linear least squares regression with SGD maintains the invariant that $\Phi$ is a linear combination of training vectors.
+For example, solving linear regression with many more parameters than data points
+has many solutions.
 
 \vfill
-It is not hard to show that SGD finds the zero training error solution minimizing $||\Phi||$.
+But SGD finds converges to the minimum norm solution.
+
+\slide{Implicit Regularization}
+
+SGD maintains the invariant that $\Phi$ is a linear combination of the (small number of) training vectors.
 
 \vfill
-So solving least squares regression by SGD has an implicit weight norm regularization.
+Any zero-loss (squared loss) solution can be projected on the span of training vectors to give a no larger norm solution.
+
+\vfill
+It can be shown that any zero loss solution in the span of the training vectors is a least-norm solution.
 
 \slideplain{An Implicit Regularization Generalization Guarantee}
 
@@ -833,6 +819,35 @@ KL(Q_{\alpha,\Phi},\;Q_{\alpha,0}) & = & \expectsub{\mu \sim P_\alpha, \epsilon 
 
 $$L(Q_{\alpha,\Phi}) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{L}(Q_{\alpha,\Phi}) + \frac{\lambda \lmax}{N}\parens{\frac{1-\alpha}{2}||\Phi||^2 + \ln \frac{1}{\delta}}}$$
 }
+
+\slide{Non-Vacuous Generalization Guarantees}
+
+Model compression has recently been used to achieve ``non-vacuous'' PAC-Bayes generalization guarantees for ImageNet classification
+--- error rate guarantees less than 1.
+
+\vfill
+Non-Vacuous PAC-Bayes Bounds at ImageNet Scale.
+
+\bigskip
+Wenda Zhou, Victor Veitch, Morgane Austern, Ryan P. Adams, Peter Orbanz
+
+\bigskip
+ICLR 2019
+
+
+\slide{Double Descent}
+
+\centerline{\includegraphics[width = 6in]{\images/DoubleDescent1}}
+
+\vfill
+Deep Double Descent: Where Bigger Models and More Data Hurt
+
+\bigskip
+Preetum Nakkiran, Gal Kaplun, Yamini Bansal, Tristan Yang, Boaz Barak, Ilya Sutskever, ICLR 2020
+
+\slide{Double Descent}
+
+\centerline{\includegraphics[width = 8in]{\images/DoubleDescent2}}
 
 \slide{Summary}
 
