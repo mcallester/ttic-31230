@@ -162,7 +162,7 @@ Take a Gaussian prior {\color{red} $$p(\Phi) \propto \exp\left(-\frac{||\Phi||^2
   & & \nabla_\Phi \;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{||\Phi||^2}{2N\sigma^2}\right) \\
   \\
   \\
-  & = & E_{(x,y) \sim \mathrm{Train}} \;\left(g(\Phi,x,y) + \frac{||\Phi||^2}{2N\sigma^2}\right)
+  & = & E_{(x,y) \sim \mathrm{Train}} \;\left(g(\Phi,x,y) + \frac{\Phi}{N\sigma^2}\right)
 \end{eqnarray*}
 
 \vfill
@@ -360,7 +360,7 @@ $$p(\Phi) \propto e^{-\lambda ||\Phi||_1} \;\;\;\;\;\;\;\;||\Phi||_1 = \sum_i |\
 $$\Phi^* = \argmin_\Phi \; \;\;\hat{\cal L}(\Phi) \;+ \; \;\frac{\lambda}{N_{\mathrm{train}}}||\Phi||_1$$
 
 \begin{eqnarray*}
-  \Phi & \minuseq & \eta \nabla_\Phi \; {\cal L}_{\mathrm{train}}(\Phi) \\
+  \Phi & \minuseq & \eta \nabla_\Phi \; \hat{\cal L}(\Phi) \\
   \Phi_i & \minuseq & (\eta\lambda/N_{\mathrm{train}})\; \mathrm{sign}(\Phi_i) \;\;\;\;\;\;\mbox{(shrinkage)}
 \end{eqnarray*}
 
@@ -368,7 +368,7 @@ $$\Phi^* = \argmin_\Phi \; \;\;\hat{\cal L}(\Phi) \;+ \; \;\frac{\lambda}{N_{\ma
 At equilibrium \hfill (sparsity is difficult to achieve with SGD)
 
 $$\begin{array}{rcll}
-\Phi_i &  = & 0  & \;\;\;\;\;\mbox{if} \;\left|\partial {\cal L} /\partial \Phi_i\right| <  \lambda \\
+\Phi_i &  = & 0  & \;\;\;\;\;\mbox{if} \;\left|\partial {\cal L} /\partial \Phi_i\right| <  \lambda/N_{\mathrm{train}} \\
 \partial {\cal L} /\partial \Phi_i & = &  -(\lambda/N_{\mathrm{train}}) \mathrm{sign}(\Phi_i) &\;\;\;\;\; \mbox{otherwise}
 \end{array}$$
 
