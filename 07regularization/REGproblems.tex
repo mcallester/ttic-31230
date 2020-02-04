@@ -51,6 +51,7 @@ $$h^* = \argmin_h \;\hat{{\cal L}}(h) + \frac{5\lmax}{N} \ln\frac{1}{P(h)}\;\;\;
 The Bayesian maximum a-posteriori (MAP) rule is
 $$h^* = \argmax_h\;P(h)\prod_{(x,y) \in \mathrm{Train}}\;P(y|x,h)\;\;\;\;(3)$$
 
+\medskip
 {\bf Problem 2. The Meaning of a PAC-Bayes Prior.}  Consider an optimal hypothysis for the population distribution.
 $$h^* = \argmin_h\;E_{\tuple{x,y} \sim \pop}\;{\cal L}(h,x,y)$$
 Equation (1) holds for any prior $P$.  Consider two priors $P_{\mathrm{lucky}}$ and $P_{\mathrm{unlucky}}$ where we have
@@ -66,6 +67,7 @@ Explain how equation (1) can hold for both of these priors.
   For $P_{\mathrm{unlucky}}$ we get an accurate measureent of ${\cal L}(h^*)$ only much later than we do under $P_{\mathrm{lucky}}$.
 }
 
+\medskip
 {\bf Problem 3. Code Length as Probability.}
 Assume that a model $h$ is represented by a (compressed) file $|h|$ bits long.  Files have a specific length and no file is a proper prefix of any other file.
 We say that the set of file bit strings is {\bf prefix free}.

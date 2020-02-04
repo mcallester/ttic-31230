@@ -74,5 +74,65 @@ Just as CNNs can be done in two dimensions for vision and in one dimension for l
 
 \medskip
 (b) Assuming that summations take logarithmic parallel time, give the parallel order of run time for the spatial transformer as a function of $L$, $X$, $Y$, $H$, $J$, and $K$.
+    
+\bigskip
+{\bf Problem 3. 25 Points:}
+This problem is on the transformer.
+
+\medskip
+{\bf Background:} The Transformer computes layers of sequences of vectors $M[\ell,t,j]$ where
+$\ell$ ranger over layers, $t$ ranges over ``time'' (the index into the sequence), and $j$ is the index
+of a particular dimension of the vector at layer $\ell$ and time $t$.
+
+\medskip
+We also let $h$ range over ``heads'' --- each head is computing an attention for a different purpose.
+
+\medskip
+We compute $M[\ell+1,T,J]$ from $M[\ell,T,J]$ as follows:
+      
+\begin{eqnarray*}
+\mathrm{Query}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
+\\
+\mathrm{Key}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^K}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
+\\
+\mathrm{Value}[\ell,h,t,{\color{red} i}] & = & \sum_j\;{\color{red} W^V}[\ell,h,{\color{red} i,j}]M[\ell,t,{\color{red} j}]
+\\
+s[\ell,h,t,t'] & = &\frac{1}{\sqrt{K}} \sum_k\;\mathrm{Query}[\ell,h,t,k]\mathrm{Key}[\ell,h,t',k] \\
+\\
+{\color{red} \alpha[\ell,h,t,t']} & {\color{red} =} & {\color{red} \softmax_{t'} \;s[\ell,h,t,t']}\;\;\;\mbox{the attention} \\
+\\
+V[\ell,h,t,i] & = & \sum_{t'}\;\alpha[\ell,h,t,t']\mathrm{Value}[\ell,h,t',i]
+\end{eqnarray*}
+
+
+$$M[\ell+1,t,J] = V[\ell,1,t,I];V[\ell,2,t,I];\cdots;V[\ell,H,t,I] \;\;\;\; J = HI$$
+
+\medskip
+(a) 15 points. Just as CNNs can be done in two dimensions for vision and in one dimension for language, the Transformer can be done in two dimensions for vision --- the so-called spatial transformer.
+Rewrite the above so as to define a spatial transformer on images with attentions computes between spatial locations.
+
+\solution{
+        
+\begin{eqnarray*}
+\mathrm{Query}[\ell,h,x,y,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,x,y,{\color{red} j}] \\
+\\
+\mathrm{Key}[\ell,h,x,y,{\color{red} k}] & = & \sum_j\;{\color{red} W^K}[\ell,h,{\color{red} k,j}]M[\ell,x,y,{\color{red} j}] \\
+\\
+\mathrm{Value}[\ell,h,x,y,{\color{red} i}] & = & \sum_j\;{\color{red} W^V}[\ell,h,{\color{red} i,j}]M[\ell,t,{\color{red} j}]
+\\
+s[\ell,h,x,y,x',y'] & = &\frac{1}{\sqrt{K}} \sum_k\;\mathrm{Query}[\ell,h,x,y,k]\mathrm{Key}[\ell,h,x',y',k] \\
+\\
+{\color{red} \alpha[\ell,h,x,y,x',y']} & {\color{red} =} & {\color{red} \softmax_{x',y'} \;s[\ell,h,x,y,x',y'']}\;\;\;\mbox{the attention} \\
+\\
+V[\ell,h,x,y,i] & = & \sum_{x',y'}\;\alpha[\ell,h,x,y,x',y']\mathrm{Value}[\ell,h,x',y',i]
+\end{eqnarray*}
+
+$$M[\ell+1,x,y,J] = V[\ell,1,x,y,I];V[\ell,2,x,y,I];\cdots;V[\ell,H,x,y,I] \;\;\;\; J = HI$$
+}
+
+(b) 10 points. Assuming that summations can be computed in logarithmic time in parallel, what is the parallel order of run time of the spatial transformer
+as a function of the dimensions $L$, $I$, $J$, $K$, $X$ and $Y$.
+
+\solution{  $O(L\log JKXY)$ }
 
 \end{document}

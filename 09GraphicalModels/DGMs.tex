@@ -43,57 +43,42 @@ We construct a graph whose nodes are the pixels and where there is an edges betw
 $$\begin{array}{ccccc}
  & & {\color{red} j(i,\mathrm{up})} \\
  & & | \\
- {\color{red} j(i,\mathrm{right})}\;\;\;\; & -& i & -& \;\;\;\;{\color{red} j(i,\mathrm{left})} \\
+ {\color{red} j(i,\mathrm{left})}\;\;\;\; & -& i & -& \;\;\;\;{\color{red} j(i,\mathrm{right})} \\
  & & | \\
  & & {\color{red} j(i,\mathrm{down})}
  \end{array}$$
 
-\slide{Labeling the Nodes of the Graph }
-
+\slide{Labeling the Nodes of the Graph}
 
 $\hat{y} $ assigns a semantic class $\hat{y}[i]$ to each node (pixel) $i$.
 
 \vfill
 We assign a score to $\hat{y}$ by assigning a score to each node and each edge of the graph.
 
-{\color{red} $$s(\hat{y}) = \sum_{i \in \mathrm{Nodes}}\; s_n[i,\hat{y}[i]]\; + \sum_{i \in \mathrm{Nodes},\;d \in \{L,R,U,D\}}\;s_e[i,d,\hat{y}[i],\;\hat{y}[j(i,d)]]$$}
+{\color{red} $$s(\hat{y}) = \sum_{i \in \mathrm{Nodes}}\; s_n[i,\hat{y}[i]]\; + \sum_{\tuple{i,j} \in \mathrm{Edges}}\;s_e[\tuple{i,j},\hat{y}[i],\hat{y}[j]]$$}
 \centerline{Node Scores \hspace{6em}Edge Scores \hspace{3em}~}
 
+\slide{Computing the Node and Edge Tensors}
 
-\slide{Computing the Node and Edge Scores}
+For input $x$ we use a network to compute the score tensors.
 
-We assume a CNN computing {\color{red} node and edge score tensors}
 \vfill
+\begin{eqnarray*}
+s_n[I,C] & = & f^n_\Phi(x) \\
+\\
+\\
+s_e[E,C,C] & = & f^e_\Phi(x)
+\end{eqnarray*}
+
+\slide{Exponential Softmax}
+
 $$\begin{array}{lrcl}
-& \mbox{intput image} \\
-& \vdots \\
-& \mbox{CNN} \\
-& \vdots \\
-\mathrm{for}\;i,c & \;{\color{red} s_n[i,c]} & = & \ldots \\
-\mathrm{for}\;i,d,c,c' & {\color{red} s_e[i,d,c,c']} & = & \ldots \\
-\end{array}$$
-
-\vfill
-The tensor {\color{red} $s_n[i,c]$} holds $PC$ scores.
-
-\vfill
-The tensor {\color{red} $s_e[i,d,c,c']$} holds $4PC^2$ scores.
-
-\slide{Computationally Infeasible Exponential Softmax}
-$$\begin{array}{lrcl}
-& \mbox{intput image} \\
-& \vdots \\
-& \mbox{CNN} \\
-& \vdots \\
-\mathrm{for}\;i,c & \;{\color{red} s_n[i,c]} & = & \ldots \\
-\mathrm{for}\;i,d,c,c' & {\color{red} s_e[i,d,c,c']} & = & \ldots
-\end{array}$$
-
-\vfill
-$$\begin{array}{lrcl}
-\mbox{for}\;\hat{y} & {\color{red} s(\hat{y})} & = & \sum_i\;s_n[i,\hat{y}[i]] + \sum_{i,d}\;s_e[i,d,\hat{y}[i],\;\hat{y}[j[i,d)]] \\
-\mbox{for}\;\hat{y} & {\color{red} P(\hat{y})} & = & \expsoftmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
- & {\cal L} & = & {\color{red} - \ln P(y) \;\;\;\mbox{gold label $y$}}
+\mbox{for}\;\hat{y} & {\color{red} s(\hat{y})} & = & \sum_i\;s_n[i,\hat{y}[i]] + \sum_{\tuple{i,j} \in \mathrm{Edges}}\;s_e[\tuple{i,j},\hat{y}[i],\;\hat{y}[j]] \\
+\\
+\\
+\mbox{for}\;\hat{y} & {\color{red} P_s(\hat{y})} & = & \softmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
+\\
+ & {\cal L} & = & - \ln P_s(y) \;\;\;{\color{red} \mbox{gold label $y$}}
 \end{array}$$
 
 \slide{Exponential Softmax is Typically Intractable}
@@ -105,30 +90,37 @@ $\hat{y} $ assigns a label $\hat{y}[i]$ to each node $i$.
 $s(\hat{y})$ is defined by a sum over node and edge tensor scores.
 
 \vfill
-$P(\hat{y})$ is defined by an exponential softmax over $s(\hat{y})$.
+$P_s(\hat{y})$ is defined by an exponential softmax over $s(\hat{y})$.
 
 \vfill
-Computing $Z$ in general is \#P hard.
+Computing $Z$ in general is \#P hard (there is an easy direct reduction from SAT).
 
-\slide{Back-Propagation Through Intractable Softmax}
+\slidetwo{Compactly Representing Scores}{on Exponentially Many Labels}
 
-$$\begin{array}{lrcl}
-& \vdots \\
-\mathrm{for}\;i,c & \;{\color{red} s_n[i,c]} & = & \ldots \\
-\mathrm{for}\;i,d,c,c' & {\color{red} s_e[i,d,c,c']} & = & \ldots
-\end{array}$$
-
-$$\begin{array}{lrcl}
-\mbox{for}\;\hat{y} & {\color{red} s(\hat{y})} & = & \sum_i\;s_n[i,\hat{y}[i]] + \sum_{i,d}\;s_e[i,d,\hat{y}[i],\;\hat{y}[j[i,d)]] \\
-\mbox{for}\;\hat{y} & {\color{red} P(\hat{y})} & = & \expsoftmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
- & {\cal L} & = & {\color{red} - \ln P(y) \;\;\;\mbox{gold label $y$}}
-\end{array}$$
+The tensor {\color{red} $s_n[I,C]$} holds $IC$ scores.
 
 \vfill
-We need to compute {\color{red} $s_n.\grad[i,c]$} and {\color{red} $s_e.\grad[i,d,c,c']$}.
+The tensor {\color{red} $s_e[E,C,C]$} holds $EC^2$ scores where $e$ ranges over edges $\tuple{i,j} \in \mathrm{Edges}$.
+
+\slide{Back-Propagation Through Exponential Softmax}
+
+\begin{eqnarray*}
+s_n[I,C] & = & f^n_\Phi(x) \\
+s_e[E,C,C] & = & f^e_\Phi(x)
+\end{eqnarray*}
 
 \vfill
-Although exact calculation is intractable, in practice the gradients can be approximated.
+\begin{eqnarray*}
+{\color{red} s(\hat{y})} & = & \sum_i\;s_n[i,\hat{y}[i]] + \sum_{\tuple{i,j} \in \mathrm{Edges}}\;s_e[\tuple{i,j},\hat{y}[i],\;\hat{y}[j]] \\
+\\
+{\color{red} P_s(\hat{y})} & = & \softmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
+\\
+{\cal L} & = & {\color{red} - \ln P_s(y) \;\;\;\mbox{gold label $y$}}
+\end{eqnarray*}
+
+\vfill
+We want the gradients {\color{red} $s_n.\grad[I,C]$} and {\color{red} $s_e.\grad[E,C,C]$}.
+
 
 \slide{Model Marginals Theorem}
 
@@ -137,38 +129,73 @@ Theorem:
     s_n.\mathrm{grad}[i,c] & = &  {\color{red} P_{\hat{y} \sim P_s}(\;\;\hat{y}[i] = c\;\;)} \\
     & & \;\;\;\;\;- \bbone[\;\;y[i] = c\;\;] \\
     \\
-    s_e.\mathrm{grad}[i,d,c,c'] & = &  {\color{red} P_{\hat{y} \sim P_s}(\;\;\hat{y}[i] = c \; \wedge \; \hat{y}[j(i,d)] = c'\;\;)} \\
-    & & \;\;\;\;\;- \bbone[\;\;y[i] = c\; \wedge \; y[j(i,d)] =
-    c'\;\;]
+    s_e.\mathrm{grad}[\tuple{i,j},c,c'] & = &  {\color{red} P_{\hat{y} \sim P_s}(\;\;\hat{y}[i] = c \; \wedge \; \hat{y}[j] = c'\;\;)} \\
+    & & \;\;\;\;\;- \bbone[\;\;y[i] = c\; \wedge \; y[j] = c'\;\;]
 \end{eqnarray*}
 
 \vfill
-To approximately back-propagate log loss of an intractable graphical model it suffices to approximate
-{\color{red} the model marginals} in red above.
+We need to compute (or approximate) the model marginals.
 
 \slide{Proof of Model Marginals Theorem}
 
-We consider the case of node marginals.
+We consider the case of node marginals, The case of edge marginals is similar.
 
-{\huge \begin{eqnarray*}
-    s_n.\mathrm{grad}[i,c] & = & \partial (\ln Z - s(y))\;/\;\partial s_n[i,c] \\
+\begin{eqnarray*}
+    s_n.\grad[i,c] & = & \partial {\cal L}(\Phi,x,y)\;/\;\partial s_n[i,c] \\
+    \\
+    & = & \partial \left(-\ln \frac{1}{Z}\exp(s(y))\right)\;/\;\partial s_n[i,c] \\
+    \\
+    & = & \partial (\ln Z - s(y))\;/\;\partial s_n[i,c] \\
+    \\
     & = & \left(\frac{1}{Z} \sum_{\hat{y}} e^{s(\hat{y})} \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
-    - \left(\partial s(y) /\partial s_b[i,c]\right)    \\
+    - \left(\partial s(y) /\partial s_b[i,c]\right) 
+\end{eqnarray*}
+
+\slide{Proof of Model Marginals Theorem}
+
+\begin{eqnarray*}
+    s_n.\grad[i,c] & = & \left(\frac{1}{Z} \sum_{\hat{y}} e^{s(\hat{y})} \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
+    - \left(\partial s(y) /\partial s_b[i,c]\right)  \\
     \\
     & = & \left(\sum_{\hat{y}} P_s(\hat{y}) \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
     - \left(\partial s(y) /\partial s_n[i,c]\right)    \\
     \\
-    & = & E_{\hat{y} \sim P_s}\bbone[\hat{y}[i] = c]
-    - \mathbbm{1}[y[i] = c] \\
+    s(\hat{y}) & = & \sum_i\;s_n[i,\hat{y}[i]] \\
     \\
-    & = & {\color{red} P_{\hat{y} \sim P_s}(\hat{y}[i] = c)}
-      - \mathbbm{1}[y[i] = c]
+    \frac{\partial s(\hat{y})}{\partial s_n[i,c]} & = & \bbone[\hat{y}[i] = c]
 \end{eqnarray*}
-}
+
+\slide{Proof of Model Marginals Theorem}
+
+\begin{eqnarray*}
+    s_n.\grad[i,c] & = & \left(\frac{1}{Z} \sum_{\hat{y}} e^{s(\hat{y})} \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
+    - \left(\partial s(y) /\partial s_b[i,c]\right)  \\
+    \\
+    & & \left(\sum_{\hat{y}} P_s(\hat{y}) \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
+    - \left(\partial s(y) /\partial s_n[i,c]\right)    \\
+    \\
+    & = & E_{\hat{y} \sim P_s}\bbone[{\color{red} \hat{y}}[i] = c]
+    - \bbone[{\color{red}y}[i] = c] \\
+    \\
+    & = & P_{\hat{y} \sim P_s}({\color{red} \hat{y}}[i] = c)
+      - \bbone[{\color{red}y}[i] = c]
+\end{eqnarray*}
+
+\slide{Model Marginals Theorem}
+
+Theorem:
+\begin{eqnarray*}
+    s_n.\mathrm{grad}[i,c] & = &   P_{\hat{y} \sim P_s}(\;\;{\color{red} \hat{y}}[i] = c\;\;) \\
+    & & \;\;\;\;\;- \bbone[\;\;{\color{red} y}[i] = c\;\;] \\
+    \\
+    s_e.\mathrm{grad}[\tuple{i,j},c,c'] & = &  P_{\hat{y} \sim P_s}(\;\;{\color{red} \hat{y}}[i] = c \; \wedge \; {\color{red} \hat{y}}[j] = c'\;\;) \\
+    & & \;\;\;\;\;- \bbone[\;\;{\color{red} y}[i] = c\; \wedge \; {\color{red} y}[j] =
+    c'\;\;]
+\end{eqnarray*}
 
 \slide{Methods of Approximating Model Marginals}
 
-MCMC Sampling
+Monte Carlo Markov Chain (MCMC) Sampling
 
 \vfill
 Pseudolikelihood
@@ -184,69 +211,43 @@ The model marginals, such as the node marginals
  ${\color{red} P_s(\hat{y}[i]=c)}$, can be estimated by sampling $\hat{y}$ from $P_s(\hat{y})$.
 
 \vfill
-We will design a Markov process whose states are segmentations $\hat{y}$ and whose stationary distribution is $P_s$.
+There are various ways to design a Markov process whose states are node labelings $\hat{y}$ and whose stationary distribution is $P_s$.
 
 \vfill
-We will run the process past its mixing time to get a sample $\hat{y}$ from $P_s$.
-
-\slide{A Neighbor Relation on States}
-
-We will say that segmentations (states) $\hat{y}$ and $\hat{y}'$ are neighbors if they differ in exactly one pixel.
+Given such a process we can sample $\hat{y}$ from $P_s$ by running the process past its mixing time.
 
 \vfill
-Note that the number of neighbors of $\hat{y}$ is $P(C-1)$.
+We will consider Metropolis MCMC and the Gibbs MCMC.  But there are more (like Hamiltonian MCMC).
+
+\slide{Metroplis MCMC}
+
+We assume a neighor relation on node assignments and let $N(\hat{y})$ be the set of neighbors of assignment $\hat{y}$.
 
 \vfill
-We will write $N(\hat{y})$ for the set of neighbors of $\hat{y}$.
-
-
-\vfill
-For the correctness of the Metropolis algorithm we need that all states have the same number of neighbors
-and $\hat{y}' \in N(\hat{y})$ if and only if $\hat{y} \in N(\hat{y}')$.
-
-\slide{The Metropolis Markov Chain}
-
-We need to define state transition probabilities.
+For example, $N(\hat{y})$ can be taken to be the set of assignments $\hat{y}'$ that differ form $\hat{y}$ on exactly one node.
 
 \vfill
-In the {\color{red} Metropolis algorithm} we do the following.
+For the correctness of Metropolis MCMC we need that all states have the same number of neighbors and that the neighbor relation is symmetric ---
+$\hat{y}' \in N(\hat{y})$ if and only if $\hat{y} \in N(\hat{y}')$.
 
-\vfill
-\vfill
-Pick an initial state $\hat{y}$ and then repeat:
+\slide{Metropolis MCMC}
+
+Pick an initial state $\hat{y}_0$ and for $t \geq 0$ do
 \vspace{-2ex}
 \begin{quotation}
-\noindent \begin{enumerate}
-        \item Pick a neighbor $\hat{y}' \in N(\hat{y})$ uniformly at random.
 
-        \vfill
-        \item If $P_s(\hat{y}') \geq P_s(\hat{y})$ then do $\hat{y} = \hat{y}'$
+    \noindent \begin{enumerate}
+    \item Pick a neighbor $\hat{y}' \in N(\hat{y}_t)$ uniformly at random.
 
-  \vfill
-\item If $P_s(\hat{y}') < P_s(\hat{y})$ then do $\hat{y} = \hat{y}'$ with probability $\frac{P_s(\hat{y}')}{P_s(\hat{y})}$
+    \vfill      
+    \item If $P_s(\hat{y}') > P_s(\hat{y}_t)$ then {\color{red} $\hat{y}_{t+1} = \hat{y}'$}
+
+    \vfill      
+    \item If $P_s(\hat{y}') \leq P_s(\hat{y})$ then with probability
+$$e^{-\Delta s} = e^{-(s(\hat{y}) - s(\hat{y}'))}   = \frac{e^{s(\hat{y}')}}{e^{s(\hat{y})}} = \frac{P_s(\hat{y}')}{P_s(\hat{y})}$$
+   do  {\color{red} $\hat{y}_{t+1} = \hat{y}'$} and otherwise {\color{red} $\hat{y}_{t+1} = \hat{y}_t$} 
   \end{enumerate}  
 \end{quotation}
-
-\slide{The Metropolis Markov Chain}
-Pick an initial state $\hat{y}$ and then repeat:
-\vspace{-2ex}
-\begin{quotation}
-\noindent \begin{enumerate}
-        \item Pick a neighbor $\hat{y}' \in N(\hat{y})$ uniformly at random.
-
-        \vfill
-        \item If $P_s(\hat{y}') \geq P_s(\hat{y})$ then do $\hat{y} = \hat{y}'$
-
-  \vfill
-\item If $P_s(\hat{y}') < P_s(\hat{y})$ then do $\hat{y} = \hat{y}'$ with probability $\frac{P_s(\hat{y}')}{P_s(\hat{y})}$
-  \end{enumerate}  
-\end{quotation}
-
-\vfill
-Note that we can determine which probability is larger just by comparing scores --- we do not need to know $Z$.
-
-\vfill
-Also note that the ratio $P_s(\hat{y}')/P_s(\hat{y})$ can be computed from the scores without knowledge of $Z$.
 
 \slide{The Metropolis Markov Chain}
 We need to show that $P_s$ is a stationary distribution of this process.
@@ -255,52 +256,31 @@ We need to show that $P_s$ is a stationary distribution of this process.
 We must show that if we select $\hat{y}_t$ from $P_s$, and then select $\hat{y}_{t+1}$ using the transition probabilities,
 then the distribution on $\hat{y}_{t+1}$ is also $P_s$.
 
-\slide{The Metropolis Markov Chain}
+\slide{Stationarity Condition}
 
-{\huge
 \begin{eqnarray*}
 P'(\hat{y}) & = & \sum_{\hat{y}'}\;P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') \\
 \\
-& = & P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}) + \sum_{\hat{y}' \in N(\hat{y})}\;P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') \\
+& = & P_s(\hat{y}) + \mbox{flow in} - \mbox{flow-out} \\
 \\
-& = & P_s(\hat{y})\left(1 - \sum_{\hat{y}' \in N(\hat{y})} P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})\right) + \sum_{\hat{y}' \in N(\hat{y})}\;P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') \\
-\\
-\\
-& = & P_s(\hat{y}) + \sum_{\hat{y}' \in N(\hat{y})}\;P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') - P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})
+& = & P_s(\hat{y}) + \sum_{\hat{y}' \in N(\hat{y})}\;P_s(\hat{y}')\frac{P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y})}{N_\mathrm{nodes}}
+- P_s(\hat{y})\frac{P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})}{N_{\mathrm{nodes}}}
 \end{eqnarray*}
-}
+
 
 \slide{Detailed Balance}
 
-{\huge
-\begin{eqnarray*}
-P'(\hat{y}) & = & P_s(\hat{y}) + \sum_{\hat{y}' \in N(\hat{y})}\;{\color{red} P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') - P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})}
-\end{eqnarray*}
-}
+Detailed balance means that for each pair of neighboring assignments $\hat{y}$, $\hat{y}'$ we have equal flows in both directions.
 
 \vfill
-{\color{red} $P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}')$} is an amount of probability mass that moves from $\hat{y}'$ to $\hat{y}$.
+$$P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') = P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})$$
 
 \vfill
-{\color{red} $P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})$} is an amount of probability mass that moves from $\hat{y}$ to $\hat{y}'$.
+Without loss generality assume $P_s(\hat{y}') \geq P_s(\hat{y})$.
 
 \vfill
-If these two flows are equal we call it {\color{red} detailed balance}.
-
-\vfill
-Detailed balance implies {\color{red} $P'(\hat{y}) = P_s(\hat{y})$} and hence $P_s$ is the stationary distribution.
-
-\slide{Detailed Balance}
-
-For $P_s(\hat{y}) \geq P_s(\hat{y}')$ we have
-
-\begin{eqnarray*}
-{\color{red} P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})} & = & P_s(\hat{y})\;\frac{1}{|N(\hat{y})|}\;\frac{P_s(\hat{y}')}{P_s(\hat{y})} \\
-\\
-& = & \frac{1}{N}\;P_s(\hat{y}') \\
-\\
-& = & {\color{red} P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}')}
-\end{eqnarray*}
+Metropolis is defined by
+$$P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') = e^{-\Delta s}\;P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y}) = \frac{P_s(\hat{y})}{P_s(\hat{y}')}\;P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})$$
 
 \slide{Gibbs Sampling}
 
@@ -328,7 +308,7 @@ Gibbs Sampling, Repeat:
 \begin{itemize}
 \item   Select $i$ at random
 
-\item draw $c$ from $P_s(\hat{y}[i] \;|\;\hat{y}[N(i)])$
+\item {\color{red} draw $c$ from $P_s(\hat{y}[i]\;|\;y\backslash i) = P_s(\hat{y}[i] \;|\;\hat{y}[N(i)])$}
 
 \item $\hat{y}[i] = c$
 \end{itemize}
@@ -344,7 +324,7 @@ The stationary distribution is $P_s$.
 For any distribution {\color{red} $Q$} on assignments of labels to nodes (segmentations), and any assignment {\color{red} $\hat{y}$},
 we define {\color{red} $\tilde{Q}(\hat{y})$} as follows.
 
-{\color{red} $$\tilde{Q}(\hat{y}) = \prod_i\;Q(\hat{y}[i]\;|\; \hat{y}/i)$$}
+{\color{red} $$\tilde{Q}(\hat{y}) = \prod_i\;Q(\hat{y}[i]\;|\; \hat{y}/i) = \prod_i\;Q(\hat{y}[i]\;|\; \hat{y}[N(i)]$$}
 
 We then train a graphical model with pseudolikelyhood loss.
 
@@ -537,6 +517,7 @@ inference.
 \slide{END}
 
 }
+
 \end{document}
 
 \slide{An Example}

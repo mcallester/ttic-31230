@@ -97,5 +97,54 @@ $$\hat{A}(s,a) =  \left\{\begin{array}{ll}A_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\
 Although a valiant attempt, this version presumably also does not work as well.
 It is interesting to contemplate the magic of (1) through (4) as used in AlphaZero (in spite of the seemingly ill-formed semantics of (1)).
 
+\bigskip
+{\bf Problem 4. 25 points.}
+This problem is on AlphaZero.
+
+\medskip
+{\bf Backgound.}
+A version of AlphaZero can be defined as follows.
+
+\medskip
+To select a move in the game, first construct a search tree over possible moves to evaluate options.
+The tree is grown by running ``simulations''. 
+In descending into the tree, simulations select the move $\argmax_a U(s,a)$ where we have
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u\; \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1)$$
+where $N(s,a)$ is the number of simulations that reached state $s$ and then selected action $a$ from there.
+
+\medskip
+When the search is completed, we select an action from the root position.  For this we use a post-search stochastic policy
+$$\pi_{s_{\mathrm{root}}}(a) \propto N(s_{\mathrm{root}},a)^\beta\;\;\;\;\;(2)$$
+where $\beta$ is temperature hyperparameter.
+
+\medskip
+The value function $V_\Phi(s)$ and the policy $\pi_\Phi(a|s)$ are trained from a replay buffer containing triples $(s,\pi,R)$ where $s$ is a position from which a tree search was done,
+$\pi$ is the root probability distribution over actions computed as above from the tree search, and $R$ is the final reward of the game in which this position occurred.
+The parameters $\Phi$ are trained by SGD on the following objective defined on the replay buffer.
+
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ - \lambda_\pi\;\log \pi_\Phi(a|s) \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)\;\;\;\;(2)$$
+  
+(a) 20point. Rewrite (1) and (2) above to replace the policy $\pi_\Phi(a|s)$ with an advantage function $A_\Phi(s,a)$ so that the expected value of an action $a$ in state $s$ (the $Q$-value)
+  is modeled by $V_\Phi(s) + A(s,a)$.
+
+  \solution{
+    $$U(s,a) =  \left\{\begin{array}{ll}\lambda_u\; (V_\Phi(s) + A_\Phi(s,a)) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda_u\; (V_\Phi(s) + A_\Phi(s,a))/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1)$$
+    or
+
+    $$U(s,a) =  \left\{\begin{array}{ll}V_\Phi(s) + A_\Phi(s,a) + \lambda_u &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + (V_\Phi(s) + A_\Phi(s,a) + \lambda_u)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1)$$
+
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ \lambda_A\;(A_\Phi(s,a) - (R - V_\Phi(s))^2 \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)\;\;\;\;(2)$$
+  }
+
+  \medskip
+  (b) 5 points: Will the training procedure you defined in (a) effectively train $A_\Phi(s,a)$ for off-policy actions $a$?  If not, is that a problem and does this problem arise
+  in the original version in terms of $\pi_\Phi(a|s)$?  Explain your answer.
+
+  \solution{The solution to (a) does not train $A_\Phi(s,a)$ on off-policy actions.  However, the original formulation in terms of the policy $\pi_\Phi(a|s)$ drives down the probability of
+    off-policy actions so as to place large probability on the on-policy actions. This would seem to be more effective.
+
+    \medskip
+    But any answer gets full credit for thinking about it.}
+
 \end{document}
 

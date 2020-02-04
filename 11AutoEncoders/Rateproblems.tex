@@ -3,8 +3,8 @@
 \parindent = 0em
 \parskip = 1ex
 
-\newcommand{\solution}[1]{}
-%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
 
 \begin{document}
 
@@ -18,12 +18,13 @@
 \bigskip
 \bigskip
 
-{\bf Problem 1}
+{\bf Problem 1.  Mutual Information as Channel Capacity}
+
 The mutual information between two random variables $x$ and $y$ is defined by
-$$I(x,y) = E_{x,y}\;\ln\frac{p(x,y)}{p(x)p(y)} = KL(p(x,y),p(x)p(y))$$
+$$I(x,y) = E_{x,y}\;\ln\frac{P(x,y)}{P(x)P(y)} = KL(P(x,y),P(x)P(y))$$
 Mutual information has an interpretation as a channel capacity.
 
-\medskip(a)
+\medskip
 Suppose that
 we draw a random bit $y \in \{0,1\}$ with $P(0) = P(1) = 1/2$ and send it across a noisy channel
 to a receiver who gets $y' = y \oplus \epsilon$ where $\epsilon$ is an independent ``noise variable'' with $\epsilon \in\{0,1\}$, where
@@ -33,50 +34,95 @@ and where the ``noise'' $\epsilon$ has a probability $P$ of being 1.
 \medskip(a) Solve for the channel capacity $I(y,y')$ as a function of $P$ in units of bits.
 When measured in bits, this channel capacity has units of bits received per message sent.
 
+\solution{
+  \begin{eqnarray*}
+    I(y,y') & = & H(y) - H(y|y') \\
+    H(y) & = & 1\;\mathrm{bit} \\
+    \\
+    H(y|y') & = & P(y=y') (- \log_2 P(y=y')) + P(y \not = y') (-log_2 P(y \not = y')) \\
+    & = & P(\epsilon = 0) (-\log_2 P(\epsilon = 0)) + P(\epsilon = 1) -log_2 P(\epsilon = 1) \\
+    & = & (1-P) \log_2 1/(1-P) + P \log_2 1/P \\
+    & = & H(P)
+  \end{eqnarray*}
+}
+
 \medskip
 (b) Explain why your answer to part (a) makes sense in terms of what the receiver knows for $P = 1/2$ and when $P=1$.
 
+\solution{
+  For $P = 1/2$ we have $H(P) = 1$ bit and $I(y,y') = H(y) - H(P) = 0$ and the receiver knows nothing about $y$.
+  For $P = 1$ we have $H(P) = 0$  and $I(y',y) = 1$ bit.  Note that in this case $y'$ is $1-y$ so $y'$ carries full information about $y$.
+}
+
 \bigskip
-{\bf Problem 2.}
+    {\bf Problem 2. Variational Rate-Distortion Autoencoders}
+    
 Consider a rate-distortion autoencoder.
-$$\Phi^* = \argmin_\Phi\;I_\Phi(y,z) + \lambda E_{y \sim \pop,\;z \sim p_\Phi(z|y)}\;\mathrm{Dist}(y,y_\Phi(z)).$$
-Here $I_\Phi(y,z)$ is defined by the distribution where we draw $y$ from $\pop$ and $z$ from $P_\Phi(z|y)$.  The distribution
+$$\Phi^* = \argmin_\Phi\;I_\Phi(y,z) + \lambda E_{y \sim \popd,\;z \sim p_\Phi(z|y)}\;\mathrm{Dist}(y,y_\Phi(z)).$$
+Here $I_\Phi(y,z)$ is defined by the distribution where we draw $y$ from $\popd$ and $z$ from $P_\Phi(z|y)$
+and where the mutual information is defined by
+$$I(x,y) = E_{x,y}\;\ln\frac{p(x,y)}{p(x)p(y)} = KL(p(x,y),p(x)p(y))$$
+The distribution
 $p_\Phi(z|y)$ is typically defined by $z = z_\Phi(y) + \epsilon$ for some form of random noise $\epsilon$.
 
 \medskip
-(a) Starting from the definition of $I_\Phi(y,z)$ given in problem 1, show
-$$I_\Phi(y,z) = E_{y\sim \pop} KL(p_\Phi(z|y),p_\Phi(z))$$
-where $p_\Phi(z) = \sum_y \pop(y)P_\Phi(z|y)$.
+(a) Starting from the definition of $I(y,z)$ given above, show
+$$I(y,z) = E_y \; KL(p(z|y),p(z))$$
+where $p_\Phi(z) = \sum_y \popd(y)P_\Phi(z|y)$.
+
+\solution{
+  \begin{eqnarray*}
+    I(z,y) & = & KL(p(z,y),p(z)p(p)) \\
+    \\
+    & = & E_{z,y}\;\ln\frac{p(z,y)}{p(z)p(y)} \\
+    \\
+    & = & E_{z,y} \; \ln \frac{p(y)p(z|y)}{p(y)p(z)} \\
+    \\
+    & = & E_{y} \left(E_{z \sim p(z|y)}\; \ln \frac{p(z|y)}{p(z)}\right) \\
+    \\
+    & = & E_y\; KL(p(z|y),p(z))
+  \end{eqnarray*}
+}
 
 \medskip
 (b) Show the variational equation
-$$I(y,z) = \inf_q\;E_{y\sim \pop} KL(p_\Phi(z|y),q(z)).$$
-Hint: It suffices to show $$I(y,z) \leq \;E_{y\sim \pop} KL(p_\Phi(z|y),q(z))$$
+$$I(y,z) = \inf_q\;E_{y\sim \popd} KL(p_\Phi(z|y),q(z)).$$
+Hint: It suffices to show $$I(y,z) \leq \;E_{y\sim \popd} KL(p_\Phi(z|y),q(z))$$
 and that there exists a $q$ achieving equality.
 
 \solution{
-  
-\begin{eqnarray*}
+
+  \begin{eqnarray*}
  & & I_\Phi(y,z) \\
  \\
- & = & E_{y \sim \pop}\; KL(p_\Phi(z|y),p_\Phi(z)) \\
+ & = & E_{y \sim \popd}\; KL(p_\Phi(z|y),p_\Phi(z)) \\
 \\
 & = & E_{y,z\sim P_\Phi(z|y)}\; \left(\ln \frac{p_\Phi(z|y)}{{\color{red} q(z)}} + \ln \frac{{\color{red} q(z)}}{p_\Phi(z)}\right) \\
 \\
-& = & E_{y \sim \pop}\;KL(p_\Phi(z|y),q(z)) + \left(E_{y \sim \pop,\;z\sim p_\Phi(z|y)}\;\ln \frac{q(z)}{p_\Phi(z)}\right)
+& = & E_{y \sim \popd}\;KL(p_\Phi(z|y),q(z)) + \left(E_{y \sim \popd,\;z\sim p_\Phi(z|y)}\;\ln \frac{q(z)}{p_\Phi(z)}\right)
 \\
 & = & E_y\;KL(p_\Phi(z|y),q(z)) + E_{\color{red} z\sim p_\Phi(z)}\;\ln \frac{q(z)}{p_\Phi(z)} \\
 \\
 & = & E_y\;KL(p_\Phi(z|y),q(z)) - KL(p_\Phi(z),q(z)) \\
 \\
-& \leq & E_{y \sim \pop}\; KL(p_\Phi(z|y),q(z))
+& \leq & E_{y \sim \popd}\; KL(p_\Phi(z|y),q(z))
 \end{eqnarray*}
 
 From part (a) equality is achieved when $q(z) = p_\Phi(z)$.
 }
 
+
+\medskip
+(c) Based on the result from part (b) rewrite the definition of rate-distortion autoencoder to be a minimization over two models
+$\Phi$ and $\Psi$ which gives the same meaning for $\Phi$ assuming universality for $\Psi$.
+
+\solution{
+  $$\Phi^*, \Psi^* = \argmin_{\Phi,\Psi} E_{y \sim \popd, z\sim P_\Phi(z|y)}\; \ln \frac{p_\Phi(z|y)}{p_\Psi(z)} + \lambda\;\mathrm{Dist}(y,y_\Phi(z)).$$
+}
+
 \bigskip
-{\bf Problem 3.}
+~{\bf Problem 3. Modeling Rounding with Continuous Noise.}
+    
 Consider a rate-distortion autoencoder
 $$\Phi^*,\Psi^*  = \argmin_{\Phi,\Psi}\;E_{y \sim \pop} KL(p_\Phi(z|y),p_\Psi(z)) + \lambda E_{y \sim \pop,\;z \sim p(z|y)}\;\mathrm{Dist}(y,y_\Phi(z)).$$
 Define $p_\Phi(z|y)$ by $z = z_\Phi(y) + \epsilon$ with $z_\Phi[y] \in \mathbb{R}^d$
@@ -135,4 +181,5 @@ for the case of $z_\Phi(y)[i] >> 1$.
 
 \medskip
 (b) Explain how these specifications model rounding down each number in $z_\Phi(y)$ to the nearest integer.
+
 \end{document}

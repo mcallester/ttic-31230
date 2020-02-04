@@ -17,78 +17,80 @@
 \slidetwo{Connectionist Temporal Classification (CTC)}
 {A Successful Deep Latent Variable Model}
 
-A speech signal
-$$x = x_1,\; \ldots,\; x_{\color{red} T}$$
-is labeled with a phone sequence
-$$y = y_1, \ldots, y_{\color{red} N}$$
-with {\color{red} $N << T$} and with $y_n \in {\cal P}$ for a set of phonemes ${\cal P}$.
+Connectionist Temporal Classification: Labelling Unsegmented
+Sequence Data with Recurrent Neural Networks
 
 \vfill
-{\color{red} The length $N$ of $y$ is not determined by $x$ and the alignment between $x$ and $y$ is not given.}
+Alex Graves, Santiago Fern´andez, Faustino Gomez, J¨urgen Schmidhuber, ICML 2006
 
-\slide{The CTC Model}
-
-{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z).$$}
-
-\vfill
-\begin{tabbing}
-Input Signal: \hspace{3em} \=$x = x_1,\;\ldots,\;x_{\color{red} T}$ \\
-Latent Label: \>$z = z_1,\;\ldots,\;z_{\color{red} T},\;\;\;z_t \in {\cal P} \cup \{\bot\}$ \\
-Output: \>$y(z) = y_1,\;\ldots,\;y_{\color{red} N}\;\;\;\;\;\;{\color{red} N << T}$
-\end{tabbing}
+\slide{CTC}
+A speech signal $x[T,J]$ is labeled with a phone sequence $y[N]$ with $N << T$.
 
 \vfill
-$y(z)$ is the result of removing all the occurrences of $\bot$ from $z$:
+$x[t,J]$ is a speech signal vector.
 
-{\color{red} $$\hspace{5em} z \hspace{7em} \Rightarrow \hspace{2em} y$$}
-{\color{red} $$\bot,a_1,\bot,\bot,\bot,a_2,\bot,\bot,a_3,\bot \;\;\;\Rightarrow\;\; a_1,a_2,a_3$$}
+\vfill
+$y[n] \in {\cal P}$ for a set of phonemes ${\cal P}$.
+
+
+\vfill
+The length $N$ of $y[N]$ is not determined by $T$ and the correspondence between $n$ and $t$ is not given.
+
+\vfill
+{\color{red} $$\Phi^* = \argmin_\Phi\;E_{\tuple{x,y} \sim \mathrm{Train}}\;\;P_\Phi(y[N]\;|\;x[T,J]) \;\;\;N << T$$}
 
 
 \slide{The CTC Model}
 
-For $z \in {\cal P} \cup \{\bot\}$ we have an embedding $e(z)$.  The embedding is a parameter of the model.
+
+We define a model
+
+$$P_\Phi(z[T]\;|\;x[T,J])$$
+
+$$z[t] \in {\cal P} \cup \{\bot\}$$
+
+\vfill
+$y[N]$ is the result of removing $\bot$ from $z[T]$.
 
 \begin{eqnarray*}
-  h_1,\;\ldots,\;h_T & = & \mathrm{RNN}_\Phi(x_1,\;\ldots,\;x_T) \\
+z[T] & \Rightarrow & y[N] \\
+\\
+\bot,a_1,\bot,\bot,\bot,a_2,\bot,\bot,a_3,\bot  & \Rightarrow & a_1,a_2,a_3
+\end{eqnarray*}
+
+
+\slide{The CTC Model}
+
+For $p \in {\cal P} \cup \{\bot\}$ we have an embedding vector $e[p,I]$.  The embedding is a parameter of the model.
+
+\vfill
+We take the phonemes $z[t]$ to be independently distributed.
+
+$$p_\Phi(Z[T]\;|\; x[T,J]) = \prod_t \;P_\Phi(z[t]\;|\;x[T,J])$$
+
+\begin{eqnarray*}
+  h[T,\tilde{J}] & = & \mathrm{RNN}_\Phi(x[T,J]) \\
   \\
-  P_\Phi(z_t|x_1,\ldots,x_T) & = & {\color{red} \softmax_{z} \;e(z)^\top h_t}
-\end{eqnarray*}
-
-\vfill
-$z_1$, $\ldots$ $z_T$ are {\color{red}  all independent} given $x$.
-
-
-\slide{Dynamic Programming}
-\begin{eqnarray*}
-  x & = & x_1,\;\ldots,\; x_T \\
-  z & = & z_1, \;\ldots,\;z_T,\;\;\;z_t \in {\cal P}\cup \{\bot\} \\
-  y & = & y_1,\;\ldots,\;y_N,\;\;\;\;y_n \in {\cal P},\;\;\;N << T \\
-  y(z) & = & (z_1,\;\ldots,\;z_T) - \bot
-\end{eqnarray*}
-
-\vfill
-
-\begin{eqnarray*}
-  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
-  {\color{red} F[n,t]} & = & P(\vec{y}_{\color{red} t} = y_1,\;\ldots,\;y_{\color{red} n}) \\
-  P(y) & = & F[N,T]
+  P_\Phi(z[t]\;|\;x[T,J]) & = & \softmax_{z[t]} \;e[z[t],I]\;W[I,\tilde{J}]\;h[t,\tilde{J}]
 \end{eqnarray*}
 
 \slide{Dynamic Programming}
 
+Let $\vec{y}[t]$ to be the prefix of $y[N]$ emitted by the first $t$ elements of $z$.
+
 \begin{eqnarray*}
-  \vec{y}_t & = & (z_1,\;\ldots,\;z_t)-\bot \\
-  {\color{red} F[n,t]} & = & P(\vec{y}_{\color{red} t} = y_1,\;\ldots,\;y_{\color{red} n})
+  \vec{y}[t] & = & z[1:t] -\bot \\
+  {\color{red} F[n,t]} & = & P(\vec{y}[t] = y[1:n])
 \end{eqnarray*}
 
 \vfill
 \begin{tabbing}
   {\color{red} $F[0,0] = 1$} \\
-  For \=$n = 1,\ldots,N$ {\color{red} $F[n,0] = 0$} \\
-  For \>$t = 1,\dots,T$ \\
-      \>{\color{red} $F[0,t] = P(z_t = \bot) F[0,t-1]$} \\
-      \> for \=$n = 1,\ldots, N$ \\
-      \>     \> {\color{red} $F[n,t] = P(z_t = \bot) F[n,t-1] + P(z_t = y_n)F[n-1,t-1]$}
+  For $n = 1,\ldots,N$ {\color{red} $F[n,0] = 0$} \\
+  Fo\=r $t = 1,\dots,T$ \\
+      \>{\color{red} $F[0,t] = P(z[t] = \bot) F[0,t-1]$} \\
+      \> Fo\=r $n = 1,\ldots, N$ \\
+      \>     \> {\color{red} $F[n,t] = P(z[t] = \bot) F[n,t-1] + P(z[t] = y[n])F[n-1,t-1]$}
 \end{tabbing}
 
 \slide{Back-Propagation}

@@ -29,4 +29,169 @@ label and $y$ is an image.
 (b) Let $\hat{y}_\Phi(z)$ be the image output by a deconvolution CNN given a noise tensor input $z$.  Describe a noise distribute on a
 tensor $z$ that would be appropriate for
 sampling from $P_\Phi(y|x)$ when $x$ is a class label.
+
+\bigskip
+{\bf Problem 3. (25 points)}
+
+This problem is on the instability of adversarial objectives.
+Consider the following adversarial objective where $x$ and $y$ are scalars (real numbers).
+
+$$\max_x\;\min_y \;xy$$
+
+\medskip
+(a) Write the differential equation for gradient flow of this adversarial objective.
+
+\solution{
+  \begin{eqnarray*}
+    \frac{dx}{dt} & = & y \\
+    \\
+    \frac{dy}{dt} & = & -x
+  \end{eqnarray*}
+}
+
+      
+\medskip
+(b) Give a general solution to your differential equation. (Hint: It goes in a circle).  You solution should have parameters
+allowing for any given initial value of $x$ and $y$.
+
+\solution{
+
+  \begin{eqnarray*}
+    x & = & r_0\sin(t + \Theta_0) \\
+    \\
+    y & = & r_0\cos(t + \Theta_0)
+  \end{eqnarray*}
+}
+
+
+\bigskip
+{\bf Problem 4. (25 points)}
+
+This problem is on contrastive GANs.
+
+Define the distribution $P\hookrightarrow Q^k$ to be the result of drawing one ``positive'' from $P$ and $k$ IID ``negatives'' from $Q$;
+then inserting the positive at a random position among the negatives; and returning $(i,y_1,\ldots,y_{N+1})$ where
+$i$ is the index of the positive.
+
+Consider a contrastive GAN.
+
+$$\Phi^* = \argmin_\Phi \max_\Psi \;E_{(i,y_1,\ldots,y_{N+1}) \sim (\popd \hookrightarrow p_\Phi^k)} \ln p_\Psi(i|y_1,\ldots,y_{N+1}) \;\;\;(1)$$
+
+Here the objective function has been negated so that we have a min-max
+problem rather than a max-min problem.
+
+\medskip
+(a) Convert the above equation to a conditional contrastive GAN for modeling $p_\Phi(y|x)$ rather than $p_\Phi(y)$ trained by the above equation.
+Your solution should have the property that the optimum assuming universality is the true conditional distribution $\popd(y|x)$.
+
+\solution{
+  $$\Phi^* = \argmin_\Phi \max_\Psi E_{x \sim \popd} \; \;E_{(i,y_1,\ldots,y_{N+1}) \sim (\popd(y|x) \hookrightarrow p_\Phi(y|x)^k)} \ln p_\Psi(i|y_1,\ldots,y_{N+1},x)$$
+}
+
+\medskip
+(b) It is shown in the slides that if we restrict $p_\Psi(i|y_1,\ldots,y_{N+1})$ to be
+computed from a softmax of a score $s_\Phi(y)$, and assume universality, we have
+$$p_{\Psi^*}(i|y_1,\ldots,y_{N+1}) = \softmax_i \;\ln \frac{\popd(y_i)}{p_\Phi(y_i)}$$
+Given this property of $\Psi^*$, show
+\begin{eqnarray*}
+  && E_{(i,y_1,\dots,y_{N+1}) \sim \popd\hookrightarrow p_\Phi^N}\;\ln p_{\Psi^*}(i|y_1,\ldots,y_{N+1}) \\
+  \\
+  & \leq & \frac{N}{N+1}(KL(\popd,p_\Phi) + KL(p_\Phi,\popd)) + \ln \frac{1}{N+1}
+\end{eqnarray*}
+Note that if $p_\Phi = \popd$ then $P(i|y_1,\ldots,y_{N+1}) = \frac{1}{N+1}$ in which case this bound is tight.
+
+\solution{
+  \begin{eqnarray*}
+    & & E_{(i,y_1,\ldots,y_{N+1}) \sim \popd \hookrightarrow p_\Phi^N}\;\ln p_{\Psi^*}(i|y_1,\ldots,y_{N+1}) \\
+    \\
+    & = & E_{(i,y_1,\ldots,y_{N+1}) \sim \popd\hookrightarrow p_\Phi^N}\;\ln \left(\softmax_i \;\ln \frac{\popd(y_i)}{p_\Phi(y_i)}\right)[i] \\
+    \\
+    & = & E_{(i,y_1,\ldots,y_{N+1}) \sim \popd\hookrightarrow p_\Phi^N}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \ln\left(\sum_i \frac{\popd(y_i)}{p_\Phi(y_i)} \right) \\
+    \\
+    & = & E_{(i,y_1,\ldots,y_{N+1}) \sim \popd\hookrightarrow p_\Phi^N}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \ln\left(\frac{1}{N+1}\sum_i \frac{\popd(y_i)}{p_\Phi(y_i)} \right) - \ln\;(N+1) \\
+    \\
+    & \leq & E_{(i,y_1,\ldots,y_{N+1}) \sim \popd\hookrightarrow p_\Phi^N}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \frac{1}{N+1} \sum_i \ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \ln\;(N+1) \\
+    \\
+    & = & \frac{N}{N+1} E_{y \sim \popd} \ln \frac{\popd(y)}{p_\Phi(y)} - \frac{N}{N+1} E_{y \sim p_\Phi} \ln \frac{\popd(y)}{p_\Phi(y)} - \ln\;(N+1) \\
+    \\
+    & = & \frac{N}{N+1}(KL(\popd,p_\Phi) + KL(p_\Phi,\popd)) - \ln\;(N+1) \\
+  \end{eqnarray*}
+
+  
+\bigskip
+{\bf Problem 1. 25 points.}  Consider a population distribution $\pop$ and subset $S$ of its support. Let $\pop_S$ be the restriction of $\pop$ to the set $S$.
+\begin{eqnarray*}
+  \pop_S(y) & = & \frac{1}{\pop(S)}\left\{\begin{array}{ll} \pop(y) & \mbox{for $y \in S$} \\ 0 & \mbox{otherwise} \end{array}\right.
+\end{eqnarray*}
+We also consider the Jensen-Shannon divergence
+$$\mathrm{JS}(P,Q) = \frac{1}{2}\left(\mathrm{KL}\left(P,\frac{P+Q}{2}\right) + \mathrm{KL}\left(Q,\frac{P+Q}{2}\right)\right)$$
+Where for distributions $P$ and $Q$ we define $P+Q$ by the equation $(P+ Q)(y) = P(y)+Q(y)$.
+
+\medskip
+(a) 10 points. Solve for
+$$\mathrm{KL}\left(\pop_S,\frac{\pop+\pop_S}{2}\right)$$
+in terms of the probability mass $\pop(S)$ of the set $S$.  Your solution should have the form
+$\ln 2 - \ln (1 + \epsilon)$ where $\epsilon$ is a function of $P(S)$ with $0 \leq \epsilon \leq 1$.
+
+\solution{
+  \begin{eqnarray*}
+    \mathrm{KL}\left(\pop_S,\frac{\pop+\pop_S}{2}\right) & = & E_{y \sim \pop_S}\;\ln \frac{2\pop_S(y)}{\pop(y) + \pop_S(y)} \\
+    \\
+    & = & E_{y \sim \pop_S}\;\ln \frac{\frac{2\pop(y)}{\pop(S)}}{\pop(y) + \frac{\pop(y)}{\pop(S)}} \\
+    \\
+    & = & \ln \frac{2}{\pop(S) + 1} \\
+    \\
+    & = & \ln 2 - \ln (1 + P(S)) \\
+  \end{eqnarray*}
+}
+
+(b) 5 points. Solve for
+$$\mathrm{KL}\left(\pop,\frac{\pop+\pop_S}{2}\right)$$
+in terms of the probability mass $\pop(S)$ of the set $S$.  Your solution should have the form $\ln 2 - \epsilon \ln (\epsilon + 1)/\epsilon$
+for $\epsilon$ a function of  $P(S)$ with $0 \leq \epsilon \leq 1$.
+Hint: Write the KL-divergence as $P(S)E_{y \sim P(y|y\in S)} [\ldots] + (1-P(S))E_{y \sim \pop(y|y \not \in S)}\;[\ldots]$.
+
+\solution{
+  \begin{eqnarray*}
+    & & \mathrm{KL}\left(\pop,\frac{\pop+\pop_S}{2}\right) \\
+    \\
+    & = & E_{y \sim \pop}\;\ln \frac{2\pop(y)}{\pop(y) + \pop_S(y)} \\
+    \\
+    & = & \pop(S)E_{y \sim \pop(y|y \in S)}\;\ln \frac{2\pop(y)}{\pop(y) + \frac{\pop(y)}{\pop(S)}}
+    +(1-\pop(S))E_{y \sim \pop(y|y \not \in S)} \ln \frac{2\pop(y)}{\pop(y)} \\
+    \\
+    & = & \pop(S)\;\ln \frac{2\pop(S)}{\pop(S)+1} + (1- \pop(S)) \ln 2 \\
+    \\
+    & = & \ln 2 - \pop(S)\;\ln \frac{\pop(S)+1}{\pop(S)} 
+  \end{eqnarray*}
+}
+
+\medskip
+(c) 5 points. For $\epsilon << 1$ we have $\ln(1+ \epsilon) \approx \epsilon$ and $\ln(1+ \epsilon)/\epsilon \approx \ln(1/\epsilon)$.  Apply these approximation
+to get an approximate value for $\mathrm{JS}(\pop_S,\pop)$ for small values of $P(S)$.
+
+\solution{
+  \begin{eqnarray*}
+    \mathrm{JS}(\pop_S,\pop,Q) & =  &\frac{1}{2}\left(\mathrm{KL}\left(\pop_S,\frac{\pop_S+\pop}{2}\right) + \mathrm{KL}\left(\pop,\frac{\pop_S+\pop}{2}\right)\right) \\
+    \\
+    & \approx & \frac{1}{2}\left(\ln 2 - \epsilon + \ln 2 - \epsilon \ln \frac{1}{\epsilon}\right) \\
+    \\
+    & = & \ln 2 - \frac{\epsilon}{2}\left(1 + \ln \frac{1}{\epsilon}\right) \\
+    \\
+    \epsilon & = & \pop(S)
+  \end{eqnarray*}
+}
+
+\medskip
+(d) 5 points. Given Your answer to (c), does the Jensen-Shannon divergence analysis of GANs indicate that the generator will suffer from collapse to a low-probability mode $S$.
+Explain your answer.
+
+\solution{
+  The analysis in part (c) indicates that any serious mode collapse will lead to a nearly maximal JS-divergence.  So mode collapse should not occur.  But the JS analysis is highly suspect ---
+  copying the training data is a serious mode collapse and would fool the discriminator.
+
+  \medskip
+  As the real situation is unclear and any attempt to answer this receives full credit for thinking about it.}
+
+}
 \end{document}
