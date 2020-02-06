@@ -160,7 +160,7 @@ We consider the case of node marginals, The case of edge marginals is similar.
     & = & \left(\sum_{\hat{y}} P_s(\hat{y}) \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
     - \left(\partial s(y) /\partial s_n[i,c]\right)    \\
     \\
-    s(\hat{y}) & = & \sum_i\;s_n[i,\hat{y}[i]] \\
+    s(\hat{y}) & = & \sum_i\;s_n[i,\hat{y}[i]]\; + \sum_{\tuple{i,j} \in \mathrm{Edges}}\;s_e[\tuple{i,j},\hat{y}[i],\;\hat{y}[j]] \\
     \\
     \frac{\partial s(\hat{y})}{\partial s_n[i,c]} & = & \bbone[\hat{y}[i] = c]
 \end{eqnarray*}
@@ -261,10 +261,10 @@ then the distribution on $\hat{y}_{t+1}$ is also $P_s$.
 \begin{eqnarray*}
 P'(\hat{y}) & = & \sum_{\hat{y}'}\;P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') \\
 \\
-& = & P_s(\hat{y}) + \mbox{flow in} - \mbox{flow-out} \\
+& = & P_s(\hat{y}) + \mbox{flow-in} - \mbox{flow-out} \\
 \\
-& = & P_s(\hat{y}) + \sum_{\hat{y}' \in N(\hat{y})}\;P_s(\hat{y}')\frac{P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y})}{N_\mathrm{nodes}}
-- P_s(\hat{y})\frac{P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})}{N_{\mathrm{nodes}}}
+& = & P_s(\hat{y}) + \sum_{\hat{y}' \in N(\hat{y})}\;P_s(\hat{y}'){P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}')}
+- P_s(\hat{y}){P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})}
 \end{eqnarray*}
 
 
