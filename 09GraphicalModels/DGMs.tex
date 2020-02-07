@@ -345,8 +345,6 @@ Since the loss is directly computed we can directly back-propagate on the loss.
 
 
 
-
-
 \slide{Pseudolikelihood Theorem}
 
 {\color{red} $$\argmin_Q \; E_{y \sim \mathrm{Pop}} \;-\ln \tilde{Q}(y) = \mathrm{Pop}$$}
@@ -418,15 +416,27 @@ Gibbs CD1 is equivalent in expectation to pseudolikelihood.
 
 {\huge
 \begin{eqnarray*}
-{\cal L}_{\mathrm{PL}} & = & \sum_i \; - \ln \frac{e^{s(y)}}{\sum_c e^{s(y[i=c])}} \\
+{\cal L}_{\mathrm{PL}} & = & E_{y \sim \pop}\;\sum_i \; - \ln P_s(y[i]=c\;|\;y\backslash i) \\
 \\
+ & = & E_{y \sim \pop}\;\sum_i -\ln \frac{e^{s(y)}}{Z_i}\;\;\;\;\;{Z_i = \sum_{c'} e^{s(y[i=c'])}} \\
 \\
-& = & \sum_i\; \left(\ln \left(\sum_c \;e^{s(y[i=c])}\right) - s(y)\right) \\
+& = & E_{y \sim \pop}\;\sum_i\; \left(\ln Z_i - s(y)\right) \\
 \\
+\nabla_\Phi {\cal L}_{\mathrm{PL}} & = & E_{y \sim \pop}\;\sum_i \left(\frac{1}{Z_i} \sum_{c'} e^{s(y[i=c'])} \; \nabla_\Phi\;s(y[i]=c')\right) - \nabla_\Phi s(y) \\
 \\
-\nabla_\Phi {\cal L}_{\mathrm{PL}} & = & \sum_i \left(E_{c|i}\; \nabla_\Phi\;s(y[i=c]) - \nabla_\Phi\; s(y)\right) \\
+& = & E_{y \sim \pop}\;\sum_i \left(\sum_{c'} P(y[i=c'\;|\;y\backslash i]) \; \nabla_\Phi\;s(y[i=c'])\right) - \nabla_\Phi s(y)
+\end{eqnarray*}
+}
+
+\slideplain{Gibbs CD1 Theorem}
+
+{\huge
+\begin{eqnarray*}
+\nabla_\Phi\;{\cal L}_{\mathrm{PL}} & = & E_{y \sim \pop}\;\sum_i \left(\sum_{c'} P(y[i=c'\;|\;y\backslash i]) \nabla_\Phi\;s(y[i]=c')\right) - \nabla_\Phi s(y) \\
 \\
-& = & N \;E_{i,c}\; \nabla_\Phi \; {\cal L}_{\mathrm{CD}}
+& = & E_{y \sim \pop}\;\sum_i \left(E_{c' \sim P(y[i=c'\;|\;y\backslash i])} \nabla_\Phi\;s(y[i]=c')\right) - \nabla_\Phi s(y) \\
+\\
+& \propto & E_{y \sim \pop}\;E_i\; E_{c' \sim P(y[i=c'\;|\;y\backslash i])}\;\; (\nabla_\Phi\;s(y[i]=c') - \nabla_\Phi s(y))\;\;\;\;\mbox{Gibbs CD(1)}
 \end{eqnarray*}
 }
 
