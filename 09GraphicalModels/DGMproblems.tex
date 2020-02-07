@@ -64,7 +64,7 @@ where $\hat{y}[N(i)]$ is $\hat{y}$ restricted to those pixels which are neighbor
 
 \medskip
 (a) show
-$$\frac{P_\Phi(\hat{y})}{\sum_c P_\Phi(\hat{y}[i:=c])} = (\softmax_c s_\Phi(\hat{y}[i:=c])$$
+$$\frac{P_\Phi(\hat{y})}{\sum_c P_\Phi(\hat{y}[i:=c])} = \softmax_c s_\Phi(\hat{y}[i:=c])\;\;\;\mbox{evaluated at $c = y[i]$}$$
 
 \solution{
 \begin{eqnarray*}
