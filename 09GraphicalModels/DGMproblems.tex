@@ -72,7 +72,7 @@ $$\frac{P_\Phi(\hat{y})}{\sum_c P_\Phi(\hat{y}[i:=c])} = \softmax_c s_\Phi(\hat{
   \\
   & = & \frac{e^{s_\Phi(\hat{y})}}{\sum_c e^{s_\Phi(\hat{y}[i:=c])}} \\
   \\
-  & = & (\softmax_c\;s_\Phi(\hat{y}[i:=c]))[\hat{y}[i]]
+  & = & \softmax_c\;s_\Phi(\hat{y}[i:=c]) \;\; \mbox{evaluated at $c = y[i]$}
 \end{eqnarray*}
 }
 
@@ -82,7 +82,7 @@ $$\frac{P_\Phi(\hat{y})}{\sum_c P_\Phi(\hat{y}[i:=c])} = \softmax_c s_\Phi(\hat{
 \solution{$K^N$ for $P_\Phi$ and $KN$ for $\tilde{P}_\Phi$.}
 
 \medskip
-(c) Consider a distribution on semantic segmentations where for each pixel the class assigned to that pixel is determined by the other pixels.
+(c) Consider a distribution on semantic segmentations where for each pixel the class assigned to that pixel is uniquely determined by the classes of its neighbors.
 Can this distribution be defined by a softmax over scores?  Explain your answer.
 
 \solution{
