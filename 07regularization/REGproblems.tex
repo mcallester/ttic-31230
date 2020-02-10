@@ -160,7 +160,7 @@ To solve this optimization problem we consider using SGD where $\Phi$ is initial
 \begin{eqnarray*}
   \Phi_{t+1} & = & \Phi_t - \eta \nabla_\Phi\;(\Phi^\top x_y - y)^2 \\
   \\
-  & = & \Phi_t - \eta (\Phi^\top x_t - y)x_t
+  & = & \Phi_t - 2 \eta (\Phi^\top x_t - y)x_t
 \end{eqnarray*}
 
 \medskip
