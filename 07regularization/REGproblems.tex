@@ -47,7 +47,7 @@ at least $1-\delta$ over the draw of training data the following holds simultane
 $${\cal L}(h) \leq \frac{10}{9}\parens{\hat{\cal L}(h) + \frac{5 L_\mathrm{max}}{N}\parens{\ln \frac{1}{P(h)} + \ln\frac{1}{\delta}}} \;\;\;(1)$$
 
 This motivates
-$$h^* = \argmin_h \;\hat{{\cal L}}(h) + \frac{5\lmax}{N} \ln\frac{1}{P(h)}\;\;\;\;(2)$$
+$$h^* = \argmin_h \;\hat{{\cal L}}(h) + \frac{5\lmax}{N_{\mathrm{train}}} \ln\frac{1}{P(h)}\;\;\;\;(2)$$
 The Bayesian maximum a-posteriori (MAP) rule is
 $$h^* = \argmax_h\;P(h)\prod_{(x,y) \in \mathrm{Train}}\;P(y|x,h)\;\;\;\;(3)$$
 
@@ -127,7 +127,7 @@ $$P(\Phi[i]) = 2^{-|\Phi[i]|}$$.
 
 \solution{
   \begin{eqnarray*}
-    {\cal L}(h) & \leq & \frac{10}{9}\parens{\hat{\cal L}(h) + \frac{5 L_\mathrm{max}}{N}\parens{2\ln 2|\Phi| + \ln\frac{1}{\delta}}} \\
+    {\cal L}(h) & \leq & \frac{10}{9}\parens{\hat{\cal L}(h) + \frac{5 L_\mathrm{max}}{N_{\mathrm{train}}}\parens{\ln 2|\Phi| + \ln\frac{1}{\delta}}} \\
     \\
     |\Phi| & = & \sum_i |\Phi[i]|
   \end{eqnarray*}

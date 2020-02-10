@@ -58,9 +58,10 @@ We have
 }
 
 \medskip
-(c) Explain why, if the forward equations are written in a framework,
-we do not need to also implement ``backward'' equations to compute
+(c) EM for HMMs involves computing a ``backward'' tensor
 $$B[t,s] = P(y_t,\ldots,y_T\;|\;s_t=s).$$
+Explain why, if the forward equations are written in a framework,
+we do not need to also compute the backward tensor.
 
 \solution{
   Once we have expressed the loss $- \ln P(y_1,\ldots,y_T)$ in a framework we can train the model by SGD using the framework's implementation of back-propagation.
@@ -87,7 +88,7 @@ a softmax at each pixel to get a probability
 $P_\Phi(z[x,y] = c)$ for each pixel location $(x,y)$ and each $c \in {\cal C} \cup \{\bot\}$ and where
 each pixel location has an independent probability distribution over classes. 
 To simplify notation we can reshape the pixel locations into a linear sequence
-and replace $z[X,Y]$ by $z[T]$ with $T = X \times Y$so we have $z[0],z[1],\ldots,z[T-1]$.
+and replace $z[X,Y]$ by $z[T]$ with $T = X \times Y$ so we have $z[1],z[1],\ldots,z[T]$.
 
 Define
 $$S_t = \{c \in {\cal C}\;\exists t'\leq t\;z[t'] = c\}$$
