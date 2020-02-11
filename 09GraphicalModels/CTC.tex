@@ -37,7 +37,7 @@ $y[n] \in {\cal P}$ for a set of phonemes ${\cal P}$.
 The length $N$ of $y[N]$ is not determined by $T$ and the correspondence between $n$ and $t$ is not given.
 
 \vfill
-{\color{red} $$\Phi^* = \argmin_\Phi\;E_{\tuple{x,y} \sim \mathrm{Train}}\;\;P_\Phi(y[N]\;|\;x[T,J]) \;\;\;N << T$$}
+{\color{red} $$\Phi^* = \argmin_\Phi\;E_{\tuple{x,y} \sim \mathrm{Train}}\;\;- \ln P_\Phi(y[N]\;|\;x[T,J]) \;\;\;N << T$$}
 
 
 \slide{The CTC Model}
