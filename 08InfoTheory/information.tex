@@ -97,48 +97,66 @@ $|C(x)| = \lceil - \log_2 \mathrm{Pop}(y)\rceil$.
 \vfill
 Furthermore $C(x)$ is at least as long as all previous code words and hence $C(x)$ is not a prefix of any previously selected code word.
 
-\slide{Huffman Coding}
+\slidetwo{Huffman Coding Produces an Optimal Code}
+{For Finite Distributions}
 
-Maintain a list of trees $T_1,\;\dots,\;T_N$.
-
-\vfill
-Inititally each tree is just one root node labeled with an element of $S$.
+Maintain a list of trees $T_1,\;\dots,\;T_N$ where each leaf of each tree is labeled with a population element $y$.
 
 \vfill
-Each tree $T_i$ has a weight equal to the sum of the probabilities of the nodes on the leaves of that tree.
+We will write $y \in T_i$ to mean that some leaf of $T_i$ is labeled with $y$ and for $y \in T_i$ write $d(y,T_i)$ for the depth
+of the leaf labeled with $y$ in the tree $T_i$.
 
 \vfill
-Repeatedly merge the two trees of lowest weight into a single tree until all trees are merged.
+Initially each tree is just one root node labeled with a single $y$ value and every $y$ value labels some tree.
+
+\slide{Tree Weight}
+
+\vfill
+We define the weight of a free $T_i$ by
+
+$$W(T_i) = \sum_{y \in T_i}\;\pop(y)d(y,T_i)$$
+
+\vfill
+The Huffman coding algorithm repeatedly merges the two trees of lowest weight into a single tree until all trees are merged.
+
+\vfill
+When all trees are merged the weight of the final tree is the expected code length.
 
 \slide{Optimality of Huffman Coding}
 
-{\bf Theorem}: The Huffman code $T$ for $\mathrm{Pop}$ is optimal --- for any other tree $T'$ we have $d(T;\mathrm{Pop}) \leq d(T';\mathrm{Pop})$.
+{\bf Theorem}: The Huffman code $T$ for $\mathrm{Pop}$ gives an optimal code $C$ --- for any other tree $T'$ defining code $C'$ we have
+
+$$E_{y \sim \pop}\;|C(y)| \leq E_{y \sim \pop} |C'(y)|$$
 
 \vfill
-{\bf Proof}: The algorithm maintains the invariant that there exists an optimal tree including
+{\bf Invariant:} The merge operation preserves the invariant that there exists an optimal tree including
 all the subtrees on the list.
 
-\vfill
-To prove that a merge operation maintains this invariant we consider any tree containing the given subtrees.
+\slide{The Merge Operation Preserves the Invariant}
+
+Assume there exists an optimal tree containing the given subtrees.
 
 \vfill
 Consider the two subtrees $T_i$ and $T_j$ of minimal weight.  Without loss of generality we can assume that $T_i$ is at least as deep as $T_j$.
 
 \vfill
-Swapping the sibling of $T_i$ for $T_j$ brings $T_i$ and $T_j$ together and can only improve the average depth.
+Swapping the sibling of $T_i$ for $T_j$ brings $T_i$ and $T_j$ together.  This can only improve the average depth (next slide).
 
-\slide{Optimality of Huffman Coding}
+\slide{Why The Swap Can Only Improve the Tree}
 
-Why the swap operation cannot increase entropy.
-
-\vfill
-Let $d(n)$ be the depth of node $n$, let $P(n)$ be $2^-d(n)$, and let $W(n)$ be the weight of $n$.
+We can swap a heavier deeper tree for a shallower lighter tree.
 
 \vfill
-For $P(n_1) \geq P(n_2)$ and $W_1 \geq W_2$ then
+For a subtree $T_i$ of an optimal tree $T$ let $d(T_i)$ be the depth of $T_i$ in $T$.
 
 \vfill
-$$P(n_1)W_1 + P(n_2)W_2 \geq P(n_1)W_2 + P(n_2)W_1$$
+The contribution of $T_i$ to the average code length is $d(T_i)W(T_i)$.
+
+\vfill
+For $d(T_1) \geq d(T_2)$ and $W(T_1) \geq W(T_2)$ we have
+
+\vfill
+$$d(T_1)W(T_1) + d(T_2)W(T_2) \geq d(T_1)W(T_2) + d(T_2)W(T_1)$$
 
 \slide{Perils of Differential Entropy}
 
@@ -148,12 +166,12 @@ Consider a continuous density $p(x)$.  For example
 $$p(x) = \frac{1}{\sqrt{2\pi}\; \sigma}\; e^{\frac{-x^2}{2\sigma^2}}$$
 
 \vfill
-Differential entropy is often defined as
+Differential entropy is defined as
 
 \vfill
-$$H(p) \doteq \int \left(\ln \frac{1}{p(x)}\right) p(x) dx$$
+$$H(p) \doteq \int \left(\ln \frac{1}{p(x)}\right) p(x) dx = E_{x \sim p}\;-\ln p(x)$$
 
-\slide{Finite Differential Entropy is Not Meaningful}
+\slide{Perils of Differential Entropy}
 
 \begin{eqnarray*}
   H({\cal N}(0,\sigma)) & = &  + \int \left( \ln(\sqrt{2\pi} \sigma) + \frac{x^2}{2\sigma^2}\right) p(x) dx \\
@@ -162,18 +180,43 @@ $$H(p) \doteq \int \left(\ln \frac{1}{p(x)}\right) p(x) dx$$
 \end{eqnarray*}
 
 \vfill
-But if we take $y \doteq x/2$ we get $H(y) = H(x) - \ln 2$.
-
-\vfill
-Also for $\sigma << 1$, we get $H(p) < 0$
+$$\lim_{\sigma \rightarrow 0} H(N(0,\sigma)) = - \infty$$.
 
 \vfill
 Hence differential entropy then depends on the choice of units --- a distributions on lengths will have a different entropy
 when measuring in inches than when measuring in feet.
 
-\slide{Differential Entropy is Always Infinite}
+\slide{Differential Cross Entropy can Diverge to $-\infty$}
 
-Consider quantizing the the real numbers into bins.
+Consider the unsupervised training object.
+
+$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{train}}\;-\ln p_\Phi(y)$$
+
+\vfill
+The training set is finite (discrete).
+
+\vfill
+For each $y$ the density $p_\Phi(y)$ can go to infinity.
+
+\vfill
+This will drive the cross entropy training loss to $-\infty$.
+
+\slide{Differential Cross Entropy can Diverge to $-\infty$}
+
+$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{train}}\;-\ln p_\Phi(y)$$
+
+\vfill
+To avoid divergence to $-\infty$ we can enforce an upper bound on the density $p_\Phi(y)$.
+
+\vfill
+We will see how this is implicitly done in continuous variational auto-encoders (VAEs).
+
+\slide{Differential Entropy is Actually Infinite}
+
+An actual real number carries an infinite number of bits.
+
+\vfill
+Consider quantizing the real numbers into bins.
 
 \vfill
 A continuous probability densisty $p$ assigns a probability $p(B)$ to each bin.
@@ -194,72 +237,32 @@ This integral can be computed by dividing the real numbers into bins and computi
 \vfill
 The KL divergence between the bin distribution typically approaches a finite limit as the bin size goes to zero.
 
-\slide{KL-Divergence can also be Infinite}
-
-$$KL(p,q) = E_{x \sim p}\; \log\frac{p(x)}{q(x)}$$
 \vfill
-In either the discrete or continuous case, if a set is assigned nonzero probability by $p$ but zero probability by $q$ then $KL(p,q) = +\infty$.
-
-\vfill
-If every set assigned nonzero probability by $p$ is also assigned nonzero probability by $q$ then we say that $p$ is absolutely continuous with respect to $q$.
-
-\slide{Random Variables}
-
-We consider variables where a single draw form the population determines a value for each variable.
-
-\vfill
-This is the formal definition of a ``random variable''.
-
-\vfill
-Each random variable has a probability distribution defined by the distribution on the population.
-
-\vfill
-We write $H(x)$ for the entropy of the distribution on $x$.
+Unlike entropy, differential KL divergence is always non-negative.  But as in the discrete case, it can be infinite.
 
 \slide{Mutual Information}
 
 For two random variables $x$ and $y$ there is a distribution on pairs $(x,y)$ determined by the population distribution.
 
 \vfill
-Mutual information concerns the relationship between the distribution on $(x,y)$ and the marginal distributions on $x$ and $y$.
-
-\vfill
-For the discrete case we can write.
+Mutual information is a KL divergence and hence differential mutual information is meaningful.
 
 \vfill
 \begin{eqnarray*}
-  I(x,y) & \doteq & H(x) + H(y) - H(x,y)
+  I(x,y) & \doteq & KL(p(x,y),p(x)p(y)) \\
+  \\
+  & = & E_{x,y} \ln \frac{p(x,y)}{p(x)p(y)}
 \end{eqnarray*}
 
-\vfill
-This can be viewed as a quantity of non-independence --- independent variables have zero mutual information.
+\slide{The Data Processing Inequality}
 
-\slide{Conditional Entropy}
-
-For the discrete case conditional entropy $H(y|x)$ is defined by
-
-\begin{eqnarray*}
-  H(y|x) & \doteq & \sum_x \mathrm{Pop}(x) \sum_y \mathrm{Pop}(y|x) - \log \mathrm{Pop}(y|x) \\
-  \\
-  & = & E_{x\sim \mathrm{Pop}}\;E_{y \sim \mathrm{Pop}|x}\;- \log \mathrm{Pop}(y|x) \\
-  \\
-  & = & E_{x\sim \mathrm{Pop}}\;H(\mathrm{Pop}(y|x))
-\end{eqnarray*}
-
-\slide{More Identities}
-\vfill
-For the discrete case we have.
+For continuous $y$ and $z$ with $z = f(y)$ we get that $H(z)$ can be either larger or smaller than $H(y)$ (consider $z = ay$ for $a >1$ vs. $a<1$).
 
 \vfill
-\begin{eqnarray*}
-  I(x,y) & = & H(x) - H(x|y) \\
-  \\
-  & = & H(y) - H(y|x) \\
-  \\
-  & = & KL(\mathrm{Pop}(x,y),\mathrm{Pop}(x)\times\mathrm{Pop}(y))
-\end{eqnarray*}
+However, mutual information is a KL divergence and is more meaningful than entropy and for $z = f(y)$ we do have
 
-The last identity can be taken as a definition of $I(x,y)$ in the continuous case.
+$$I(x,z) \leq I(x,y)$$
+
 
 \slide{END}
 

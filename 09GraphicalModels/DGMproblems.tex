@@ -18,7 +18,7 @@
 \bigskip
 \bigskip
 
-{\bf Problem 1. Pseudolikelihood of a one dimensional spin glass.}
+~{\bf Problem 1. Pseudolikelihood of a one dimensional spin glass.}
 We let $\hat{x}$ be an assignment of a value to every node where the nodes are numbered from $1$ to $N_\mathrm{nodes}$ and for every node $i$ we have
 $\hat{x}[i] \in \{0,1\}$. We define the score of $\hat{x}$ by
 $$f(\hat{x}) = \sum_{i = 1}^{N-1} \bbone[\hat{x}[i] = \hat{x}[i+1]]$$
@@ -29,12 +29,10 @@ Pseudolikelihood is defined in terms of the softmax probability $P_f$ as follows
 \begin{eqnarray*}
   \tilde{P}_f(\hat{x}) & = & \prod_i P_f(\hat{x}[i] \;|\; \hat{x}\backslash i)
 \end{eqnarray*}
-What is the {\bf Pseudolikelihood} of the all ones assignment under the definition of $f$ given above?
+What is the pseudolikelihood of the all ones assignment under the definition of $f$ given above?
 
 \solution{
-$$\tilde{P}_f(\hat{x}) = \Pi_i P_f(\hat{x}[i] \;|\; \hat{x}/i)$$
-
-where $\hat{x}/i$ consists of all components of $\hat{x}$ other than $i$.  In a graphical model $P_f(\hat{x}[i] \;|\; \hat{x}/i)$ is determined by the neighbors of $i$ and we can consider only how a value is scored against it neighbors.  For $\hat{x}$ equal to all ones we have
+In a graphical model $P_f(\hat{x}[i] \;|\; \hat{x}/i)$ is determined by the neighbors of $i$ and we can consider only how a value is scored against it neighbors.  For $\hat{x}$ equal to all ones we have
 
 \begin{eqnarray*}
 f(\hat{x}) & = & N-1 \\
