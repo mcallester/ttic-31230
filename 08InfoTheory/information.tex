@@ -112,9 +112,9 @@ Initially each tree is just one root node labeled with a single $y$ value and ev
 \slide{Tree Weight}
 
 \vfill
-We define the weight of a free $T_i$ by
+We define the weight of a free $T_i$ to be the total probability mass of the the items labeling the leaves.
 
-$$W(T_i) = \sum_{y \in T_i}\;\pop(y)d(y,T_i)$$
+$$W(T_i) = \sum_{y \in T_i}\;\pop(y)$$
 
 \vfill
 The Huffman coding algorithm repeatedly merges the two trees of lowest weight into a single tree until all trees are merged.
@@ -149,8 +149,7 @@ We can swap a heavier deeper tree for a shallower lighter tree.
 \vfill
 For a subtree $T_i$ of an optimal tree $T$ let $d(T_i)$ be the depth of $T_i$ in $T$.
 
-\vfill
-The contribution of $T_i$ to the average code length is $d(T_i)W(T_i)$.
+Swapping $T_1$ and $T_2$ replaces a cost of $d(T_i)W(T_i) + d(T_2)W(T_2)$ with $d(T_1)W(T_2) + d(T_2)W(T_1)$.
 
 \vfill
 For $d(T_1) \geq d(T_2)$ and $W(T_1) \geq W(T_2)$ we have
