@@ -8,7 +8,7 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2019}
+  \centerline{David McAllester, Winter 2020}
   \vfill
   \centerline{Rate-Distortion Autoencoders (RDAs)}
   \vfill
@@ -16,40 +16,123 @@
   \vfill
   \centerline{Gaussian Variational Autoencoders (Gaussian VAEs)}
 
-\slide{Rate-Distortion Autoencoders}
+\slidetwo{Rate-Distortion Autoencoders}{(Image Compression)}
 
-Given a continuous signal $y$ we can compress it into a (discrete) bit string $\tilde{z}_\Phi(y)$.
+We compress a continuous signal $y$ to a bit string $\tilde{z}_\Phi(y)$.
 
 \vfill
-We let $y_\Phi(\tilde{z}_\Phi(y))$ be the decompression of $\tilde{z}_\Phi(y)$.
+We decompress $\tilde{z}_\Phi(y)$ to $y_\Phi(\tilde{z}_\Phi(y))$.
 
 \vfill
 We can then define a rate-distortion loss.
 
 {\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$}
 
+
 \slide{Common Distortion Functions}
 
-$$\Phi^* = \argmin_\Phi\;E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(y))$$
+$$\Phi^* = \argmin_\Phi\;E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
 
 \vfill
 It is common to take
 
-$$\mathrm{Dist}(y,y') = ||y-y'||^2 \hspace{4em}(L_2)$$
+$$\mathrm{Dist}(y,\hat{y}) = ||y-\hat{y}||^2 \hspace{4em}(L_2)$$
 
 \vfill
 or
 
-$$\mathrm{Dist}(y,y') = ||y-y'||_1 \hspace{4em} (L_1)$$
+$$\mathrm{Dist}(y,\hat{y}) = ||y-\hat{y}||_1 \hspace{4em} (L_1)$$
 
-\slide{A Case Study in Image Compression}
+\slide{CNN-based Image Compression}
 
-{\bf End-to-End Optimized Image Compression, Balle, Laparra, Simoncelli, ICLR 2017.}
+These slides are loosely based on
+
+\vfill
+End-to-End Optimized Image Compression, Balle, Laparra, Simoncelli, ICLR 2017.
 
 
 \vfill
-$${\color{red}y \hspace{5em}  \tilde{z}_\Psi(y) \hspace{4em} \tilde{z} \hspace{6em} y'_\Phi(\tilde{z}) \hspace{4em}||y - y'||^2}$$
-\centerline{\includegraphics[width=9in]{../images/Deconv}}
+\centerline{$y$\includegraphics[width=4in]{\images/deconvleft} $\;\tilde{z}\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
+
+
+\slide{Rounding a Tensor}
+
+Take $z_\Phi(y)$ can be a layer in a CNN applied to image $y$.  $z_\Phi(y)$ can have with both spatial and feature dimensions.
+
+\vfill
+Take $\tilde{z}_\Phi(y)$ to be the result of rounding each component of the continuous tensor $z_\Phi(y)$ to the nearest integer.
+
+\vfill
+$$\tilde{z}_\Phi(y)[x,y,i] = \lfloor z_\Phi(y)[x,y,i] + 1/2 \rfloor$$
+
+\slide{Increasing Spatial Dimension in Decoding}
+
+\centerline{$y$\includegraphics[width=4in]{\images/deconvleft} $\;\tilde{z}\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
+
+\slide{Increasing Spatial Dimension in Decoding (Deconvolution)}
+
+\vfill
+To increase spatial dimension we use 4 times the desired output the features.
+
+\begin{eqnarray*}
+  L'_{\ell+1}[x,y,i] & = & \sigma\left(W[\Delta X, \Delta Y, J,i]\; L'_\ell[x + \Delta X, y + \Delta Y, J]\right)
+\end{eqnarray*}
+
+\vfill
+We then reshape $L'_{\ell+1}[X,Y,I]$ to $L'_{\ell+1}[2X,2Y,I/4]$.
+
+\slide{Rounding is not Differentiable}
+
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
+
+\vfill
+Because of rounding, $\tilde{z}_\Phi(y)$ is discrete and the gradients are zero.
+
+\vfill
+We will train using a differentiable approximation.
+
+\slide{Rate: Replacing Code Length with Differential Entropy}
+
+\begin{eqnarray*}
+{\cal L}_{\mathrm{rate}}(\Phi) & = & E_{y \sim \pop}\;|\tilde{z}_\Phi(y)|
+\end{eqnarray*}
+
+\vfill
+Recall that {\color{red} $\tilde{z}_\Phi(y)$} is a rounding of a continuous encoding {\color{red} $z_\Phi(y)$}.
+
+\vfill
+We approximate the code length after rounding using a differentiable function of the value before rounding.
+
+\vfill
+{\color{red} $$|{\color{red} \tilde{z}_\Phi(y)}| \approx \sum_{x,y,i} (\log_2 {\color{red} z_\Phi(y)[x,y,i]})^+$$}
+
+This continuous value can be interpreted as a ``differential entropy''.
+
+\slide{Distortion: Replacing Rounding with Noise}
+
+We can make distortion differentiable by modeling rounding as the addition of noise.
+
+\begin{eqnarray*}
+{\cal L}_{\mathrm{dist}}(\Phi) & = & E_{y \sim \mathrm{Pop}} \;\mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y))) \\
+\\
+& \approx & E_{y,\epsilon} \;\mathrm{Dist}(y,\;y_\Phi(z_\Phi(y) + \epsilon))
+\end{eqnarray*}
+
+\vfill
+Here $\epsilon$ is a noise vector each component of which is drawn uniformly from $(-1/2,1/2)$.
+
+\slide{Rate: Differential Entropy vs. Discrete Entropy}
+
+\bigskip
+\centerline{\includegraphics[height=3in]{../images/RateDist6}}
+
+Each point is a rate for an image measured in both differential entropy and discrete entropy.  The size of the rate changes as we change the weight $\lambda$.
+
+\slide{Distortion: Noise vs. Rounding}
+
+\centerline{\includegraphics[height=3in]{../images/RateDist5}}
+
+Each point is a distortion for an image measured in both a rounding model and a noise model.  The size of the distortion changes as we change the weight $\lambda$.
 
 \anaslide{JPEG at 4283 bytes or .121 bits per pixel}
 
@@ -66,234 +149,142 @@ $${\color{red}y \hspace{5em}  \tilde{z}_\Psi(y) \hspace{4em} \tilde{z} \hspace{6
 \bigskip
 \centerline{\includegraphics[height = 5in]{../images/RateDist4}}
 
-\slide{A CNN Encoder}
-
-A three layer CNN is used as an encoder.
-
-\vfill
-We let $z_\Phi(y)$ be the final layer of this CNN.
-
-\vfill
-Each continuous value in the final layer $z_\Phi(y)$ is then rounded to a (small) integer giving a discrete encoding $\tilde{z}(y)$.
-
-\slide{Rate-Distortion Autoencoders}
-
-$$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
-
-\vfill
-Oops: Because of rounding, $\tilde{z}_\Phi(y)$ is discrete and the gradients are zero.
-
-\vfill
-We will train using a differentiable approximation.
-
-\slide{A Noise Model of Rounding}
-
-We can make distortion differentiable by modeling rounding as the addition of noise.
-
-\begin{eqnarray*}
-{\cal L}_{\mathrm{dist}}(\Phi) & = & E_{y \sim \mathrm{Pop}} \;\mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y))) \\
-\\
-& \approx & E_{y,\epsilon} \;\mathrm{Dist}(y,\;y_\Phi(z_\Phi(y) + \epsilon))
-\end{eqnarray*}
-
-\vfill
-Here $\epsilon$ is a noise vector each component of which is drawn uniformly from $(-1/2,1/2)$.
-
-\slide{Noise vs. Rounding}
-
-\centerline{\includegraphics[height=5in]{../images/RateDist5}}
-
-
-\slide{A Differentiable Approximation of Code Length}
-
-\begin{eqnarray*}
-{\cal L}_{\mathrm{rate}}(\Phi) & = & E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| 
-\end{eqnarray*}
-
-\vfill
-Recall that {\color{red} $\tilde{z}_\Phi(y)$} is a rounding of a continuous encoding {\color{red} $z_\Phi(y)$}.
-
-
-\vfill
-We approximate the code length after rounding using a differentiable function of the value before rounding.
-
-\vfill
-{\color{red} $$|{\color{red} \tilde{z}_\Phi(y)}| \approx \sum_i (\log_2 {\color{red} z_\Phi(y)[i]})^+$$}
-
-This continuous value can be interpreted as a ``differential entropy''.
-
-\slide{Differential Entropy vs. Discrete Entropy}
-
-\bigskip
-\centerline{\includegraphics[height=5in]{../images/RateDist6}}
-
-
-\slide{Details}
-
-\vfill
-The first layer is computed stride 4.
-
-\vfill
-The next two layers are computed stride 2.
-
-\vfill
-Final image dimension is reduced by a factor of 16 with 192 channels per pixel (192 channels is for color images).
-
-\vfill
-$$192 < 16 \times 16 \times 3 = 768$$
-
-\vfill
-
-
-\slide{Increasing Spatial Dimension in Decoding}
-
-\centerline{\includegraphics[width=9in]{../images/Deconv}}
-\centerline{[Hyeonwoo Noh et al.]}
-
-\vfill
-In the ICLR 17 paper the deconvolution network has the shape as the input CNN but with independent parameters.
-
-\slide{Increasing Spatial Dimension in Decoding}
-
-Consider a stride 2 convolution
-\begin{eqnarray*}
-  L_{\ell+1}[x,y,j] & = & \sigma\left(\sum_{\Delta x,\Delta y,i}   W[\Delta x, \Delta y, i,j] L_\ell[2x + \Delta x, 2y + \Delta y, i]\right)
-\end{eqnarray*}
-
-\vfill
-For deconvolution we use stride 1 with 4 times the features.
-\begin{eqnarray*}
-  L'_\ell[x,y,i] & = & \sigma\left(\sum_{\Delta x,\Delta y,j}   W[\Delta x, \Delta y, j,i] L'_{\ell+1}[x + \Delta x, y + \Delta y, j]\right)
-\end{eqnarray*}
-
-\vfill
-The channels at each $L'_\ell[x,y]$ are divided among four higher resolution pixels.
-
-\vfill
-This is done by a simple reshaping of $L'_\ell[x,y,i]$.
-
-\slide{Noisy-Channel RDAs (TZ)}
-
-Consider the differentiable loss used in training.
-{\color{red} $$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;- \ln p(z_\Phi(y)) + \lambda E_\epsilon\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + \epsilon))$$}
-
-Intuitively, {\color{red} $- \ln p(z_\Phi(y))$} is a proxy for the number of bits used in the (intuitively rounded) encoding {\color{red} $z_\Phi(y) + \epsilon$}.
-
-\vfill
-By the channel capcacity theorem the number of bits that {\color{red} $z_\Phi(y) + \epsilon$} can carry about {\color{red} $y$}
-is the mutual information between $y$ and $z_\Phi(y) + \epsilon$.
-
-{\color{red} $$I(y,z_\Phi(y)+\epsilon)$$}
-
 \slide{Noisy-Channel RDAs}
 
-We now consider {\color{red} $p_\Phi(z|y)$} as a generalization of {\color{red} $z_\Phi(y) + \epsilon$}.
+The case study of rate-distortion image compression we used a differentiable loss in training.
 
 \vfill
-The channel capacity theorem motivates
-
-$${\color{red} p_\Phi(z) = E_{y \sim \pop}\;p_\Phi(z|y)}$$
-$${\color{red} I(y,z)} = H(z) - H(z|y) = {\color{red} E_{y \sim \pop}\;KL(p_\Phi(z|y),p_\Phi(z))}$$
-
+{\color{red} $$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;- \ln p_\Phi(z_\Phi(y)) + \lambda E_\epsilon\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + \epsilon))$$}
 
 \vfill
-{\huge
-\begin{eqnarray*}
-{\color{red} \Phi^*} & = & \argmin_\Phi \left(\;{\color{red} I(y,z)} + \;\lambda E_{y \sim \pop,z \sim p_\Phi(z|y)}\;\mathrm{Dist}(y,y_\Phi(z))\;\right) \\
-\\
-& = & {\color{red} \argmin_\Phi  E_{y \sim \pop}\;\left(\begin{array}{l}\;\;\;\;KL(p_\Phi(z|y),p_\Phi(z)) \\
-\\
-+ \lambda E_{z \sim p_\Phi(z|y)}\; \mathrm{Dist}(y,y_\Phi(z))\end{array}\right)}
-\end{eqnarray*}
-}
-
-\slide{A Variational Upper Bound}
-
-Unfortunately we cannot compute {\color{red} $p_\Phi(z) = E_{y \sim \pop}\;p_\Phi(z|y)$}.
+In a rate-distortion auto-encoder we will measure rate directly on continuous variables without rounding.
 
 \vfill
-We now replace {\color{red} $p_\Phi(z)$} by a friendly (variational) model {\color{red} $p_\Psi(z)$}.
+The problem is that the first term --- the cross entropy term --- should be viewed as begin infinite --- there are infinitely many bits in a real number.
+
+\slide{Mutual Information Replaces Cross Entropy}
+
+We replace
+\vfill
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;- \ln p_\Phi(z_\Phi(y)) + \lambda E_\epsilon\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + \epsilon))$$
+
+by
 
 \begin{eqnarray*}
- & & I_\Phi(y,z) \\
- \\
- & = & E_{y \sim \pop}\; KL(p_\Phi(z|y),p_\Phi(z)) \\
+\tilde{z} & = & z_\Phi(y) + \epsilon \;\;\mbox{($\epsilon$ is random noise --- typically Gaussian)} \\
 \\
-& = & E_{y,z\sim P_\Phi(z|y)}\; \left(\ln \frac{p_\Phi(z|y)}{{\color{red} p_\Psi(z)}} + \ln \frac{{\color{red} p_\Psi(z)}}{p_\Phi(z)}\right) \\
-\\
-& = & E_{y \sim \pop}\;KL(p_\Phi(z|y),p_\Psi(z)) + \left(E_{y \sim \pop,\;z\sim p_\Phi(z|y)}\;\ln \frac{p_\Psi(z)}{p_\Phi(z)}\right)
+\Phi^* & = & \argmin_\Phi \;I(y,\tilde{z}) + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(\tilde{z}))
 \end{eqnarray*}
 
-\slide{A Variational Upper Bound}
+\vfill
+Differential mutual information is more meaningful than differential cross-entropy.
+
+\slide{Mutual Information Replaces Cross Entropy}
+
+By the channel capacity theorem $I(y,\tilde{z})$ is the {\bf rate} at which a receiver of $\tilde{z}$ gets information about $y$ across a noisy channel.
 
 \begin{eqnarray*}
- & & I(y,z) \\
- \\
- & = & E_{y \sim \pop}\;KL(p_\Phi(z|y),p_\Psi(z)) + \left(E_{\color{red} y \sim \pop,\;z\sim p_\Phi(z|y)}\;\ln \frac{p_\Psi(z)}{p_\Phi(z)}\right) \\
+I(y,\tilde{z})  & = & E_{y,\tilde{z}}\; \ln \frac{p(y,\tilde{z})}{p(\tilde{z})p(y)} \\
 \\
-& = & E_y\;KL(p_\Phi(z|y),p_\Psi(z)) + E_{\color{red} z\sim p_\Phi(z)}\;\ln \frac{p_\Psi(z)}{p_\Phi(z)} \\
 \\
-& = & E_y\;KL(p_\Phi(z|y),p_\Psi(z)) - KL(p_\Phi(z),p_\Psi(z)) \\
 \\
-& \leq & E_{y \sim \pop}\; KL(p_\Phi(z|y),p_\Psi(z))
+& = & E_{y,\tilde{z}}\;\ln \frac{p(\tilde{z}\;|\;z_\Phi(y))}{p(\tilde{z})}
+\end{eqnarray*}
+
+\slide{A Variational Bound}
+
+$$p(\tilde{z}) = E_y\;p(\tilde{z}\;|\;z_\Phi(y))$$
+
+\vfill
+We cannot compute $p(\tilde{z})$.
+
+\vfill
+Instead we have a model $p_\Phi(\tilde{z})$.
+
+\vfill
+The model corresponds to the ``code'' we are using to approximate the true distribution $p(\tilde{z})$.
+
+\slide{A Variational Bound}
+
+\begin{eqnarray*}
+{\color{red} I(y,\tilde{z})}  & = & E_{y,\tilde{z}}\;\ln \frac{p(\tilde{z}\;|\;z_\Phi(y))}{p(\tilde{z})} \\
+\\
+& = & E_{y,\tilde{z}}\;\ln \frac{p(\tilde{z}\;|\;z_\Phi(y))}{p_\Phi(\tilde{z})} + E_{\tilde{z}}\;\ln\frac{p_\Phi(\tilde{z})}{p(\tilde{z})} \\
+\\
+& = & E_{y,\tilde{z}}\;\ln \frac{p(\tilde{z}\;|\;z_\Phi(y))}{p_\Phi(\tilde{z})} - KL(p(\tilde{z}),p_\Phi(\tilde{z})) \\
+\\
+& {\color{red} \leq} & {\color{red} E_{y,\tilde{z}}\;\ln \frac{p(\tilde{z}\;|\;z_\Phi(y))}{p_\Phi(\tilde{z})}}
 \end{eqnarray*}
 
 
-\slide{The Noisy-Channel RDA}
+\slide{Cross MI}
 
-{\color{red} $$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{y\sim \pop} \left(\begin{array}{l}\;\;\;\;KL(p_\Phi(z|y),p_\Psi(z)) \\
+\begin{eqnarray*}
+{\color{red} I(y,z)} & {\color{red} \leq} & {\color{red} E_{y,z}\;\ln \frac{p(z\;|\;y)}{p_\Phi(z)}}
+\end{eqnarray*}
+
+\vfill
+We might call the right hand side ``cross MI'' written $I(y,z,p_\Phi)$.
+
+\vfill
+Cross MI, unlike true MI, is measurable.
+
+\slide{A Fundamental Equation for the  Continuous Case}
+
+\begin{eqnarray*}
+\tilde{z} & = & z_\Phi(y) + \epsilon \;\;\mbox{($\epsilon$ is random noise --- typically Gaussian)} \\
 \\
-+ \lambda \; E_{z\sim p_\Phi(z|y)}\;\mathrm{Dist}(y,\;y_\Phi(z))\end{array}\right)$$}
-
+\Phi^* & = & \argmin_\Phi E_{y,\tilde{z}}\; \;\ln \frac{p(\tilde{z}|z_\Phi(y))}{p_\Phi(\tilde{z})} + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}))
+\end{eqnarray*}
 
 \slide{Gaussian Noisy-Channel RDA}
 
-$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{y\sim \pop} \left(\begin{array}{l}\;\;\;\;KL(p_\Phi(z|y),p_\Psi(z)) \\
+$$\Phi^* = \argmin_{\Phi}\;E_{y\sim \pop} \left(\begin{array}{l}\;\;\;\;KL(p_\Phi(\tilde{z}|y),p_\Phi(\tilde{z})) \\
 \\
-+ \lambda \; E_{z\sim p_\Phi(z|y)}\;\mathrm{Dist}(y,\;y_\Phi(z))\end{array}\right)$$
++ \lambda \; E_{\tilde{z}\sim p_\Phi(\tilde{z}|y)}\;\mathrm{Dist}(y,\;y_\Phi(\tilde{z}))\end{array}\right)$$
 
 {\color{red}
 \begin{eqnarray*}
-p_\Phi(z[i]\;|\;y) & = & {\cal N}(z_\Phi(y)[i],\sigma_\Phi(y)[i])) \\
+p_\Phi(\tilde{z}[i]\;|\;y) & = & {\cal N}(z_\Phi(y)[i],\sigma^\epsilon_\Phi(y)[i])) \\
 \\
-p_\Psi(z[i]) & = & {\cal N}(\mu_\Psi[i],\sigma_\Psi[i]) \\
+p_\Phi(\tilde{z}[i]) & = & {\cal N}(\mu_\Phi[i],\sigma^z_\Phi[i]) \\
 \\
-\mathrm{Dist}(y,y') & = & ||y-y'||^2
+\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||^2
 \end{eqnarray*}
 }
 
 \slide{Closed Form KL-Divergence}
 
 \begin{eqnarray*}
-& & KL(p_\Phi(z|y),p_\Psi(z)) \\
+& & KL(p_\Phi(\tilde{z}|y),p_\Phi(\tilde{z})) \\
 \\
 \\
-& = & \sum_i \;\frac{\sigma_\Phi(y)[i]^2 + (z_\Phi(y)[i]-\mu_\Psi[i])^2}{2 \sigma_\Psi[i]^2}
-+ \ln\frac{\sigma_\Psi[i]}{\sigma_\Phi(y)[i]} - \frac{1}{2}
+& = & \sum_i \;\frac{\sigma^\epsilon_\Phi(y)[i]^2 + (z_\Phi(y)[i]-\mu_\Phi[i])^2}{2 \sigma^z_\Phi[i]^2}
++ \ln\frac{\sigma^z_\Phi[i]}{\sigma^\epsilon_\Phi(y)[i]} - \frac{1}{2}
 \end{eqnarray*}
 
 
-\slide{Standardizing $p_\Psi(z)$}
+\slide{Standardizing $p_\Phi(z)$}
 
 The KL-divergence term is
     
-$$\sum_i \;\frac{{\color{red} \sigma}_\Phi(y)[i]^2 +({\color{red}
-z}_\Phi(y)[i] - {\color{red} \mu}_\Psi[i])^2}{2
-{\color{red} \sigma}_\Psi[i]^2}
-+ \ln\frac{{\color{red} \sigma}_\Psi[i]}{{\color{red} \sigma}_\Phi(y)[i]}
+$$\sum_i \;\frac{{\color{red} \sigma}^\epsilon_\Phi(y)[i]^2 +({\color{red}
+z}_\Phi(y)[i] - {\color{red} \mu}_\Phi[i])^2}{2
+{\color{red} \sigma}^z_\Phi[i]^2}
++ \ln\frac{{\color{red} \sigma}^z_\Phi[i]}{{\color{red} \sigma}^\epsilon_\Phi(y)[i]}
 - \frac{1}{2}$$
 
 \vfill
 We can adjust $\Phi$ to $\Phi'$ such that
 \begin{eqnarray*}
-z_{\Phi'}(y)[i] & = & (z_\Phi(y)[i] - \mu_\Psi[i])/\sigma_\Psi[i] \\
-\sigma_{\Phi'}(y)[i] & = & \sigma_\Phi(y)[i]/\sigma_\Psi[i]
+z_{\Phi'}(y)[i] & = & (z_\Phi(y)[i] - \mu_\Phi[i])/\sigma^z_\Phi[i] \\
+\sigma^\epsilon_{\Phi'}(y)[i] & = & \sigma^\epsilon_\Phi(y)[i]/\sigma^z_\Phi[i]
 \end{eqnarray*}
 
 \vfill
-We then get {\color{red} $KL(p_{\Phi'}(z|y),{\cal N}(0,I)) = KL(p_{\Phi}(z|y),p_\Psi(z))$}.
+We then get {\color{red} $KL(p_{\Phi'}(\tilde{z}|y),{\cal N}(0,I)) = KL(p_{\Phi}(\tilde{z}|y),p_\Phi(\tilde{z}))$}.
 
-\slide{Standardizing $p_\Psi(z)$}
+\slide{Standardizing $p_\Phi(z)$}
 
 \vfill
 Without loss of generality the Gaussian noisy channel RDA becomes.
@@ -358,7 +349,7 @@ Issue: Do we expect compression to yield useful features?
 \begin{eqnarray*}
 z[i] & = & z_\Phi(y)[i] + \sigma_\Phi(y)[i]\epsilon\;\;\;\;\epsilon \sim {\cal N}(0,1) \\
 p_\Psi(z[i]) & = & {\cal N}(\mu_\Psi[i],\sigma_\Psi[i]) \\
-\mathrm{Dist}(y,y') & = & ||y-y'||^2 \\
+\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||^2 \\
 \\
 {\color{red} \sigma^*(u)} & {\color{red} =} & {\color{red} \argmin_\sigma E_{y \sim \pop,z \sim p_\Phi(z|y)}\; \frac{1}{2\sigma^2}\mathrm{Dist}(y,y_\Phi(z)) + d \ln \frac{\sigma}{u}}
 \;\mbox{for $y \in \mathbb{R}^d$}
