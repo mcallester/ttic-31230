@@ -223,6 +223,27 @@ $${\color{red} \Phi^{t+1}} =  {\color{red} \argmin_\Phi}\;E_{y \sim \mathrm{Trai
 \vfill
 {\color{red} In most cases the inference is intractible!}
 
+\slide{The ELBO}
+
+\begin{eqnarray*}
+    ELBO & = & E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{Q_\Phi(y)Q_\Phi(z|y)}{\tilde{Q}_\Psi(z|y)} \\
+    \\
+    & = & \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln Q_\Phi(y)\right) +
+    \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln Q_\Phi(z|y)\right)
+    + \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{1}{\tilde{Q}_\Psi(z|y)}\right) \\
+    & = & \ln Q_\Phi(y) - H(\tilde{Q}_\Psi(z|y),Q_\Phi(z|y)) +  H(\tilde{Q}(z|y))
+  \end{eqnarray*}
+
+\slide{}
+
+  \begin{eqnarray*}
+    ELBO & = & E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{Q_\Phi(y)Q_\Phi(z|y)}{\tilde{Q}_\Psi(z|y)} \\
+    \\
+    & = & \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln Q_\Phi(y)\right) +
+    \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{Q_\Phi(z|y)}{\tilde{Q}_\Psi(z|y)}\right) \\
+    & = & \ln Q_\Phi(y) - KL(\tilde{Q}_\Psi(z|y),Q_\Phi(z|y))
+  \end{eqnarray*}
+
 \slidetwo{Variational Inference:}
 {The Evidence Lower Bound (The ELBO)}
 We introduce a friendly model {\color{red} $P_\Psi(z|y)$} to approximate {\color{red} $P_\Phi(z|y)$}.
