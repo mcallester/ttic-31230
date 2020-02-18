@@ -95,7 +95,7 @@ The rightmost column (yellow boarders) gives the nearest neighbor in the trainin
 \slide{Assuming Universality of $\Psi$ Only}
 
 \begin{eqnarray*}
-\Psi^*(\Phi) & = & \argmin_\Psi  E_{(i,y) \sim \tilde{p}_\Phi}\; - \ln \tilde{p}_\Phi(i|y) \\
+P_{\Psi^*(\Phi)}(i|y) & = & \tilde{p}_\Phi(i|y) \\
 \\
 \tilde{p}_\Phi(i|y) & = & \frac{\tilde{p}_\Phi(i \wedge y)}{\tilde{p}_\Phi(y)} \\
 \\
@@ -228,7 +228,7 @@ $$\softmax_i s_{\Psi^*}(y_i) =  \softmax_i \ln \frac{\popd(y_i)}{p_\Phi(y_i)}$$
 is solved by
 
 \vfill
-$$s_{\Psi^*}(y) = \ln \frac{\popd(y)}{p_\Phi(y)} - \ln Z$$
+$$s_{\Psi^*}(y) = \ln \frac{\popd(y)}{p_\Phi(y)} + \ln Z$$
 
 \vfill
 giving
