@@ -95,7 +95,7 @@ The rightmost column (yellow boarders) gives the nearest neighbor in the trainin
 \slide{Assuming Universality of $\Psi$ Only}
 
 \begin{eqnarray*}
-\Psi^* & = & \argmin_\Psi  E_{(i,y) \sim \tilde{p}_\Phi}\; \ln \tilde{p}_\Phi(i|y) \\
+\Psi^*(\Phi) & = & \argmin_\Psi  E_{(i,y) \sim \tilde{p}_\Phi}\; - \ln \tilde{p}_\Phi(i|y) \\
 \\
 \tilde{p}_\Phi(i|y) & = & \frac{\tilde{p}_\Phi(i \wedge y)}{\tilde{p}_\Phi(y)} \\
 \\
@@ -118,6 +118,15 @@ The rightmost column (yellow boarders) gives the nearest neighbor in the trainin
 \\
 & = & {\color{red} \mathrm{JSD}(\popd,p_\Phi) - \ln 2}
 \end{eqnarray*}
+
+\slide{Assuming Universality of $\Psi$ Only}
+
+\begin{eqnarray*}
+& &  E_{(i,y) \sim \tilde{p}_\Phi}\; - \ln \tilde{p}_\Phi(i|y) \\
+\\
+& = & \ln 2 - JSD(\popd,p_\Phi)
+\end{eqnarray*}
+
 
 \slide{Contrastive GANs}
 
