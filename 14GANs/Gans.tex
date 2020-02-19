@@ -441,10 +441,9 @@ We assume a corpus of ``image translation pairs'' such as images paired with sem
 \centerline{\includegraphics[width = 8.0in]{../images/cGAN0}}
 
 \slide{Conditional GANS}
-All unconditional distribution modeling methods apply to conditional distribution modeling.
-\vfill
-
-Let $y$ range over images.  We have a generator $p_\Phi$. For $i \in \{-1,1\}$ we define a probability distribution over triple
+In the conditional case we have a population distribution over pairs $\tuple{x,y}$.
+For conditional GANs we have a generator $p_\Phi(y|x)$ and a discriminator $P_\Psi(i|x,y)$
+For $i \in \{-1,1\}$ we define a probability distribution over triples
 $\tuple{x,y,i}$ by
 \begin{eqnarray*}
 \tilde{p}_\Phi(i = 1) & = & 1/2 \\
@@ -452,14 +451,7 @@ $\tuple{x,y,i}$ by
 \tilde{p}_\Phi(y|i=-1) & = & p_\Phi(y|x)
 \end{eqnarray*}
 
-\vfill
-We also have a discriminator $P_\Psi(i|y)$.
 {\color{red} $$\Phi^* = \argmax_\Phi\;\;\min_\Psi\;E_{\tuple{x,y,i} \sim \tilde{p}_\Phi}\;-\ln P_\Psi(i|x,y)$$}
-
-\slide{Conditional GANs}
-
-$${\color{red} \Phi^* = \argmin_\Phi \; \max_\Psi \;\expectsub{x,y,i \sim \tilde{p}_\Phi(y|x)}\;
-  {\ln P_\Psi(i|x,y)}}$$
 
 \slide{Adversarial Discrimination as an Additional Loss}
 
