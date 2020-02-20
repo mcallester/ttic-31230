@@ -10,12 +10,7 @@
   \bigskip
   \centerline{David McAllester, Winter 2019}
   \vfill
-  \centerline{Latent Variable Models}
-  \vfill
-  \centerline{Expectation Maximization (EM)}
-  \vfill
-  \centerline{The Evidence Lower Bound (the ELBO)}
-  \vfill
+  \vfil
   \centerline{Variational Autoencoders (VAEs)}
   \vfill
   \vfill
@@ -136,49 +131,42 @@ An autoregressive model, such as an autoregressive language model, is both sampl
 \centerline{$z$ \includegraphics[width=4in]{\images/deconvright}$y$}
 
 \vfill
-We can generate an image $y$ from noise $z$ where $p_\Phi(z)$ and $p_\Phi(y|z)$ are both samplable and computable.
-
-\slide{Image Generators}
-
-\centerline{$z$ \includegraphics[width=4in]{\images/deconvright}$y$}
+We can generate an image $y$ form noise $z$ where $p_\Phi(z)$ and $p_\Phi(y|z)$ are both samplable and computable.
 
 \vfill
 Typically $p_\Phi(z)$ is ${\cal N}(0,I)$ reshaped as $z[X,Y,J]$
 
-\vfill
-We can generate an image $y$ form noise $z$ where $p_\Phi(z)$ and $p_\Phi(y|z)$ are both samplable and computable.
 
 \anaslide{Assumptions}
 
 \bigskip
 \bigskip
-We assume models $P_\Phi(z)$ and $P_\Phi(y|z)$ are both samplable and computable.
+Even when $P_\Phi(z)$ and $P_\Phi(y|z)$ are samplable and computable we cannot typically compute $P_\Phi(y)$.
 
 \vfill
-When the assumptions hold we can sample from $P_\Phi(y)$ but we cannot typically compute $P_\Phi(y)$.
-
-\vfill
-In particular, for an image generator we cannot compute $P_\Phi(y)$.
+Specifically, for $P_\Phi(y)$ defined by a GAN generator we cannot compute $P_\Phi(y)$ for a test image $y$.
 
 \vfill
 Hence it is not obvious how to optimize the fundamental equation.
 
 $$\Phi^* = \argmin_\Phi\;E_{y \sim \pop}\;- \ln P_\Phi(y)$$
 
-\slide{Shifting the Difficulty}
+\slide{The Evidence Lower Bound (ELBO)}
 
-For any $z$ we have
-
-\vfill
+{\huge
 \begin{eqnarray*}
 P_\Phi(y) & = & \frac{P_\Phi(y)P_\Phi(z|y)}{P_\Phi(z|y)} \\
 \\
 \\
-& = & \frac{P_\Phi(z) P_\Phi(y|z)}{P_\Phi(z|y)}
+& = & \frac{P_\Phi(z) P_\Phi(y|z)}{P_\Phi(z|y)} \\
+\\
+\\
+\ln P_\Phi(y) & = & \ln \frac{P_\Phi(z) P_\Phi(y|z)}{P_\Phi(z|y)} \\
+\\
+\\
+& = & E_{z \sim Q_\Phi(z|y)}\;\ln \frac{P_\Phi(z) P_\Phi(y|z)}{P_\Phi(z|y)}
 \end{eqnarray*}
-
-\vfill
-The difficulty has now been shifted to estimating $P_\Phi(z|y)$ which remains intractable but is intuitively easier than estimating $P_\Phi(y)$.
+}
 
 \slide{The Evidence Lower Bound (The ELBO)}
 
@@ -198,55 +186,43 @@ We introduce a samplable and computable model $Q_\Phi(z|y)$ to approximate $P_\P
 
 \slide{The Variational Autoencoder (VAE)}
 
-$$\Phi^* = \argmin_\Phi E_{y\sim \pop,\;z \sim Q_\Phi(z|y)}\;\;\ln \frac{Q_\Phi(z|y)}{P_\Phi(z,y)}$$
+$$\Phi^* = \argmin_\Phi E_{y\sim \pop,\;z \sim Q_\Phi(z|y)}\;\;-\ln \frac{P_\Phi(z,y)}{Q_\Phi(z|y)}$$
 
 \slide{VAE generalizes EM}
 
-VAE:
-
-$$\Phi^* = \argmin_\Phi E_{y\sim \mathrm{Train},\;z \sim Q_\Phi(z|y)}\;\;\ln \frac{Q_\Phi(z|y)}{P_\Phi(z,y)}$$
+Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_\Phi(z|y)$ is samplable and computable.
+EM alternates exact optimization of $Q$ and $P$.
 
 \vfill
-EM:  Alternately optimize $Q$ then $P$.
+VAE: $\Phi^* = \argmin_\Phi E_{y\sim \mathrm{Train},\;z \sim Q_\Phi(z|y)}\;\;- \ln \frac{P_\Phi(z,y)}{Q_\Phi(z|y)}$
 
-$$\Phi^{\color{red} t+1} =  \argmin_\Phi\;E_{y \sim \mathrm{Train}}\;E_{z \sim P_{\Phi^{\color{red} t}}(z|y)}\; - \ln P_\Phi(z,y)$$
+\vfill
+EM: $\Phi^{\color{red} t+1} =  \argmin_\Phi\;E_{y \sim \mathrm{Train}}\;E_{z \sim P_{\Phi^{\color{red} t}}(z|y)}\; - \ln P_\Phi(z,y)$ \\
+\\
 \centerline{\hspace{1em} Update \hspace{6em} Inference \hspace{2.5em}~}
 \centerline{(M Step) \hspace{5em} (E Step) \hspace{1.5em}~}
-\centerline{Hold $Q$ fixed \hspace{4em} $Q^* = P_{\Phi^{\color{red} t}}$ \hspace{1.5em}~}
+\centerline{Hold $Q$ fixed \hspace{2.5em} $Q(z|y) = P_{\Phi^{\color{red} t}}(z|y)$ \hspace{0em}~}
 
-\slide{Hard VAEs}
-\vfill
-In hard EM we use $\argmax_z P_{\Phi^t}(z|y)$ rather than $E_{z \sim P_{\Phi^t}(z|y)}$.
+\slide{Hard EM relies on Closed Form $Q^*$}
 
-\vfill
-$K$-means is hard EM for mixtures of Gaussians (when all covariances matrices are fixed at $I$).
+EM: $\Phi^{\color{red} t+1} =  \argmin_\Phi\;E_{y,z \sim P_{\Phi^{\color{red} t}}(z|y)}\; - \ln P_\Phi(z,y)$
 
 \vfill
-By analogy with hard EM we can formulate a notion of a hard VAE.
-
-\slide{Hard VAEs}
-
-(Soft) VAE:
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\;\ln \frac{Q_\Phi(z|y)}{P_\Phi(z,y)} \\
-\\
-& = & \argmin_\Phi \left(E_{z\sim Q_\Phi(z|y)} \;-\ln P_\Phi(z,y)\right) - H(Q_\Phi(z|y))
-\end{eqnarray*}
+Hard EM: $\Phi^{\color{red} t+1} =  \argmin_\Phi\; E_{y, z = \argmax_z P_{\Phi^{\color{red} t}}(z|y)} \;- \ln P_\Phi(z,y)$
 
 \vfill
-Hard VAE:
-$$\Phi^* = \argmin_\Phi E_{z\sim Q_\Phi(z|y)} \;-\ln P_\Phi(z,y)$$
+This relies on $P_{\Phi^t}(z|y)$ being exactly computable so that the optimization over $Q$ in VAE has a closed form solution.
 
 \vfill
-For a hard VAE we have that $Q^*$ focuses on a single value.  Even for a soft VAE $Q$ can suffer from mode collapse.
+There does not seem to be a sensible ``hard VAE''.
 
 \slide{The Reparameterization Trick}
 
 \begin{eqnarray*}
-- \ln P_\Phi(y) & \leq & E_{z \sim Q_\Phi(z|y)}\;\ln \frac{Q_\Phi(z|y)}{P_\Phi(z)P_\Phi(y|z)} \\
+- \ln P_\Phi(y) & \leq & E_{z \sim Q_\Phi(z|y)}\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)} \\
 \\
 \\
-& = & E_\epsilon\;\ln \frac{Q_\Phi(z|y)}{P_\Phi(z)P_\Phi(y|z)}\;\;\;z := f_\Phi(y,\epsilon)
+& = & E_\epsilon\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)}\;\;\;z := f_\Phi(y,\epsilon)
 \end{eqnarray*}
 
 \vfill
@@ -309,22 +285,18 @@ Constrained Variational Framework, Higgins et al., ICLR 2017.
 \vfill
 The VAE:
 
-$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;\ln \frac{Q_\Phi(z|y)}{P_\Phi(z)P_\Phi(y|z)}$$
+$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)}$$
 
 \vfill
 The $\beta$-VAE:
 
-$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;\;\;\beta \ln \frac{Q_\Phi(z|y)}{P_\Phi(z)} - \ln P_\Phi(y|z)$$
+$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;\;\;-\beta\ln \frac{P_\Phi(z)}{Q_\Phi(z|y)} - \ln P_\Phi(y|z)$$
 
 \slide{The $\beta$-VAE}
 
-$\beta$-VAE: Learning Basic Visual Concepts With A
-Constrained Variational Framework, Higgins et al., ICLR 2017.
-
-\vfill
 The $\beta$-VAE:
 
-$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;\;\;\beta \ln \frac{Q_\Phi(z|y)}{P_\Phi(z)} - \ln P_\Phi(y|z)$$
+$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;\;\;-\beta \ln \frac{P_\Phi(z)}{Q_\Phi(z|y)} - \ln P_\Phi(y|z)$$
 
 \vfill
 The paper claims that taking $\beta > 1$ can prevent posterior collapse. More Later.
@@ -334,14 +306,14 @@ The paper claims that taking $\beta > 1$ can prevent posterior collapse. More La
 
 Noisy-Channel RDA
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{q_\Phi(z)} + \lambda \mathrm{Dist}(y,y_\Phi(z))\;\;z := f_\Phi(y,\epsilon)
+\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{q_\Phi(z)}{p_\Phi(z|y)} + \lambda \mathrm{Dist}(y,y_\Phi(z))\;\;z := f_\Phi(y,\epsilon)
 \end{eqnarray*}
 
 
 \vfill
 $\beta$-VAE
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\;\;\beta \ln \frac{q_\Phi(z|y)}{p_\Phi(z)} - \ln p_\Phi(y|z)\;\;\;z := f_\Phi(y,\epsilon)
+\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\;\;-\beta \ln \frac{p_\Phi(z)}{q_\Phi(z|y)} - \ln p_\Phi(y|z)\;\;\;z := f_\Phi(y,\epsilon)
 \end{eqnarray*}
 
 
@@ -352,34 +324,32 @@ Using $L_2$ distortion and $p_\Phi(y|z) \propto \exp(-||y - y_\Phi(z)||/(2\sigma
 \vfill
 Noisy-Channel RDA
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{q_\Phi(z)} + \lambda ||y - y_\Phi(z)||^2
+\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{p_\Phi(z|y)}{q_\Phi(z)} + \lambda ||y - y_\Phi(z)||^2
 \end{eqnarray*}
 
 \vfill
 $\beta$-VAE
 \begin{eqnarray*}
-\Phi^* & = & \argmin_{\Phi,\sigma} E_{y,\epsilon}\;\;\;\beta \ln \frac{q_\Phi(z|y)}{p_\Phi(z)} +\left(\frac{1}{2\sigma^2}\right)||y - y_\Phi(z)||^2 + \ln \sigma
+\Phi^* & = & \argmin_{\Phi,\sigma} E_{y,\epsilon}\;\;\;-\beta\ln \frac{p_\Phi(z)}{q_\Phi(z|y)} +\left(\frac{1}{2\sigma^2}\right)||y - y_\Phi(z)||^2 + \ln \sigma
 \end{eqnarray*}
 
 \slide{Gaussian Image Noise}
 
-for $p_\Phi(y|z) \propto \exp(-||y - y_\Phi(z)||/(2\sigma^2))$ we have
+$\beta$-VAE:
 
+$$\Phi^*,\sigma^*  =  \argmin_{\Phi,\sigma} E_{y,\epsilon} - \beta \ln \frac{p_\Phi(z)}{q_\Phi(z|y)} +\left(\frac{1}{2\sigma^2}\right)||y - y_\Phi(z)||^2 + \ln \sigma$$
+\\
 \vfill
-$\beta$-VAE
-\begin{eqnarray*}
-\Phi^* & = & \argmin_{\Phi,\sigma} E_{y,\epsilon}\;\;\;\beta \ln \frac{q_\Phi(z|y)}{p_\Phi(z)} +\left(\frac{1}{2\sigma^2}\right)||y - y_\Phi(z)||^2 + \ln \sigma \\
-\\
-\\
-\mbox{where}\;\;\sigma^* & = & \sqrt{E_{y,\epsilon}\; ||y - y_\Phi(z)||^2}
-\end{eqnarray*}
+where
+
+$$\sigma^*  =  \sqrt{E_{y,\epsilon}\; ||y - y_\Phi(z)||^2}$$
 
 
 \slide{Partial Optimization}
 
 Noisy-Channel RDA
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{q_\Phi(z)} + \lambda \mathrm{Dist}(y, y_\Phi(z)) \\
+\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{q_\Phi(z)}{p_\Phi(z|y)} + \lambda \mathrm{Dist}(y, y_\Phi(z)) \\
 \\
 q^*(z) & = & p_{\mathrm{pop}}(z) \;=\;E_{y \sim \mathrm{pop}}\;p_\Phi(z|y)
 \end{eqnarray*}
@@ -387,7 +357,7 @@ q^*(z) & = & p_{\mathrm{pop}}(z) \;=\;E_{y \sim \mathrm{pop}}\;p_\Phi(z|y)
 \vfill
 $\beta$-VAE
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\;\;\beta \ln \frac{q_\Phi(z|y)}{p_\Phi(z)} - \ln p_\Phi(y|z) \\
+\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\;\;-\beta \ln \frac{p_\Phi(z)}{q_\Phi(z|y)} - \ln p_\Phi(y|z) \\
 \\
 p^*(z) & = & p_{\mathrm{pop}}(z) \;=\; E_{y \sim \mathrm{pop}}\;q_\Phi(z|y)
 \end{eqnarray*}
@@ -403,7 +373,7 @@ Noisy-Channel RDA
 \vfill
 $\beta$-VAE
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;\;\; \beta I(y,z) - E_{y,\epsilon}\;\ln p_\Phi(y|z)
+\Phi^* & = & \argmin_\Phi \;\;\; \beta I(y,z) + E_{y,\epsilon}\;-\ln p_\Phi(y|z)
 \end{eqnarray*}
 
 \vfill
@@ -412,41 +382,28 @@ where the joint distribution on $y$ and $z$ is determined by $\mathrm{pop}(y)$ a
 \slide{Semantics of the $\beta$-VAE seems unclear}
 
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;\;\;\;\beta I(y,z) -  E_{y,\epsilon}\;\ln p_\Phi(y|z) \\
-\\
-& = & \beta I(y,z) + H(y|z)
+\Phi^* & = & \argmin_\Phi \;\;\;\;\beta I(y,z) +  E_{y,\epsilon}\;-\ln p_\Phi(y|z)
 \end{eqnarray*}
 
 \vfill
 We are minimizing the mutual information term.  To encourage large mutual information we should take $\beta < 1$ not $\beta > 1$ as recommended.
 
-\slide{A VAE for Images}
-
-Auto-Encoding Variational Bayes, Diederik P Kingma, Max Welling, 2013.
-
-\vfill
-$${\color{red}y \hspace{5em}  z_\Psi(y,\epsilon) \hspace{4em} z\;p_\Phi(z) \hspace{3em} \hat{y}_\Phi(z) \hspace{3em}||y - \hat{y}||^2}$$
-\centerline{\includegraphics[width=9in]{../images/Deconv}}
-
-\centerline{\Large [Hyeonwoo Noh et al.]}
-
-
 \slide{Gaussian VAEs} 
-$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(\tilde{z}|y)}{q_\Phi(\tilde{z})} + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}))$$
+$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{p_\Phi(z)p_\Phi(y|z)}{q_\Phi(z|y)}$$
 
 {\color{red}
 \begin{eqnarray*}
-\tilde{z}[i] & = & z_\Phi(y)[i] + \sigma_\Phi(y)\epsilon[i]\;\;\;\epsilon[i] \sim {\cal N}(0,1) \\
+z[i] & = & z_\Phi(y)[i] + \sigma_\Phi(y)\epsilon[i]\;\;\;\epsilon[i] \sim {\cal N}(0,1) \\
 \\
-p_\Phi(\tilde{z}[i]|y) & = & {\cal N}(z_\Phi(y)[i],\sigma_\Phi(y)[i]) \\
+q_\Phi(z[i]|y) & = & {\cal N}(z_\Phi(y)[i],\sigma_\Phi(y)[i]) \\
 \\
-q_\Phi(\tilde{z}[i]) & = & {\cal N}(\mu_q[i],\sigma_q[i]) \;\;\mbox{WLOG} = {\cal N}(0,1) \\
+p_\Phi(z[i]) & = & {\cal N}(\mu_p[i],\sigma_p[i]) \;\;\mbox{WLOG} = {\cal N}(0,1) \\
 \\
 p_\Phi(y[i]|z) & = & {\cal N}(y_\Phi(z)[i],\;\sigma_\Phi(z)[i])
 \end{eqnarray*}
 }
 
-\slide{Sampling}
+\slide{VAEs 2013}
 
 \centerline{Sample {\color{red} $z \sim {\cal N}(0,I)$} and compute {\color{red} $y_\Phi(z)$}}
 
@@ -454,51 +411,58 @@ p_\Phi(y[i]|z) & = & {\cal N}(y_\Phi(z)[i],\;\sigma_\Phi(z)[i])
 \centerline{\includegraphics[width = 4in]{../images/VariationalFaces}}
 \centerline{[Alec Radford]}
 
+\slide{VQ-VAE-2, June 2019}
+
+\centerline{\includegraphics[width = 8in]{\images/VQ-VAE22}}
+
+\vfill
+VQ-VAE-2, Razavi et al. June, 2019
+
+\slide{VQ-VAE-2, June 2019}
+
+\centerline{\includegraphics[width = 10in]{/users/davidmcallester/tex/images/VQ-VAE21}}
+
+\vfill
+VQ-VAE-2, Razavi et al. June, 2019
+
+
 \slide{Vector Quantized VAEs (VQ-VAE)}
 
-Neural Discrete Representation Learning, van den Ord et al., ArXiv 1711.00937, Neurips 2017.
-
-\vfill
-Generating Diverse High-Fidelity Images
-with VQ-VAE-2, Razavi et al, arXiv 1906.00446
-
-\vfill
 VQ-VAEs effectively perform $k$-means on vectors in the model so as to represent vectors by discrete cluster centers.
-
-\slide{Vector Quantized VAEs (VQ-VAE)}
 
 \vfill
 For concreteness we will consider VQ-VAEs on images with a single layer of quantization.
 
 \vfill
-We will use $s$ (for signal) to denote images.
+We use $x$ and $y$ for spatial image coordinates and use $s$ (for signal) to denote images.
 
 \slide{VQ-VAE Encoder-Decoder}
 
 We train a dictionary $C[K,I]$ where $C[k,I]$ is the center vector of cluster $k$.
-
-\vfill
 \begin{eqnarray*}
 L[X,Y,I] & = & \mathrm{Enc}_\Phi(s) \\
 \\
-k[x,y] & = & \argmin_k \;||L[x,y,I] - C[k,I]|| \\
+z[x,y] & = & \argmin_k \;||L[x,y,I] - C[k,I]|| \\
 \\
-\hat{L}[x,y,I] & = & C[k[x,y],I] \\
+\hat{L}[x,y,I] & = & C[z[x,y],I] \\
 \\
 \hat{s} & = & \mathrm{Dec}_\Phi(\hat{L}[X,Y,I])
 \end{eqnarray*}
+
+\vfill
+The ``symbolic image'' $z[X,Y]$ is the latent variable.
 
 \slide{VQ-VAE Training Loss}
 
 We will interpret the VQ-VAE as a noisy-channel RDA.
 
-$$\Phi^*  =  \argmin_\Phi E_s\;I(s,k) + \lambda\mathrm{Dist}(s,\hat{s})$$
+$$\Phi^*  =  \argmin_\Phi E_s\;I(s,z) + \lambda\mathrm{Dist}(s,\hat{s})$$
 
 \vfill
-The mutual information $I(s,k)$ is limited by the entropy of $k[X,Y]$ which can be no larger than $\ln K^{XY} = XY\ln K$.
+The mutual information $I(s,z)$ is limited by the entropy of $z[X,Y]$ which can be no larger than $\ln K^{XY} = XY\ln K$.
 
 \vfill
-Maximizing $I(s,k)$ subject to this upper bound should reduce the distortion by providing the decoder with adequate information
+Maximizing $I(s,z)$ subject to this upper bound should reduce the distortion by providing the decoder with adequate information
 about the image.
 
 \slide{VQ-VAE Training Loss}
@@ -507,7 +471,7 @@ We preserve information about the image $s$ by minimizing the distortion between
 
 \vfill
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_s\; \sum_{x,y} ||L[x,y,I] - \hat{L}[x,y,I]||^2 + \lambda \mathrm{Dist}(s,\hat{s})
+\Phi^* & = & \argmin_\Phi \;E_s\; \sum_{x,y} \beta||L[x,y,I] - \hat{L}[x,y,I]||^2 + ||s -\hat{s}||^2
 \end{eqnarray*}
 
 \vfill
@@ -515,58 +479,65 @@ This is a two-level rate-distortion auto-encoder where the rate is ultimately go
 
 \slide{VQ-VAE Training Loss}
 
-Unfortunately the latent variable $k[X,Y]$ is discrete and has no gradient.  Hence some approximation must be used.  They use:
+Unfortunately the latent variable $z[X,Y]$ is discrete and has no gradient.  Hence some approximation must be used.  They use:
 
 \begin{eqnarray*}
-L[x,y,I].\grad & = & \hat{L}[x,y,I].\grad \\
+\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \hat{L}[x,y,I].\grad \\
 \\
-C[k,I].\grad & = & \beta \sum_{x,y: k[x,y] = k}\;(C[k,I] - L[x,y,I])
+\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \beta({L}[x,y,I]- C[z[x,y],I]) \\
+\\
+\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & C[z[x,y],I] - L[x,y,I]
 \end{eqnarray*}
 
 \slide{VQ-VAE Training Loss}
 
 \begin{eqnarray*}
-L[x,y,I].\grad & = & \hat{L}[x,y,I].\grad \\
-\\
-C[k,I].\grad & = & \beta \sum_{x,y: k[x,y] = k}\;(C[k,I] - L[x,y,I])
+\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \hat{L}[x,y,I].\grad
 \end{eqnarray*}
 
 \vfill
-The first equation is the ``straight through'' gradient.  This makes sense for low distortion between $L[X,Y,I]$ and $\hat{L}[X,Y,I]$.
+This is the ``straight through'' gradient.  This makes sense for low distortion between $L[X,Y,I]$ and $\hat{L}[X,Y,I]$.
+
+\slide{VQ-VAE Training Loss}
+
+\begin{eqnarray*}
+\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \beta({L}[x,y,I]- C[z[x,y],I]) \\
+\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & C[z[x,y],I] - L[x,y,I]
+\end{eqnarray*}
 
 \vfill
-If the second gradient is zero then $C[k,I]$ is the mean of the vectors assigned to $k$.  Then $C[K,I]$ is a minimizer of the distortion
-between $L(X,Y,I)$ and $\hat{L}(X,Y,I)$.
+This is the gradient of the loss term $\beta||L[x,y,I] - \hat{L}[x,y,I]||^2$ which equals $\beta||L[x,y,I] - C[z[x,y],I]||^2$.
+
+\vfill
+The absense of the weight $\beta$ in the gradient update for $C[K,I]$ is equivalent to using a different learning rate for these parameters.
+Giving different parameters different learning rates does not change the optimum (the stationary points).
+
+\slide{VQ-VAE Training Loss}
+
+\begin{eqnarray*}
+\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \beta({L}[x,y,I]- C[z[x,y],I]) \\
+\\
+\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & C[z[x,y],I] - L[x,y,I]
+\end{eqnarray*}
+
+\vfill
+At a stationary point we get that $C[k,I]$ is the mean of the set of vectors $L[x,y,I]$ with $z[x,y] = k$ (as in $k$-means).
 
 \slide{Training Phase II}
 
-Once the model is trained we can sample images $s$ and compute the ``symbolic image'' $k[X,Y]$.
+Once the model is trained we can sample images $s$ and compute the ``symbolic image'' $z[X,Y]$.
 
 \vfill
-Given samples of symbolic images $k[X,Y]$ we can learn an auto-regressive model of these symbolic images using a pixalCNN.
+Given samples of symbolic images $z[X,Y]$ we can learn an auto-regressive model of these symbolic images using a pixalCNN.
 
 \vfill
-This yields a prior probability distribution $P_\Phi(k[X,Y])$ which provides a tighter upper bound on the rate.
+This yields a prior probability distribution $P_\Phi(z[X,Y])$ which provides a tighter upper bound on the rate.
 
 \vfill
 We can then measure compression and distortion for test images.  This is something GANs cannot do.
 
 \slide{Multi-Layer Vector Quantized VAEs}
 \centerline{\includegraphics[width =10in]{\images/VQ-VAE24}}
-
-\slide{VAEs in 2019}
-
-\centerline{\includegraphics[width = 8in]{\images/VQ-VAE22}}
-
-\vfill
-VQ-VAE-2, Razavi et al. June, 2019
-
-\slide{VAEs in 2019}
-
-\centerline{\includegraphics[width = 10in]{/users/davidmcallester/tex/images/VQ-VAE21}}
-
-\vfill
-VQ-VAE-2, Razavi et al. June, 2019
 
 \slide{Quantitative Evaluation}
 
@@ -590,6 +561,12 @@ Rate-distortion metrics also allow one to explore the rate-distortion trade-off.
 
 \vfill
 \centerline{\includegraphics[width = 10in]{\images/VQVAE2Scores}}
+
+\slide{Image Compression}
+
+\vfill
+\centerline{\includegraphics[width = 10in]{\images/VQgirl}}
+
 
 \slide{Vector Quantization (Emergent Symbols)}
 
@@ -650,6 +627,33 @@ Embedded symbols can be domain specific.
 Separating domain-general parameters from domain-specific parameters may improve transfer between domains.
 
 
+\slide{Unsupervised Machine Translation}
+
+We can treat the German sentence $z$ as a latent variable in a probability model of a English sentence $y$.
+
+$$\Phi^* = \argmin_\Phi\;E_{y,z \sim Q_\Phi(z|y)} \; \;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)}$$
+
+\vfill
+Here $P_\Phi(z)$ can be a trained language model for German and $P_\Phi(y|z)$ and $Q_\Phi(z|y)$ are translation models.
+
+\slide{Unsupervised Machine Translation}
+
+$$\Phi^* = \argmin_\Phi\;E_{y,z \sim Q_\Phi(z|y)} \; \;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)}$$
+
+\vfill
+This will be subject to mode collapse.  $P_\Phi(y|z)$ will collapse to an unconditional language model of English.
+
+\vfill
+We can model the distribution of English directly better than we can model it with German as a latent variable.
+
+\slide{Unsupervised Machine Translation}
+
+In practice we use ``backtranslation''
+
+$$\Phi^* = \argmin_\Phi\;\begin{array}{ll} & E_{y,z \sim Q_\Phi(z|y)} \; \;-\ln P_\Phi(y|z) \\ \\ + & E_{y,z \sim P_\Phi(z|y)} \; \;-\ln Q_\Phi(y|z) \end{array}$$
+
+\vfill
+Is there some theoretical justification for this?
 
 \slide{Final Thought: Attention and Latent Variables}
 
