@@ -3,8 +3,8 @@
 \parindent = 0em
 \parskip = 1ex
 
-\newcommand{\solution}[1]{}
-%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
 
 \begin{document}
 
@@ -17,23 +17,26 @@
 
 \bigskip
 \bigskip
-{\bf Problem 1.} This problem is class-conditional GANs.  Here we consider a dataset, such as imagenet, consisting of a set of pairs where each pair
-consists of a image and class label.  In class-conditional GAN we view the class label as the input $x$ and the image as the thing to be predicted $y$.
-Obviously there is a lot of variation in the images that can be labeled as a dog.  In a class-conditional GAN we build a model $P_\Phi(y|x)$ where $x$ is a class
-label and $y$ is an image.
+~{\bf Problem 1. Conditional GANs}  In a conditional GAN
+we model a conditional distribution $\pop(y|x)$ defined by a population distribution on pairs $\tuple{x,y}$.
+For conditional GANs we consider the probability distribution over triples
+$\tuple{x,y,i}$ defined by
+\begin{eqnarray*}
+\tilde{P}_\Phi(i = 1) & = & 1/2 \\
+\tilde{P}_\Phi(y|x,i=1) & =&  \popd(y|x) \\
+\tilde{P}_\Phi(y|x,i=-1) & = & p_\Phi(y|x)
+\end{eqnarray*}
 
 \medskip
-(a) Write the conditional classification GAN adversarial objective function for this problem in terms of $P_\Phi(y|x)$ and $P_\Psi(i|y,x)$.
+(a)  Write the conditional GAN adversarial objective function for this problem in terms of $\tilde{P}(x,y,i)$, $P_\Phi(y|x)$ and $P_\Psi(i|y,x)$.
 
-\medskip
-(b) Let $\hat{y}_\Phi(z)$ be the image output by a deconvolution CNN given a noise tensor input $z$.  Describe a noise distribute on a
-tensor $z$ that would be appropriate for
-sampling from $P_\Phi(y|x)$ when $x$ is a class label.
-
+\solution{
+$$\Phi^* = \argmax_\Phi\;\min_\Psi \;E_{x,y,i \sim \tilde{P}(x,y,i)}\;\;-\ln P_\Psi(i|x,y)$$
+}
+ 
 \bigskip
-{\bf Problem 3. (25 points)}
+{\bf Problem 2. GAN instability}
 
-This problem is on the instability of adversarial objectives.
 Consider the following adversarial objective where $x$ and $y$ are scalars (real numbers).
 
 $$\max_x\;\min_y \;xy$$
@@ -49,7 +52,6 @@ $$\max_x\;\min_y \;xy$$
   \end{eqnarray*}
 }
 
-      
 \medskip
 (b) Give a general solution to your differential equation. (Hint: It goes in a circle).  You solution should have parameters
 allowing for any given initial value of $x$ and $y$.
@@ -65,61 +67,38 @@ allowing for any given initial value of $x$ and $y$.
 
 
 \bigskip
-{\bf Problem 4. (25 points)}
+{\bf Problem 3. Contrastive GANs.}
 
-This problem is on contrastive GANs.
-
-Define the distribution $P\hookrightarrow Q^k$ to be the result of drawing one ``positive'' from $P$ and $k$ IID ``negatives'' from $Q$;
-then inserting the positive at a random position among the negatives; and returning $(i,y_1,\ldots,y_{N+1})$ where
-$i$ is the index of the positive.
-
-Consider a contrastive GAN.
-
-$$\Phi^* = \argmin_\Phi \max_\Psi \;E_{(i,y_1,\ldots,y_{N+1}) \sim (\popd \hookrightarrow p_\Phi^k)} \ln p_\Psi(i|y_1,\ldots,y_{N+1}) \;\;\;(1)$$
-
-Here the objective function has been negated so that we have a min-max
-problem rather than a max-min problem.
+A GAN can be built with a ``contrastive'' discriminator.  Rather than
+estimate the probability that $y$ is from the population, the
+discriminator must select which of $y_1,\ldots,y_N$ is from the
+population.
 
 \medskip
-(a) Convert the above equation to a conditional contrastive GAN for modeling $p_\Phi(y|x)$ rather than $p_\Phi(y)$ trained by the above equation.
-Your solution should have the property that the optimum assuming universality is the true conditional distribution $\popd(y|x)$.
+More formally, for $N \geq 2$ let $\tilde{P}_\Phi^{(N)}$ be the distribution on tuples $\tuple{i,y_1,\ldots,y_N}$ defined by drawing one
+``positive'' from $\pop$ and $N-1$ IID negatives from $P_\Phi$; then
+inserting the positive at a random position among the negatives; and
+returning $(i,y_1,\ldots,y_N)$ where $i$ is the index of the positive.
+
+$$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y_1,\ldots,y_{N+1}) \sim \tilde{P}_\Phi^{(N)}}\; - \ln p_\Psi(i|y_1,\ldots,y_{N+1}) \;\;\;(1)$$
+
+\medskip
+Restate the above definition of $\tilde{P}_\Phi^{(N)}$ and the GAN adversarial objective for the case of conditional constrastive GANs.
 
 \solution{
+
+  For $N \geq 2$ let $\tilde{P}_\Phi^{(N)}$ be the distribution on tuples $\tuple{i,y_1,\ldots,y_N,x}$ defined by drawing a pair $\tuple{x,y}$ from $\pop$,
+  where $y$ is a positive sample of $\pop(y|x)$,
+  drawing IID negatives from $P_\Phi(y|x)$; then
+  inserting the positive at a random position among the negatives; and
+  returning $(i,y_1,\ldots,y_N,x)$ where $i$ is the index of the positive.
+
   $$\Phi^* = \argmin_\Phi \max_\Psi E_{x \sim \popd} \; \;E_{(i,y_1,\ldots,y_{N+1}) \sim (\popd(y|x) \hookrightarrow p_\Phi(y|x)^k)} \ln p_\Psi(i|y_1,\ldots,y_{N+1},x)$$
 }
 
-\medskip
-(b) It is shown in the slides that if we restrict $p_\Psi(i|y_1,\ldots,y_{N+1})$ to be
-computed from a softmax of a score $s_\Phi(y)$, and assume universality, we have
-$$p_{\Psi^*}(i|y_1,\ldots,y_{N+1}) = \softmax_i \;\ln \frac{\popd(y_i)}{p_\Phi(y_i)}$$
-Given this property of $\Psi^*$, show
-\begin{eqnarray*}
-  && E_{(i,y_1,\dots,y_{N+1}) \sim \popd\hookrightarrow p_\Phi^N}\;\ln p_{\Psi^*}(i|y_1,\ldots,y_{N+1}) \\
-  \\
-  & \leq & \frac{N}{N+1}(KL(\popd,p_\Phi) + KL(p_\Phi,\popd)) + \ln \frac{1}{N+1}
-\end{eqnarray*}
-Note that if $p_\Phi = \popd$ then $P(i|y_1,\ldots,y_{N+1}) = \frac{1}{N+1}$ in which case this bound is tight.
-
-\solution{
-  \begin{eqnarray*}
-    & & E_{(i,y_1,\ldots,y_{N+1}) \sim \popd \hookrightarrow p_\Phi^N}\;\ln p_{\Psi^*}(i|y_1,\ldots,y_{N+1}) \\
-    \\
-    & = & E_{(i,y_1,\ldots,y_{N+1}) \sim \popd\hookrightarrow p_\Phi^N}\;\ln \left(\softmax_i \;\ln \frac{\popd(y_i)}{p_\Phi(y_i)}\right)[i] \\
-    \\
-    & = & E_{(i,y_1,\ldots,y_{N+1}) \sim \popd\hookrightarrow p_\Phi^N}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \ln\left(\sum_i \frac{\popd(y_i)}{p_\Phi(y_i)} \right) \\
-    \\
-    & = & E_{(i,y_1,\ldots,y_{N+1}) \sim \popd\hookrightarrow p_\Phi^N}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \ln\left(\frac{1}{N+1}\sum_i \frac{\popd(y_i)}{p_\Phi(y_i)} \right) - \ln\;(N+1) \\
-    \\
-    & \leq & E_{(i,y_1,\ldots,y_{N+1}) \sim \popd\hookrightarrow p_\Phi^N}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \frac{1}{N+1} \sum_i \ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \ln\;(N+1) \\
-    \\
-    & = & \frac{N}{N+1} E_{y \sim \popd} \ln \frac{\popd(y)}{p_\Phi(y)} - \frac{N}{N+1} E_{y \sim p_\Phi} \ln \frac{\popd(y)}{p_\Phi(y)} - \ln\;(N+1) \\
-    \\
-    & = & \frac{N}{N+1}(KL(\popd,p_\Phi) + KL(p_\Phi,\popd)) - \ln\;(N+1) \\
-  \end{eqnarray*}
-
-  
-\bigskip
-{\bf Problem 1. 25 points.}  Consider a population distribution $\pop$ and subset $S$ of its support. Let $\pop_S$ be the restriction of $\pop$ to the set $S$.
+\ignore{
+~{\bf Problem 4. Jensen-Shannon Divergence}
+Consider a population distribution $\pop$ and subset $S$ of its support. Let $\pop_S$ be the restriction of $\pop$ to the set $S$.
 \begin{eqnarray*}
   \pop_S(y) & = & \frac{1}{\pop(S)}\left\{\begin{array}{ll} \pop(y) & \mbox{for $y \in S$} \\ 0 & \mbox{otherwise} \end{array}\right.
 \end{eqnarray*}
@@ -128,7 +107,7 @@ $$\mathrm{JS}(P,Q) = \frac{1}{2}\left(\mathrm{KL}\left(P,\frac{P+Q}{2}\right) + 
 Where for distributions $P$ and $Q$ we define $P+Q$ by the equation $(P+ Q)(y) = P(y)+Q(y)$.
 
 \medskip
-(a) 10 points. Solve for
+(a) Solve for
 $$\mathrm{KL}\left(\pop_S,\frac{\pop+\pop_S}{2}\right)$$
 in terms of the probability mass $\pop(S)$ of the set $S$.  Your solution should have the form
 $\ln 2 - \ln (1 + \epsilon)$ where $\epsilon$ is a function of $P(S)$ with $0 \leq \epsilon \leq 1$.
@@ -145,7 +124,7 @@ $\ln 2 - \ln (1 + \epsilon)$ where $\epsilon$ is a function of $P(S)$ with $0 \l
   \end{eqnarray*}
 }
 
-(b) 5 points. Solve for
+(b) Solve for
 $$\mathrm{KL}\left(\pop,\frac{\pop+\pop_S}{2}\right)$$
 in terms of the probability mass $\pop(S)$ of the set $S$.  Your solution should have the form $\ln 2 - \epsilon \ln (\epsilon + 1)/\epsilon$
 for $\epsilon$ a function of  $P(S)$ with $0 \leq \epsilon \leq 1$.
@@ -167,7 +146,7 @@ Hint: Write the KL-divergence as $P(S)E_{y \sim P(y|y\in S)} [\ldots] + (1-P(S))
 }
 
 \medskip
-(c) 5 points. For $\epsilon << 1$ we have $\ln(1+ \epsilon) \approx \epsilon$ and $\ln(1+ \epsilon)/\epsilon \approx \ln(1/\epsilon)$.  Apply these approximation
+(c) For $\epsilon << 1$ we have $\ln(1+ \epsilon) \approx \epsilon$ and $\ln(1+ \epsilon)/\epsilon \approx \ln(1/\epsilon)$.  Apply these approximation
 to get an approximate value for $\mathrm{JS}(\pop_S,\pop)$ for small values of $P(S)$.
 
 \solution{
@@ -181,17 +160,5 @@ to get an approximate value for $\mathrm{JS}(\pop_S,\pop)$ for small values of $
     \epsilon & = & \pop(S)
   \end{eqnarray*}
 }
-
-\medskip
-(d) 5 points. Given Your answer to (c), does the Jensen-Shannon divergence analysis of GANs indicate that the generator will suffer from collapse to a low-probability mode $S$.
-Explain your answer.
-
-\solution{
-  The analysis in part (c) indicates that any serious mode collapse will lead to a nearly maximal JS-divergence.  So mode collapse should not occur.  But the JS analysis is highly suspect ---
-  copying the training data is a serious mode collapse and would fool the discriminator.
-
-  \medskip
-  As the real situation is unclear and any attempt to answer this receives full credit for thinking about it.}
-
 }
 \end{document}
