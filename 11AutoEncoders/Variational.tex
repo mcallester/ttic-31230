@@ -184,10 +184,6 @@ We introduce a samplable and computable model $Q_\Phi(z|y)$ to approximate $P_\P
 \end{eqnarray*}
 }
 
-\slide{The Variational Autoencoder (VAE)}
-
-$$\Phi^* = \argmin_\Phi E_{y\sim \pop,\;z \sim Q_\Phi(z|y)}\;\;-\ln \frac{P_\Phi(z,y)}{Q_\Phi(z|y)}$$
-
 \slide{VAE generalizes EM}
 
 Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_\Phi(z|y)$ is samplable and computable.
@@ -214,7 +210,7 @@ Hard EM: $\Phi^{\color{red} t+1} =  \argmin_\Phi\; E_{y, z = \argmax_z P_{\Phi^{
 This relies on $P_{\Phi^t}(z|y)$ being exactly computable so that the optimization over $Q$ in VAE has a closed form solution.
 
 \vfill
-There does not seem to be a sensible ``hard VAE''.
+For a ``hard VAE'' we need some way of training $Q$ other than sampling from it (see the slides on VQ-VAE).
 
 \slide{The Reparameterization Trick}
 
@@ -290,22 +286,30 @@ We introduce a latent segmentation into the model.
 In practice the latent segmentation is likely to ``collapse'' because the colorization can be done just as well without it.
 
 
-\slide{Optimizing the VAE leaves $I(y,z)$ undetermined}
+\slide{Independent Universality}
+
+$$\Phi^* = \argmin_\Phi E_{y\sim \pop,\;z \sim Q_\Phi(z|y)}\;\;-\ln \frac{P_\Phi(z,y)}{Q_\Phi(z|y)}$$
 
 \vfill
-Complete optimization gives $P_\Phi(y) = \pop(y)$.  But this does not determine $Q_\Phi(z|y)$.
+It is natural to assume  that $\Phi$ has independent parameters for each distribution.  In practice parameters are often shared.
 
 \vfill
-At complete optimization the value of the objective function is $H(y)$.  But we have
+Since $\Phi$ can indepedently parameterize each distribution, we will often use an independent universality assumption
+that $\Phi$ can represent any triple of distributions $Q(z|y)$, $P(z)$ and $P(y|z)$.
+
+
+\slide{Independent Universality}
+
+More formally, we will often assume that for any triple of distributions $Q(z|y)$, $P(z)$ and $P(y|z)$ there exists a $\Phi$ that {\color{red} simultaneously} satisfies
+
+\begin{eqnarray*}
+Q_\Phi(z|y) & = & Q(z|y) \\
+P_\Phi(z) & = & P(z) \\
+P_\Phi(y|z) & = & P(y|z)
+\end{eqnarray*}
 
 \vfill
-$$H(y) = I(y,z) +       H(y|z)$$
-
-\vfill
-The VAE operates on the joint distribution on $y$ and $z$ determined by $\pop(y)$ and $Q_\Phi(z|y)$.
-
-\vfill
-Posterior collapse is the case of $I(y,z) = 0$.
+This assumption allows each distribution to be independently optimized while holding the others fixed.
 
 \slide{The $\beta$-VAE}
 
@@ -313,25 +317,39 @@ $\beta$-VAE: Learning Basic Visual Concepts With A
 Constrained Variational Framework, Higgins et al., ICLR 2017.
 
 \vfill
+The $\beta$-VAE introduces a parameter $\beta$ allow control of the rate-distortion trade off.
+
+\slide{Indeterminacy of the VAE}
+
 VAE: $\Phi^* = \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{P_\Phi(z)}{Q_\Phi(z|y)} - \ln P_\Phi(y|z)$
 
 \vfill
-Assuming universality the we have $P^*(z) = P_\popd(z) = E_y \;Q(z|y)$ and $P^*(y|z) = P^*_\popd(y|z) \propto P(y,z) = \pop(y)Q_\Phi(z|y)$.
+Assuming independent universality we can optimize $P_\Phi(z)$ and $P_\Phi(y|z)$ while holding $Q_\Phi(z|y)$ fixed.
+This gives
 
-\vfill
-VAE: $\Phi^* = \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{P_\popd(z)}{Q_\Phi(z|y)} - \ln P_\popd(y|z)$
+\begin{eqnarray*}
+P^*(z) & = & = P_\popd(z) = E_y \;Q(z|y) \\
+\\
+P^*(y|z) & = & P^*_\popd(y|z) \propto P(y,z) = \pop(y)Q_\Phi(z|y)
+\end{eqnarray*}
 
-\slide{The $\beta$-VAE}
+\slide{Indeterminacy of the VAE}
 
 \begin{eqnarray*}
 \Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{P_\popd(z)}{Q_\Phi(z|y)} - \ln P_\popd(y|z) \\
 \\
-& = & \argmin_\Phi I_\Phi(y,z) - H_\Phi(y|z) \\
+& = & \argmin_\Phi \;\;\;I_\Phi(y,z)\; - \; H_\Phi(y|z) \\
 \\
-& = & \argmin_\Phi H_\popd(y)\;\;\;\mbox{but $H_\popd(y)$ is independent of $\Phi$!!}
+& = & \argmin_\Phi \;\;\;\;\; H_\popd(y)
 \end{eqnarray*}
 
-\slide{The $\beta$-VAE}
+\vfill
+But $H_\popd(y)$ is independent of $\Phi$.
+
+\vfill
+Any choice of $Q_\Phi(z|y)$ gives optimal modeling of $y$.
+
+\slide{Indeterminacy of the VAE}
 
 \begin{eqnarray*}
 \Phi^* & = & \argmin_\Phi \; I_\Phi(y,z) - H_\Phi(y|z)
@@ -356,10 +374,13 @@ To control $I(y,z)$ we introduce a weighting $\beta$
 For $\beta < 1$ we no longer have an upper bound on $H_\popd(y)$ but we can force the use of $z$ (avoid posterior collapse).
 
 \vfill
-For $\beta > 1$ the bound on $H_\pop(y)$ becomes weaker and the latent variables carry less information.  This may make the latent variables more interpretable.
+For $\beta > 1$ the bound on $H_\pop(y)$ becomes weaker and the latent variables carry less information.
 
 \slide{RDAs vs. $\beta$-VAEs}
 
+RDAs and $\beta$-VAEs are essentially the same.
+
+\vfill
 RDA: $\Phi^* = \argmin_\Phi E_{y,z \sim Q_\Phi(z|y)}\;-\ln \frac{P_\Phi(z)}{Q_\Phi(z|y)} + \lambda \mathrm{Dist}(y,y_\Phi(z))$
 
 \vfill
@@ -414,9 +435,9 @@ z[x,y] & = & \argmin_k \;||L[x,y,I] - C[k,I]|| \\
 \vfill
 The ``symbolic image'' $z[X,Y]$ is the latent variable.
 
-\slide{VQ-VAE Training Loss}
+\slide{VQ-VAE as an RDA}
 
-We will interpret the VQ-VAE as a noisy-channel RDA.
+We will interpret the VQ-VAE as an RDA.
 
 $$\Phi^*  =  \argmin_\Phi E_s\;I(s,z) + \lambda\mathrm{Dist}(s,\hat{s})$$
 
@@ -433,34 +454,18 @@ We preserve information about the image $s$ by minimizing the distortion between
 
 \vfill
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_s\; \sum_{x,y} \beta||L[x,y,I] - \hat{L}[x,y,I]||^2 + ||s -\hat{s}||^2
+\Phi^* & = & \argmin_\Phi \;E_s\; \beta||L[X,Y,I] - \hat{L}[X,Y,I]||^2 + ||s -\hat{s}||^2
 \end{eqnarray*}
 
 \vfill
-This is a two-level rate-distortion auto-encoder where the rate is ultimately governed by the size $K$ of the codebook $C[K,I]$.
+This is a two-level rate-distortion auto-encoder where the rate can be no larger than $XY\ln K$.
 
-\slide{VQ-VAE Training Loss}
+\slide{Parameter-Specific Learning Rates}
 
-Unfortunately the latent variable $z[X,Y]$ is discrete and has no gradient.  Hence some approximation must be used.  They use:
-
-\begin{eqnarray*}
-\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \hat{L}[x,y,I].\grad \\
-\\
-\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \beta({L}[x,y,I]- C[z[x,y],I]) \\
-\\
-\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & C[z[x,y],I] - L[x,y,I]
-\end{eqnarray*}
-
-\slide{VQ-VAE Training Loss}
-
-\begin{eqnarray*}
-\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \hat{L}[x,y,I].\grad
-\end{eqnarray*}
+$$||L[X,Y,I] - \hat{L}[X,Y,I]||^2 = \sum_{x,y}\;||L[x,y,I] - C[z[x,y],I]||^2$$
 
 \vfill
-This is the ``straight through'' gradient.  This makes sense for low distortion between $L[X,Y,I]$ and $\hat{L}[X,Y,I]$.
-
-\slide{VQ-VAE Training Loss}
+For the gradient of this they use
 
 \begin{eqnarray*}
 \mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \beta({L}[x,y,I]- C[z[x,y],I]) \\
@@ -468,31 +473,55 @@ This is the ``straight through'' gradient.  This makes sense for low distortion 
 \end{eqnarray*}
 
 \vfill
-This is the gradient of the loss term $\beta||L[x,y,I] - \hat{L}[x,y,I]||^2$ which equals $\beta||L[x,y,I] - C[z[x,y],I]||^2$.
+This gives a parameter-specific learning rate for $C[K,I]$.
 
 \vfill
-The absense of the weight $\beta$ in the gradient update for $C[K,I]$ is equivalent to using a different learning rate for these parameters.
-Giving different parameters different learning rates does not change the optimum (the stationary points).
+Parameter-specific learning rates do not change the stationary points (the points where the gradients are zero).
 
-\slide{VQ-VAE Training Loss}
+\slide{The Relationship to $K$-means}
 
 \begin{eqnarray*}
-\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \beta({L}[x,y,I]- C[z[x,y],I]) \\
-\\
 \mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & C[z[x,y],I] - L[x,y,I]
 \end{eqnarray*}
 
 \vfill
-At a stationary point we get that $C[k,I]$ is the mean of the set of vectors $L[x,y,I]$ with $z[x,y] = k$ (as in $k$-means).
+At a stationary point we get that $C[k,I]$ is the mean of the set of vectors $L[x,y,I]$ with $z[x,y] = k$ (as in $K$-means).
 
-\slide{A Running Average for $C[k,I]$}
+\slide{Straight Through Gradients}
+
+The latent variables are discrete so some approximation to SGD must be used.
+
+\vfill
+They use ``straight-through'' gradients.
+
+\begin{eqnarray*}
+\mathrm{for}\;x,y\;\;L[x,y,I].\grad & = & \hat{L}[x,y,I].\grad
+\end{eqnarray*}
+
+\vfill
+This assumes low distortion between $L[X,Y,I]$ and $\hat{L}[X,Y,I]$.
+
+\slide{A Suggested Modification}
+
+The parameter $\beta$ is paying two roles
+
+\vfill
+\begin{itemize}
+\item It controls the relative weight of the two distortion losses.
+
+\vfill
+\item It controls the learning rate adjustment for the codebook.
+\end{itemize}
+
+\vfill
+Shouldn't we have separate parameters for these two roles?
 
 \slide{Training Phase II}
 
 Once the model is trained we can sample images $s$ and compute the ``symbolic image'' $z[X,Y]$.
 
 \vfill
-Given samples of symbolic images $z[X,Y]$ we can learn an auto-regressive model of these symbolic images using a pixalCNN.
+Given samples of symbolic images $z[X,Y]$ we can learn an auto-regressive model of these symbolic images using a pixel-CNN.
 
 \vfill
 This yields a prior probability distribution $P_\Phi(z[X,Y])$ which provides a tighter upper bound on the rate.
