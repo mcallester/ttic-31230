@@ -13,7 +13,7 @@
 
 \bigskip
 
-\centerline{\bf Problems for Rate Distortion Autoencoders.}
+\centerline{\bf Problems for RDAs and VAEs}
 
 \bigskip
 \bigskip
@@ -94,7 +94,7 @@ We will write $P_\popd(z)$ for the marginal on $z$ under this distribution.
 $$P_\popd(z) = E_{y \sim \pop} \;P_\Phi(z|y)$$
 
 \medskip
-Based on the result from part (b) rewrite the definition of rate-distortion autoencoder to be a minimization over three independent models
+Based on the result from part (b) rewrite the above definition of rate-distortion autoencoder to be a minimization over three independent models
 $P_\Phi(z)$ and $P_\Phi(y|z)$ and $P_\Phi(z|y)$ (although these models share parameters we will assume that $\Phi$ is sufficiently rich that
 the models are independently optimizable).
 
@@ -141,7 +141,7 @@ for the case of $z_\Phi(y)[i] >> 1$.
 \begin{eqnarray*}
   & & KL(p_\Phi(z|y),p_\Phi(z)) \\
   \\
-  & = & E_{z \sim P_\Phi(z|y)}\;\ln\frac{p_\Phi(z_\Phi(y)}{p_\Phi(z)} \\
+  & = & E_{z \sim P_\Phi(z|y)}\;\ln\frac{p_\Phi(z_\Phi(y))}{p_\Phi(z)} \\
   \\
   & = & E_{z \sim P_\Phi(z|y)} \;\sum_i \ln \frac{1}{1/(s_{\mathrm{max}}z[i])} \\
   \\
@@ -160,8 +160,5 @@ for the case of $z_\Phi(y)[i] >> 1$.
   & \approx & \left(\sum_i \ln z_\Phi(y)[i] \right) + d \ln s_{\mathrm{max}} \;\;\;\mbox{for $z_\Phi(y)[i] >> 1$}
 \end{eqnarray*}
 }
-
-\medskip
-(b) Explain how these specifications model rounding down each number in $z_\Phi(y)$ to the nearest integer.
 
 \end{document}

@@ -495,7 +495,7 @@ The latent variables are discrete so some approximation to SGD must be used.
 They use ``straight-through'' gradients.
 
 \begin{eqnarray*}
-\mathrm{for}\;x,y\;\;L[x,y,I].\grad & = & \hat{L}[x,y,I].\grad
+\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \hat{L}[x,y,I].\grad
 \end{eqnarray*}
 
 \vfill
