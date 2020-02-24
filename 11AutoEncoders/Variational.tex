@@ -8,7 +8,7 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2019}
+  \centerline{David McAllester, Winter 2020}
   \vfill
   \vfil
   \centerline{Variational Autoencoders (VAEs)}
@@ -328,7 +328,7 @@ Assuming independent universality we can optimize $P_\Phi(z)$ and $P_\Phi(y|z)$ 
 This gives
 
 \begin{eqnarray*}
-P^*(z) & = & = P_\popd(z) = E_y \;Q(z|y) \\
+P^*(z) & = & = P_\popd(z) = E_y \;Q_\Phi(z|y) \\
 \\
 P^*(y|z) & = & P^*_\popd(y|z) \propto P(y,z) = \pop(y)Q_\Phi(z|y)
 \end{eqnarray*}
@@ -338,7 +338,7 @@ P^*(y|z) & = & P^*_\popd(y|z) \propto P(y,z) = \pop(y)Q_\Phi(z|y)
 \begin{eqnarray*}
 \Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{P_\popd(z)}{Q_\Phi(z|y)} - \ln P_\popd(y|z) \\
 \\
-& = & \argmin_\Phi \;\;\;I_\Phi(y,z)\; - \; H_\Phi(y|z) \\
+& = & \argmin_\Phi \;\;\;I_\Phi(y,z)\; + \; H_\Phi(y|z) \\
 \\
 & = & \argmin_\Phi \;\;\;\;\; H_\popd(y)
 \end{eqnarray*}
@@ -468,8 +468,8 @@ $$||L[X,Y,I] - \hat{L}[X,Y,I]||^2 = \sum_{x,y}\;||L[x,y,I] - C[z[x,y],I]||^2$$
 For the gradient of this they use
 
 \begin{eqnarray*}
-\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \beta({L}[x,y,I]- C[z[x,y],I]) \\
-\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & C[z[x,y],I] - L[x,y,I]
+\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & 2\beta({L}[x,y,I]- C[z[x,y],I]) \\
+\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & 2(C[z[x,y],I] - L[x,y,I])
 \end{eqnarray*}
 
 \vfill
@@ -481,7 +481,7 @@ Parameter-specific learning rates do not change the stationary points (the point
 \slide{The Relationship to $K$-means}
 
 \begin{eqnarray*}
-\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & C[z[x,y],I] - L[x,y,I]
+\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & 2(C[z[x,y],I] - L[x,y,I])
 \end{eqnarray*}
 
 \vfill

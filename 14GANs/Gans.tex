@@ -52,7 +52,7 @@ In the case of binary classification cross-entropy loss becomes the log loss of 
 \\
 & = & \argmin_\Psi \expectsub{(i,y) \sim \tilde{p}_\Phi}{\;\;\;\ln(1 + e^{-m}}) \\
 \\
-m & = & 2is_\Psi(i|y)\;\;\;\mbox{for $\begin{array}{rcl} s_\Psi(-1|y) & = & -s_\Psi(1|y) \\\;P_\Psi(i|y) & = & \softmax_i\;s_\Phi(i|y) \end{array}$}
+m & = & 2is_\Psi(i|y)\;\;\;\mbox{for $\begin{array}{rcl} s_\Psi(-1|y) & = & -s_\Psi(1|y) \\\;P_\Psi(i|y) & = & \softmax_i\;s_\Psi(i|y) \end{array}$}
 \end{eqnarray*}
 
 
@@ -455,7 +455,7 @@ $\tuple{x,y,i}$ by
 
 \slide{Adversarial Discrimination as an Additional Loss}
 
-$${\color{red} \Phi^* = \argmin_\Phi\;E_{(x,y) \sim \popd}\;\; ||x - y||^2\; + \; \lambda\; {\cal L}_{\mathrm{Discr}}(\Phi)}$$
+$${\color{red} \Phi^* = \argmin_\Phi\;E_{(x,y) \sim \popd}\;\; ||y- y_\Phi(x)||^2\; + \; \lambda\; {\cal L}_{\mathrm{Discr}}(\Phi)}$$
 
 \vfill
 $${\cal L}_\mathrm{Discr}(\Phi) = \max_\Psi \;E_{x,y,i \sim \tilde{p}_\Phi}\; \ln P_\Psi(i|y,x)$$

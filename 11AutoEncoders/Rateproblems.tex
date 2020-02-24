@@ -59,9 +59,9 @@ When measured in bits, this channel capacity has units of bits received per mess
 ~{\bf Problem 2. Rate-Distortion Autoencoders}
 
 (a)  Consider an arbitrary distribution $P(z,y)$. Show the variational equation
-$$I(y,z) = \inf_q\;E_{y\sim \popd} KL(P_\Phi(z|y),Q(z))$$
+$$I(y,z) = \inf_Q\;E_{y\sim P(y)} KL(P(z|y),Q(z))$$
 where $Q$ ranges over distributions on $z$.
-Hint: It suffices to show $$I(y,z) \leq \;E_y KL(P_\Phi(z|y),Q(z))$$
+Hint: It suffices to show $$I(y,z) \leq \;E_y KL(P(z|y),Q(z))$$
 and that there exists a $Q$ achieving equality.
 
 \solution{
@@ -73,13 +73,13 @@ and that there exists a $Q$ achieving equality.
 \\
 & = & E_{y,z\sim P(z|y)}\; \left(\ln \frac{P(z|y)}{{\color{red} Q(z)}} + \ln \frac{{\color{red} Q(z)}}{P(z)}\right) \\
 \\
-& = & E_{y \sim \popd}\;KL(P(z|y),Q(z)) + \left(E_{y \sim \popd,\;z\sim P(z|y)}\;\ln \frac{Q(z)}{P(z)}\right)
+& = & E_{y \sim P(y)}\;KL(P(z|y),Q(z)) + \left(E_{y \sim \popd,\;z\sim P(z|y)}\;\ln \frac{Q(z)}{P(z)}\right)
 \\
 & = & E_y\;KL(P(z|y),Q(z)) + E_{\color{red} z\sim P(z)}\;\ln \frac{Q(z)}{P(z)} \\
 \\
 & = & E_y\;KL(P(z|y),Q(z)) - KL(P(z),Q(z)) \\
 \\
-& \leq & E_{y \sim \popd}\; KL(P(z|y),Q(z))
+& \leq & E_{y \sim P(y)}\; KL(P(z|y),Q(z))
 \end{eqnarray*}
 
 Equality is achieved when $Q(z) = P(z)$.
@@ -88,7 +88,7 @@ Equality is achieved when $Q(z) = P(z)$.
 
 \medskip
 (b) Consider a rate-distortion autoencoder.
-$$\Phi^* = \argmin_\Phi\;I_\Phi(y,z) + \lambda E_{y \sim \popd,\;z \sim P_\Phi(z|y)}\;\mathrm{Dist}(y,y_\Phi(z)).$$
+$$\Phi^* = \argmin\;I_\Phi(y,z) + \lambda E_{y \sim \popd,\;z \sim P_\Phi(z|y)}\;\mathrm{Dist}(y,y_\Phi(z)).$$
 Here $I_\Phi(y,z)$ is defined by the distribution where we draw $y$ from $\popd$ and $z$ from $P_\Phi(z|y)$.
 We will write $P_\popd(z)$ for the marginal on $z$ under this distribution.
 $$P_\popd(z) = E_{y \sim \pop} \;P_\Phi(z|y)$$
@@ -125,7 +125,7 @@ This gives
 \end{eqnarray*}
 
 \medskip
-Assume That we have that $z_\Phi(y) \in [1,e^{s_{\mathrm{max}}}-1]^d$ so that with probability 1 over the draw of $\epsilon$ we have
+Assume that we have that $z_\Phi(y) \in [1,e^{s_{\mathrm{max}}}-1]^d$ so that with probability 1 over the draw of $\epsilon$ we have
 $\ln(z_\Phi(y) + \epsilon) \in [0,s_{\mathrm{max}}]$.
 
 \medskip
@@ -151,13 +151,13 @@ for the case of $z_\Phi(y)[i] >> 1$.
   \\
   & = & \left(\sum_i [z\ln z - z]_{z_\Phi(y)[i]}^{z_\Phi(y)[i]+1} \right) + d \ln s_{\mathrm{max}}
   \\
-  & = & \left(\sum_i [z\ln z]_{z_\Phi(y)[i]}^{z_\Phi(y)[i]+1} \right) + d \ln s_{\mathrm{max}} - 1 \\
+  & = & \left(\sum_i [z\ln z]_{z_\Phi(y)[i]}^{z_\Phi(y)[i]+1} \right) + d \ln s_{\mathrm{max}} - d \\
   \\
-  & = & \left(\sum_i \ln (z_\Phi(y)[i] + 1) + z_\Phi(y)[i](\ln (z_\Phi(y)[i] + 1) - \ln z_\Phi(y)[i]) \right) + d \ln s_{\mathrm{max}} - 1 \\
+  & = & \left(\sum_i \ln (z_\Phi(y)[i] + 1) + z_\Phi(y)[i](\ln (z_\Phi(y)[i] + 1) - \ln z_\Phi(y)[i]) \right) + d \ln s_{\mathrm{max}} - d \\
   \\
-  & = & \left(\sum_i \ln (z_\Phi(y)[i] + 1) + z_\Phi(y)[i]\ln \left(1+ \frac{1}{z_\Phi(y)[i]}\right) \right) + d \ln s_{\mathrm{max}} - 1 \\
+  & = & \left(\sum_i \ln (z_\Phi(y)[i] + 1) + z_\Phi(y)[i]\ln \left(1+ \frac{1}{z_\Phi(y)[i]}\right) \right) + d \ln s_{\mathrm{max}} - d \\
   \\
-  & \approx & \left(\sum_i \ln z_\Phi(y)[i] \right) + d \ln s_{\mathrm{max}} \;\;\;\mbox{for $z_\Phi(y)[i] >> 1$}
+  & \approx & \left(\sum_i \ln z_\Phi(y)[i] \right) + d \ln s_{\mathrm{max}} - d \;\;\;\mbox{for $z_\Phi(y)[i] >> 1$}
 \end{eqnarray*}
 }
 

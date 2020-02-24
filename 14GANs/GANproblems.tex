@@ -86,14 +86,7 @@ $$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y_1,\ldots,y_{N+1}) \sim \tilde{P}_\Ph
 Restate the above definition of $\tilde{P}_\Phi^{(N)}$ and the GAN adversarial objective for the case of conditional constrastive GANs.
 
 \solution{
-
-  For $N \geq 2$ let $\tilde{P}_\Phi^{(N)}$ be the distribution on tuples $\tuple{i,y_1,\ldots,y_N,x}$ defined by drawing a pair $\tuple{x,y}$ from $\pop$,
-  where $y$ is a positive sample of $\pop(y|x)$,
-  drawing IID negatives from $P_\Phi(y|x)$; then
-  inserting the positive at a random position among the negatives; and
-  returning $(i,y_1,\ldots,y_N,x)$ where $i$ is the index of the positive.
-
-  $$\Phi^* = \argmin_\Phi \max_\Psi E_{x \sim \popd} \; \;E_{(i,y_1,\ldots,y_{N+1}) \sim (\popd(y|x) \hookrightarrow p_\Phi(y|x)^k)} \ln p_\Psi(i|y_1,\ldots,y_{N+1},x)$$
+  $$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y_1,\ldots,y_{N+1},x) \sim \tilde{P}^{(N)}_\Phi} \ln - P_\Psi(i|y_1,\ldots,y_{N+1},x)$$
 }
 
 \ignore{
