@@ -57,14 +57,14 @@ Here $\mathrm{round}(z) \in {\cal Z}$ where ${\cal Z}$ is a discrete set of vect
 defined independent of the choice of $y$.  For example, rounding might map each real number in $z$ to the nearest integer
 as was done in Balle et al. 2017.
 Or rounding might map the vector $z$ to the nearest center vector resulting from $K$-means vector quantization as in VQ-VAE.  Other roundings are possible.
-The Rounding RDA corresponds to practical image compression where $-\log_2 P_\Phi(\mathrm{round}(z_\Phi(y)))$ is (approximately) the number of bits in the compressed file.
+The Rounding RDA corresponds to practical image compression where $-\log_2 P_\Phi(\mathrm{round}(z_\Psi(y)))$ is (approximately) the number of bits in the compressed file.
 
 (a) What is $\nabla_\Psi \ln P_\Phi(\mathrm{round}(z_\Psi(y))$? \solution{zero}
 
 (b) What is $\nabla_\Psi \mathrm{Dist}(y,y_\Phi(\mathrm{round}(z_\Psi(y))))$? \solution{zero}
 
 To optimize $\Psi$ Balle et al. used two tricks.
-They replaced $P_\Phi(\mathrm{round}(z_\Phi(y)))$ with $p_\Phi(z_\Phi(y))$ where $p_\Phi(z)$ is a continuous density,
+They replaced $P_\Phi(\mathrm{round}(z_\Psi(y)))$ with $p_\Phi(z_\Psi(y))$ where $p_\Phi(z)$ is a continuous density,
 and they replace the rounding operation with additive noise.  Although rounding will be used for image compression, gradient descent is then done on
 $$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi} E_{y,\epsilon}\;-\ln p_\Phi(z_\Psi(y)) + \lambda\mathrm{Dist}(y_\Phi(z_\Psi(y) + \epsilon))$$
 To model rounding to the nearest integer we take each dimension of $\epsilon$ to be drawn uniformly over the interval $(-1/2,1/2)$.
@@ -101,7 +101,7 @@ $$\Phi^*,\Psi^*,C^* = \argmin_{\Phi,\Psi,C}\;E_{y \sim \pop,\;\hat{L} :=\mathrm{
 In the VQ-VAE we are controlling the rate with the parameter $K$ giving the number of clusters.  In the optimization problem
 the prior term $P_\Phi(\hat{L})$ is being held as uniform over all $\hat{L}$ and can be ignored.  Assuming $L_2$ distortion we are then left with
 $$\Phi^*,\Psi^*,C^* = \argmin_{\Psi,\Psi,C} E_y \frac{1}{2}||y - y_\Phi(\mathrm{round}_C(L_\Psi(y)))||^2$$
-This has well defined gradients for $\Phi$ and $\Theta$ but, because of rounding, not for $\Psi$.
+This has well defined gradients for $\Phi$ and $C$ but, because of rounding, not for $\Psi$.
 We are now trying to minimize the expected loss of the following forward calculation where $L[P,I]$ is a sequence of vectors.
 \begin{eqnarray*}
   y & \sim & \pop \\
@@ -127,7 +127,7 @@ $$L.\grad\; \pluseq \; \hat{L}.\grad$$
 \begin{eqnarray*}
 L.\grad & \pluseq & \hat{L}.\grad \\
 L.\grad & \pluseq & \beta(L - \hat{L}) \\
-\mathrm{for}\;p\;\;C[k(p),I].\grad & \pluseq & \tilde{\eta}(C[k(p),I] - L[p,I])
+\mathrm{for}\;p\;\;C[k[p],I].\grad & \pluseq & \tilde{\eta}(C[k[p],I] - L[p,I])
 \end{eqnarray*}
 
 Actually, this has been modified from the published form to add a learning rate adjustment parameter $\tilde{\eta}$.
@@ -148,7 +148,7 @@ backpropagation to $L[P,I].\grad$
   L.\grad & \pluseq & \hat{L}.\grad \\
   \mathrm{for}\;p\;\;\;C[k[p],I].\grad & \pluseq & \hat{L}[p,I].\grad \\
 L.\grad & \pluseq & \beta(L - \hat{L}) \\
-\mathrm{for}\;t\;\;C[k(t),I].\grad & \pluseq & \beta(C[k(t),I] - L[t,I])
+\mathrm{for}\;p\;\;C[k(t),I].\grad & \pluseq & \beta(C[k(t),I] - L[p,I])
 \end{eqnarray*}
 
 Here any hyper-parameter for the learning rate for $C[K,I]$ must be handled elsewhere (in the optimizer).
