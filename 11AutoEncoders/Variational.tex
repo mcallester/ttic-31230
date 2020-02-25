@@ -184,6 +184,11 @@ We introduce a samplable and computable model $Q_\Phi(z|y)$ to approximate $P_\P
 \end{eqnarray*}
 }
 
+
+\slide{The Variational Auto-Encoder (VAE)}
+
+$$\Phi^* = \argmin_\Phi\; E_{y \sim \pop,\;z \sim Q_\Phi(z|y)}\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)}$$
+
 \slide{VAE generalizes EM}
 
 Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_\Phi(z|y)$ is samplable and computable.
