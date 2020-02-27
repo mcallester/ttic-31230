@@ -12,22 +12,42 @@
   \centerline{\bf Pretraining}
 
 
-\slide{Supervised Pretraining}
+\slide{Pretraining}
+
+We train a model on a large data set and then either use the model as features, or fine-tune the model, on a different problem typically with a smaller training set.
+
+\slide{Pretraining}
+Pretraining can be either supervised or self-supervised.
 
 \vfill
-We train a general purpose model and then fine tune that model on a different task.
+{\bf Supervised:} Trained on human annotations
+done explicitly for the purpose of training machine learning models.  Examples include imagenet training
+and training parsers on the Penn tree bank.
 
 \vfill
-This has been standard practice with Imagenet models since 2013.
+{\bf Self-Supervised:} Anything not involving human annotation. Examples include language modeling (e.g. BERT) and  image colorization.
+
+\slide{Pretraining}
+
+Pretraining is currently essential for achieving state of the art (SOTA) performance on both NLP and vision benchmarks.
 
 \vfill
-General Learning Algorithms vs. Learning General Knowledge.
+NLP SOTA uses language modeling (self-supervised) pretraining.
 
-\slide{Example: R-CNN, Girshick et al., Nov. 2013}
+\vfill
+Vision SOTA still uses ImageNet pretraining, although self-supervised pretraining is making advances.
 
-\centerline{\includegraphics[width=10.0 in]{../images/R-CNN}}
+\slide{ImageNet Pretraining in Vision}
 
-Note that Alexnet appeared on the scene at the ImageNet evaluation (ILSVRC2012) Oct. 2012.
+CBNet: A Novel Composite Backbone Network Architecture for Object Detection
+Liu et al., Sept. 2019 (COCO leader as of February 26, 2019).
+
+\vfill
+\begin{quotation}
+Generally speaking, in a typical CNN based object detector, a backbone network is used to extract basic features for detecting objects, which is usually designed for
+the image classification task and pretrained on the ImageNet
+dataset (Deng et al. 2009).
+\end{quotation}
 
 \slide{Instagram Pretraining, Mahajan et al., May 2018}
 
@@ -52,168 +72,209 @@ models trained from {\bf random initialization}.
 
 \centerline{\includegraphics[width=6.0 in]{../images/RethinkingPre}}
 
-\slide{Self-Supervised Pretraining}
+\slide{CBNet (COCO leader as of Feb, 2020)}
 
-We find some naturally occuring source of $(x,y)$ pairs and then treat it as a supervised learning problem.
+\centerline{\includegraphics[height=5.2 in]{\images/CBNet}}
+
+
+\slide{CBNet (COCO leader as of Feb, 2020)}
+
+\begin{quotation}
+We initialize each assembled backbone of CBNet with the pretrained model of the single backbone which is widely and
+freely available today, such as ResNet and ResNeXt
+\end{quotation}
+
+\slide{}
+
+\centerline{\bf Self-Supervised Feature Learning for Vision}
 
 \vfill
-We then initialize learning models the weights derived from pretraining.
+\vfill
+
+\slidetwo{Learning Representations for Colorization}{Larsson et al., 2016}
 
 \vfill
-We will consider inpainting and colorization.
+\centerline{\includegraphics[width = 5in]{../images/colorizationGreg2}}
+\centerline{$x$ \hspace{4em} $y_\Phi(x)$ \hspace{4em} $y$}
 
-\slidetwo{Feature Learning by Inpainting}{Pathak et al., April 2016}
+\vfill
+Trained to minimize $L_2$ image distortion between $y_\Phi(x)$ and $y$.
 
-$${\color{red} \Phi^* = \argmin_{\Phi}\; E_{(x,y) \sim \pop}\;||y - \hat{y}_\Phi(x)||^2 + \lambda \mathrm{Discr}(y,\hat{y}_\Phi(x))}$$
+\slide{Evaluation}
+
+Self-supervised representations (features) are tested by training a {\color{red} linear} classifier for ImageNet.
+
+\slidetwo{Self-Supervised Pretraining in Vision}{Feature Learning by Inpainting, Pathak et al., 2016}
 
 \centerline{\includegraphics[width = 3in]{../images/LearnRepInpa}}
 
-\slidetwoplain{Feature Learning by Inpainting}{Pathak et al., April 2016}
+Trained to minimize distortion between $y_\Phi(x)$ and $y$ and to {\color{red} maximize} discriminator loss for distinguishing $y_\Phi(x)$ from $y$.
 
-\centerline{\includegraphics[width = 9in]{../images/LearnRepINpb}}
-\centerline{Alexnet, Trained on Imagenet, Evaluated on PASCAL}
-\centerline{Image Count: {\color{red} Instagram 3.5G, ImageNet 14M, Pascal 5.7k}}
+\slide{Contrastive Predictive Coding (CPC)}
 
-\slidetwo{Learning Representations for Colorization}{Larsson et al., March 2016}
-
-{\color{red} $$\Phi^* = \argmin_\Phi \;E_{x,y \sim \pop}\; ||y - \hat{y}_\Phi(x)||^2$$}
+We consider a population distribution on pairs $\tuple{x,y}$.
 
 \vfill
-\centerline{\includegraphics[width = 6in]{../images/colorizationGreg2}}
+For example $x$ and $y$ might be video frames separated by 10 seconds in a video.
 
-\slidetwo{Learning Representations for Colorization}{Larsson et al., March 2016}
+\vfill
+For simplicity we will assume that the marginal distributions on $x$ and $y$ are the same --- the probability that an image occurs as a first frame
+is the same as the probability that image occurs as a second frame.
 
-\centerline{\includegraphics[width = 5in]{../images/LearnRepColorb}}
+\vfill
+In CPC we draw a pair $\tuple{x,y}$ and {\color{red} minimize} a discriminator loss for distinguishing $z_\Phi(y)$ from $z_\Phi(\tilde{y})$ for $\tilde{y} \sim \pop(y)$.
+The discriminator gets to see $x$.
 
-\slidetwo{Learning Representations for Colorization}{Larsson et al., March 2016}
+\slide{Contrastive Predictive Coding (CPC)}
 
-\centerline{\includegraphics[width = 5in]{../images/LearnRepColorc}}
-VGG-16, Pretrained on ImageNet evaluated on the PASCAL segmentation task.
-Images Counts: {\color{red} Instagram 3.5G, ImageNet 14M, Pascal 5.7k}.
-$X$ --- pretraining used, $Y$ ---pretrained with Labels, $C$ --- trained on PASCAL with color.
+For $N \geq 2$ let  $\tilde{P}^{(N)}$ be the distribution on tuples $\tuple{i,y_1,\ldots,y_N,x}$
+defined by the following process.
 
-\slidetwo{Adding a Discrimination Loss}{to a Noisy-Channel RDA}
+\begin{itemize}
+\item draw a pair $\tuple{x,y}$ from the population.
 
-{\color{red} $$P_\Phi(y,z) = \pop(y)P_\Phi(z|y)$$}
+\item drawn a sequence of $N-1$ ``distractor values'' from the marginal distribution $\pop(y)$.  These are unrelated to $x$.
+
+\item insert $y$ at a random position among the distractors to get the sequence
+$y_1,\ldots,y_N$.
+
+\item return the tuple $\tuple{i,y_1,\ldots,y_N,x}$ where $i$ is the index of $y$ among the distractors.
+\end{itemize}
+
+\slide{Contrastive Predictive Coding (CPC)}
 
 \begin{eqnarray*}
-\Phi^* & =  & \argmin_\Phi \left\{\begin{array}{l} I(y,z) \\
-+ \lambda_1\;E_{y,z}\;\mathrm{Dist}(y,\hat{y}_\Phi(z)) \\
-+ \lambda_2 \;E_{y,z}\;\mathrm{Discr}(y,\hat{y}_\Phi(z))\end{array}\right.
-\end{eqnarray*}
-
-\vfill
-This can be viewed as an RDA with a discrimination distortion, or as a GAN with a rate-distortion objective.
-
-\slidetwo{Adding a Discrimination Loss}{to a Conditional Noisy-Channel RDA}
-
-
-\vfill
-To model a class-conditional image distribution we might use the following where $x$ is a class label and $y$ is an image.
-
-{\color{red} $$P_\Phi(x,y,z) = \pop(x,y)P_\Phi(z|y,x)$$}
-
-\begin{eqnarray*}
-\Phi^* & =  & \argmin_\Phi E_{x,y,z}\;\;\left\{\begin{array}{l} KL(P_\Phi(z|y,x),P_\Phi(z|x)) \\
-+ \lambda_1\mathrm{Dist}(y,\;\hat{y}_\Phi(z)) \\
-+ \lambda_2 \mathrm{Discr}(y,\;\hat{y}_\Phi(z)\;|\;x)\end{array}\right.
-\end{eqnarray*}
-
-
-\slidetwo{Contrastive Predictive Coding (CPC)}{van den Oord et al., July 2018}
-
-\centerline{\includegraphics[height=3.5 in]{../images/MMI-PC}}
-
-We $x_1$, $\ldots$ $x_t$ and make predictions about $x_{t+1}$, $\ldots$, $x_{t+k}$
-
-\slidetwo{Contrastive Predictive Coding (CPC)}{van den Oord et al., July 2018}
-
-\centerline{\includegraphics[height = 2.0in]{../images/MMI-PC}}
-
-Rather than predict $x_{t+ \Delta t}$ we predict a feature vector $z_\Phi(x_t + \Delta t)$ from the feature vectors $z_\Phi(x_1)$, $\ldots$ $z_\Phi(x_t)$.
-
-\vfill
-We want the feature vector $z_\Phi(x)$ to carry the ``signal'' and drop the ``noise'' --- more later.
-
-\slide{CPC}
-
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi\;\;E_{x_1,\ldots,x_t,\ldots,x_{t+k}} \;\sum_{\Delta t} \;\lambda_{\Delta t}\; {\cal L}_\mathrm{CEN}(x_{t+\Delta t}) \\
+\Phi^*  & = & \argmin_\Phi\;{\cal L}_\mathrm{CPC}(\Phi) \\
 \\
-{\cal L}_{\mathrm{CEN}}(x_{t+\Delta t}) & = & E_{x_1,\ldots x_N \sim \pop^N}\\
+{\cal L}_\mathrm{CPC}(\Phi) &= & E_{\tuple{i,y_1,\ldots,y_N,x} \sim \tilde{P}^{(N)}} \\
 \\
-& & \;\;\;-\ln P_\Phi(i|c_t,\Delta t,z_\Phi(x_{t+\Delta t}) \hookrightarrow z_\Phi(x_1),\ldots,z_\Phi(x_N))
+& & ~\;\;\;\;\;\; -\ln P_\mathrm{CPC}(i|z_\Phi(y_1),\ldots,z_\Phi(y_N),z_\Phi(x))
 \end{eqnarray*}
 
-$$P_\Phi(i|c_t,\Delta t,z_1,\ldots,z_{N+1}) = {\color{red} \softmax_i\;z_iW_{\Delta t}\;c_t}$$
-
 \vfill
-The context $c_t$ and learned features $z_t$ must have {\color{red} linearly-extractable} information.
+$$P_\mathrm{CPC}(i|z_1,\ldots,z_N,z_x) = \softmax_i\;z_i^\top z_x$$
 
-\slide{Maximizing a Lower Bound on Mutual Information}
-
-\centerline{\includegraphics[height = 3.0in]{../images/MMI-PC}}
+\slide{Contrastive Predictive Coding (CPC)}
 
 \begin{eqnarray*}
-{\color{red} I(c_t,x_{t+\Delta t})} & {\color{red} \geq} & {\color{red} \ln (N +1) - {\cal L}_\mathrm{CEN}(\Delta t)}
+\Phi^*  & = & \argmin_\Phi\;{\cal L}_\mathrm{CPC}(\Phi)
 \end{eqnarray*}
 
 \vfill
-By maximizing mutual information we are intuitively separating signal from noise.
-
-\slide{CPC for Vision}
-
-\centerline{\includegraphics[width=8.0 in]{../images/LearnRepCTCb}}
-
-\slide{CPC Vision Results}
-
-\centerline{\includegraphics[height=3.5 in]{../images/LearnRepCTCc}}
-
-Train and test are both on Imagenet but labels are only used retraining the final linear layer.
+$$P_\Phi(i|z_1,\ldots,z_n,z_x) = \softmax_i\;z_i^\top z_x$$
 
 \vfill
-Results are also give for speech recognition tasks and NLP tasks.
-
-
-\slidetwo{Information Theoretic Co-Training}
-{McAllester, Feb. 2018}
-
-\centerline{\includegraphics[height=2.25in]{../images/MMI-PC}}
-
-$$\Phi^* = \argmax_\Phi\;\left(\sum_{\Delta t} \;\lambda_{\Delta t}\; \hat{I}(c,z_\Phi(x_{t+\Delta t}))\right) - \lambda \hat{H}(z_\Phi(x))$$
+As $N$ gets larger the contrastive discrimination task gets harder.
 
 \vfill
-$$\hat{I}(c,z_\Phi(x_{t+ \Delta t})) = \hat{H}(z_\Phi(x)) - \hat{H}(z_\Phi(x_{t+\Delta t})|c)$$
+The task is also made difficult by the requirement that the score is defined to be an inner product of feature vectors.
 
-\slide{Difference of Entropy Models}
+\slide{Contrastive Predictive Coding (CPC)}
 
-$$\hat{I}(c,z_\Phi(x_{t+ \Delta t})) = \hat{H}(z_\Phi(x)) - \hat{H}(z_\Phi(x_{t+\Delta t})|c)$$
-
-We maximize the mutual information estimate where the entropy estimates are done with cross-entropy models --- upper bounds on true entropy.
+(SimCLR:) A Simple Framework for Contrastive Learning of Visual Representations, Chen et al., Feb. 2020 (self-supervised leader as of February, 2020).
 
 \vfill
-Note that maximizing $\hat{H}(z_\Phi(x))$ is adversarial --- $\Phi$ wants to increase the cross entropy while the cross entropy model
-is trying to minimize the cross entropy.
+They use a distribution on pairs $\tuple{x,y}$ defined by drawing an image $s$ from ImageNet and then drawing $x$ and $y$ as random ``augmentations'' (modifications) of the image $s$
+--- either a random translation, rotation, color jitter, masking, edge image, or a composition of these modifications.
+
+\slide{Contrastive Predictive Coding (CPC)}
+
+The feature map $z_\Phi$ can then be applied to the images of ImageNet.
+
+\vfill
+The feature map $z_\Phi$ is then tested by using a {\color{red} linear} classifier for ImageNet based on these features.
+
+\slide{SimCLR}
+
+\centerline{\includegraphics[height=5.2 in]{\images/SimCLR}}
+
+\slide{Mutual Information Objectives}
+
+CPC represents a fundamental shift in the self-supervised training objective.
+
+\vfill
+GANs and VAEs are motivated by modeling $\pop(y)$.
+
+\vfill
+But in CPC there is no attempt to model $\pop(y)$.
+
+\vfill
+CPC can be viewed as training a feature map $z_\Phi$ so as to maximize the mutual information {\color{red} $I(z_\Phi(x),z_\Phi(y))$} while, at the same time, making $z_\Phi(x)$ useful
+for linear classifiers.
+
+\slide{Relationship to Noise Contrastive Estimation}
+
+CPC is noise contrastive estimation (NCE) with ``noise'' generated by drawing $y$ unrelated to $x$.
+By the NCE theorems, universality implies
+
+$$P_{\Phi^*}(i|z_1,\ldots,z_N,z_x) = \softmax_i \;\ln \frac{\pop(z_i|z_x)}{\pop(z_i)}$$
+
+and also
+
+{\huge
+\begin{eqnarray*}
+{\cal L}_\mathrm{CPC} & \geq & \ln N - \frac{N-1}{N}(KL(\pop(z_y|z_x),\pop(z_y)) + KL(\pop(z_y),\pop(z_y|z_x))) \\
+\\
+& = & \ln N - \frac{N-1}{N}({\color{red} I(z_x,z_y)} + KL(\pop(z_y),\pop(z_y|z_x)))
+\end{eqnarray*}
+}
+
+\slide{Deep Co-Training}
+
+For a population on $\tuple{x,y}$ and a ``feature map'' $z_\Phi$ we optimize $\Phi$ by
+
+\vfill
+$$\Phi^* = \argmax_\Phi \; I(z_\Phi(x),z_\Phi(y)) - \beta H(z_\Phi(x))$$
+
+
+\vfill
+Here we can think of $z_\Phi(x)$ as what we remember about a past $x$ to carry information about a future $y$ while maintaining low memory requirements.
+
+\slide{Deep Co-Training}
+
+\begin{eqnarray*}
+\Phi^* & = & \argmax_\Phi \; (1-\beta)\hat{H}_\Phi(z_\Phi(x)) - \hat{H}_\Phi(z_\Phi(x)|z_\Phi(y)) \\
+\\
+\hat{H}_\Phi(z_\Phi(x)) & = & E_x \; P_{\Psi^*}(z_\Phi(x)) \\
+\\
+\Psi^* & = & \argmin_\Psi\;E_x\;-\ln P_\Psi(z_\Phi(x)) \\
+\\
+\hat{H}_\Phi(z_\Phi(x)|z_\Phi(y)) & = & E_{x,y} \; -\ln P_\Phi(z_\Phi(x)|z_\Phi(y)) 
+\end{eqnarray*}
+
+\vfill
+Here, as in CPC, we only model distributions on $z$.  There is no attempt to model distributions on $x$ or $y$.
 
 \slide{Pretraining for NLP}
 
-\begin{itemize}
-\item Word Embeddings
+Unlike vision, in NLP self-supervised pretraining is now required for strong benchmark performance.
 
 \vfill
-\item The Transformer
+
+\slide{Moore's Law of AI: Natural Language Understanding}
+
+GLUE: General Language Understanding Evaluation
 
 \vfill
-\item ELMO, BERT and GPT-2
-\end{itemize}
 
-\slidetwo{Advances in Pre-Training Distributed Word Representations}
-{Mikolov et al., 2017}
+\centerline{\normalsize ArXiv 1804.07461}
+\centerline{\includegraphics[width= 7in]{\images/GLUE}}
 
+\slide{GLUE Leader Board as of February 27, 2020}
+
+\centerline{\includegraphics[width= 7in]{\images/GLUELeader}}
+
+\slide{SuperGLUE Leader Board as of February 27, 2020}
+
+\centerline{\includegraphics[width= 9in]{\images/SuperLeader}}
+
+
+\slide{Pretrained Word Embeddings}
+
+Advances in Pre-Training Distributed Word Representations, Mikolov et al., 2017
+
+\vfill
 We want a mapping from a word $w$ to a vector $e(w)$ --- a word embedding.
-
-\vfill
-We can also consider phrase embedings $e(P)$ for a word sequence $P$.
 
 \vfill
 {\color{red} fastText} from Facebook is currently popular.
@@ -257,153 +318,111 @@ Given a set of character n-grams each word is treated as a bag of character n-gr
 \vfill
 $$e[w] = \frac{1}{N} \sum_{n \in w}\; e(n)$$
 
-\slidetwo{Attention is All You Need (the Transformer)}{Vaswani et al., June 2017}
+\vfill
+Current systems use byte pairs but train the byte pair embeddings as part of transformer training.
 
-The Transformer is based on multi-headed self-attention.
+\slide{The Transformer}
 
-\centerline{\includegraphics[height  = 3.5in]{../images/Transformera}}
-
-\slide{Review of Attention}
-Procedure $\mathrm{Lookup}(\mathrm{key}[J],\;M[T,J])$
-
-\bigskip
-\begin{eqnarray*}
-s[t] & = &\mathrm{key}[J]^\top M[t,J] \\
-\\
-{\color{red} \alpha[t]} & {\color{red} =} & {\color{red} \softmax_t \;s[t]\;\mbox{; the attention}} \\
-\\
-{\color{red} V[J]} & {\color{red} =} & {\color{red} \sum_t\;\alpha[t]M[t,J]}
-\end{eqnarray*}
-
-\bigskip
-Return $V[J]$
-
-\slide{Multi-Layer, Multi-Headed Attention}
+Attention is All You Need, Vaswani et al., June 2017
 
 \vfill
-Let $\ell$ ranger over layers --- each layer will be computed from the previous layer.
+The transformer is like an RNN in that it takes a sequence of words and converts it to a sequence of vectors.
 
 \vfill
-Let $h$ range over ``heads'' --- each head is computing an attention for a different purpose.
+The output vectors are sometimes called contextual word embeddings.
 
 \vfill
-We will construct layers of sequences of vectors $M[L,T,J]$.
+But unlike RNNs, transformers run in parallel time in proportion to the layering depth
+independent of the length of the block.
 
-\slide{Multi-Headed Self Attention}
+\slide{The Transformer}
 
-To compute {\color{red} $M[\ell+1,T,J]$} from {\color{red} $M[\ell,T,J]$} we first compute:
-      
-\begin{eqnarray*}
-\mathrm{Query}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
-\\
-\mathrm{Key}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^K}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
-\\
-\mathrm{Value}[\ell,h,t,{\color{red} i}] & = & \sum_j\;{\color{red} W^V}[\ell,h,{\color{red} i,j}]M[\ell,t,{\color{red} j}]
-\end{eqnarray*}
+\centerline{\includegraphics[height=4.5in]{\images/transformer}}
 
-\slide{Multi-Headed Self Attention}
-
-We then compute {\color{red} $M[\ell+1,T,J]$} as follows.
-
-{\color{red}
-\begin{eqnarray*}
-s[\ell,h,t,t'] & = &\frac{1}{\sqrt{K}} \sum_k\;\mathrm{Query}[\ell,h,t,k]\mathrm{Key}[\ell,h,t',k] \\
-\\
-{\color{red} \alpha[\ell,h,t,t']} & {\color{red} =} & {\color{red} \softmax_{t'} \;s[\ell,h,t,t']}\;\;\;\mbox{the attention} \\
-\\
-V[\ell,h,t,i] & = & \sum_{t'}\;\alpha[\ell,h,t,t']\mathrm{Value}[\ell,h,t',i]
-\end{eqnarray*}
+{\huge
+\centerline{Jay Alammar's blog}
 }
 
-{\color{red} $$M[\ell+1,t,J] = V[\ell,1,t,I];V[\ell,2,t,I];\cdots;V[\ell,H,t,I] \;\;\;\; J = HI$$}
+All layers run in $O(1)$ time independent of block length.
+
+\slide{A Self-Attention Layer}
+
+Given an $h_\mathrm{in}[T,J]$ we will construct $h_\mathrm{out}[T,J]$
+\vfill
+
+We first construct a head-specific self-attention $\alpha[k,t_1,t_2]$ --- the attention position
+$t_1$ is giving to position $t_2$ for head $k$.
+
+\vfill
+\centerline{\includegraphics[height  = 3.5in]{../images/Transformera}}
+
+\slide{Computing the Self Attention}
+
+For each head $k$ and position $t$ we compute a key vector and a query vector with dimension $U$ typically smaller than dimension $J$.
+      
+\begin{eqnarray*}
+\mathrm{Query}[k,t,U] & = & W^Q[k,U,J]h_\mathrm{in}[t,J] \\
+\\
+\mathrm{Key}[k,t,U] & = &  W^K[k,U,J]h_\mathrm{in}[t,J] \\
+\\
+\alpha[k,t_1,t_2] & = & \softmax_{t_2}\; \mathrm{Query}[k,t_1,U]\mathrm{Key}[k,t_2,U]
+\end{eqnarray*}
+
+\slide{Computing the Output}
+
+We require $I = J/K$.
+      
+\begin{eqnarray*}
+\mathrm{Value}[k,t,I] & = & W^V[k,I,J]h_\mathrm{in}[k,t,J] \\
+\\
+\mathrm{Out}[k,t,I] & = & \sum_{t'}\alpha[k,t,t']\mathrm{Value}[k,t',I] \\
+\\
+h_\mathrm{out}[t,J] & = & \mathrm{Out}[1,t,I];\cdots;\mathrm{Out}[K,t,I]
+\end{eqnarray*}
+
+\slide{The Transformer}
+
+\centerline{\includegraphics[height=4.5in]{\images/transformer}}
+
+{\huge
+\centerline{Jay Alammar's blog}
+}
+
+Position encodings are inserted at the bottom.
 
 \slide{Encoding Positional Information}
 
 At the input layer we augment the word embeddings with position information. For example:
 
 \vfill
-{\color{red} $$M[0,t,J] = e[w[t],I];e^{i\omega t}\;;e^{i2\omega t}\;;e^{i4\omega t}\cdots;e^{i2^k\omega t}$$}
+{\color{red} $$h[0,t,J] = e[w[t],I];e^{i\omega t}\;;e^{i2\omega t}\;;e^{i4\omega t}\cdots;e^{i2^k\omega t}$$}
 
 \vfill
-This is analogous to adding a $k$-bit binary representation of $t$.
+In modern versions there is a position encodings trained for each position in the block.
+
+\slide{ELMO: Language Modeling}
+
+To do language modeling we fix $\alpha[k,t_1,t_2] = 0$ for $t_2 > t_1$.
 
 \vfill
-Each complex number can be interpreted as a pointer on a dial.
+We can then predict the word $w[t+1]$ as
 
 \vfill
-Each dial rotates twice as fast as the dial before.
+$$P(w_{t+1}|w_1,\ldots,w_t) = \softmax_w\;e[w,I]h_\mathrm{top}[t,I]$$
 
-\slide{The Transformer as a Translation Model}
+\slide{Machine Translation}
 
-\centerline{\includegraphics[height=5in]{../images/Transformerb}}
-
-
-
-
-\slidetwo{Deep Contextualized Word Representations (ELMo)}{Peters et al., Feb. 2018 (AI2)}
-
-\centerline{\includegraphics[height = 1in]{../images/ELMob}}
+Translation is just a conditional language model.
 
 \vfill
-ELMo (EMbeddings from Language models) is a two layer bidirectional LSTM character language model trained to predict the next word
-in both the forward and backward direction.
+We take the input English sentence followed by a special token and then generate from the transformer language model.
 
-\vfill
-It is designed to be used to generate ``contextual word embeddings'' as inputs to any system that uses word embeddings.
-
-\slidetwo{Deep Contextualized Word Representations (ELMo)}{Peters et al., Feb. 2018 (AI2)}
-
-\centerline{\includegraphics[width=8in]{../images/ELMo}}
-
-
-
-\slidetwo{BERT: Pre-training of Deep Bidirectional Transformers}{Devlin et al., Oct. 2018 (Google AI Language)}
-
-\centerline{\includegraphics[height = 1in]{../images/BERTb}}
-
-\vfill
-BERT (Bidirectional Encoder Representations from Transformers) is Transformer language models trained to fill in sparse blanks that have been placed in text.
-
-\vfill
-It also generates sentence embeddings and has a second ``skip thought'' training criterion where it predicts the next senentence embedding (thought vector)
-from the previous one.
-
-\vfill It is designed to be used by adding a single task specific output layer and then fine tuning the entire model to the task.
-
-\slidetwo{BERT: Pre-training of Deep Bidirectional Transformers}{Devlin et al., Oct. 2018 (Google AI Language)}
-
-\centerline{\includegraphics[width = 9in]{../images/BERTa}}
-
-BERT results on the GLUE benchmark problems (General Language Understanding Evaluation) excluding the Winograd problems.
-The first problem (MNLI -- Multi genre Natual Langauge Inference) has two metrics.  The number below each problem is the training set size.
-
-\slide{GLUE tasks}
-
-{\bf Sentiment Analysis} Given a sentence does it express positive or negative sentiment (toward a product in a product review). {\color{red} SST-2}.
-
-\vfill
-{\bf Natural Langauge Inference (NLI).}
-Given a pair of sentences classify the relationship into ``entailed'', ``contradictory'' or ``netural''. {\color{red} MNLI, QNLI, RTE}.
-
-\vfill
-{\bf Semantic Equivalence.} Given two sentences do they express the same meaning. {\color{red} QQP, STS-B, MRPC}.
-
-\vfill
-{\bf Grammaticality Judgements.} Given a sentence is it grammatical. {\color{red} CoLA}.
-
-\vfill
-{\bf Winograd Problems.} Determine the referent of a pronoun in cases requiring semantics. {\color{red} WNLI}
-
-\slidetwo{Language Models [are] Multitask Learners, (GPT-2)}{Radford et al., Feb. 2019 (Open AI)}
-
-This is a Transformer language model trained on a new text corpus, webText, scraped from the internet and containing 40G words of text.
-
-\vfill
-Historically sampling text from a language model has yielded semantic gibberish.  This time things are different.
-
-\vfill
 \slide{Continuing from a Prompt}
 
+
+GPT-2 from Open AI.
+
+\vfill
 {\color{red} Continue from:}
 
 \vfill
@@ -425,15 +444,42 @@ While examining these bizarre creatures the scientists discovered that the creat
 
 Dr. Pérez believes that the unicorns may have originated in Argentina ... some believe that perhaps the creatures were created when a human and a unicorn met each other in a time before human civilization. ... However, Pérez also pointed out that it is likely that the only way of knowing for sure if unicorns are indeed the descendants of a lost alien race is through DNA. ...
 
-\slide{A Laguage Model Translating French to English}
+\slide{Fine Tuning on Question Answering}
 
-{\color{red} Continue from: $<$French1$>$ = $<$English1$>$, ... ,$<$Frenchn$>$ = $<$Englishn$>$, $<$French$>$ =}
-
-\vfill
-Note that the translation pairs in the prompt do not influence the model parameters.
+COMET: Busselut et al, June 2019.
 
 \vfill
-\centerline{\includegraphics[width = 9in]{../images/GPT-2a}}
+Charlie is drifting though life:
+
+\centerline{\includegraphics[height=4in]{\images/COMET}}\
+
+\slide{The Chatbot Meena}
+
+\centerline{\includegraphics[height=4in]{\images/meena1}}\
+
+\slide{The Chatbot Meena}
+
+\centerline{\includegraphics[height=4in]{\images/meena2}}\
+
+\slide{BERT: Blank Languagage Modeling}
+
+We replace a random subset of the words with a blank token.
+
+\vfill
+We run a transformer on a block of text containing some blanks.
+
+\vfill
+For a blank occurring at position $t$ we predict the word at position $t$:
+
+\vfill
+$$P(w) = \softmax_w\;h[t,J]e[w,J]$$
+
+\vfill
+Blank language modeling outperforms language modeling when used for pretraining in classification tasks such as the GLUE tasks.
+
+\slide{GLUE Leader Board as of February 27, 2020}
+
+\centerline{\includegraphics[width= 7in]{\images/GLUELeader}}
 
 
 \slide{END}

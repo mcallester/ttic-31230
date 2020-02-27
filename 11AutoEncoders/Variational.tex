@@ -357,7 +357,7 @@ Any choice of $Q_\Phi(z|y)$ gives optimal modeling of $y$.
 \slide{Indeterminacy of the VAE}
 
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \; I_\Phi(y,z) - H_\Phi(y|z)
+\Phi^* & = & \argmin_\Phi \; I_\Phi(y,z) + H_\Phi(y|z)
 \end{eqnarray*}
 
 \vfill
@@ -371,7 +371,7 @@ We have $0 \leq I(y,z) \leq H(y)$ with the full range possible.
 To control $I(y,z)$ we introduce a weighting $\beta$
 
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \; \beta I_\Phi(y,z) - H_\Phi(y|z) \\
+\Phi^* & = & \argmin_\Phi \; \beta I_\Phi(y,z) + H_\Phi(y|z) \\
 \mbox{$\beta$-VAE}\;\; \Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;-\beta \ln \frac{P_\Phi(z)}{Q_\Phi(z|y)} - \ln P_\Phi(y|z)
 \end{eqnarray*}
 
