@@ -373,7 +373,7 @@ For each head $k$ and position $t$ we compute a key vector and a query vector wi
 We require $I = J/K$.
       
 \begin{eqnarray*}
-\mathrm{Value}[k,t,I] & = & W^V[k,I,J]h_\mathrm{in}[k,t,J] \\
+\mathrm{Value}[k,t,I] & = & W^V[k,I,J]h_\mathrm{in}[t,J] \\
 \\
 \mathrm{Out}[k,t,I] & = & \sum_{t'}\alpha[k,t,t']\mathrm{Value}[k,t',I] \\
 \\
