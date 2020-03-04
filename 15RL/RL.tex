@@ -350,7 +350,7 @@ For $t' < t$ we have
 $$\nabla_\Phi \;E_{\pi_\Phi}\;R \;\;\; = \;\;\; E_{\pi_\Phi}\; \sum_{t,\;t' \geq t} \; \left(\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right) \;r_{t'}$$
 
 \vfill
-Sampling runs and computing the above sum over $t$ is Williams' REINFORCE algorithm.
+Sampling runs and computing the above sum over $t$ and $t'$ is Williams' REINFORCE algorithm.
 
 \slidetwo{Optimizing Discrete Decisions}{with Non-Differentiable Loss}
 
@@ -367,46 +367,47 @@ $$\Phi^* = \argmax_\Phi \;E_{w_1,\ldots,w_n \sim P_\Phi}\;\mathrm{BLEU}$$
 REINFORCE typically suffers from high variance of the gradient samples requiring very small learning rates and very long convergence times.
 
 \begin{eqnarray*}
-    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & E_{\pi_\Phi}\; \sum_{t,\;t'\geq t}\; \left(\nabla_\Phi\;\ln \pi_\Phi(a_{t}|s_{t})\right)\;\;r_{t'}
+    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,\;t'\geq t}\; E_{s_t,a_t,r_{t'}}\; \left(\nabla_\Phi\;\ln \pi_\Phi(a_{t}|s_{t})\right)\;\;r_{t'}
 \end{eqnarray*}
 
 \vfill
 We have to consider
 \begin{itemize}
-\item {\color{red} the variation over the choice of $a_t$}
-\item {\color{red} the variation over $r_{t'}$ given $a_t$}
+\item {\color{red} the variation over the choice of $s_t$, $a_t$}
+\item {\color{red} the variation over $r_{t'}$ given $s_t$, $a_t$}
 \end{itemize}
 
+\slidetwo{Reducing the Variance over $r_{t'}$}{The Policy Gradient Theorem}
 
-\slide{The Variance Issue}
-
-\begin{eqnarray*}
-    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & E_{\pi_\Phi}\; \sum_{t,\;t'\geq t}\; \nabla_\Phi\;\ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} r_{t'}}
-\end{eqnarray*}
-
-\vfill
-We can reduce the variation over $r_{t'}$ given $s_t$ and $a_t$ by shifting to the following.
-
-\begin{eqnarray*}
-    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & E_{\pi_\Phi}\; \sum_{t,t'}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} E_{r_{t'}\;|\;s_t,a_t}\;r_{t'}}
-\end{eqnarray*}
-
-Before saying how this can be computationally approximated, we state the above expression somewhat differently.
-
-\slide{Policy Gradient Theorem}
-\begin{eqnarray*}
-  \nabla_\Phi \;E_{\pi_\Phi}\;R & = & E_{\pi_\Phi}\; \sum_{t,\;t' \geq t} \; \left(\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right) \;{\color{red} E_{s_{t'},a_{t'}\;|\;s_t,a_t}\;r_{t'}} \\
-  \\
-  \\
-  & = & E_{\pi_\Phi} \; \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;{\color{red} Q^{\pi_\Phi}(s_t,a_t)}
-\end{eqnarray*}
+``Policy Gradient Methods for
+Reinforcement Learning with Function
+Approximation'' Sutton, McAllester, Singh, Mansour, 2000, cited by 2,841 as of March 2020.
 
 \vfill
-$Q^\pi(s,a) = \expectsub{\pi}{\sum_t\; r_t\;|\;s_0=s,\;a_0=a}$
+``Actor-Critic Algorithms'', Konda and Tsitsilas, 2000, cited by 776.
 
-\slide{Policy Gradient Theorem}
+\vfill
+These two papers both appeared at NeurIPS 2000 and are essentially identical.  The first is just easier to read.
+
+
+\slide{Reducing the variance over $r_{t'}$}
+
 \begin{eqnarray*}
-  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & E_{\pi_\Phi} \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) {\color{red} Q^{\pi_\Phi}(s_t,a_t)}
+    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,t'}\;E_{s_t,a_t,r_{t'}}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} r_{t'}} \\
+    \\
+    \\
+    & = & \sum_{t}\;E_{s_t,a_t}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} \sum_{t' \geq t} E_{r_{t'}\;|\;s_t,a_t}\;r_{t'}} \\
+  \\
+  \\
+  & = & E_{\pi_\Phi} \; \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;{\color{red} Q^{\pi_\Phi}(s_t,a_t)} \\
+  \\
+  \\
+ Q^\pi(s,a) & = & \expectsub{\pi}{\sum_t\; r_t\;|\;s_0=s,\;a_0=a}
+ \end{eqnarray*}
+
+\slideplain{Reducing the Variance due to $r_{t'}$}
+\begin{eqnarray*}
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & \sum_t\;E_{s_t,a_t}\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) {\color{red} Q^{\pi_\Phi}(s_t,a_t)}
 \end{eqnarray*}
 
 \vfill
@@ -438,9 +439,20 @@ We can sample an episode and then do
 
 The two updates typically apply to different (but perhaps overlapping) subsets of the parameters $\Phi$.
 
-\slide{Variance from the Choice of $a_t$}
+\slide{Reducing the Variance from $s_t$}
 
-To address the variance due to the choice of $a_t$ we first make the following observation for any function $V(s)$ of states.
+Thoerem:
+$$\nabla_\Phi \;E_{\pi_\Phi}\; R = \sum_t\;E_{s_t,a_t} \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right)(Q^{\pi_\Phi}(s_t,a_t) - V^{\pi_\Phi}(s_t))$$
+
+\vfill
+$V^{\pi_\Phi}(s) = \expectsub{a \sim \pi_\Phi(a|s)}{Q^{\pi_\Phi}(s,a)}$
+
+\vfill
+$Q^{\pi_\Phi}(s,a) - V^{\pi_\Phi}(s)$ is the ``advantage'' of deterministically using $a$ rather than sampling an action.
+
+\slide{Proof}
+
+We have the following for any function $V(s)$ of states.
 
 \begin{eqnarray*}
  & & E_{s_t,a_t} \;  \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
@@ -449,48 +461,8 @@ To address the variance due to the choice of $a_t$ we first make the following o
  \\
  & = & E_{s_t} \;  \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) V(s_t) \\
  \\
- & = & E_{s_t} \;  V(s_t) \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right)
+ & = & E_{s_t} \;  V(s_t) \nabla_\Phi \sum_{a_t}\; \pi_\Phi(a_t|s_t) \;=\; 0
 \end{eqnarray*}
-
-\slide{Variance from the Choice of $a_t$}
-
-\begin{eqnarray*}
- & & E_{s_t,a_t} \;  \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
- \\
- & = & E_{s_t} \;  V(s_t) \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) \\
- \\
- & = & E_{s_t} \;  V(s_t)\; \nabla_\Phi\; \sum_{a_t} \pi_\Phi(a_t|s_t) \\
- \\
- & = & 0
-\end{eqnarray*}
-
-\slide{Variance from the Choice of $a_t$}
-
-
-\begin{eqnarray*}
- & & E_{s_t,a_t}\; \sum_t\; \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right)(Q^{\pi_\Phi}(s_t,a_t) - V(s_t)) \\
- \\
- & = & E_{s_t,a_t} \; \sum_t\; \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right)Q^{\pi_\Phi}(s_t,a_t) \\
- \\
- & = & \nabla_\Phi \; E_{\pi_\Phi}\;R
-\end{eqnarray*}
-
-
-\slide{Variance from the Choice of $a_t$}
-
-In particular we have
-
-$$\nabla_\Phi \;E_{\pi_\Phi}\; R = E_{\pi_\Phi}\; \sum_t\; \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right)(Q^{\pi_\Phi}(s_t,a_t) - V^{\pi_\Phi}(s_t))$$
-
-\vfill
-$V^{\pi_\Phi}(s) = \expectsub{a \sim \pi_\Phi(a|s)}{Q^{\pi_\Phi}(s,a)}$
-
-\vfill
-$Q^{\pi_\Phi}(s,a) - V^{\pi_\Phi}(s)$ is the ``advantage'' of deterministically using $a$ rather than sampling an action.
-
-\vfill
-Nondeterminism of the policy $\pi_\Phi$ provides for exploration.
-
 
 \slide{Advantage-Actor-Critic Algorithm}
 \begin{eqnarray*}
