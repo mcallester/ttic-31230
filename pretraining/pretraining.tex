@@ -235,9 +235,9 @@ Here we can think of $z_\Phi(x)$ as what we remember about a past $x$ to carry i
 \begin{eqnarray*}
 \Phi^* & = & \argmax_\Phi \; (1-\beta)\hat{H}_\Phi(z_\Phi(x)) - \hat{H}_\Phi(z_\Phi(x)|z_\Phi(y)) \\
 \\
-\hat{H}_\Phi(z_\Phi(x)) & = & E_x \; P_{\Psi^*}(z_\Phi(x)) \\
+\hat{H}_\Phi(z_\Phi(x)) & = & E_x \; -\ln \;P_{\Psi^*(\Phi)}(z_\Phi(x)) \\
 \\
-\Psi^* & = & \argmin_\Psi\;E_x\;-\ln P_\Psi(z_\Phi(x)) \\
+\Psi^*(\Phi) & = & \argmin_\Psi\;E_x\;-\ln P_\Psi(z_\Phi(x)) \\
 \\
 \hat{H}_\Phi(z_\Phi(x)|z_\Phi(y)) & = & E_{x,y} \; -\ln P_\Phi(z_\Phi(x)|z_\Phi(y)) 
 \end{eqnarray*}
