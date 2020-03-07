@@ -1,3 +1,4 @@
+
 \documentclass{article}
 \input ../preamble
 \parindent = 0em
@@ -14,55 +15,42 @@
 
 \bigskip
 \bigskip
-{\bf Problem 1.} The Transformer computes layers of sequences of vectors $M[\ell,t,j]$ where
-$\ell$ ranger over layers, $t$ ranges over ``time'' (the index into the sequence), and $j$ is the index
-of a particular dimension of the vector at layer $\ell$ and time $t$.
+~ {\bf Problem 1.} A self-attention layer in the transformer takes a sequence of vectors $h_\mathrm{in}[T,J]$ and computes
+a sequence of vectors $h_\mathrm{out}[T,J]$ using the following equations where $k$ ranges over ``heads''. Heads are intended to allow for
+different relationship between words such as ``coreference'' or ``subject of'' for a verb. But the actual meaning emerges during training
+and is typically difficult or impossible to interpret.  In the following equations we typically hve $U < J$ and we require $I = J/K$
+so that the concatenation of $K$ vectors of dimension $I$ is a vector of dimension $J$.
 
-\medskip
-We also let $h$ range over ``heads'' --- each head is computing an attention for a different purpose.
-
-\medskip
-We compute $M[\ell+1,T,J]$ from $M[\ell,T,J]$ as follows:
-      
 \begin{eqnarray*}
-\mathrm{Query}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
+\mathrm{Query}[k,t,U] & = & W^Q[k,U,J]h_\mathrm{in}[t,J] \\
 \\
-\mathrm{Key}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^K}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
+\mathrm{Key}[k,t,U] & = &  W^K[k,U,J]h_\mathrm{in}[t,J] \\
 \\
-\mathrm{Value}[\ell,h,t,{\color{red} i}] & = & \sum_j\;{\color{red} W^V}[\ell,h,{\color{red} i,j}]M[\ell,t,{\color{red} j}]
+\alpha[k,t_1,t_2] & = & \softmax_{t_2}\; \mathrm{Query}[k,t_1,U]\mathrm{Key}[k,t_2,U]\\
 \\
-s[\ell,h,t,t'] & = &\frac{1}{\sqrt{K}} \sum_k\;\mathrm{Query}[\ell,h,t,k]\mathrm{Key}[\ell,h,t',k] \\
+\mathrm{Value}[k,t,I] & = & W^V[k,I,J]h_\mathrm{in}[t,J] \\
 \\
-{\color{red} \alpha[\ell,h,t,t']} & {\color{red} =} & {\color{red} \softmax_{t'} \;s[\ell,h,t,t']}\;\;\;\mbox{the attention} \\
+\mathrm{Out}[k,t,I] & = & \sum_{t'}\alpha[k,t,t']\mathrm{Value}[k,t',I] \\
 \\
-V[\ell,h,t,i] & = & \sum_{t'}\;\alpha[\ell,h,t,t']\mathrm{Value}[\ell,h,t',i]
+h_\mathrm{out}[t,J] & = & \mathrm{Out}[1,t,I];\cdots;\mathrm{Out}[K,t,I]
 \end{eqnarray*}
 
+A summation over $N$ terms can be done in parallel in $O(\log N)$ time.
 
-$$M[\ell+1,t,J] = V[\ell,1,t,I];V[\ell,2,t,I];\cdots;V[\ell,H,t,I] \;\;\;\; J = HI$$
-
-(a) assume that summations are done serially on a GPU while other computations are maximally parallel.  Under these assumptions what is the order of the parallel running time
-of the Transformer as a function of $L$, $T$, $H$, $J$ and $K$ (we have $I = J/H$).
-
-\solution{
-  The computation must be serial over the layers but we need to determine the parallel running time for computing $M[\ell+1,T,J]$ from $M[\ell,T,J]$
-  The first three equations can be computed in parallel over $t$, $h$, $k$ and $i$. We have assumed that each summation takes time proportional to $J$.
-  The fourth equation can be computed in parallel over $h$, $t$ and $t'$ and takes time proportional to $K$.  The softmax operation can be parallelized over
-  $h$ and $t$ but requires computing the normalizing
-  constant $Z$ by summing over $t'$ and takes time proportional to $T$.  Computing $V[\ell,h,t,i]$ can be parallelized over $h$, $t$ and $i$ but sums over $t'$
-  and hence takes time proportional to $T$.  The concatenation operation can be fully parallelized and so takes unit time in parallel.  Putting this all together
-  we get
-  $$O(L(J + K + T))$$
-}
-
-(b) Actually a summation over $N$ terms can be done in parallel in $O(\log N)$ time.  Repeat part (a) but under the assumption that the summations take logarithmic parallel time.
+\medskip
+(a) For a given head $k$ and position $t_1$ what is the parallel running time of the above softmax operation, as a function of $T$ and $U$
+where we first compute the scores to be used in the softmax and then compute the normalizing constant $Z$.
 
 \solution{
-  $O(L(\log J + \log K + \log T))$
-
-  \medskip
-  The Transformer is much faster than an RNN.  It is comparable in speed to a CNN but with each position in each layer taking input from all positions in the previous layer.
+  The scores can be computed in parallel in $\ln U$ time and then $Z$ can be computed in $\ln T$ time.  We then get $O(\ln T + \ln U)$.
+  In practice the inner product used in computing the scores would be done in $O(U)$ time giving $O(U + \ln T)$.
 }
+
+\medskip
+(b) What is the order of running time of the self-attention layer as a function of $T$, $J$ and $K$ (we have $I$ and $U$ are both less than $J$.)
+
+\solution{$O(\ln T + \ln J)$.  In practice the inner products would be done serially which would give $O(J + \ln T)$.}
+
 
 \bigskip
 
@@ -72,128 +60,27 @@ Just as CNNs can be done in two dimensions for vision and in one dimension for l
 \medskip
 (a) Rewrite the equations from problem 1 so that the time index $t$ is replaced by spatial dimensions $x$ and $y$.
 
-\medskip
-(b) Assuming that summations take logarithmic parallel time, give the parallel order of run time for the spatial transformer as a function of $L$, $X$, $Y$, $H$, $J$, and $K$.
-    
-\bigskip
-{\bf Problem 3. 25 Points:}
-This problem is on the transformer.
-
-\medskip
-{\bf Background:} The Transformer computes layers of sequences of vectors $M[\ell,t,j]$ where
-$\ell$ ranger over layers, $t$ ranges over ``time'' (the index into the sequence), and $j$ is the index
-of a particular dimension of the vector at layer $\ell$ and time $t$.
-
-\medskip
-We also let $h$ range over ``heads'' --- each head is computing an attention for a different purpose.
-
-\medskip
-We compute $M[\ell+1,T,J]$ from $M[\ell,T,J]$ as follows:
-      
-\begin{eqnarray*}
-\mathrm{Query}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
-\\
-\mathrm{Key}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^K}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
-\\
-\mathrm{Value}[\ell,h,t,{\color{red} i}] & = & \sum_j\;{\color{red} W^V}[\ell,h,{\color{red} i,j}]M[\ell,t,{\color{red} j}]
-\\
-s[\ell,h,t,t'] & = &\frac{1}{\sqrt{K}} \sum_k\;\mathrm{Query}[\ell,h,t,k]\mathrm{Key}[\ell,h,t',k] \\
-\\
-{\color{red} \alpha[\ell,h,t,t']} & {\color{red} =} & {\color{red} \softmax_{t'} \;s[\ell,h,t,t']}\;\;\;\mbox{the attention} \\
-\\
-V[\ell,h,t,i] & = & \sum_{t'}\;\alpha[\ell,h,t,t']\mathrm{Value}[\ell,h,t',i]
-\end{eqnarray*}
-
-
-$$M[\ell+1,t,J] = V[\ell,1,t,I];V[\ell,2,t,I];\cdots;V[\ell,H,t,I] \;\;\;\; J = HI$$
-
-\medskip
-(a) 15 points. Just as CNNs can be done in two dimensions for vision and in one dimension for language, the Transformer can be done in two dimensions for vision --- the so-called spatial transformer.
-Rewrite the above so as to define a spatial transformer on images with attentions computes between spatial locations.
-
 \solution{
-        
-\begin{eqnarray*}
-\mathrm{Query}[\ell,h,x,y,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,x,y,{\color{red} j}] \\
-\\
-\mathrm{Key}[\ell,h,x,y,{\color{red} k}] & = & \sum_j\;{\color{red} W^K}[\ell,h,{\color{red} k,j}]M[\ell,x,y,{\color{red} j}] \\
-\\
-\mathrm{Value}[\ell,h,x,y,{\color{red} i}] & = & \sum_j\;{\color{red} W^V}[\ell,h,{\color{red} i,j}]M[\ell,t,{\color{red} j}]
-\\
-s[\ell,h,x,y,x',y'] & = &\frac{1}{\sqrt{K}} \sum_k\;\mathrm{Query}[\ell,h,x,y,k]\mathrm{Key}[\ell,h,x',y',k] \\
-\\
-{\color{red} \alpha[\ell,h,x,y,x',y']} & {\color{red} =} & {\color{red} \softmax_{x',y'} \;s[\ell,h,x,y,x',y'']}\;\;\;\mbox{the attention} \\
-\\
-V[\ell,h,x,y,i] & = & \sum_{x',y'}\;\alpha[\ell,h,x,y,x',y']\mathrm{Value}[\ell,h,x',y',i]
-\end{eqnarray*}
 
-$$M[\ell+1,x,y,J] = V[\ell,1,x,y,I];V[\ell,2,x,y,I];\cdots;V[\ell,H,x,y,I] \;\;\;\; J = HI$$
+\begin{eqnarray*}
+\mathrm{Query}[k,x,y,U] & = & W^Q[k,U,J]h_\mathrm{in}[x,y,J] \\
+\\
+\mathrm{Key}[k,x,y,U] & = &  W^K[k,U,J]h_\mathrm{in}[x,y,J] \\
+\\
+\alpha[k,x_1,y_1,x_2,y_2] & = & \softmax_{x_2,y_2}\; \mathrm{Query}[k,x_1,y_1,U]\mathrm{Key}[k,x_2,y_2,U]\\
+\\
+\mathrm{Value}[k,x,y,I] & = & W^V[k,I,J]h_\mathrm{in}[x,y,J] \\
+\\
+\mathrm{Out}[k,x,y,I] & = & \sum_{x',y'}\alpha[k,x,y,x',y']\mathrm{Value}[k,x',y',I] \\
+\\
+h_\mathrm{out}[x,y,J] & = & \mathrm{Out}[1,x,y,I];\cdots;\mathrm{Out}[K,x,y,I]
+\end{eqnarray*}
 }
 
-(b) 10 points. Assuming that summations can be computed in logarithmic time in parallel, what is the parallel order of run time of the spatial transformer
-as a function of the dimensions $L$, $I$, $J$, $K$, $X$ and $Y$.
+\medskip
+(b) Assuming that summations take logarithmic parallel time, give the parallel order of run time for the spatial self-attention layer as a function
+of $X$, $Y$, $J$ and $K$ (we have that $I$ and $U$ are both less than $J$).
 
-\solution{  $O(L\log JKXY)$ }
-
+\solution{$O(\ln XY + \ln J)$}
     
-\bigskip
-{\bf Problem 3. 25 Points:}
-This problem is on the transformer.
-
-\medskip
-{\bf Background:} The Transformer computes layers of sequences of vectors $M[\ell,t,j]$ where
-$\ell$ ranger over layers, $t$ ranges over ``time'' (the index into the sequence), and $j$ is the index
-of a particular dimension of the vector at layer $\ell$ and time $t$.
-
-\medskip
-We also let $h$ range over ``heads'' --- each head is computing an attention for a different purpose.
-
-\medskip
-We compute $M[\ell+1,T,J]$ from $M[\ell,T,J]$ as follows:
-      
-\begin{eqnarray*}
-\mathrm{Query}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
-\\
-\mathrm{Key}[\ell,h,t,{\color{red} k}] & = & \sum_j\;{\color{red} W^K}[\ell,h,{\color{red} k,j}]M[\ell,t,{\color{red} j}] \\
-\\
-\mathrm{Value}[\ell,h,t,{\color{red} i}] & = & \sum_j\;{\color{red} W^V}[\ell,h,{\color{red} i,j}]M[\ell,t,{\color{red} j}]
-\\
-s[\ell,h,t,t'] & = &\frac{1}{\sqrt{K}} \sum_k\;\mathrm{Query}[\ell,h,t,k]\mathrm{Key}[\ell,h,t',k] \\
-\\
-{\color{red} \alpha[\ell,h,t,t']} & {\color{red} =} & {\color{red} \softmax_{t'} \;s[\ell,h,t,t']}\;\;\;\mbox{the attention} \\
-\\
-V[\ell,h,t,i] & = & \sum_{t'}\;\alpha[\ell,h,t,t']\mathrm{Value}[\ell,h,t',i]
-\end{eqnarray*}
-
-
-$$M[\ell+1,t,J] = V[\ell,1,t,I];V[\ell,2,t,I];\cdots;V[\ell,H,t,I] \;\;\;\; J = HI$$
-
-\medskip
-(a) 15 points. Just as CNNs can be done in two dimensions for vision and in one dimension for language, the Transformer can be done in two dimensions for vision --- the so-called spatial transformer.
-Rewrite the above so as to define a spatial transformer on images with attentions computes between spatial locations.
-
-\solution{
-        
-\begin{eqnarray*}
-\mathrm{Query}[\ell,h,x,y,{\color{red} k}] & = & \sum_j\;{\color{red} W^Q}[\ell,h,{\color{red} k,j}]M[\ell,x,y,{\color{red} j}] \\
-\\
-\mathrm{Key}[\ell,h,x,y,{\color{red} k}] & = & \sum_j\;{\color{red} W^K}[\ell,h,{\color{red} k,j}]M[\ell,x,y,{\color{red} j}] \\
-\\
-\mathrm{Value}[\ell,h,x,y,{\color{red} i}] & = & \sum_j\;{\color{red} W^V}[\ell,h,{\color{red} i,j}]M[\ell,t,{\color{red} j}]
-\\
-s[\ell,h,x,y,x',y'] & = &\frac{1}{\sqrt{K}} \sum_k\;\mathrm{Query}[\ell,h,x,y,k]\mathrm{Key}[\ell,h,x',y',k] \\
-\\
-{\color{red} \alpha[\ell,h,x,y,x',y']} & {\color{red} =} & {\color{red} \softmax_{x',y'} \;s[\ell,h,x,y,x',y'']}\;\;\;\mbox{the attention} \\
-\\
-V[\ell,h,x,y,i] & = & \sum_{x',y'}\;\alpha[\ell,h,x,y,x',y']\mathrm{Value}[\ell,h,x',y',i]
-\end{eqnarray*}
-
-$$M[\ell+1,x,y,J] = V[\ell,1,x,y,I];V[\ell,2,x,y,I];\cdots;V[\ell,H,x,y,I] \;\;\;\; J = HI$$
-}
-
-(b) 10 points. Assuming that summations can be computed in logarithmic time in parallel, what is the parallel order of run time of the spatial transformer
-as a function of the dimensions $L$, $I$, $J$, $K$, $X$ and $Y$.
-
-\solution{  $O(L\log JKXY)$ }
-
 \end{document}
