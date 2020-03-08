@@ -59,7 +59,7 @@ $$E_{\hat{y} \sim P_\Phi(\hat{y}|x)}\;\;\;V(x) \nabla_\Phi \ln P_\Phi(\hat{y}_t|
     \\
     & = & V(x) E_{\hat{y}_1\ldots,\hat{y}_{t-1}}\; \nabla_\Phi \sum_{\hat{y}_t} P_\Phi(\hat{y}_t|x,\hat{y}_1,\ldots,\hat{y}_{t-1}) \\
     \\
-    & = & 0she
+    & = & 0
   \end{eqnarray*}
       }
         
@@ -76,7 +76,7 @@ $V_\Phi(x)$ to predict $E_{\hat{y} \sim P(y|x)}\;\mathrm{BLEU}(\hat{y},y)$.  (Re
   \begin{eqnarray*}
     \Phi & \pluseq & \eta(\mathrm{BLEU}(\hat{y},y)-V_\Phi(x))\sum_{t = 1}^T \; \nabla_\Phi\;\ln P_\Phi(\hat{y}_t|x,\hat{y}_1,\ldots,\hat{y}_{t-1}) \\
     \\
-    \Phi & \minuseq & \eta \nabla_\Phi (V_\Phi(x) - \mathrm{BLEU}(\hat{y},y))^2  \;=\; 2\eta(V_\Phi(x) - \mathrm{BLEU}(\hat{y},y))\nabla_\Phi V_\Phi(x)
+    \Phi & \minuseq & \eta \nabla_\Phi (V_\Phi(x) - \mathrm{BLEU}(\hat{y},y))^2  \;=\; 2\eta(V_\Phi(x) - \mathrm{BLEU}(\hat{y},y))\nabla_\Phi V_\Phi(x)s
     \end{eqnarray*}
 }
 
