@@ -40,7 +40,7 @@ SOTA as of January 2020 is 1.3\%
 Each box is a tensor $L_\ell[b,x,y,i]$
 
 \vfill
-Each value $L_\ell[b,x,y,j]$ (for $\ell > 0$) is the output of a single linear threshold unit.
+Each value $L_\ell[b,x,y,i]$ (for $\ell > 0$) is the output of a single linear threshold unit.
 
 \slideplain{A Convolution Layer}
 
@@ -54,15 +54,7 @@ Each value $L_\ell[b,x,y,j]$ (for $\ell > 0$) is the output of a single linear t
  \\
  & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)\end{eqnarray*}
 
-\slide{Review of Implicit Summation Notation}
-
-Capital letter indeces are used to indicate subtensors (slices) so that, for example,  $M[I,J]$ denotes a matrix
-while $M[i,j]$ denotes one element of the matrix, $M[i,J]$ denotes the $i$th row, and $M[I,j]$ denotes the $j$th collumn.
-
-\vfill
-We will adopt the convention, similar to true Einstein notation, that repeated capital indeces in a product of tensors are implicitly summed.  For example, we can write the inner product $e[w,I]^\top h[t,I]$ simply as $e[w,I]h[t,I]$ without the need for the (meaningless) transpose operation.
-
-\slide{Convolution in Implicit Summation Notation}
+\slide{Convolution Layer in Einstein Notation}
 
 \begin{eqnarray*}
  & &  L_{{\ell+1}}[b,x,y,j] \\
@@ -73,7 +65,7 @@ We will adopt the convention, similar to true Einstein notation, that repeated c
   & = &   \sigma\left(W[\Delta X, \Delta Y, I,j]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, I] - B[j]\right)
 \end{eqnarray*}
 
-\slideplain{Many ``Neurons'' (Linear Threshold Units)}
+\slide{Many ``Neurons'' (Linear Threshold Units)}
 
 Each $L_{{\ell+1}}[b,x,y,j]$ is the output of a single linear threshold unit.
 
@@ -81,8 +73,11 @@ Each $L_{{\ell+1}}[b,x,y,j]$ is the output of a single linear threshold unit.
 \begin{eqnarray*}
  & &  L_{{\ell+1}}[b,x,y,j] \\
  \\
- & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)
+  & = &   \sigma\left(W[\Delta X, \Delta Y, I,j]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, I] - B[j]\right)
 \end{eqnarray*}
+
+\vfill
+In this equation the input to the activation function $\sigma$ is a scalar value --- this is a single linear threshold unit.
 
 \slide{2D CNN in PyTorch}
 
@@ -136,7 +131,7 @@ $L'_{{\ell}} = \mathrm{Padd}(L_{{\ell}},\;p)$
 $L_{{\ell+1}}[b,x,y,j] =$
 
 \vfill
-$\;\;\;\sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\;L'_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j] \right)$
+$\;\;\;\sigma\left(W[\Delta X, \Delta Y, I,j]\;L'_{{\ell}}[b,x + \Delta X, y + \Delta Y, I] - B[j] \right)$
 
 \vfill
 If the input is padded but the output is not padded then $\Delta x$ and $\Delta y$ are non-negative.
@@ -163,7 +158,7 @@ We can move the filter by a ``stride'' $s$ for each spatial step.
 \vfill
 $L_{{\ell+1}}[b,{\color{red}x},{\color{red}y},j] =$
 
-$$\hspace{-1em}\sigma\left(\left(\sum_{\Delta x,\Delta y,i}\;W[\Delta x, \Delta y, i, j] L_{{\ell}}[b,{\color{red} s*x} + \Delta x, {\color{red} s*y} + \Delta y, i]\right) - B[j]\right)$$
+$$\hspace{-1em}\sigma\left(W[\Delta X, \Delta Y, I, j] L_{{\ell}}[b,{\color{red} s*x} + \Delta X, {\color{red} s*y} + \Delta Y, I] - B[j]\right)$$
 
 \vfill
 For strides greater than 1 the spatial dimention is reduced.
@@ -179,8 +174,9 @@ For strides greater than 1 the spatial dimention is reduced.
 We reshape $L_{{\ell}}[b,x,y,i]$ to $L_{{\ell}}[b,i']$ and then
 
 \vfill
-$$L_{{\ell+1}}[b,j] = \sigma\left(\left(\sum_{i'} \;W[j,i']\;L_{{\ell}}[b,i']\right) - B[j]\right)$$
+$$L_{{\ell+1}}[b,j] = \sigma\left(W[j,I]\;L_{{\ell}}[b,I] - B[j]\right)$$
 
+\ignore{
 \slideplain{Image to Column (Im2C)}
 
 Reduce convolution to matrix multiplication
@@ -217,6 +213,7 @@ $$\tilde{L}_{{\ell}}[b,x,y,\Delta x,\Delta y,i] = L_{{\ell}}[b,x+\Delta x,y+\Del
                                               * W[(\Delta x, \Delta y, i), j] \\
                                            \end{array}\right) + B[j]
 \end{eqnarray*}
+}
 
 \slideplain{Dilation}
 
@@ -244,7 +241,9 @@ To implement a fully convolutional CNN we can ``dilate'' the filters by a dilati
 
 \vfill
 \begin{eqnarray*}
-\tilde{L}_{{\ell+1}}[b,x,y,j] & = &  W[\Delta x, \Delta y, i, j] L_{{\ell}}[b,x + {\color{red} d*\Delta x}, y + {\color{red} d*\Delta y}, i] + B[j]
+ & & L_{{\ell+1}}[b,x,y,j] \\
+ \\
+ & = &  \sigma(W[\Delta X, \Delta Y, I, j] L_{{\ell}}[b,x + {\color{red} d*\Delta X}, y + {\color{red} d*\Delta Y}, I] + B[j])
 \end{eqnarray*}
 
 
@@ -260,11 +259,11 @@ To mean that the vector $L[b,x,y,J_1+J_2]$ is the concatenation of the vectors $
 
 \slide{Hypercolumns}
 
+For a given image location $\tuple{x,y}$ we concatenate all the feature vectors of all layers above the point $\tuple{x,y}$.
 
+\vfill
 \begin{eqnarray*}
 & & L\left[b,x,y,\sum_\ell\;J_\ell\right] \\
-\\
-\\
 \\
 & = & L_0\left[b,x,y,J_0\right] \\
  & & \vdots \\
@@ -276,12 +275,14 @@ To mean that the vector $L[b,x,y,J_1+J_2]$ is the concatenation of the vectors $
 \slide{Grouping}
 
 The input features and the output features are each divided into $G$ groups.
-
 $$L_{\ell+1}[b,x,y,J] = L^0_{\ell+1}[b,x,y,J/G];\cdots;L^{G-1}_{\ell+1}[b,x,y,J/G]$$
+where we have $G$ filters $W^g[\Delta X, \Delta Y,I/G,J/G]$ with
 
-\vfill
-Each tensor $L^g_{{\ell+1}}[b,x,y,J/G]$ is computed by convolution with a filter
-$$W^g[b,x,y,I/G,J/G].$$
+\begin{eqnarray*}
+ & & L^g_{{\ell+1}}[b,x,y,j] \\
+ \\
+ & = & \sigma(W^g[\Delta X, \Delta Y,I/G,j]L_\ell^g[x+\Delta X,y+\Delta Y,I/G,j] - B^g[j])
+ \end{eqnarray*}
 
 \vfill
 This uses a factor of $G$ fewer weights.
@@ -321,7 +322,7 @@ Max pooling and dilation seem to have disappeared.
 \vfill
 ResNet and resnet-like architectures are now dominant.
 
-\slide{Alexnet}
+\slide{Alexnet, 2012}
 {\huge
 \centerline{Given Input$[227,227,3]$}
 
@@ -340,7 +341,7 @@ s[1000] & = & \relu(\mathrm{FC}(L_{10},\Phi_s)) \;\;\mbox{class scores}
 \end{eqnarray*}
 }
 
-\slideplain{VGG}
+\slideplain{VGG, 2014}
 \centerline{\includegraphics[height=4.5in]{../images/VGGStack}}
 \centerline{\large Stanford CS231}
 
@@ -349,6 +350,9 @@ s[1000] & = & \relu(\mathrm{FC}(L_{10},\Phi_s)) \;\;\mbox{class scores}
 \centerline{\includegraphics[width = 9.0in]{../images/inception1}}
 \vfill
 \centerline{\includegraphics[width = 3.5in]{../images/inception2}}
+\slideplain{ResNet, 2015}
+
+\centerline{\includegraphics[height= 5.2in]{../images/ResNetStack} {\large [Kaiming He]}}
 
 
 \slide{Imagenet Classification}
@@ -361,370 +365,7 @@ s[1000] & = & \relu(\mathrm{FC}(L_{10},\Phi_s)) \;\;\mbox{class scores}
 
 \medskip
 SOTA as of January 2020 is 1.3\%
-
-\slideplain{}
-\centerline{\bf Trainability}
-
-\slide{The Expressive Power of DNNs}
-
-Linear Threshold units generalize logical operations.
-
-\vfill
-Consider Boolean Values $P,Q$ --- numbers that are either close to 0 or close to 1.
-
-\vfill
-\begin{eqnarray*}
-P \wedge Q & \approx & \sigma(100*P + 100* Q -150) \\
-\\
-P \vee Q & \approx & \sigma(100*P + 100* Q -50) \\
-\\
-\neg P & \approx & \sigma(100*(1-P) - 50)
-\end{eqnarray*}
-
-\vfill
-DNNs generalize digital circuits.
-
-\slide{DNNs are Expressive and Trainable}
-
-{\color{red} Universality Assumption:} DNNs are universally expressive (can model any function) and trainable (the desired function can be found by SGD).
-
-\vfill
-Universal trainability is clearly false but can still guide architecture design.
-
-\vfill
-Equally expressive architectures differ in trainability.  This lecture is on trainability.
-
-\slide{}
-
-\centerline{\bf Vanishing and Exploding Gradients}
-\vfill
-\vfill
-
-\slide{Activation Function Saturation}
-
-Consider the sigmoid activation function $1/(1+ e^{-x})$.
-
-\vfill
-\centerline{\includegraphics[width= 4.0in]{../images/sigmoid2}}
-
-
-\vfill
-The gradient of this function is quite small for $|x| > 4$.
-
-\vfill
-In deep networks backpropagation can go through many sigmoids and
-the gradient can ``vanish''
-
-\slide{Activation Function Saturation}
-
-$\mathrm{Relu}(x) = \max(x,0)$
-
-\vfill
-\centerline{\includegraphics[width= 4.0in]{../images/relu}}
-
-\vfill
-The Relu does not saturate at positive inputs (good) but is completely saturated at negative inputs (bad).
-
-\vfill
-Alternate variations of Relu still have small gradients at negative inputs.
-
-\slide{Repeated Multiplication by Network Weights}
-
-Consider a deep CNN.
-
-$$L_{i+1} = \mathrm{Relu}(\mathrm{Conv}(\Phi_i,L_i))$$
-
-\vfill
-For $i$ large, $L_i$ has been multiplied by many weights.
-
-\vfill
-If the weights are small then the neuron values, and hence the weight gradients, decrease exponentially with depth. {\bf Vanishing Gradients.}
-
-\vfill
-If the weights are large, and the activation functions do not saturate, then the neuron values, and hence the weight gradients,
-increase exponentially with depth. {\bf Exploding Gradients.}
-
-\slide{Methods for Maintaining Gradients}
-
-\centerline{Initialization}
-
-\vfill
-\centerline{Batch Normalization}
-
-\vfill
-\centerline{ResNet}
-
-\slide{Methods for Maintaining Gradients}
-
-\centerline{\includegraphics[width = 9in]{../images/DepthSpectrum}}
-
-\centerline{\large Kaiming He}
-
-\slide{}
-\centerline{\bf Initialization}
-\vfill
-
-\slide{Xavier Initialization}
-
-Initialize a weight matrix (or tensor) to preserve zero-mean unit variance distributions.
-
-\vfill
-If we assume $x_i$ has zero mean and unit variance then we want
-
-\vfill
-$$y_j = \sum_{j=0}^{N-1} x_i w_{i,j}$$
-
-\vfill
-to have zero mean and unit variance.
-
-\vfill
-Xavier initialization randomly draws $w_{i,j}$ from a uniform distribution on the interval $\left(-\sqrt{\frac{3}{N}},\;\sqrt{\frac{3}{N}}\right)$.
-
-\vfill
-Assuming independence this gives zero mean and unit variance for $y_j$.
-
-\slide{}
-\centerline{\bf Batch Normalization}
-\vfill
-
-\slide{Normalization}
-Given a tensor $x[b,j]$ we define $\tilde{x}[b,j]$ as follows.
-
-\begin{eqnarray*}
-  \hat{\mu}[j] & = & \frac{1}{B} \sum_b\;x[b,j] \\
-  \\
-  \\
-  \hat{\sigma}[j] & = & \sqrt{\frac{1}{B-1} \sum_b (x[b,j]-\hat{\mu}[j])^2} \\
-  \\
-  \\
-  \tilde{x}[b,j]& = & \frac{x[b,j] - \hat{\mu}[j]}{\hat{\sigma}[j]}
-\end{eqnarray*}
-
-
-\vfill
-At test time a single fixed estimate of $\mu[j]$ and $\sigma[j]$ is used.
-
-\slide{Spatial Batch Normalization}
-
-For CNNs we convert a tensor $x[b,x,y,j]$ to $\tilde{x}[b,x,y,j]$ as follows.
-
-\begin{eqnarray*}
-  \hat{\mu}[j] & = & \frac{1}{BXY} \sum_{b,x,y}\;x[b,x,y,j] \\
-  \\
-  \\
-  \hat{\sigma}[j] & = & \sqrt{\frac{1}{BXY-1} \sum_{b,x,y} (x[b,x,y,j]-\hat{\mu}[j])^2} \\
-  \\
-  \\
-  \tilde{x}[b,x,y,j]& = & \frac{x[b,x,y,j] - \hat{\mu}[j]}{\hat{\sigma}[j]}
-\end{eqnarray*}
-
-\slide{Adding an Affine Transformation}
-
-$$\breve{x}[b,x,y,j] = \gamma[j] \tilde{x}[b,x,y,j] + \beta[j]$$
-
-\vfill
-Here $\gamma[j]$ and $\beta[j]$ are parameters of the batch normalization.
-
-\vfill
-This allows the batch normlization to learn an arbitrary affine transformation (offset and scaling).
-
-\vfill
-It can even undo the normaliztion.
-
-\slide{Batch Normalization}
-
-Batch Normalization appears to be generally useful in CNNs but is not always used.
-
-\vfill
-Not so successful in RNNs.
-
-\vfill
-It is typically used just prior to a nonlinear activation function.
-
-\vfill
-It is intuitively justified in terms of ``internal covariate shift'':
-as the inputs to a layer change the zero mean unit variance property underlying Xavier initialization are maintained.
-
-\ignore{
-\slide{Normalization Interacts with SGD}
-
-Consider backpropagation through a weight layer.
-
-\begin{eqnarray*}
-  y.\mathrm{value}[\cdots] & \pluseq & w.\mathrm{value}[\cdots]\;x.\mathrm{value}[\dots] \\
-  \\
-  \\
-  w.\mathrm{grad}[\cdots] & \pluseq & y.\mathrm{grad}[\cdots]\;x.\mathrm{value}[\cdots]
-\end{eqnarray*}
-
-\vfill
-Replacing $x$ by $x/\hat{\sigma}$ seems related to RMSProp for the update of $w$.
-
-\slide{The Simple Normalization Conjecture}
-
-A simple normalization layer $y = \alpha (x + \beta)$ can be used in place of batch normalization as long $\beta$ is initialized to $-\hat{\mu}$
-and $\alpha$ is initialized to $1/\hat{\sigma}$.
-
-\vfill
-Here $\hat{\mu}$ and $\hat{\sigma}$ should be computed only after earlier normalizations have been properly initialized.
-}
-
-\vfill
-\eject
-~ \vfill
-\centerline{\bf ResNet}
-\vfill
-\vfill
-
-\slide{Deep Residual Networks (ResNets) by Kaiming He 2015}
-
-\vfill
-\includegraphics[width= 2.5in]{../images/resnet}
-\hfill \begin{minipage}[b]{4in}
-  A ``skip connection'' is adjusted by a ``residual correction''
-
-  \bigskip
-  The skip connections connects input to output directly and hence preserves gradients.
-
-  \bigskip
-  ResNets were introduced in late 2015 (Kaiming He et al.) and revolutionized computer vision.
-\end{minipage}
-
-\anaslideplain{Simple Residual Skip Connections in CNNs (stride 1)}
-
-\medskip
-\begin{eqnarray*}
-R_{\color{red} \ell+1}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+1}[X,Y,J,J],B_{\color{red} \ell+1}[J],L_{\color{red} \ell}[B,X,Y,J]) \\
-\\
-\mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\\
-L_{\color{red} \ell+1}[b,x,y,j] & = & L_{\color{red}\ell}[b,x,y,j] + R_{\color{red} \ell+1}[b,x,y,j]
-\end{eqnarray*}
-
-\vfill I will use capital letter indices to denote entire tensors and lower case letters for particular indeces.
-
-\anaslide{Simple Residual Skip Connections in CNNs (stride 1)}
-
-\medskip
-\begin{eqnarray*}
-R_{\color{red} \ell+1}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+1}[X,Y,J,J],B_{\color{red} \ell+1}[J],L_{\color{red} \ell}[B,X,Y,J]) \\
-\\
-\mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\\
-L_{\color{red} \ell+1}[b,x,y,j] & = & L_{\color{red}\ell}[b,x,y,j] + R_{\color{red} \ell+1}[b,x,y,j]
-\end{eqnarray*}
-
-\vfill Note that in the above equations $L_{\color{red} \ell}[B,X,Y,J]$ and $R_{\color{red} \ell+1}[B,X,Y,J]$ are the same shape.
-\vfill
-In the actual ResNet $R_{\color{red} \ell+1}$ is computed by two or three convolution layers.
-
-\slideplain{Handling Spacial Reduction}
-
-Consider $L_{\color{red} \ell}[B,X_{\color{red} \ell},Y_{\color{red} \ell},J_{\color{red} \ell}]$ and $R_{\color{red} \ell+1}[B,X_{\color{red} \ell+1},Y_{\color{red} \ell+1},J_{\color{red} \ell+1}]$
-\begin{eqnarray*}
-X_{\color{red} \ell+1} & = & X_{\color{red} \ell}/s \\
-Y_{\color{red} \ell+1} & = & Y_{\color{red} \ell}/s \\
-J_{\color{red} \ell+1} & \geq &  J_{\color{red} \ell}
-\end{eqnarray*}
-
-
-\vfill
-In this case we construct $\tilde{L}_{\color{red} \ell}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}]$
-
-\begin{eqnarray*}
-\mathrm{for}\;b,x,y,j\;\;\tilde{L}_{\color{red} \ell}[b,x,y,j] & = & \left\{\begin{array}{ll} L_{\color{red} \ell}[b,s*x,s*y,j] & \mbox{for $j < J_{\color{red} \ell}$} \\ 0 & \mbox{otherwise} \end{array}\right.\\
-\\
-L_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] & = & \tilde{L}_{\color{red} \ell}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] \\
-& & + R_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}]
-\end{eqnarray*}
-
-\slide{ResNet32}
-
-\centerline{\includegraphics[height= 5.5in]{../images/ResNetStack} {\large [Kaiming He]}}
-
-
-\slideplain{Deeper Versions use Bottleneck Residual Paths}
-We reduce the number of features to ${\color{red} K < J}$ before doing the convolution.
-
-{\huge
-\begin{eqnarray*}
-U[B,X,Y,{\color{red} K}] & = & \mathrm{Conv}'(\Phi^A_{\ell+1}{ [1,1,{\color{red} J},{\color{red} K}]},L_\ell[B,X,Y,{\color{red} J}]) \\
-\\
-V[B,X,Y,{\color{red} K}] & = & \mathrm{Conv}'(\Phi^B_{\ell+1}{[3,3,{\color{red} K},{\color{red} K}]},U[B,X,Y,{\color{red} K}]) \\
-\\
-R[B,X,Y,{\color{red} J}] & = & \mathrm{Conv}'(\Phi^R_{\ell+1}{ [1,1,{\color{red} K},{\color{red} J}]},V[B,X,Y,{\color{red} K}]) \\
-\\
-L_{ \ell+1} & = & L_\ell + R
-\end{eqnarray*}
-}
-
-\vfill
-Here $\mathrm{CONV}'$ may include batch normalization and/or an activation function.
-
-\slide{A General Residual Connection}
-
-$${\color{red} y = \tilde{x} + R(x)}$$
-
-\vfill
-Where $\tilde{x}$ is either $x$ or a version of $x$ adjusted to match the shape of $R(x)$.
-
-
-\slide{Models for Image Classification in PyTorch}
-
-{\Large
-\begin{itemize}
-
-\item AlexNet
-
-\item VGG
-
-\item ResNet
-
-\item SqueezeNet
-
-\item DenseNet
-
-\item Inception v3
-
-\item GoogLeNet
-
-\item ShuffleNet v2
-
-\item MobileNet v2
-
-\item ResNeXt
-
-\item Wide ResNet
-
-\item MNASNet
-\end{itemize}
-}
-
-\slide{DenseNet}
-
-We compute a residual $R[b,x,y,J_R]$ and then simply concatenate the residual onto the previous layer.
-
-\vfill
-$$\mbox{for}\;b,x,y\;\;L_{\color{red} \ell + 1}[b,x,y,J_{\color{red} \ell} + J_{\color{red} R}] = L_\ell[b,x,y,J_{\color{red} \ell}];R[b,x,y,J_{\color{red} R}]$$
-
-\vfill
-The number $J_R$ of new features can be can be relatively small.
-
-\slideplain{ResNet Simplicity}
-
-\centerline{\includegraphics[height= 4.0 in]{../images/ResNetStack} {\large [Kaiming He]} \includegraphics[width = 5.0in]{../images/inception1}}
-
-\slide{ResNet Power}
-
-ResNet gives powerful image classification.
-
-\vfill
-ResNet is used in folding proteins.
-
-\vfill
-ResNet is the netowwork used in AlphaZero for Go, Chess and Shogi.
-
-\vfill
-This supports Hinton's claim that general purpose ``prior-free'' learning is possible.
-\slide{END}
+\slideplain{END}
 
 }
 \end{document}
