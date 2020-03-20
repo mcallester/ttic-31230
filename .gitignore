@@ -8,3 +8,5 @@
 *.txt
 *.fls
 *.fdb_latexmk
+.DS_store
+
