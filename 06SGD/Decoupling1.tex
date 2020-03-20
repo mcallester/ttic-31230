@@ -1,0 +1,86 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\newcommand{\solution}[1]{\bigskip {\bf Solution}: #1}
+
+\begin{document}
+
+{\Huge
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Stochastic Gradient Descent (SGD)}
+  \vfill
+  \centerline{\bf Decoupling the Learning Rate From the Batch Size}
+  
+\slide{Decoupling $\eta$ from $B$}
+
+For vanilla SGD with minibatching we have
+
+\begin{eqnarray*}
+\Phi_{t+1} & \;\minuseq\; & \eta \hat{g}_t \\
+\\
+\hat{g}_t & = & \frac{1}{B} \sum_b \hat{g}_{t,b}
+\end{eqnarray*}
+
+\vfill
+Where $\hat{g}_{t,b}$ is the gradient of the element $b$ of the batch.
+
+\slide{Decoupling $\eta$ from $B$}
+
+We can compare batch size $B$ to batch size 1.
+
+\vfill
+For batch size 1 on the same sequence of data points with $b \in \{1,\ldots,B\}$ and with learning rate $\eta_0$ we have
+
+\vfill
+$$\Phi_{t+b} = \Phi_{t+b-1} - \eta_0\;\nabla_\Phi\; {\cal L}(b,\Phi_{t+b-1})$$
+
+\vfill
+where ${\cal L}(b,\Phi_{t+b-1})$ is the gradient of the batch element $b$ at parameter value $\Phi_{t+b-1}$.
+
+\slide{Decoupling $\eta$ from $B$}
+
+$$\Phi_{t+b} = \Phi_{t+b-1} - \eta_0\;\nabla_\Phi\; {\cal L}(b,\Phi_{t+b-1})$$
+
+\vfill
+If the parameters are moving slowing we have
+
+\vfill
+$$\nabla_\Phi \;{\cal L}(b,\Phi_{t+b-1}) \approx \nabla_\Phi \;{\cal L}(b,\Phi_{t}) = \hat{g}_{t,b}$$
+
+\vfill
+So for Batch size 1 we get
+
+$$\Phi_{t+B} \approx \Phi_{t} - \eta_0\;\sum_b \;\hat{g}_{t,b}$$
+
+\slide{Decoupling $\eta$ from $B$}
+
+For batch size 1 we have
+$$\Phi_{t+B} \approx \Phi_{t} - \eta_0\;\sum_b \;\hat{g}_{t,b}$$
+
+\vfill
+For batch size $B$ we have
+$$\Phi_{t+1} = \Phi_{t} - \eta\;\frac{1}{B}\;\sum_b \;\hat{g}_{t,b}$$
+
+\vfill
+If $\eta_0$ causes convergence to a desirable loss at batch size 1 then
+$$\eta = B \eta_0$$
+
+\vfill
+will cause a similar convergence at batch size $B$.
+
+\slide{Decoupling $\eta$ from $B$}
+
+Recent work has show that using $\eta = B\eta_0$ leads to effective learning with very large (highly parallel)
+batches.
+
+\vfill
+{\bf Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour}, Goyal et al., 2017.
+
+
+\slide{END}
+
+} \end{document}
+

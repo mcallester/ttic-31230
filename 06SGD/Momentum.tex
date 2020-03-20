@@ -1,0 +1,194 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\newcommand{\solution}[1]{\bigskip {\bf Solution}: #1}
+
+\begin{document}
+
+{\Huge
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Stochastic Gradient Descent (SGD)}
+  \vfill
+  \centerline{\bf Momentum as a Running Average}
+  \vfill
+  \centerline{\bf Decoupled Momentum}
+  \vfill
+  \vfill
+
+\slideplain{Momentum}
+
+The standard (PyTorch) momentum SGD equations are
+
+\begin{eqnarray*}
+  {\color{red} v_t} & {\color{red} =} & {\color{red} \mu v_{t-1} + \eta * \hat{g}_t} \;\;\;\mbox{$\mu$ is typically .9 or .99}\\
+  \\
+  {\color{red} \Phi_{t+1}} & {\color{red} =} & {\color{red} \Phi_t -  v_t} \\
+\end{eqnarray*}
+
+We wil refer to $\eta$ in these equations as the {\bf PyTorch Learning Rate Parameter}.
+
+\slide{Momentum}
+
+The theory of momentum is generally given in terms of second order structure and total gradients (GD rather than SGD).
+
+\vfill
+But second order analyses are of questionable value for SDG in large dimension.
+
+\vfill
+Still, momentum is widely used in practice.
+
+\vfill
+To better understand momentum we will rewrite it as a running average.
+
+\slide{Running Averages}
+Consider a sequence $x_1$, $x_2$, $x_3$, $\ldots$.
+\vfill
+For $t \geq N$, consider the average of the $N$ most recent values.
+$$\overline{x}_t = \frac{1}{N} \sum_{\tilde{t} = t-N+1}^t x_{\tilde{t}}$$
+
+\vfill
+This can be approximated efficiently with
+\begin{eqnarray*}
+\tilde{x}_0 & = & 0 \\
+\\
+\tilde{x}_t & = & \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t
+\end{eqnarray*}
+
+\slide{Deep Learning Convention for Running Averages}
+
+In deep learning a running average
+
+$$\tilde{x}_t = \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t$$
+
+\vfill
+is written as
+
+$$\tilde{x}_t = \beta\tilde{x}_{t-1} + (1-\beta)x_t$$
+
+\vfill
+where
+$$\beta = 1 - 1/N$$
+
+\vfill
+Typical values for $\beta$ are .9, .99 or .999 corresponding to $N$ being 10, 100 or 1000.
+
+\vfill
+It will be convenient here to use $N$ rather than $\beta$.
+
+\slide{Momentum as a Running Average}
+
+\begin{eqnarray*}
+v_t & = & \mu v_{t-1} + {\color{red} \eta \hat{g}_t} \\
+\\
+& = & \left(1-\frac{1}{N_g}\right) v_{t-1} + {\color{red} \frac{1}{N_g}(N_g\eta \hat{g}_t)}
+\end{eqnarray*}
+
+\vfill
+We see that $v_t$ is a running average of $N_g \eta \hat{g}$.
+
+\slide{Momentum as a Running Average}
+
+$v_t$ is a running average of $N_g \eta \hat{g}$.
+
+\vfill
+Alternatively, we can consider a direct running average of the gradient.
+$$\tilde{g}_t = \left(1-\frac{1}{N_g}\right)\tilde{g}_{t-1} + \frac{1}{N_g} \hat{g}_t$$
+
+\vfill
+Since averaging is a linear operation, we get
+
+\vfill
+{\color{red} $$v_t = N_g \eta \tilde{g}_t$$}
+
+\slide{Momentum as a Running Average}
+
+We have now shown that standard momentum (PyTorch Momentum) can be written as
+\begin{eqnarray*}
+\tilde{g}_t & = & \left(1-\frac{1}{N_g}\right)\tilde{g}_{t-1} + \frac{1}{N_g} \hat{g}_t \\
+\\
+\Phi_{t+1} & = &  \Phi_t - \tilde{\eta}\tilde{g}_t \\
+\\
+\tilde{\eta} & = & N_g\eta
+\end{eqnarray*}
+
+Here $\eta$ is the standard (PyTorch) learning rate parameter for momentum.
+
+\slide{Decoupled Momentum}
+
+\begin{eqnarray*}
+\tilde{g}_t & = & \left(1-\frac{1}{N_g}\right)\tilde{g}_{t-1} + \frac{1}{N_g} \hat{g}_t \\
+\\
+\Phi_{t+1} & = &  \Phi_t - \tilde{\eta}\tilde{g}_t \\
+\\
+\tilde{\eta} & = & N_g\eta
+\end{eqnarray*}
+
+\vfill
+We will show that $\tilde{\eta}$ is a more rational (decoupled from $N_g$) learning rate parameter than the PyTorch learning rate $\eta$ when using momentum.
+
+\slide{Decoupled Momentum}
+
+We will use the general {\bf matching principle} that the effect of a single batch element gradient $\hat{g}_{t,b}$ on the model
+should be $\eta_0\hat{g}_{t,b}$ where $\eta_0$ is the optimal learning rate
+for Vanilla SGD with batch size 1.
+
+\vfill
+This principle should lead to converged loss values with minibatching and momentum similar to convergence loss values for SGD with batch size 1, learning rate $\eta_0$, and no momentum.
+
+\slide{Decoupled Momentum}
+
+\begin{eqnarray*}
+\tilde{g}_t & = & \left(1-\frac{1}{N_g}\right)\tilde{g}_{t-1} + \frac{1}{N_g} \hat{g}_t \\
+\\
+\Phi_{t+1} & = &  \Phi_t - \tilde{\eta}\tilde{g}_t
+\end{eqnarray*}
+
+For $\Delta t >> N_g$, the effect of $\hat{g}_t$ on $\Phi_{t+\Delta t}$ is approximately
+
+$$\frac{\tilde{\eta}\hat{g}_t}{N_g}\sum_{i = 0}^\infty \;\left(1 - \frac{1}{N_g}\right)^i = \frac{\tilde{\eta}\hat{g}_t}{N_g}\;N_g = \tilde{\eta}\hat{g}_t$$
+
+\vfill
+{\color{red} So the effect of $\hat{g}_t$ on the model is $\tilde{\eta}\hat{g}_t$ independent of $N_g$.}
+
+\slide{Decoupled Momentum}
+
+Using the same value of $\tilde{\eta}$ independent of $N_g$ gives
+
+$$\tilde{\eta} = B\eta_0 = N_g\eta$$
+
+where, as before, $\eta_0$ is the optimal learning rate for Vanilla SGD with $B = 1$.
+
+\vfill
+Solving for the PyTorch learning rate $\eta$ we get
+{\color{red} $$\eta = \frac{B\eta_0}{N_g}$$}
+which can then be used with the PyTorch implementation.
+
+\slide{Decoupled Momentum}
+
+{\color{red} $$\eta = \frac{B\eta_0}{N_g}$$}
+
+\vfill
+Emprical evidence for this setting of $\eta$ is given in
+
+\vfill
+{\bf Don't Decay the Learning Rate, Increase the Batch Size}, Smith et al., 2018
+
+\slide{Decoupled Momentum Summary}
+
+By setting the PyTorch learning rate to be
+
+{\color{red} $$\eta = \frac{B\eta_0}{N_g}$$}
+
+\vfill
+The optimnal value of $\eta_0$ should be fairly insensitive to the choice of $B$ and $N_g$.
+
+\vfill
+One should set the batch size $B$ to be large enough so as to saturate the hardware (your GPUs should be running at maximum FLOPs).
+
+\slide{END}
+
+} \end{document}
+

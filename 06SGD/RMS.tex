@@ -71,12 +71,20 @@ has no dependence on the choice of the weight unit.
 
 \vfill
 Consistent with the dimensional analysis, many theoretical analyses support (2) over (1) contrary to apparent empirical performance.
+
 \slide{Adam --- Adaptive Momentum}
 
-Adam combines momentum and RMSProp (although PyTorch RMSProp also supports momentum).
+Adam combines momentum and RMSProp.
 
 \vfill
-Adam also uses ``bias correction'' which probably accounts for it's popularity over RMSProp in practice.
+PyTorch RMSProp also supports momentum.  However, it presumably uses the standard moment learning rate parameter which is strongly coupled to the momentum parameter.
+Without an understanding of the coupling, hyper-parameter optimization is then difficult.
+
+\vfill
+Adam uses a learning rate parameter that is naturally decoupled from the momentum parameter.
+
+\vfill
+Adam also uses ``bias correction''.
 
 \slide{Bias Correction}
 
@@ -131,59 +139,42 @@ The published version of Adam has a more obscure form of bias correction which y
 \Phi_{t+1}[i] & =  & \Phi_t - \frac{\eta}{\sqrt{s_{t}[i]} + \epsilon}\;\;\tilde{g}_{t}[i]
 \end{eqnarray*}
 
-\slide{Decoupling Hyperparametera}
+\slide{Decoupled Adam}
 
-The following reparameterization should be helpful for Adam.
-
-\begin{eqnarray*}
-N_g & = & min(1,N^0_g/B) \\
-\\
-\eta & = & \epsilon B \eta_0
-\end{eqnarray*}
+$$\Phi_{t+1}[i] =  \Phi_t - \frac{\eta}{\sqrt{s_{t}[i]} + \epsilon}\;\;\tilde{g}_{t}[i]$$
 
 \vfill
 Empirically, tuning $\epsilon$ is important.
 
 \vfill
-Some coupling remains between $\eta_0$ and $\epsilon$.
+It seems useful to reparameterizing in terms of $\eta_0$ by
+$$\eta = \frac{\eta_0}{\epsilon}$$
 
 \vfill
-$N_s$ should also be adapted to $B$ but this is problematic --- see the next slide.
+Some coupling remains between $\eta_0$ and $\epsilon$.
 
-\slide{Making $s_t[i]$ batch size invariant}
+\slide{Decoupled Adam}
 
-rather than
+Decoupling Adam from the batch size $B$ is problematic.
+
+\vfill
+Rather than
 $$s_t[i] = \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2$$
 \vfill
 we would like
 \begin{eqnarray*}
-s_t[i] & = &  \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \left(\frac{1}{B} \sum_b \hat{g}_{t,b}[i]^2\right) \\
-\\
-\\
-N_s & = & \min\left(1,N^0_s/B\right)\;\;\;\mbox{$N^0_s$ optimal for $B=1$}
+s_t[i] & = &  \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \left(\frac{1}{B} \sum_b \hat{g}_{t,b}[i]^2\right)
 \end{eqnarray*}
 
-\slide{Making $s_t[i]$ Batch Size Invariant}
+\slide{Decoupled Adam}
 
 In PyTorch this is difficult because ``optimizers'' are defined as a function of $\hat{g}_t$.
 
 \vfill
 $\hat{g}_t[i]$ is not sufficient for computing $\sum_b \;\hat{g}_{t,b}[i]^2$.
 
-
 \vfill
 To compute $\sum_b \;\hat{g}_{t,b}[i]^2$ we need to modify the backward method of all PyTorch objects!
-
-\slide{Summary}
-
-We have considered Vanilla SGD, Momentum, RMSProp and Adam.
-
-\vfill
-Vanilla tends to be used in vision while Adam tends to be used in NLP.
-
-\vfill
-Reparameterization of the PyTorch hyperparameters can decouple hyperparameters simplifying hyperparameter search.
-
 
 \slide{END}
 
