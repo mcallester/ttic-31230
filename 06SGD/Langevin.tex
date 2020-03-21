@@ -30,28 +30,41 @@ with a {\color{red} continuous time} stochastic differential equation.
 
 
 \vfill
-Consider SGD with $B = 1$.
+Consider SGD with batch size 1.
 
-$$\Phi \;\minuseq\; \eta\hat{g}$$
-
-\vfill
-For $N$ steps of SGD we define $\Delta t = N \eta$.
+$$\Phi_{i+1} = \Phi_i - \eta\hat{g}_i$$
 
 \vfill
-To model noise we hold $\eta > 0$ fixed.
+To model noise we consider holding $\eta > 0$ fixed.
 
 \vfill
-We then consider $\Delta t$ large compared to $\eta$ (so that it corresponds to many SGD updates) but
-small enough so that the gradient distribution does not change during the interval $\Delta t$.
+As in gradient flow, taking ``time'' to be the sum of the learning rates over the updates.
+For $N$ steps of SGD we define $\Delta t = N \eta$ or equivalently
+\begin{eqnarray*}
+\Phi(t) & = & \Phi_{i(t)} \\
+\\
+i(t) & = & \lfloor t/\eta \rfloor
+\end{eqnarray*}
+
+
+\slide{Continuous Time Noise}
+
+
+
+\vfill
+We consider $\Delta t$ large compared to $\eta$ so that $\Delta t$ corresponds to many SGD updates.
+
+\vfill
+We consider $\Delta t$ small enough so that the gradient distribution does not change during the many-update interval $\Delta t$.
 
 \slide{Continuous Time Noise}
 
 If the mean gradient $g(\Phi)$ is approximately constant over the interval $\Delta t = N \eta$ we have
 
-$$\Phi(t + \Delta t)  \approx \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i)$$
+$$\Phi(t + \Delta t)  \approx \Phi(t) -g(\Phi)\Delta t + \eta \sum_{i=1}^N (g(\Phi) - \hat{g}_i)$$
 
 \vfill
-The Random variables in the last term have zero mean.
+The random variables in the last term have zero mean.
 
 \vfill
 By the law of large numbers a sum (not the average) of $N$ random vectors will approximate a Gaussian distribution where the standard deviation
@@ -82,7 +95,7 @@ Let $\epsilon$ be a zero mean Gaussian random variable with the same covariance 
 \end{eqnarray*}
 
 \vfill
-We can take this last equation to hold for all $\Delta t$ in which case we get a continuous time stochastic process.  This process can be written as
+We can take this last equation to hold for all (arbitrarily small) $\Delta t$ in which case we get a continuous time stochastic process.  This process can be written as
 
 {\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\Sigma)$$}
 
@@ -105,13 +118,13 @@ To model noise we hold $\eta > 0 $ fixed.
 
 SGD (at batch size 1) defines a Markov process
 
-$$\Phi \;\minuseq \; \eta \hat{g}$$
+$$\Phi_{i+1} = \Phi_i - \eta \hat{g}_i$$
 
 \vfill
 We will model the stationary distribution as a continuous density in parameter space.
 
 \vfill
-If the covariance matrix is isotropic (all eigenvalues are the same) we get a Gibbs distribution.
+If the noise covariance matrix is isotropic (all eigenvalues are the same) we get a Gibbs distribution.
 
 
 \slide{The 1-D Stationary Distribution}
