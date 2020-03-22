@@ -1,0 +1,348 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+
+\centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+\bigskip
+\centerline{David McAllester, Winter 2020}
+
+\vfill
+\centerline{\bf PAC-Bayesian Learning Theory}
+\vfill
+\vfill
+
+\slide{Chomsky vs. Kolmogorov and Hinton}
+
+\includegraphics[width=1.0 in]{../images/Chomsky} \begin{minipage}[b]{8in} Noam Chomsky: 
+Natural language grammar cannot be learned by a universal learning algorithm.
+This position is supported by the ``no free lunch theorem''.\end{minipage}
+
+\vfill
+\includegraphics[height=1.0 in]{../images/Kolmogorov}
+\includegraphics[height=1.0 in]{../images/Hinton}
+\begin{minipage}[b]{7in}
+Andrey Kolmogorov, Geoff Hinton: Universal learning algorithms exist. This position is supported by the ``free lunch theorem''.
+\end{minipage}
+
+\slide{The No Free Lunch Theorem}
+
+\includegraphics[width=1.0 in]{../images/Chomsky} 
+
+Without prior knowledge, such as universal grammar, it is impossible to make a prediction for an input you have not seen in the training data.
+
+
+\vfill
+{\bf Proof:} Select a predictor $h$ uniformly at random from all functions from ${\cal X}$ to ${\cal Y}$ and then take the data distribution to draw pairs $(x, h(x))$
+where $x$ is drawn uniformly from ${\cal X}$.  No learning algorithm can predict $h(x)$ where $x$ does not occur in the training data.
+
+
+\slide{The Free Lunch Theorem}
+
+Consider a classifier $f$ written in C++ with an arbitrarily large standard library.
+
+\vfill
+Let $|f|$ be the number of bits needed to represent $f$.
+
+\slide{The Free Lunch Theorem}
+
+\vfill
+$$0 \leq {\cal L}(h,x,y) \leq \lmax$$
+\begin{eqnarray*}
+{\cal L}(h)  & = &  E_{(x,y)\sim \mathrm{Pop}}\;{\cal L}(h,x,y) \\
+\hat{{\cal L}}(h) & = & E_{(x,y)\sim \mathrm{Train}}\;{\cal L}(h,x,y)
+\end{eqnarray*}
+
+\vfill
+Theorem: With probability at least $1-\delta$ over the draw of the training data the following holds simultaneously for all $f$.
+
+{\color{red} $$E(f) \leq \frac{10}{9}\left(\hat{E}(f) + \frac{5\lmax}{N_\mathrm{Train}}\left((\ln 2)|f| +\ln\frac{1}{\delta}\right)\right)$$}
+
+
+\slide{Free Lunch Theorem (Probability Form)}
+
+Code length is inter-convertable with with probability.
+
+$$P(h) = 2^{-|h|}\;\;\;\mbox{or}\;\;\;|h| = - \log_2 P(h)$$
+
+\vfill
+Instead of fixing the language (e.g., C++ with a large library) we fix a prior $P(h)$.
+
+\vfill
+    {\bf Theorem:} With probability
+    at least $1-\delta$ over the draw of training data the following holds simultaneously for all $h$.
+
+\vfill
+    $${\cal L}(h) \leq \frac{10}{9}\parens{\hat{\cal L}(h) + \frac{5 L_\mathrm{max}}{N_\mathrm{Train}}\parens{\ln \frac{1}{P(h)} + \ln\frac{1}{\delta}}}$$
+
+\slide{Proof}
+
+Define
+$$\epsilon(h) = \sqrt{\frac{2{\cal L}(h)\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{\lmax N_\mathrm{Train}}}.$$
+
+\vfill
+By the relative Chernov bound we have
+
+\vfill
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\frac{\hat{{\cal L}}(h)}{\lmax} \leq \frac{{\cal L}(h)}{\lmax} - \epsilon(h)} \leq e^{-N_\mathrm{Train}\frac{\epsilon(h)^2\lmax}{2{\cal L}(h)}} = \delta P(h).$$
+
+\slide{Proof}
+
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\hat{{\cal L}}(h) \leq {\cal L}(h) - \lmax\epsilon(h)} \leq \delta P(h).$$
+
+\vfill
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\exists h\;\hat{{\cal L}}(h) \leq {\cal L}(h) - \lmax\epsilon(h)} \leq \sum_h \delta P(h) =\delta$$
+
+\vfill
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\forall h\;{\cal L}(h) \leq \hat{{\cal L}}(h) + \lmax\epsilon(h)} \geq 1- \delta$$
+
+\slide{Proof}
+
+$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \lmax\sqrt{\frac{{\cal L}(h)}{\lmax}\parens{\frac{2\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{N_\mathrm{Train}}}}$$
+
+using
+$$\sqrt{ab} = \inf_{\lambda > 0}\;\frac{a}{2\lambda} + \frac{\lambda b}{2}$$
+\vfill
+we get
+$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \frac{{\cal L}(h)}{2\lambda} + \frac{\lambda\lmax\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{N_\mathrm{Train}}$$
+
+\slide{Proof}
+$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \frac{{\cal L}(h)}{2\lambda} + \frac{\lambda\lmax\parens{\ln\frac{1}{P(h)} + \ln\frac{1}{\delta}}}{N_\mathrm{Train}}$$
+
+\vfill
+Solving for ${\cal L}(h)$ yields
+
+\vfill
+$${\cal L}(h) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{{\cal L}}(h) + \frac{\lambda\lmax}{N_\mathrm{Train}}\parens{\ln \frac{1}{P(h)} + \ln \frac{1}{\delta}}}$$
+
+\vfill
+Setting $\lambda = 5$ brings the leading factor to 10/9 which seems sufficiently close to 1 that larger values of $\lambda$ need not be considered.
+
+\slide{A Model Compression Guarantee}
+
+Let $|\Phi|$ be the number of bits used to represent $\Phi$ under some fixed compression scheme.
+
+\vfill
+Let $P(\Phi) = 2^{-|\Phi|}$
+
+\vfill
+    $${\cal L}(\Phi) \leq \frac{10}{9}\parens{\hat{\cal L}(\Phi) + \frac{5 L_\mathrm{max}}{N_\mathrm{Train}}\parens{(\ln 2)|\Phi| + \ln\frac{1}{\delta}}}$$
+
+
+\slide{A Bound for Continuous Densities}
+
+Let $p$ be any ``prior'' and $q$ be any ``posterior'' on any  (possibly continuous) model space.
+Define
+\begin{eqnarray*}
+  L(q) & =  &\expectsub{h \sim q}{L(h)} \\
+  \\
+  \hat{L}(q) & =  &\expectsub{h \sim q}{\hat{L}(h)}
+\end{eqnarray*}
+
+
+\vfill
+For any $p$ and any $\lambda > \frac{1}{2}$, with probability
+at least $1-\delta$ over the draw of the training data, the following holds simultaneously for all $q$.
+\vfill
+$$L(q) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{L}(q) + \frac{\lambda \lmax}{N_\mathrm{Train}}\parens{KL(q,p) + \ln \frac{1}{\delta}}}$$
+
+\slide{Adding Noise Simulates Limiting Precision}
+
+Assume $0 \leq {\cal L}(\Phi,x,y) \leq \lmax$.
+
+\vfill
+Define:
+\begin{eqnarray*}
+{\cal L}(\Phi) & = & E_{\;(x,y)\sim \pop,\;\epsilon \sim {\cal N}(0,\sigma)^d}\;{{\cal L}(\Phi+\epsilon,x,y)} \\
+\\
+\hat{{\cal L}}(\Phi) & = & E_{\;(x,y)\sim \mathrm{Train},\;\epsilon \sim {\cal N}(0,\sigma)^d}\;{{\cal L}(\Phi+\epsilon,x,y)} \\
+\end{eqnarray*}
+
+\vfill
+Theorem: With probability at least $1-\delta$ over the draw of training data the following holds {\bf simultaneously} for all $\Phi$.
+\begin{eqnarray*}
+   {\color{red} {\cal L}(\Phi)} & {\color{red} \leq} & {\color{red} \frac{10}{9}\parens{\hat{{\cal L}}(\Phi)
+   + \frac{5 \lmax}{N_\mathrm{Train}}\parens{\frac{||\Phi-\Phi_{\mathrm{init}}||^2}{2\sigma^2} + \ln \frac{1}{\delta}}}}
+\end{eqnarray*}
+
+\slide{Implicit Regularization}
+
+Any stochastic learning algorithm, such as SGD, determines a stochastic mapping from training data to models.
+
+\vfill
+The algorithm can implicitly incorporate a preference or bias for models.
+
+\slide{Implicit Regularization in Linear Regression}
+
+Linear regression with many more parameters than data points
+has many solutions.
+
+\vfill
+But SGD finds converges to the minimum norm solution.
+
+\slide{Implicit Regularization in Linear Regression}
+
+For linear regression SGD maintains the invariant that $\Phi$ is a linear combination of the (small number of) training vectors.
+
+\vfill
+Any zero-loss (squared loss) solution can be projected on the span of training vectors to give a no larger norm solution.
+
+\vfill
+It can be shown that any zero loss solution in the span of the training vectors is a least-norm solution.
+
+\slideplain{An Implicit Regularization Generalization Guarantee}
+
+Let ${\cal H}$ be a discrete set of classifiers.
+
+\vfill
+Let $A$ be an algorithm mapping a training set to a classifier.
+
+\vfill
+Let $P(h | A,\pop)$ be the probability over the draw of the training data that $A(\mathrm{Train}) = h$.
+
+\vfill
+Theorem: With probability at least $1-\delta$ over the draw of the training data we have
+$${\color{red} \mathrm{Err}(A(\mathrm{Train}))} \leq \frac{10}{9}\parens{\begin{array}{l} {\color{red} \hat{\mathrm{Err}}(A(\mathrm{Train}))}
+ \\+ \frac{5}{N_\mathrm{Train}}\parens{
+- \ln {\color{red} P(A(\mathrm{Train})|A,\pop)} + \ln \frac{1}{\delta}}\end{array}}$$
+
+
+\ignore{
+\slide{Optimality of $Q_{\cal A}(\mathrm{Pop})$}
+
+Consider an arbitrary prior $P$.
+
+\vfill
+\begin{eqnarray*}
+  & & E_{\mathrm{Train}\sim\mathrm{Pop}}\;KL(Q_{\cal A}(\mathrm{Train}),P) \\
+  \\
+  & = & E_{\mathrm{Train}\sim\mathrm{Pop}}\;\ln \frac{Q_{\cal A}(\mathrm{Train})(h)}{P(h)}  \\
+\\
+\\
+& = & \expectsub{\mathrm{Train}\sim \mathrm{Pop},\;h \sim Q_{\cal A}(\mathrm{Train})}{\ln \frac{Q_{\cal A}(\mathrm{Train})(h)}{Q_{\cal A}(\mathrm{Pop})(h)}} \\
+\\
+\\
+& & + \expectsub{h \sim Q_{\cal A}(\mathrm{Pop})}{\ln \frac{Q_{\cal A}(\mathrm{Pop}(h))}{P(h)}}
+\end{eqnarray*}
+
+\slideplain{Optimality of $Q_{\cal A}(\mathrm{Pop})$}
+
+\begin{eqnarray*}
+  & & E_{\mathrm{Train}\sim\mathrm{Pop}}\;KL(Q_{\cal A}(\mathrm{Train}),P) \\
+\\
+& = & \expectsub{\mathrm{Train}\sim \mathrm{Pop}}{KL(Q_{\cal A}(\mathrm{Train}),Q_{\cal A}(\mathrm{Pop}))} + KL(Q_{\cal A}(\mathrm{Pop}),P)
+\end{eqnarray*}
+
+\vfill
+So $Q_{\cal A}(\mathrm{Pop})$ is an {\bf optimal prior} (or {\bf implicit prior}) for algorithm ${\cal A}$.
+}
+
+\ignore{
+\slide{The Broad Basin Hypothesis}
+
+Do broad basins in the loss function generalize better?
+
+\vfill
+
+{\bf Flat Minima:} Hochreiter and Schmidhuber (1997)
+
+\vfill
+{\bf On Large-Batch Training for Deep Learning: Generalization Gap and Sharp Minima:} Keskar et al. (Nocedal) arXiv 2016, ICLR 2017.
+
+\vfill
+{\bf Sharp Minima Can Generalize For Deep Nets:} Dihn et al. (both Bengios) arXiv 2017.
+
+\vfill
+I believe that the PAC-Bayesian analysis supports the broad basin hypothesis.  We are interested in the implicit prior (implicit geometry) of SGD
+and ``broad'' should be defined in terms of that geometry.
+}
+
+\ignore{
+\slide{Sparse Activation}
+
+We can impose an $L_1$ regularization on the activations of the network (the output of the activation function of each neuron).
+
+$$\Phi^* = \argmin_\Phi {\cal L}(\Phi) + \lambda||h||_1$$
+
+\vfill
+where $h$ is the vector of neuron activation outputs.
+
+\vfill
+This will tend to make activations sparse.
+
+\slide{Sparse Coding}
+
+Let $W$ be a matrix where we view $W_{\cdot,i}$ is the $i$th ``dictionary vector''.
+
+\vfill
+For input $x$ we can construct a $k$-sparse representation $h(x)$.
+
+\vfill
+$$h(x) = \argmin_{h,||h||_0=k} \;||x - Wh||^2$$
+
+\vfill
+Note
+
+$$Wh = \sum_{i \in I(x)} \; h_i \; W_{\cdot,i}\;\;\;\;\;|I(x)| = k$$
+
+\vfill
+We can now replace $x$ by its sparse code $h(x)$.
+
+}
+
+\ignore{
+\slide{Modeling the Implicit Prior}
+
+We divide the parameters into classes where we write $c_i$ for the class of parameter $w_i$.
+
+\vfill
+We let $w_i^0$ be the initial value of $w_i$ and let $w_i^f(S)$ be the final value of $w_i$.
+
+\vfill
+\begin{eqnarray*}
+\beta_{c,1},\beta_{c,2} & = & E_{S \sim D^N}\;\argmin_{\beta_1,\beta_2}\; \sum_{i: c_i = c}\;(w_i^f(S) - (\beta_1 w_i^0 + \beta_2))^2 \\
+\beta_{c,3},\beta_{c,4} &  = & E_{S \sim D^N}\; \argmin_{\beta_3,\beta_4}\;\sum_{i: c_i = c}\;((w_i^f(S) - (\beta_{c_1,1} w_i^0 + \beta_{c_i,2}))^2 - (\beta_3 w_i^0 + \beta_4))^2
+\end{eqnarray*}
+
+We then consider the prior distribution $P$ on $w_i$ to be a Gaussian with mean $\mu_i$ and standard deviation $\sigma_i$ given by
+
+\begin{eqnarray*}
+  \mu_i & = & \beta_{c_i,1}w_i^0 + \beta_{c_i,2} \\
+  \sigma_i^2 & = & \beta_{c_i,3}w_i^0 + \beta_{c_i,4}
+\end{eqnarray*}
+
+\slide{Modeling the Implicit Prior}
+
+This prior does not depend on any particular training data $S$ and hence is a legitimate prior.
+
+\vfill
+In practice we can estimate this prior from the training data.
+
+\begin{eqnarray*}
+\hat{\beta}_{c,1},\hat{\beta}_{c,2} & = & \argmin_{\beta_1,\beta_2} \sum_{i: c_i = c}\;(w_i^f(S) - (\beta_1 w_i^0 + \beta_2))^2 \\
+\hat{\beta}_{c,3},\hat{\beta}_{c,4} &  = & \argmin_{\beta_3,\beta_4} \sum_{i: c_i = c}\;((w_i^f(S) - (\hat{\beta}_{c_i,1} w_i^0 + \hat{\beta}_{c_i,2}))^2 - (\beta_3 w_i^0 + \beta_4))^2
+\end{eqnarray*}
+}
+
+\slide{Non-Vacuous Generalization Guarantees}
+
+Model compression has recently been used to achieve ``non-vacuous'' PAC-Bayes generalization guarantees for ImageNet classification
+--- error rate guarantees less than 1.
+
+\vfill
+Non-Vacuous PAC-Bayes Bounds at ImageNet Scale.
+
+\bigskip
+Wenda Zhou, Victor Veitch, Morgane Austern, Ryan P. Adams, Peter Orbanz
+
+\bigskip
+ICLR 2019
+
+\slide{END}
+
+}
+\end{document}
