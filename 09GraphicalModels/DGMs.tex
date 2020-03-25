@@ -10,7 +10,9 @@
   \centerline{David McAllester, Winter 2019}
   \vfill
   \vfill
-  \centerline{\bf Deep Graphical Models}
+  \centerline{\bf Approximate Algotithms}
+  \vfill
+  \centerling{\bf for Exponential Softmax Backpropagation}
 \vfill
 \vfill
 \vfill
@@ -78,7 +80,7 @@ $$\begin{array}{lrcl}
 \\
 \mbox{for}\;\hat{y} & {\color{red} P_s(\hat{y})} & = & \softmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
 \\
- & {\cal L} & = & - \ln P_s(y) \;\;\;{\color{red} \mbox{gold label $y$}}
+ & {\cal L} & = & - \ln P_s(y) \;\;\;{\color{red} \mbox{gold label (training label) $y$}}
 \end{array}$$
 
 \slide{Exponential Softmax is Typically Intractable}

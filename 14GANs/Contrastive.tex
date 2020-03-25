@@ -1,0 +1,117 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Contrastive Gans}
+\vfill
+\vfill
+
+\slide{GANs}
+
+The generator tries to fool the discriminator.
+
+\vfill
+\begin{eqnarray*}
+\Phi^* & = & \argmax_\Phi\;\;\min_\Psi\;E_{\tuple{i,y} \sim \tilde{p}_\Phi}\;-\ln P_\Psi(i|y)
+\end{eqnarray*}
+
+\vfill
+Assuming universality of both the generator $p_\Phi$ and the discriminator $P_\Psi$ we have {\color{red} $p_{\Phi^*} = \popd$}.
+
+
+\slide{Contrastive GANs}
+
+A GAN can be built with a ``contrastive'' discriminator.  Rather than estimate the probability that $y$ is from the population, the discriminator must select which
+of $y_1,\ldots,y_N$ is from the population.
+
+\vfill
+More formally, for $N \geq 2$ let {\color{red} $\tilde{p}_\Phi^{(N)}$} be the distribution defined by drawing one ``positive'' from $\popd$ and $N-1$ IID negatives from $p_\Phi$;
+then inserting the positive at a random position among the negatives; and returning $(i,y_1,\ldots,y_N)$ where
+$i$ is the index of the positive.
+
+\anaslide{Contrastive GANs}
+
+\begin{eqnarray*}
+\Psi^*(\Phi) & = & \argmin_\Psi\; E_{(i,y_1,\ldots,y_{N})\sim \tilde{p}_\Phi^{(N)}} \;- \ln P_\Psi(i|y_1,\ldots,y_{N}) \\
+\\
+\Phi^* & = & \argmax_\Phi\; E_{(i,y_1,\ldots,y_{N})\sim \tilde{p}_\Phi^{(N)}} \;- \ln P_{\Psi^*(\Phi)}(i|y_1,\ldots,y_{N})
+\end{eqnarray*}
+
+\vfill
+{\color{red} $\tilde{p}_\Phi^{(2)}(i|y_1,y_2)$} requires a choice between two $y$'s while {\color{red} $\tilde{p}_\Phi(i|y)$} classifies a single $y$ --- these are different.
+
+\vfill
+The discrimination gets more difficult as $N$ gets larger.
+
+\anaslide{Contrastive GANs}
+
+\begin{eqnarray*}
+\Psi^*(\Phi) & = & \argmin_\Psi\; E_{(i,y_1,\ldots,y_{N})\sim \tilde{p}_\Phi^{(N)}} \;- \ln P_\Psi(i|y_1,\ldots,y_{N}) \\
+\\
+\Phi^* & = & \argmax_\Phi\; E_{(i,y_1,\ldots,y_{N})\sim \tilde{p}_\Phi^{(N)}} \;- \ln P_{\Psi^*(\Phi)}(i|y_1,\ldots,y_{N})
+\end{eqnarray*}
+
+\vfill
+Assuming universality
+
+\vfill
+$${\cal L}(\Psi^*(\Phi)) = H_\Phi(i|y_1,\ldots y_{N})$$
+
+\vfill
+$$p_{\Phi^*} = \popd\;\;\;\;\;\;H_{\Phi^*}(i|y_1,\ldots,y_N) = \ln N$$
+
+
+\slide{A Theorem for Universal $\Psi$}
+
+\begin{eqnarray*}
+  && E_{(i,y_1,\dots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;- \ln \tilde{p}^{(N)}_\Phi(i|y_1,\ldots,y_{N}) \\
+  \\
+  \\
+  \\
+  & \geq & \ln N - \frac{N-1}{N}(KL(\popd,p_\Phi) + KL(p_\Phi,\popd))
+\end{eqnarray*}
+
+\vfill
+Note that the bound holds with equality for $p_\Phi = \popd$.
+
+\vfill
+This is analogous to the JSD expression for the optimal discriminator.
+\slide{Proof Part A.}
+
+{\huge
+ \begin{eqnarray*}
+    & & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln p_{\Psi^*}(i|y_1,\ldots,y_{N}) \\
+    \\
+    & = & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln \left(\softmax_i \;\ln \frac{\popd(y_i)}{p_\Phi(y_i)}\right)[i] \\
+    \\
+    & = & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \ln\left(\sum_j \frac{\popd(y_j)}{p_\Phi(y_j)} \right) \\
+    \\
+    & = & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \ln\left(\frac{1}{N}\sum_j \frac{\popd(y_j)}{p_\Phi(y_j)} \right) - \ln\;N
+  \end{eqnarray*}
+}
+
+\slide{Proof Part B.}
+{\huge
+ \begin{eqnarray*}
+    & & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} {\color{red} - \ln\left(\frac{1}{N}\sum_j \frac{\popd(y_j)}{p_\Phi(y_j)} \right)} - \ln\;N \\
+    \\
+    & {\color{red} \leq} & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} {\color{red} - \frac{1}{N} \sum_j \ln\frac{\popd(y_j)}{p_\Phi(y_j)}} - \ln\;N \\
+    \\
+    & = & E_{y \sim \popd} \ln \frac{\popd(y)}{p_\Phi(y)} -  E_{(i,y_1,\ldots,y_N) \sim \tilde{p}^{(N)}_\Phi} \frac{1}{N} \sum_j \ln\frac{\popd(y_j)}{p_\Phi(y_j)} - \ln N \\
+    \\
+    & = & \frac{N-1}{N}(KL(\popd,p_\Phi) + KL(p_\Phi,\popd)) - \ln\;N \\
+  \end{eqnarray*}
+}
+
+\slide{END}
+
+}
+\end{document}

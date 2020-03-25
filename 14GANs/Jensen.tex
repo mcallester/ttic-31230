@@ -1,0 +1,76 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Optimal Discrimination}
+  \vfill
+  \centerline{\bf and Jensen-Shannon Divergence}
+\vfill
+\vfill
+
+
+
+\slide{GANs}
+
+The generator tries to fool the discriminator.
+
+\vfill
+\begin{eqnarray*}
+\Phi^* & = & \argmax_\Phi\;\;\min_\Psi\;E_{\tuple{i,y} \sim \tilde{p}_\Phi}\;-\ln P_\Psi(i|y)
+\end{eqnarray*}
+
+\vfill
+Assuming universality of both the generator $p_\Phi$ and the discriminator $P_\Psi$ we have {\color{red} $p_{\Phi^*} = \popd$}.
+
+
+\slide{Assuming Universality of $\Psi$ Only}
+
+\begin{eqnarray*}
+  \Psi^*(\Phi) & = & \argmin_\Psi\;E_{\tuple{i,y} \sim \tilde{p}_\Phi}\;-\ln P_\Psi(i|y) \\
+  \\
+  \\
+  P_{\Psi^*(\Phi)}(1|y)  & = & \tilde{p}_\Phi(1|y) \;=\;  \frac{\tilde{p}_\Phi(1,y)}{\tilde{p}_\Phi(y)} \;=\; \frac{\frac{1}{2}\popd(y)}{\frac{1}{2}\popd(y) + \frac{1}{2}p_\Phi(y)} \\
+  \\
+  \\
+  P_{\Psi^*(\Phi)}(-1|y)  & = & \tilde{p}_\Phi(-1|y) \;=\; \frac{\tilde{p}_\Phi(-1,y)}{\tilde{p}_\Phi(y)} \;=\; \frac{\frac{1}{2}p_\Phi(y)}{\frac{1}{2}\popd(y) + \frac{1}{2}p_\Phi(y)}
+\end{eqnarray*}
+
+
+\slide{Assuming Universality of $\Psi$ Only}
+
+\begin{eqnarray*}
+  \Phi^* & = & \argmax_\Phi\;\;\min_\Psi\;E_{\tuple{i,y} \sim \tilde{p}_\Phi}\;-\ln P_\Psi(i|y) \\
+  \\
+  & = & \argmax_\Phi E_{(i,y) \sim  \tilde{p}_\Phi}\;- \ln \tilde{p}_\Phi(i|y) \\
+  \\
+  & = & \argmin_\Phi E_{(i,y) \sim  \tilde{p}_\Phi}\;\ln \tilde{p}_\Phi(i|y) \\
+  \\
+  & = & \argmin_\Phi \frac{1}{2}\ln \tilde{p}_\Phi(1|y) + \frac{1}{2}\ln \tilde{p}_\Phi(-1|y)
+\end{eqnarray*}
+
+\slide{Assuming Universality of $\Psi$ Only}
+
+\begin{eqnarray*}
+  &= & \frac{1}{2}\ln \tilde{p}_\Phi(1|y) + \frac{1}{2}\ln \tilde{p}_\Phi(-1|y) \\
+  \\
+  & = & \frac{1}{2} E_{y \sim \popd}\; \ln \frac{\frac{1}{2}\popd(y)}{\frac{1}{2}\popd(y) + \frac{1}{2} p_\Phi(y)} + \frac{1}{2} E_{y \sim p_\Phi}\;\ln \frac{\frac{1}{2}p_\Phi(y)}{\frac{1}{2}\popd(y) + \frac{1}{2}p_\Phi(y)} \\
+\\
+\\
+& = & \frac{1}{2} \left(\;KL\left(\popd,\frac{\popd+p_\Phi}{2}\right)+\;KL\left(p_\Phi,\frac{\popd+p_\Phi}{2}\right)\right) - \ln 2 \\
+\\
+\Phi^* & = & \argmin_\Phi {\color{red} \mathrm{JSD}(\popd,p_\Phi)}
+\end{eqnarray*}
+
+
+\slide{END}
+
+}
+\end{document}

@@ -1,0 +1,141 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2019}
+  \vfill
+  \vfill
+  \centerline{\bf Pseudo-Likelihood and Contrastive Divergence}
+\vfill
+\vfill
+\vfill
+
+\slide{Pseudolikelihood}
+
+For any distribution {\color{red} $Q$} on assignments of labels to nodes (segmentations), and any assignment {\color{red} $\hat{y}$},
+we define {\color{red} $\tilde{Q}(\hat{y})$} as follows.
+
+{\color{red} $$\tilde{Q}(\hat{y}) = \prod_i\;Q(\hat{y}[i]\;|\; \hat{y}/i) = \prod_i\;Q(\hat{y}[i]\;|\; \hat{y}[N(i)]$$}
+
+We then train a graphical model with pseudolikelyhood loss.
+
+{\color{red} $$\Phi^* = \argmin_\Phi E_{y \sim \pop}\;\;-\ln \tilde{P}_\Phi(y)$$}
+
+
+\slide{Pseudolikelihood}
+
+{\color{red} $${\cal L}_{\mathrm{PL}} = - \ln \tilde{P}_s(y)$$}
+
+\vfill
+We note that by the Markov blanket property for Markov random fields we have
+
+{\color{red} $$\tilde{P}_s(\hat{y}) = \prod_i\;P_s(\hat{y}[i]\;|\; \hat{y}[N(i)])$$}
+
+\vfill
+Since the loss is directly computed we can directly back-propagate on the loss.
+
+
+
+\slide{Pseudolikelihood Theorem}
+
+{\color{red} $$\argmin_Q \; E_{y \sim \mathrm{Pop}} \;-\ln \tilde{Q}(y) = \mathrm{Pop}$$}
+
+\vfill
+or equivalently
+
+
+\vfill
+{\color{red} $$\min_Q \; E_{y \sim \mathrm{Pop}} \;-\ln \tilde{Q}(y) = E_{y \sim \pop}\;-\ln \widetilde{\mathrm{Pop}}(y)$$}
+\vfill
+
+
+\slide{Proof I}
+We have
+$$\min_{Q} \;E_{y \sim \mathrm{Pop}}\;-\ln \tilde{Q}(y) \;\;\leq \;\; E_{y \sim \mathrm{Pop}}\;-\ln \widetilde{\mathrm{Pop}}(y)$$
+
+\vfill
+So it suffices to show
+
+$$\min_{Q} \;E_{y \sim \mathrm{Pop}}\;-\ln \tilde{Q}(y) \;\;\geq \;\; E_{y \sim \mathrm{Pop}}\;-\ln \widetilde{\mathrm{Pop}}(y)$$
+
+\slide{Proof II}
+
+We will prove the case of two nodes.
+
+\vfill
+\begin{eqnarray*}
+  & & \min_Q \;E_{y\sim \mathrm{Pop}}{-\ln Q(y[1]|y[2])\;Q(y[2]|y[1])} \\
+  \\
+  & \geq & \min_{P_1,P_2} E_{y \sim \mathrm{Pop}}{-\ln P_1(y[1]|y[2])\;P_2(y[2]|y[1])} \\
+  \\
+  & = & \min_{P_1} E_{y \sim \mathrm{Pop}}{-\ln P_1(y[1]|y[2])} + \min_{P_2} E_{y \sim \mathrm{Pop}}{-\ln P_2(y[2]|y[1])} \\
+  \\
+  & = & E_{y \sim \mathrm{Pop}}{-\ln \mathrm{Pop}(y[1]|y[2])} + E_{y \sim \mathrm{Pop}}{-\ln \mathrm{Pop}(y[2]|y[1])} \\
+  \\
+  & = & E_{y \sim \mathrm{Pop}}{-\ln \widetilde{\mathrm{Pop}}(y)}
+\end{eqnarray*}
+
+\slideplain{Contrastive Divergence (CDk)}
+
+In contrastive divergence we first construct an MCMC process whose stationary distribution is ${\color{red} P_s}$.  This could be
+Metropolis or Gibbs or something else.
+
+\vfill
+{\bf Algorithm CDk}: Given a gold segmentation $y$, start the MCMC process from initial state $y$ and run the process for $k$ steps
+to get ${\color{red} \hat{y}}$.  Then take the loss to be
+
+\vfill
+{\color{red} $${\cal L}_{\mathrm{CD}}  = s(\hat{y}) - s(y)$$}
+
+If $P_s = \pop$ then the the distribution on $\hat{y}$ is the same as the distribution on $y$ and the
+expected loss gradient is zero.
+
+\slideplain{Gibbs CD1}
+
+CD1 for the Gibbs MCMC process is a particularly interesting special case.
+
+\vfill
+{\bf Algorithm (Gibbs CD1)}: Given $y$, select a node $i$ at random and draw {\color{red} $c \sim P(y[i]\;| \;y[N(i)])$}. Define {\color{red} $y[i=c]$}
+to be the assignment (segmentation) which is the same as $y$ except that node $i$ is assigned label $c$.  Take the loss to be
+
+\vfill
+{\color{red} $${\cal L}_{\mathrm{CD}}  = s(y[i=c]) - s(y)$$}
+
+\slide{Gibbs CD1 Theorem}
+
+Gibbs CD1 is equivalent in expectation to pseudolikelihood.
+
+{\huge
+\begin{eqnarray*}
+{\cal L}_{\mathrm{PL}} & = & E_{y \sim \pop}\;\sum_i \; - \ln P_s(y[i]=c\;|\;y\backslash i) \\
+\\
+ & = & E_{y \sim \pop}\;\sum_i -\ln \frac{e^{s(y)}}{Z_i}\;\;\;\;\;{Z_i = \sum_{c'} e^{s(y[i=c'])}} \\
+\\
+& = & E_{y \sim \pop}\;\sum_i\; \left(\ln Z_i - s(y)\right) \\
+\\
+\nabla_\Phi {\cal L}_{\mathrm{PL}} & = & E_{y \sim \pop}\;\sum_i \left(\frac{1}{Z_i} \sum_{c'} e^{s(y[i=c'])} \; \nabla_\Phi\;s(y[i]=c')\right) - \nabla_\Phi s(y) \\
+\\
+& = & E_{y \sim \pop}\;\sum_i \left(\sum_{c'} P(y[i=c'\;|\;y\backslash i]) \; \nabla_\Phi\;s(y[i=c'])\right) - \nabla_\Phi s(y)
+\end{eqnarray*}
+}
+
+\slideplain{Gibbs CD1 Theorem}
+
+{\huge
+\begin{eqnarray*}
+\nabla_\Phi\;{\cal L}_{\mathrm{PL}} & = & E_{y \sim \pop}\;\sum_i \left(\sum_{c'} P(y[i=c'\;|\;y\backslash i]) \nabla_\Phi\;s(y[i]=c')\right) - \nabla_\Phi s(y) \\
+\\
+& = & E_{y \sim \pop}\;\sum_i \left(E_{c' \sim P(y[i=c'\;|\;y\backslash i])} \nabla_\Phi\;s(y[i]=c')\right) - \nabla_\Phi s(y) \\
+\\
+& \propto & E_{y \sim \pop}\;E_i\; E_{c' \sim P(y[i=c'\;|\;y\backslash i])}\;\; (\nabla_\Phi\;s(y[i]=c') - \nabla_\Phi s(y))\;\;\;\;\mbox{Gibbs CD(1)}
+\end{eqnarray*}
+}
+
+\slide{END}
+}
+\end{document}

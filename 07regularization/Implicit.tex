@@ -1,0 +1,95 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+
+\centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+\bigskip
+\centerline{David McAllester, Winter 2020}
+
+\vfill
+\centerline{\bf Implicit Regularization}
+\vfill
+\vfill
+
+\slide{Implicit Regularization}
+
+Any stochastic learning algorithm, such as SGD, determines a stochastic mapping from training data to models.
+
+\vfill
+The algorithm, especially with early stopping, can implicitly incorporate a preference or bias for models.
+
+\slide{Implicit Regularization in Linear Regression}
+
+Linear regression with many more parameters than data points
+has many solutions.
+
+\vfill
+But SGD converges to the minimum norm solution.
+
+\slide{Implicit Regularization in Linear Regression}
+
+For linear regression SGD maintains the invariant that $\Phi$ is a linear combination of the (small number of) training vectors.
+
+\vfill
+Any zero-loss (squared loss) solution can be projected on the span of training vectors to give a smaller (or no larger) norm solution.
+
+\vfill
+It can be shown that when the training vectors are linearly independent any zero loss solution in the span of the training vectors is a least-norm solution.
+
+\slide{A PAC-Bayes Analysis of Implicit Regularization}
+
+Let $A$ be an algorithm that stochastically maps a training set to a model parameter vector.
+
+\vfill
+In the case of SGD we take the stochasticity to include both the random initialization and the random sequence of training batches.
+
+\slide{A PAC-Bayes Analysis of Implicit Regularization}
+
+\vfill
+Let $p(\Phi|A,\mathrm{Train})$ be the probability desity on parameter vectors defined by the stochasticity of the algorithm $A$.
+
+\vfill
+Define
+$$p(\Phi|A) = E_{\parens{\mathrm{Train} \sim \pop^{N_\mathrm{Train}}}} p(\Phi|A,\mathrm{Train})$$
+
+\vfill
+The density $p(\Phi|A)$ is independent of any choice of training data and can be used as the prior in a BAC-Bayesian bound.
+
+\slide{A PAC-Bayes Analysis of Implicit Regularization}
+
+\begin{eqnarray*}
+{\cal L}(\Phi,\pop) & = & E_{\tuple{x,y} \sim \pop}\;{\cal L}(\Phi,x,y) \\
+\\
+{\cal L}(\Phi,\mathrm{Train}) & = & E_{\tuple{x,y} \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y) \\
+\\
+{\cal L}(A) & = & E_{\parens{\mathrm{Train} \sim \pop^{N_\mathrm{Train}}}}\;E_{\Phi \sim p(\Phi\;|A,\;\mathrm{Train})}\;{\cal L}(\Phi,\pop) \\
+\\
+\hat{\cal L}(A) & = & E_{\parens{\mathrm{Train} \sim \pop^{N_\mathrm{Train}}}}\;E_{\Phi \sim p(\Phi\;|A,\;\mathrm{Train})}\;{\cal L}(\Phi,\mathrm{Train})
+\end{eqnarray*}
+
+\slide{A PAC-Bayes Analysis of Implicit Regularization}
+\vfill
+$${\cal L}(A) \leq \frac{10}{9}\parens{
+\begin{array}{ll} & \hat{\cal L}(A) \\
+                  + & \frac{5\lmax}{N_\mathrm{Train}}\parens{\begin{array}{ll} & E_{\mathrm{Train} \sim \pop^{N_{\mathrm{Train}}}} \\
+                                                                                \\                                                           
+                                                                              & ~~~~~~KL(p(\Phi|A,\mathrm{Train}),p(\Phi|A)) \\
+                                                                                \\
+                                                                             + & \ln\frac{1}{\delta}\end{array}}
+ \end{array}}$$
+
+\vfill
+There is no obvious way to calculate this guarantee.
+
+\vfill
+However, it can be shown that $p(\Phi|A)$ is the optimal PAC-Bayeisan prior for algorithm $A$ making this the best possible PAC-Bayesian bound for $A$.
+
+\slide{END}
+
+}
+\end{document}

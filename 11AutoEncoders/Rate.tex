@@ -67,22 +67,6 @@ Take $\tilde{z}_\Phi(y)$ to be the result of rounding each component of the cont
 \vfill
 $$\tilde{z}_\Phi(y)[x,y,i] = \lfloor z_\Phi(y)[x,y,i] + 1/2 \rfloor$$
 
-\slide{Increasing Spatial Dimension in Decoding}
-
-\centerline{$y$\includegraphics[width=4in]{\images/deconvleft} $\;\tilde{z}\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
-
-\slide{Increasing Spatial Dimension in Decoding (Deconvolution)}
-
-\vfill
-To increase spatial dimension we use 4 times the desired output the features.
-
-\begin{eqnarray*}
-  L'_{\ell+1}[x,y,i] & = & \sigma\left(W[\Delta X, \Delta Y, J,i]\; L'_\ell[x + \Delta X, y + \Delta Y, J]\right)
-\end{eqnarray*}
-
-\vfill
-We then reshape $L'_{\ell+1}[X,Y,I]$ to $L'_{\ell+1}[2X,2Y,I/4]$.
-
 \slide{Rounding is not Differentiable}
 
 $$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
