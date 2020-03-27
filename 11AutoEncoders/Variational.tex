@@ -128,10 +128,12 @@ An autoregressive model, such as an autoregressive language model, is both sampl
 
 \slide{Image Generators}
 
-\centerline{$z$ \includegraphics[width=4in]{\images/deconvright}$y$}
+\centerline{$z$\hspace{5in}$y_\Phi(z)$}
+\centerline{\includegraphics[width=6in]{\images/generator2}}
+
 
 \vfill
-We can generate an image $y$ form noise $z$ where $p_\Phi(z)$ and $p_\Phi(y|z)$ are both samplable and computable.
+We can generate an image $y_\Phi(z)$ from noise $z$ where $p_\Phi(z)$ and $p_\Phi(y|z)$ are both samplable and computable.
 
 \vfill
 Typically $p_\Phi(z)$ is ${\cal N}(0,I)$ reshaped as $z[X,Y,J]$

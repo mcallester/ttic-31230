@@ -1,0 +1,120 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{Noisy Channel RDAs}
+  \vfill
+  \vfill
+
+\slide{Noisy-Channel RDAs}
+
+In the image compression case study, training was based on a differentiable loss
+
+\vfill
+$$\Phi^* = \argmin_\Phi \left(\; E_y\;- \ln p_\Phi(z_\Phi(y))\right) + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + \epsilon))$$
+
+\vfill
+In a rate-distortion auto-encoder we will replace the conceptually dubious differential entropy rate term with a conceptually legitimate
+mutual information (channel capacity) rate term.
+
+\slide{Mutual Information as a Channel Rate}
+
+$$\Phi^* = \argmin_\Phi \left(\; E_y\;- \ln p_\Phi(z_\Phi(y))\right) + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + \epsilon))$$
+
+\vfill
+is replaced by
+
+\begin{eqnarray*}
+\tilde{z} & = & z_\Phi(y) + f_\Phi(y,\epsilon) \;\;\mbox{$\epsilon$ is fixed (parameter independent) noise} \\
+\\
+\Phi^* & = & \argmin_\Phi \;{\color{red} I_\Phi(y,\tilde{z})} + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(\tilde{z}))
+\end{eqnarray*}
+
+\vfill
+By the channel capacity theorem {\color{red} $I(y,\tilde{z})$} is the {\bf rate} of information transfer from $y$ to $\tilde{z}$.
+
+\anaslide{Mutual Information as a Channel Rate}
+
+\bigskip
+\bigskip
+\begin{eqnarray*}
+\tilde{z} & = & z_\Phi(y) + {\color{red} f_\Phi(y,\epsilon)} \;\;\mbox{$\epsilon$ is fixed (parameter independent) noise} \\
+\\
+\Phi^* & = & \argmin_\Phi \;I_\Phi(y,\tilde{z}) + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(\tilde{z}))
+\end{eqnarray*}
+
+\vfill
+Taking the distribution on $\epsilon$ to be parameter independent is called the ``reparameterization trick'' and allows SGD.
+\begin{eqnarray*}
+& & \nabla_\Phi \;E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + f_\Phi(y,\epsilon))) \\
+\\
+& = & E_{y,\epsilon}\; \nabla_\Phi\;\mathrm{Dist}(y,y_\Phi(z_\Phi(y) + f_\Phi(y,\epsilon)))
+\end{eqnarray*}
+
+\anaslide{Mutual Information as a Channel Rate}
+
+\bigskip
+\bigskip
+\begin{eqnarray*}
+\tilde{z} & = & z_\Phi(y) + {\color{red} f_\Phi(y,\epsilon)} \;\;\mbox{$\epsilon$ is fixed (parameter independent) noise} \\
+\\
+\Phi^* & = & \argmin_\Phi \;I_\Phi(y,\tilde{z}) + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(\tilde{z}))
+\end{eqnarray*}
+
+\vfill
+Typically $f_\Phi(y,\epsilon)$ is simple, such as $\sigma_\Phi(y)\odot \epsilon$, so that {\color{red} $p_\Phi(\tilde{z}|y)$ is easily computed.}
+
+\slide{Mutual Information Replaces Cross Entropy}
+
+\begin{eqnarray*}
+I_\Phi(y,\tilde{z})  & = & E_{y,\epsilon}\; \ln \frac{\mathrm{pop}(y)p_\Phi(\tilde{z}|y)}{\mathrm{pop}(y)p_{\mathrm{pop},\Phi}(\tilde{z})} \\
+\\
+\\
+& = & E_{y,\epsilon}\;\ln \frac{p_\Phi(\tilde{z}|y)}{p_{\mathrm{pop},\Phi}(\tilde{z})} \\
+\\
+\\
+\mathrm{where}\;\;\;\;p_{\mathrm{pop},\Phi}(\tilde{z}) & = & E_{y\sim \mathrm{pop}}\;\;p_\Phi(\tilde{z}|y)
+\end{eqnarray*}
+
+\slide{A Variational Bound}
+
+$$p_{\mathrm{pop},\Phi}(\tilde{z})  = E_{y\sim \mathrm{pop}}\;\;p_\Phi(\tilde{z}|y)$$
+
+\vfill
+We cannot compute $p_{\mathrm{pop},\Phi}(\tilde{z})$.
+
+\vfill
+Instead we will use a variational bound involving a computable model $q_\Phi(\tilde{z})$
+
+\slide{A Variational Bound}
+
+\begin{eqnarray*}
+{\color{red} I(y,\tilde{z})}  & = & E_{y,\epsilon}\;\ln \frac{p_\Phi(\tilde{z}|y)}{p_{\mathrm{pop},\Phi}(\tilde{z})} \\
+\\
+& = & E_{y,\epsilon}\;\ln \frac{p_\Phi(\tilde{z}|y)}{q_\Phi(\tilde{z})} + E_{y,\epsilon}\;\ln\frac{q_\Phi(\tilde{z})}{p_{\mathrm{pop},\Phi}(\tilde{z})} \\
+\\
+& = & E_{y,\epsilon}\;\ln \frac{p_\Phi(\tilde{z}|y)}{q_\Phi(\tilde{z})} - KL(p_{\mathrm{pop},\Phi}(\tilde{z}),q_\Phi(\tilde{z})) \\
+\\
+& {\color{red} \leq} & {\color{red} E_{y,\epsilon}\;\ln \frac{p_\Phi(\tilde{z}|y)}{q_\Phi(\tilde{z})}}
+\end{eqnarray*}
+
+\slide{A Fundamental Equation for the  Continuous Case}
+
+\begin{eqnarray*}
+\tilde{z} & = & z_\Phi(y) + f_\Phi(y,\epsilon) \\
+\\
+\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(\tilde{z}|y)}{q_\Phi(\tilde{z})} + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}))
+\end{eqnarray*}
+
+\slide{END}
+
+}
+\end{document}

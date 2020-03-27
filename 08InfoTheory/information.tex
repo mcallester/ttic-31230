@@ -8,16 +8,118 @@
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
   \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Perils of Differential Entropy}
+  \vfill
+\vfill
+\vfill
 
-  \vfill
-  \centerline{\bf Shannon's Source Coding Theorem}
-  \vfill
-  \centerline{\bf Huffman Coding}
-  \vfill
-  \centerline{\bf Perils of Continuous Information Theory}
-  \vfill
+\slide{Perils of Differential Entropy}
+
+Consider a continuous density $p(x)$.  For example
+
 \vfill
+$$p(x) = \frac{1}{\sqrt{2\pi}\; \sigma}\; e^{\frac{-x^2}{2\sigma^2}}$$
+
 \vfill
+Differential entropy is defined as
+
+\vfill
+$$H(p) \doteq \int \left(\ln \frac{1}{p(x)}\right) p(x) dx = E_{x \sim p}\;-\ln p(x)$$
+
+\slide{Perils of Differential Entropy}
+
+\begin{eqnarray*}
+  H({\cal N}(0,\sigma)) & = &  \int_{-\infty}^\infty \left( \ln(\sqrt{2\pi} \sigma) + \frac{x^2}{2\sigma^2}\right) p(x) dx \\
+  \\
+  & = & \ln(\sigma) + \ln(\sqrt{2\pi}) + \frac{1}{2\sigma^2}E_{x \sim {\cal N}(0,1)} x^2 \\
+  \\
+  & = & \ln \sigma + \ln(\sqrt{2\pi}) + \frac{1}{2}  
+\end{eqnarray*}
+
+\vfill
+$$\lim_{\sigma \rightarrow 0} H(N(0,\sigma)) = - \infty$$.
+
+\slide{Sensivity to the Choice of Units}
+
+$$H(N(0,\sigma)) = C + \ln \sigma$$
+
+\vfill
+Differential entropy depends on the choice of units --- a distributions on lengths will have a different entropy
+when measuring in inches than when measuring in feet.
+
+\slide{Differential Cross Entropy can Diverge to $-\infty$}
+
+Consider the unsupervised training object.
+
+$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{train}}\;-\ln p_\Phi(y)$$
+
+\vfill
+The training set is finite (discrete).
+
+\vfill
+For each $y$ the density $p_\Phi(y)$ can go to infinity.
+
+\vfill
+This will drive the cross entropy training loss to $-\infty$.
+
+\slide{Differential Entropy is Actually Infinite}
+
+An actual real number carries an infinite number of bits.
+
+\vfill
+Consider quantizing the real numbers into bins.
+
+\vfill
+A continuous probability densisty $p$ assigns a probability $p(B)$ to each bin.
+
+\vfill
+As the bin size decreases toward zero the entropy of the bin distribution increases toward $\infty$.
+
+\vfill
+A meaningful convention is that $H(p) = +\infty$ for any continuous density $p$.
+
+\slide{Differential KL-divergence is Meaningful}
+
+$$KL(p,q) = \int \left( \ln \frac{p(x)}{q(x)}\right) p(x) dx$$
+
+\vfill
+This integral can be computed by dividing the real numbers into bins and computing the $KL$ divergence between the distributions on bins.
+
+\vfill
+The KL divergence between the bin distribution typically approaches a finite limit as the bin size goes to zero.
+
+\vfill
+Unlike entropy, differential KL divergence is always non-negative.  But as in the discrete case, it can be infinite.
+
+\slide{Mutual Information}
+
+For two random variables $x$ and $y$ there is a distribution on pairs $(x,y)$ determined by the population distribution.
+
+\vfill
+Mutual information is a KL divergence and hence differential mutual information is meaningful.
+
+\vfill
+\begin{eqnarray*}
+  I(x,y) & \doteq & KL(p(x,y),p(x)p(y)) \\
+  \\
+  & = & E_{x,y} \ln \frac{p(x,y)}{p(x)p(y)}
+\end{eqnarray*}
+
+\slide{The Data Processing Inequality}
+
+For continuous $y$ and $z$ with $z = f(y)$ we get that $H(z)$ can be either larger or smaller than $H(y)$ (consider $z = ay$ for $a >1$ vs. $a<1$).
+
+\vfill
+However, mutual information is a KL divergence and is more meaningful than entropy and for $z = f(y)$ we do have
+
+$$I(x,z) \leq I(x,y)$$
+
+
+\slide{END}
+
+}
+\end{document}
 
 \slide{Source Coding Theorem}
 
@@ -156,114 +258,3 @@ For $d(T_1) \geq d(T_2)$ and $W(T_1) \geq W(T_2)$ we have
 
 \vfill
 $$d(T_1)W(T_1) + d(T_2)W(T_2) \geq d(T_1)W(T_2) + d(T_2)W(T_1)$$
-
-\slide{Perils of Differential Entropy}
-
-Consider a continuous density $p(x)$.  For example
-
-\vfill
-$$p(x) = \frac{1}{\sqrt{2\pi}\; \sigma}\; e^{\frac{-x^2}{2\sigma^2}}$$
-
-\vfill
-Differential entropy is defined as
-
-\vfill
-$$H(p) \doteq \int \left(\ln \frac{1}{p(x)}\right) p(x) dx = E_{x \sim p}\;-\ln p(x)$$
-
-\slide{Perils of Differential Entropy}
-
-\begin{eqnarray*}
-  H({\cal N}(0,\sigma)) & = &  + \int \left( \ln(\sqrt{2\pi} \sigma) + \frac{x^2}{2\sigma^2}\right) p(x) dx \\
-  \\
-  & = & \ln(\sigma) + \ln(\sqrt{2\pi}) + \frac{1}{2}
-\end{eqnarray*}
-
-\vfill
-$$\lim_{\sigma \rightarrow 0} H(N(0,\sigma)) = - \infty$$.
-
-\vfill
-Hence differential entropy then depends on the choice of units --- a distributions on lengths will have a different entropy
-when measuring in inches than when measuring in feet.
-
-\slide{Differential Cross Entropy can Diverge to $-\infty$}
-
-Consider the unsupervised training object.
-
-$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{train}}\;-\ln p_\Phi(y)$$
-
-\vfill
-The training set is finite (discrete).
-
-\vfill
-For each $y$ the density $p_\Phi(y)$ can go to infinity.
-
-\vfill
-This will drive the cross entropy training loss to $-\infty$.
-
-\slide{Differential Cross Entropy can Diverge to $-\infty$}
-
-$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{train}}\;-\ln p_\Phi(y)$$
-
-\vfill
-To avoid divergence to $-\infty$ we can enforce an upper bound on the density $p_\Phi(y)$.
-
-\vfill
-We will see how this is implicitly done in continuous variational auto-encoders (VAEs).
-
-\slide{Differential Entropy is Actually Infinite}
-
-An actual real number carries an infinite number of bits.
-
-\vfill
-Consider quantizing the real numbers into bins.
-
-\vfill
-A continuous probability densisty $p$ assigns a probability $p(B)$ to each bin.
-
-\vfill
-As the bin size decreases toward zero the entropy of the bin distribution increases toward $\infty$.
-
-\vfill
-A meaningful convention is that $H(p) = +\infty$ for any continuous density $p$.
-
-\slide{Differential KL-divergence is Meaningful}
-
-$$KL(p,q) = \int \left( \ln \frac{p(x)}{q(x)}\right) p(x) dx$$
-
-\vfill
-This integral can be computed by dividing the real numbers into bins and computing the $KL$ divergence between the distributions on bins.
-
-\vfill
-The KL divergence between the bin distribution typically approaches a finite limit as the bin size goes to zero.
-
-\vfill
-Unlike entropy, differential KL divergence is always non-negative.  But as in the discrete case, it can be infinite.
-
-\slide{Mutual Information}
-
-For two random variables $x$ and $y$ there is a distribution on pairs $(x,y)$ determined by the population distribution.
-
-\vfill
-Mutual information is a KL divergence and hence differential mutual information is meaningful.
-
-\vfill
-\begin{eqnarray*}
-  I(x,y) & \doteq & KL(p(x,y),p(x)p(y)) \\
-  \\
-  & = & E_{x,y} \ln \frac{p(x,y)}{p(x)p(y)}
-\end{eqnarray*}
-
-\slide{The Data Processing Inequality}
-
-For continuous $y$ and $z$ with $z = f(y)$ we get that $H(z)$ can be either larger or smaller than $H(y)$ (consider $z = ay$ for $a >1$ vs. $a<1$).
-
-\vfill
-However, mutual information is a KL divergence and is more meaningful than entropy and for $z = f(y)$ we do have
-
-$$I(x,z) \leq I(x,y)$$
-
-
-\slide{END}
-
-}
-\end{document}

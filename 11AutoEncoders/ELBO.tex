@@ -1,0 +1,267 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \vfil
+  \centerline{\bf The Evidence Lower Bound (ELBO)}
+  \vfill
+  \centerline{\bf and Variational Auto Encoders (VAEs)}
+  \vfill
+  \vfill
+
+\slide{Latent Variable Assumptions}
+
+Even when $P_\Phi(z)$ and $P_\Phi(y|z)$ are samplable and computable we cannot typically compute $P_\Phi(y)$.
+
+\vfill
+Specifically, for $P_\Phi(y)$ defined by a GAN generator we cannot compute $P_\Phi(y)$ for a test image $y$.
+
+\vfill
+Hence it is not obvious how to optimize the fundamental equation.
+
+$$\Phi^* = \argmin_\Phi\;E_{y \sim \pop}\;- \ln P_\Phi(y)$$
+
+\slide{The Evidence Lower Bound (The ELBO)}
+
+We introduce a samplable and computable model $Q_\Phi(z|y)$ to approximate $P_\Phi(z|y)$.
+
+{\huge
+\begin{eqnarray*}
+ {\color{red} \ln P_\Phi(y)} & = & E_{z \sim Q_\Phi(z|y)} \ln \frac{P_\Phi(z)P_\Phi(y|z)}{P_\Phi(z|y)} \\
+        \\
+ & = & E_{z \sim Q_\Phi(z|y)} \left(\ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)} + \ln \frac{Q_\Phi(z|y)}{P_\Phi(z|y)}\right) \\
+ \\
+  & = & \left(E_{z \sim Q_\Phi(z|y)} \ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)}\right) + KL(Q_\Phi(z|y),P_\Phi(z|y)) \\
+  \\
+  & {\color{red} \geq} & {\color{red} E_{z \sim Q_\Phi(z|y)} \ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)}}\;\;\mbox{The ELBO}
+\end{eqnarray*}
+}
+
+
+\slide{The Variational Auto-Encoder (VAE)}
+
+$$\Phi^* = \argmin_\Phi\; E_{y \sim \pop,\;z \sim Q_\Phi(z|y)}\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)}$$
+
+\slide{VAE generalizes EM}
+
+Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_\Phi(z|y)$ is samplable and computable.
+EM alternates exact optimization of $Q$ and $P$.
+
+\vfill
+VAE: $\Phi^* = \argmin_\Phi E_{y\sim \mathrm{Train},\;z \sim Q_\Phi(z|y)}\;\;- \ln \frac{P_\Phi(z,y)}{Q_\Phi(z|y)}$
+
+\vfill
+EM: $\Phi^{\color{red} t+1} =  \argmin_\Phi\;E_{y \sim \mathrm{Train}}\;E_{z \sim P_{\Phi^{\color{red} t}}(z|y)}\; - \ln P_\Phi(z,y)$ \\
+\\
+\centerline{\hspace{1em} Update \hspace{6em} Inference \hspace{2.5em}~}
+\centerline{(M Step) \hspace{5em} (E Step) \hspace{1.5em}~}
+\centerline{Hold $Q$ fixed \hspace{2.5em} $Q(z|y) = P_{\Phi^{\color{red} t}}(z|y)$ \hspace{0em}~}
+
+\slide{The Reparameterization Trick}
+
+\begin{eqnarray*}
+- \ln P_\Phi(y) & \leq & E_{z \sim Q_\Phi(z|y)}\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)} \\
+\\
+\\
+& = & E_\epsilon\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{Q_\Phi(z|y)}\;\;\;z := f_\Phi(y,\epsilon)
+\end{eqnarray*}
+
+\vfill
+$\epsilon$ is parameter-independent noise.
+
+\vfill
+This supports SGD: $\nabla_\Phi \;E_{y,\epsilon}\; [\ldots] = E_{y,\epsilon}\; \nabla_\Phi\;[\ldots]$
+
+\slide{Gaussian VAEs} 
+$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{p_\Phi(z)p_\Phi(y|z)}{q_\Phi(z|y)}$$
+
+{\color{red}
+\begin{eqnarray*}
+z & = & z_\Phi(y) + \sigma_\Phi(y) \odot \epsilon\;\;\;\epsilon \sim {\cal N}(0,I) \\
+\\
+q_\Phi(z[i]|y) & = & {\cal N}(z_\Phi(y)[i],\sigma_\Phi(y)[i]) \\
+\\
+p_\Phi(z[i]) & = & {\cal N}(\mu_p,\sigma_p[i]) \;\;\mbox{WLOG} = {\cal N}(0,1) \\
+\\
+p_\Phi(y|z) & = & {\cal N}(y_\Phi(z),\;\sigma^2I)
+\end{eqnarray*}
+}
+
+\slide{$-\ln p_\Phi(y|z)$ as Distortion}
+
+For $p_\Phi(y|z) \propto \exp(-||y - y_\Phi(z)||^2/(2\sigma^2))$ we get
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_{\Phi} E_{y,\epsilon}\;\;\;-\ln \frac{p_\Phi(z)}{q_\Phi(z|y)} - \ln p_\Phi(y|z) \\
+\\
+       & = & \argmin_{\Phi,\sigma} E_{y,\epsilon}\;\;\;-\ln \frac{p_\Phi(z)}{q_\Phi(z|y)} +\left(\frac{1}{2\sigma^2}\right)||y - y_\Phi(z)||^2 + d\ln \sigma
+\end{eqnarray*}
+
+\vfill
+where
+
+\centerline{$d$ is the dimension of $y$ and $\sigma^*  =  \sqrt{\frac{1}{d}\;E_{y,\epsilon}\; ||y - y_\Phi(z)||^2}$}
+
+\slide{Posterior Collapse}
+
+Assume Universal Expressiveness for $P_\Phi(y|z)$.
+
+\vfill
+This allows $P_\Phi(y|z) = \pop(y)$ independent of $z$.
+
+\vfill
+We then get a completely optimized model with $z$ taking a single (meaningless) determined value.
+
+\vfill
+$$Q_\Phi(z|y) = P_\Phi(z|y) = 1$$
+
+\anaslide{Colorization with Latent Segmentation}
+\medskip
+\centerline{\includegraphics[width = 5in]{../images/colorizationGreg2}}
+\centerline{$x$ \hspace{4em} $\hat{y}$ \hspace{4em} $y$}
+\centerline{\huge Larsson et al., 2016}
+
+\vfill
+Can colorization be used to learn latent segmentation?
+
+\vfill
+We introduce a latent segmentation into the model.
+
+\vfill
+In practice the latent segmentation is likely to ``collapse'' because the colorization can be done just as well without it.
+
+
+\slide{Independent Universality}
+
+$$\Phi^* = \argmin_\Phi E_{y\sim \pop,\;z \sim Q_\Phi(z|y)}\;\;-\ln \frac{P_\Phi(z,y)}{Q_\Phi(z|y)}$$
+
+\vfill
+It is natural to assume  that $\Phi$ has independent parameters for each distribution.  In practice parameters are often shared.
+
+\vfill
+Since $\Phi$ can indepedently parameterize each distribution, we will often use an independent universality assumption
+that $\Phi$ can represent any triple of distributions $Q(z|y)$, $P(z)$ and $P(y|z)$.
+
+
+\slide{Independent Universality}
+
+More formally, we will often assume that for any triple of distributions $Q(z|y)$, $P(z)$ and $P(y|z)$ there exists a $\Phi$ that {\color{red} simultaneously} satisfies
+
+\begin{eqnarray*}
+Q_\Phi(z|y) & = & Q(z|y) \\
+P_\Phi(z) & = & P(z) \\
+P_\Phi(y|z) & = & P(y|z)
+\end{eqnarray*}
+
+\vfill
+This assumption allows each distribution to be independently optimized while holding the others fixed.
+
+\slide{The $\beta$-VAE}
+
+$\beta$-VAE: Learning Basic Visual Concepts With A
+Constrained Variational Framework, Higgins et al., ICLR 2017.
+
+\vfill
+The $\beta$-VAE introduces a parameter $\beta$ allow control of the rate-distortion trade off.
+
+\slide{Indeterminacy of the VAE}
+
+VAE: $\Phi^* = \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{P_\Phi(z)}{Q_\Phi(z|y)} - \ln P_\Phi(y|z)$
+
+\vfill
+Assuming independent universality we can optimize $P_\Phi(z)$ and $P_\Phi(y|z)$ while holding $Q_\Phi(z|y)$ fixed.
+This gives
+
+\begin{eqnarray*}
+P^*(z) & = & = P_\popd(z) = E_y \;Q_\Phi(z|y) \\
+\\
+P^*(y|z) & = & P^*_\popd(y|z) \propto P(y,z) = \pop(y)Q_\Phi(z|y)
+\end{eqnarray*}
+
+\slide{Indeterminacy of the VAE}
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{P_\popd(z)}{Q_\Phi(z|y)} - \ln P_\popd(y|z) \\
+\\
+& = & \argmin_\Phi \;\;\;I_\Phi(y,z)\; + \; H_\Phi(y|z) \\
+\\
+& = & \argmin_\Phi \;\;\;\;\; H_\popd(y)
+\end{eqnarray*}
+
+\vfill
+But $H_\popd(y)$ is independent of $\Phi$.
+
+\vfill
+Any choice of $Q_\Phi(z|y)$ gives optimal modeling of $y$.
+
+\slide{Indeterminacy of the VAE}
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \; I_\Phi(y,z) + H_\Phi(y|z)
+\end{eqnarray*}
+
+\vfill
+The choice of $Q_\Phi(z|y)$ does not influence the value of the objective function but controls $I(y,z)$.
+
+\vfill
+We have $0 \leq I(y,z) \leq H(y)$ with the full range possible.
+
+\slide{The $\beta$-VAE}
+
+To control $I(y,z)$ we introduce a weighting $\beta$
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \; \beta I_\Phi(y,z) + H_\Phi(y|z) \\
+\mbox{$\beta$-VAE}\;\; \Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;-\beta \ln \frac{P_\Phi(z)}{Q_\Phi(z|y)} - \ln P_\Phi(y|z)
+\end{eqnarray*}
+
+\vfill
+For $\beta < 1$ we no longer have an upper bound on $H_\popd(y)$ but we can force the use of $z$ (avoid posterior collapse).
+
+\vfill
+For $\beta > 1$ the bound on $H_\pop(y)$ becomes weaker and the latent variables carry less information.
+
+\slide{RDAs vs. $\beta$-VAEs}
+
+RDAs and $\beta$-VAEs are essentially the same.
+
+\vfill
+RDA: $\Phi^* = \argmin_\Phi E_{y,z \sim Q_\Phi(z|y)}\;-\ln \frac{P_\Phi(z)}{Q_\Phi(z|y)} + \lambda \mathrm{Dist}(y,y_\Phi(z))$
+
+\vfill
+$\beta$-VAE: $\Phi^* = \argmin_\Phi E_{y,z \sim Q_\Phi(z|y)}\;-\beta \ln \frac{P_\Phi(z)}{Q_\Phi(z|y)} \;-\;\ln P_\Phi(y|z)$
+
+\slide{VAEs 2013}
+
+\centerline{Sample {\color{red} $z \sim {\cal N}(0,I)$} and compute {\color{red} $y_\Phi(z)$}}
+
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/VariationalFaces}}
+\centerline{[Alec Radford]}
+
+\slide{VAEs 2019}
+
+\centerline{\includegraphics[width = 8in]{\images/VQ-VAE22}}
+
+\vfill
+VQ-VAE-2, Razavi et al. June, 2019
+
+\slide{VAEs 2019}
+
+\centerline{\includegraphics[width = 10in]{/users/davidmcallester/tex/images/VQ-VAE21}}
+
+\vfill
+VQ-VAE-2, Razavi et al. June, 2019
+
+
+\slide{END}
+
+\end{document}
