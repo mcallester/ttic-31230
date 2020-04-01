@@ -14,7 +14,34 @@
   \vfill
   \vfill
 
-\slidetwo{Rate-Distortion Autoencoders}{(Image Compression)}
+\slide{The Fundamental Equation for Continuous $y$}
+
+If $y$ is continuous then the fundamental equation for estimating the distribution on $y$ (cross entropy) involves continuous probability densities.
+
+\vfill
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)$$
+
+\vfill
+This occurs in unsupervised pretraining for sounds and images.
+
+\vfill
+But differential entropy and differential cross-entropy are conceptually problematic.
+
+\slide{Rate-Distortion Autoencoders (RDAs)}
+
+A rate-distortion autoencoder (RDA) replaces differential cross-entropy with a bi-objective --- a compression rate and
+the reconstruction distortion.
+
+\vfill
+The primary example is lossy compression of images and audio.
+
+\vfill
+A compressed image does not have all the information of the original and the reconstructed image is a ``distorted'' version of the original.
+
+\vfill
+The rate is given by the size of the compressed image (in bits or bytes).
+
+\slide{Rate-Distortion Autoencoders (RDAs)}
 
 We compress a continuous signal $y$ to a bit string $\tilde{z}_\Phi(y)$.
 
@@ -131,6 +158,14 @@ Each point is a distortion for an image measured in both a rounding model and a 
 
 \bigskip
 \centerline{\includegraphics[height = 5in]{../images/RateDist4}}
+
+
+\slide{Rate-Distortion Autoencoders (RDAs)}
+
+$$\Phi^* = \argmin_\Phi E_{y \sim \popd} - \ln P_\Phi(z_\Phi(y)) + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y)))$$
+
+\vfill
+$z_\Phi(y)$ discrete.
 
 \slide{END}
 

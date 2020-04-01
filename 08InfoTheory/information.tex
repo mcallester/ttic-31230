@@ -14,6 +14,20 @@
 \vfill
 \vfill
 
+\slide{The Fundamental Equation for Continuous $y$}
+
+If $y$ is continuous then the fundamental equation for estimating the distribution on $y$ (cross entropy) involves continuous probability densities.
+
+\vfill
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)$$
+
+\vfill
+This occurs in unsupervised pretraining for sounds and images.
+
+\vfill
+But differential entropy and differential cross-entropy are conceptually problematic.
+
+
 \slide{Perils of Differential Entropy}
 
 Consider a continuous density $p(x)$.  For example
@@ -40,7 +54,7 @@ $$H(p) \doteq \int \left(\ln \frac{1}{p(x)}\right) p(x) dx = E_{x \sim p}\;-\ln 
 \vfill
 $$\lim_{\sigma \rightarrow 0} H(N(0,\sigma)) = - \infty$$.
 
-\slide{Sensivity to the Choice of Units}
+\slide{Sensitivity to the Choice of Units}
 
 $$H(N(0,\sigma)) = C + \ln \sigma$$
 

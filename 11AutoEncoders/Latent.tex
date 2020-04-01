@@ -11,11 +11,11 @@
   \centerline{David McAllester, Winter 2020}
   \vfill
   \vfil
-  \centerline{\bf Assumptions on Latent Variables}
+  \centerline{\bf Interpretable Latent Variables}
   \vfill
   \vfill
 
-\slide{Latent Variable Models}
+\slide{Latent Variables}
 
 {\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z) = E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)$$}
 
@@ -27,7 +27,7 @@ Or
 \vfill
 Here {\color{red} $z$} is a latent variable.
 
-\slide{Latent Variable Models}
+\slide{Interpretable Latent Variables}
 
 {\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z) = E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)$$}
 
@@ -40,9 +40,9 @@ For example $z$ might be a physical scene causing image $y$.
 Or $z$ might be the intended utterance causing speech signal $y$.
 
 \vfill
-In these situations a latent variable model should more accurately represents the distribution on $y$.
+In these situations a latent variable model should more accurately represent the distribution on $y$.
 
-\slide{Latent Variable Models}
+\slide{Interpretable Latent Variables}
 
 {\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z) = E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)$$}
 
@@ -126,31 +126,41 @@ In a hidden markov model $z$ is the sequence of hidden states and $y$ is the seq
 \vfill
 An autoregressive model, such as an autoregressive language model, is both samplable and computable.
 
-\slide{Image Generators}
+\anaslide{Image Generators}
 
+\bigskip
 \centerline{$z$\hspace{5in}$y_\Phi(z)$}
 \centerline{\includegraphics[width=6in]{\images/generator2}}
 
-\vfill
+\bigskip
 We can generate an image $y$ form noise $z$ where $p_\Phi(z)$ and $p_\Phi(y|z)$ are both samplable and computable.
 
-\vfill
+\bigskip
 Typically $p_\Phi(z)$ is ${\cal N}(0,I)$ reshaped as $z[X,Y,J]$
 
 
-\anaslide{Assumptions}
+\anaslide{Image Generators}
 
 \bigskip
+\centerline{$z$\hspace{5in}$y_\Phi(z)$}
+\centerline{\includegraphics[width=6in]{\images/generator2}}
+
 \bigskip
-Even when $P_\Phi(z)$ and $P_\Phi(y|z)$ are samplable and computable we cannot typically compute $P_\Phi(y)$.
+Our assumptions hold for image generators such as GANs, but $z$ is typically viewed as ``noise'' and is not interpretable.
+
+\anaslide{Modeling $y$}
 
 \vfill
-Specifically, for $P_\Phi(y)$ defined by a GAN generator we cannot compute $P_\Phi(y)$ for a test image $y$.
-
-\vfill
-Hence it is not obvious how to optimize the fundamental equation.
+We would like to use the fundamental equation
 
 $$\Phi^* = \argmin_\Phi\;E_{y \sim \pop}\;- \ln P_\Phi(y)$$
+
+\bigskip
+\bigskip
+But even when $P_\Phi(z)$ and $P_\Phi(y|z)$ are samplable and computable we cannot typically compute $P_\Phi(y)$.
+
+\vfill
+Specifically, for $P_\Phi(y)$ defined by a generator we cannot compute $P_\Phi(y)$ for a test image $y$.
 \slide{END}
 
 \end{document}
