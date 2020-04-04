@@ -1,0 +1,70 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+
+  \vfill
+  \centerline{\bf The Policy as a $Q$-Function}
+  \vfill
+  \vfill
+
+\slide{Analysis}
+
+Simulations select $\argmax_a\;U(s,a)$.
+
+{\huge
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \; \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right. \;\;\;\;(1)$$
+
+\vfill
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ - \lambda_\pi\log \pi_\Phi(a|s) \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)\;\;\;\;(2)$$
+}
+\vfill
+Equation (2) establishes the meaning of $\pi_\Phi(a|s)$ as a stochastic policy.
+
+\anaslide{Analysis}
+
+\bigskip
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \; \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right. \;\;\;\;(1)$$
+
+\bigskip
+But equation (1) then seems ill-typed --- how can we add a reward and a probability?
+
+\bigskip
+The types would work if we use $Q_\Phi(s,a)$ rather than $\pi_\Phi(s,a)$.
+
+
+\anaslide{Analysis}
+
+\bigskip
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ - \lambda_\pi\log \pi_\Phi(a|s) \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)\;\;\;\;(2)$$
+
+\bigskip
+It is not clear why this use of a policy as a $Q$-funtion is so effective.
+
+\bigskip
+One explanation might be that a policy is discriminative --- it is trained on its ability to discriminate between actions
+rather than its ability to assign a value to each action. $Q$-value to the actions.
+
+\anaslide{Analysis}
+
+\bigskip
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ - \lambda_\pi\log \pi_\Phi(a|s) \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)\;\;\;\;(2)$$
+
+
+\bigskip
+This works in tree search bootstrapping but it is not clear whether one can replace the $Q$-function critic with a policy in a general
+actor-critic algorithm.
+
+
+\anaslide{END}
+
+
+
+}
+\end{document}

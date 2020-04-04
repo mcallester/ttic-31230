@@ -1,0 +1,170 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+
+  \vfill
+  \centerline{\bf The AlphaZero Training Algorithm}
+  \vfill
+  \vfill
+
+\slide{The AlphaZero Algorithm}
+
+The AlphaZero algorithm is an RL learning method for the case where state transitions are determined by actions.
+
+\vfill
+In principle, the AlphaZero algorithm could be applied to the problem of direct optimization of the BLEU score in machine translation.
+
+\slide{Top Level Algorithm}
+
+To play a game (against yourself) select a move at each position as the game progresses.
+
+\vfill
+To select a move in a game evaluate the options by growing a search tree data structure.
+
+\vfill
+To grow a tree data structure we start with a tree consisting of just the current position.
+We then perform a series of ``simulations''. Each simulation adds one new leaf.
+
+\vfill
+To perform a simulation recursively descend into the tree data structure by selecting a move at each node until a new node (leaf) is generated.
+
+\slide{The Value and Policy Networks}
+
+Simulations select moves based on value and policy networks.
+
+\centerline{\includegraphics[height=3.0in]{../images/alphagoArchitecture2}}
+
+\vfill
+In AlphaZero the networks are either 20 block or 40 block ResNets and either separate networks or one dual-headed network.
+
+\slide{Simulations}
+
+Each simulation starts from the root node (the current positiion) and selects a move at each node until a new leaf is generated.
+
+\vfill
+During a simulation moves are selected by maximizing an upper value as in the UCT algorithm.
+
+\vfill
+Each simulation returns the value $V_\Phi(s)$ (from the value network) for the newly generated state (position) $s$.
+
+\slide{The Data Structures}
+
+\vfill
+Each node in the tree data structrure stores the following information which is initialized
+by running the value and policy networks on state $s$.
+
+\begin{itemize}
+\item $V_\Phi(s)$ --- the value network value for the position $s$.
+\item The policy probabilities $\pi_\Phi(s,a)$ for each legal action $a$.
+\item The number $N(s,a)$ of simulations that have tried move $a$ from $s$. This is initially zero.
+\item For $N(s,a) > 0$, the average $\hat{\mu}(s,a)$ of the values of the simulations that have
+  tried move $a$ from position $s$.
+\end{itemize}
+
+\slide{Simulations and Upper Confidence Bounds}
+
+In descending into the tree, a simulation selects the move $\argmax_a U(s,a)$ where we have
+
+\vfill
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \;\pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\  \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.$$
+
+\slide{Upper Confidence Bounds}
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \; \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.$$
+
+\vfill
+The hyperparameter $\lambda_u$ should be selected so that $U(s,a)$ will typically {\bf decrease} as $N(s,a)$ increases.
+
+\vfill
+In this regime for $\lambda_u$, we can think of $U(s,a)$ as an upper confidence bound in the UCT algorithm.
+
+\slide{Root Action Selection}
+
+When the search is completed, we must select a move from the root position to make actual progress in the game.  For this we use a post-search stochastic policy
+
+\vfill
+$$\pi_{s_{\mathrm{root}}}(a) \propto N(s_{\mathrm{root}},a)^\beta$$
+
+\vfill
+where $\beta$ is a temperature hyperparameter.
+
+\slide{Constructing a Replay Buffer}
+
+We run a large number of games.
+
+\vfill
+We construct a replay buffer of triples $(s,\pi_{s},R)$ where
+
+\vfill
+\begin{itemize}
+\item $s$ is a position encountered in a game and hence a root position of a tree search.
+
+\vfill
+\item $\pi_{s}$ is the distribution on $a$ defined by $P(a) \propto N(s,a)^\beta$.
+
+\vfill
+\item $R \in \{-1,1\}$ is the final outcome of the game for the player whoes move it is at position $s$.
+\end{itemize}
+
+\slide{The Loss Function}
+
+\vfill
+Training is done by SGD on the following loss function.
+
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ - \lambda_\pi\log \pi_\Phi(a|s) \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)$$
+
+\vfill
+The replay buffer is periodically updated with new self-play games.
+
+\slide{END}
+
+
+
+}
+\end{document}
+
+\ignore{
+\slideplain{Conspiracy Numbers}
+
+Conspiracy Numbers for Min-Max search, McAllester, 1988
+
+\vfill
+Each node $s$ has a min-max value $V(s)$ determined by the leaf values.
+
+\vfill
+For any positive integer $N$ and potential value $V$ we define $L(N,V)$ to be the set of leaf nodes $s_1$ such that
+there exist $N-1$ other leaf nodes $s_2$, $\ldots$, $s_N$ such that by changing the values of $s_1$, $\ldots$, $s_N$ the root node
+can be changed to $V$.
+
+
+\vfill
+{\bf Algorithm:}
+
+
+\vfill
+Repeatedly select some $N$ and $V$ such that $L(N,V)$ is non empty and expand some leaf in $L(N,V)$.
+}
+
+\ignore{
+\slide{Simulation}
+
+To find an upper-confidence leaf for the root and value $U$:
+
+\vfill
+At a max node pick the child minimizing $N(s,U)$.
+
+\vfill
+At a min node select any child $s$ with $V(s) < U$.
+
+\vfill
+\slide{Refinement}
+
+Let the static evaluator associate leaf nodes with values $U(s,N)$ and $L(s,N)$
+}
+

@@ -1,0 +1,269 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf REINFORCE and Actor-Critic Algorithms}
+  \vfill
+  \vfill  
+
+
+\slide{The REINFORCE Algorithm}
+
+\centerline{\bf Williams, 1992}
+
+\vfill
+REINFORCE is a Policy Gradient Algorithm
+
+\vfill
+We assume a parameterized policy $\pi_\Phi(a|s)$.
+
+\vfill
+$\pi_\Phi(a|s)$ is normalized while $Q_\Phi(s,a)$ is not.
+
+\slide{Policy Gradient Theorem (Episodic Case)}
+
+$$\Phi^* = \argmax_\Phi\; E_{\pi_\Phi} \; R$$
+
+{\huge
+\begin{eqnarray*}
+  \nabla_\Phi \;E_{\pi_\Phi}\;R & = & \sum_{s_0,a_0,s_1,a_1,\ldots,s_T,a_T}\;\;\nabla_\Phi P(s_0,a_0,s_1,a_1,\ldots,s_T,a_T)\;R \\
+  \\
+  \nabla_\Phi \;P(\ldots)R & = & P(S_0){\color{red} \nabla_\Phi \;\pi(a_0)}P(s_1)\pi(a_1) \cdots P(s_T)\pi(a_T)\;R \\
+  & & + P(S_0)\pi(a_0)P(s_1){\color{red} \nabla_\Phi\;\pi(a_1)} \cdots P(s_T)\pi(a_T)\;R \\
+  & & \vdots \\
+  & & + P(S_0)\pi(a_0)P(s_1)\pi(a_1) \cdots P(s_T){\color{red} \nabla_\Phi\;\pi(a_T)}\;R \\
+  \\
+  & = & P(\ldots) \left(\sum_t\;\frac{\nabla_\Phi\;\pi_\Phi(a_t)}{\pi_\Phi(a_t)}\right) R
+\end{eqnarray*}
+}
+
+
+\slide{Policy Gradient Theorem (Episodic Case)}
+\begin{eqnarray*}
+  \nabla_\Phi \;P(\ldots)R  & = & P(\ldots) \left(\sum_t\;\frac{\nabla_\Phi\;\pi_\Phi(a_t|s_t)}{\pi_\Phi(a_t|s_t)}\right) R \\
+  \\
+  \nabla_\Phi \;E_{\pi_\Phi}\;R & = & E_{\pi_\Phi}\;\left(\sum_t\;\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right) R
+\end{eqnarray*}
+
+\slide{Policy Gradient Theorem}
+\begin{eqnarray*}
+ & &   \nabla_\Phi \; E_{\pi_\Phi}\; R \\
+  \\
+  & = & E_{\pi_\Phi}\;\left(\sum_t\;\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right)\;\;R \\
+  \\
+  & = & E_{\pi_\Phi}\; \left(\sum_t\;\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right)\left(\sum_{t} r_{t}\right)  \\
+  \\
+  & = & E_{\pi_\Phi}\; \sum_{t,t'} \nabla_\Phi\;\ln \pi_\Phi(a_{t}|s_{t}) \;\;r_{t'}
+\end{eqnarray*}
+
+
+\slide{Policy Gradient Theorem}
+
+\begin{eqnarray*}
+    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,t'}\;E_{s_t,a_t,r_{t'}}\;\; \nabla_\Phi\;\ln \pi_\Phi(a_{t}|s_{t})\;\;r_{t'}
+    \end{eqnarray*}
+For $t' < t$ we have
+{\huge
+\begin{eqnarray*}
+    E_{r_{t'},s_t,a_t}\;\; r_{t'} \nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)  & =  & E_{r_{t'},s_t}\; r_{t'}  \;\sum_{a_t} \; \pi_\Phi(a_t|s_t)\; \nabla_\Phi\;\ln \pi_\Phi(a_t|s_t) \\
+    \\
+    & =  & E_{r_{t'},s_t}\; r_{t'}  \;\sum_{a_t}\; \nabla_\Phi\; \pi_\Phi(a_t|s_t) \\
+    \\
+    & =  & E_{r_{t'},s_t}\; r_{t'}  \;\nabla_\Phi\; \sum_{a_t}\;\pi_\Phi(a_t|s_t) \\
+    \\
+    & = & 0
+\end{eqnarray*}
+}
+
+\slide{REINFORCE}
+$$\nabla_\Phi \;E_{\pi_\Phi}\;R \;\;\; = \;\;\; E_{\pi_\Phi}\; \sum_{t,\;t' \geq t} \; \left(\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right) \;r_{t'}$$
+
+\vfill
+Sampling runs and computing the above sum over $t$ and $t'$ is Williams' REINFORCE algorithm.
+
+\slidetwo{Optimizing Discrete Decisions}{with Non-Differentiable Loss}
+
+The REINFORCE algorithm is used generally for non-differentiable loss functions.
+
+\vfill
+For example error rate and BLEU score are non-differentiable --- they are defined on the result of discrete decisions.
+
+\vfill
+$$\Phi^* = \argmax_\Phi \;E_{w_1,\ldots,w_n \sim P_\Phi}\;\mathrm{BLEU}$$
+
+\slide{The Variance Issue}
+
+REINFORCE typically suffers from high variance of the gradient samples requiring very small learning rates and very long convergence times.
+
+\begin{eqnarray*}
+    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,\;t'\geq t}\; E_{s_t,a_t,r_{t'}}\; \left(\nabla_\Phi\;\ln \pi_\Phi(a_{t}|s_{t})\right)\;\;r_{t'}
+\end{eqnarray*}
+
+\vfill
+We have to consider
+\begin{itemize}
+\item {\color{red} the variation over $r_{t'}$ given $s_t$, $a_t$}
+\item {\color{red} the variation over the choice of $s_t$, $a_t$}
+\end{itemize}
+
+\slidetwo{Reducing the Variance over $r_{t'}$}{The Policy Gradient Theorem}
+
+``Policy Gradient Methods for
+Reinforcement Learning with Function
+Approximation'' Sutton, McAllester, Singh, Mansour, 2000, cited by 2,841 as of March 2020.
+
+\vfill
+``Actor-Critic Algorithms'', Konda and Tsitsilas, 2000, cited by 776.
+
+\vfill
+These two papers both appeared at NeurIPS 2000 and are essentially identical.  The first is just easier to read.
+
+
+\slide{Reducing the Variance over $r_{t'}$}
+
+\begin{eqnarray*}
+    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,t'}\;E_{s_t,a_t,r_{t'}}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} r_{t'}} \\
+    \\
+    \\
+    & = & \sum_{t}\;E_{s_t,a_t}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} \sum_{t' \geq t} E_{r_{t'}\;|\;s_t,a_t}\;r_{t'}} \\
+  \\
+  \\
+  & = & E_{\pi_\Phi} \; \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;{\color{red} Q^{\pi_\Phi}(s_t,a_t)} \\
+  \\
+  \\
+ Q^\pi(s,a) & = & \expectsub{\pi}{\sum_t\; r_t\;|\;s_0=s,\;a_0=a}
+ \end{eqnarray*}
+
+\slideplain{Reducing the Variance over $r_{t'}$}
+\begin{eqnarray*}
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & \sum_t\;E_{s_t,a_t}\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) {\color{red} Q^{\pi_\Phi}(s_t,a_t)}
+\end{eqnarray*}
+
+\vfill
+{\bf The point} is that we can now approximate $Q^{\pi_\Phi}$ with neural network $Q_\Phi$ where the networks $\pi_\Phi$ and $Q_\Phi$ can use different, perhaps overlapping, parts of $\Phi$.
+
+\vfill
+We reduced the variance at the cost of approximating the expected future reward.
+
+
+\slide{The Actor-Critic Algorithm}
+\begin{eqnarray*}
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & \approx & E_{\pi_\Phi} \; \sum_t\; {\color{red} \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_\Phi(s_t,a_t)}
+\end{eqnarray*}
+
+\vfill
+\centerline{{\color{red} $\pi_\Phi$} is the ``actor'' and {\color{red} $Q_\Phi$} is the ``critic''}
+
+\slide{The Actor-Critic Algorithm}
+\begin{eqnarray*}
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & \approx & E_{\pi_\Phi} \; \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_\Phi(s_t,a_t)
+\end{eqnarray*}
+
+We can sample an episode and then do
+
+\begin{eqnarray*}
+  \Phi  &\pluseq & \sum_t \eta_1\left(\nabla_{\Phi}\;\ln \pi_{\Phi}(a_i|s_i)\right)Q_\Phi(s_t,a_t)\\
+  \Phi & \minuseq & \sum_t \eta_2 \;\nabla_{\Phi}\;\left(Q_\Phi(s_t,a_t) - \sum_{t' \geq t} r_{t'}\right)^2
+\end{eqnarray*}
+
+The two updates typically apply to different (but perhaps overlapping) subsets of the parameters $\Phi$.
+
+\slide{Reducing the Variance over $s_t$}
+
+Thoerem:
+$$\nabla_\Phi \;E_{\pi_\Phi}\; R = \sum_t\;E_{s_t,a_t} \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right)(Q^{\pi_\Phi}(s_t,a_t) - V^{\pi_\Phi}(s_t))$$
+
+\vfill
+$V^{\pi_\Phi}(s) = \expectsub{a \sim \pi_\Phi(a|s)}{Q^{\pi_\Phi}(s,a)}$
+
+\vfill
+$Q^{\pi_\Phi}(s,a) - V^{\pi_\Phi}(s)$ is the ``advantage'' of deterministically using $a$ rather than sampling an action.
+
+\slide{Proof}
+
+We have the following for any function $V(s)$ of states.
+
+\begin{eqnarray*}
+ & & E_{s_t,a_t} \;  \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ \\
+ & = & E_{s_t} \;  \sum_{a_t} \left(\pi_\Phi(a_t|s_t) \;\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ \\
+ & = & E_{s_t} \;  \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ \\
+ & = & E_{s_t} \;  V(s_t) \nabla_\Phi \sum_{a_t}\; \pi_\Phi(a_t|s_t) \;=\; 0
+\end{eqnarray*}
+
+\slide{Advantage-Actor-Critic Algorithm}
+\begin{eqnarray*}
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & \approx & E_{\pi_\Phi} \; \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;(Q_\Phi(s_t,a_t) - V_\Phi(s_t))
+\end{eqnarray*}
+
+We can sample an episode and then do
+
+\begin{eqnarray*}
+  \Phi  &\pluseq & \sum_t \eta_1\left(\nabla_{\Phi}\;\ln \pi_{\Phi}(a_i|s_i)\right)(Q_\Phi(s_t,a_t) - V_\Phi(s_t))\\
+  \Phi & \minuseq & \sum_t \eta_2 \;\nabla_{\Phi}\;\left(Q_\Phi(s_t,a_t) - \sum \!_{t' \geq t}\; r_{t'}\right)^2 \\
+  \Phi & \minuseq & \sum_t \eta_3 \;\nabla_{\Phi}\;\left(V_\Phi(s_t) - Q_\Phi(s_t,a)\right)^2 \\
+\end{eqnarray*}
+
+
+\slidetwo{Asynchronous Methods for Deep RL (A3C)}{Mnih et al., Arxiv, 2016 (Deep Mind)}
+
+\begin{quotation}
+  \noindent $\tilde{\Phi} = \Phi$ (retrieve global $\Phi$)\newline
+  \noindent using policy $\pi_{\tilde{\Phi}}$ compute $s_t,a_t,r_t,\ldots,s_{t+K},a_{t+K},r_{t+K}$
+  $$R_i = \sum_{\delta=0}^D \gamma^{i+\delta} r_{(i+\delta)}$$
+  \begin{eqnarray*}
+  \Phi  &\pluseq & \eta \sum_{i=t}^{t+K-D} \left(\nabla_{\tilde{\Phi}}\;\ln \pi_{\tilde{\Phi}}(a_i|s_i)\right)\left(R_i - V_{\tilde{\Phi}}(s_i)\right)\\
+  \Phi & \minuseq & \eta \sum_{i=t}^{t+K-D} \nabla_{\tilde{\Phi}}\;(V_{\tilde{\Phi}}(s_i) - R_i)^2
+  \end{eqnarray*}
+\end{quotation}
+
+\slide{Issue: Policies must be Exploratory}
+
+The optimal policy is deterministic --- $a(s) = \argmax_a Q(s,a)$.
+
+\vfill
+However, a deterministic policy never samples alternative actions.
+
+\vfill
+Typically one forces a random action some small fraction of the time.
+
+
+\slide{Issue: Discounted Reward}
+
+DQN and A3C use discounted reward on episodic or long term problems.
+
+\vfill
+Presumably this is because actions have near term consequences.
+
+\vfill
+This should be properly handled in the mathematics, perhaps in terms of the mixing time of
+the Markov process defined by the policy.
+
+\slide{Observation: Continuous Actions are Differentiable }
+
+In problems like controlling an inverted pendulum, or robot control generally,
+a continuous loss can be defined and the gradient of loss of with respect to a deterministic policy exists.
+
+\slide{More Videos}
+
+https://www.youtube.com/watch?v=g59nSURxYgk
+
+https://www.youtube.com/watch?v=rAai4QzcYbs
+
+
+
+\slide{END}
+
+}
+\end{document}
+
+

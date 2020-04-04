@@ -1,0 +1,75 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+
+  \vfill
+  \centerline{\bf Representing Functions with Deep Circuits}
+  \vfill
+  \centerline{\bf Circuit Complexity Theory}
+  \vfill
+  \vfill
+
+\slide{Representing Functions by Circuits}
+
+We can define functions of Boolean variables (the corners of $[0,1]^d$) with Boolean circuits or linear threshold circuits.
+
+\vfill
+We can define functions of $[0,1]^d$ with feed-forward real-valued networks (Deep models).
+
+\slide{Circuit Complexity Theory}
+
+Building on work of Ajtai, Sipser and others, Hastad proved (1987) that any bounded-depth Boolean circuit computing the parity function must have exponential size. 
+
+\vfill
+Matus Telgarsky recently gave some formal conditions under which shallow networks provably require exponentially more parameters than deeper networks (COLT 2016).
+
+
+\slideplain{The Kaurnaugh Model of DNNs}
+
+The Karnaugh map, also known as the K-map, is a method to simplify boolean algebra expressions.
+
+\vfil
+\centerline{\includegraphics[width = 1.5in]{../images/Kmap1} \hspace{1.0in} \includegraphics[width=3.0in]{../images/Kmap2}}
+
+\begin{eqnarray*}
+  F(A,B,C,D) & = & AC' + AB' + BCD' + AD' \\
+  & = & (A+B)(A+C)(B' + C' + D')(A+D')
+\end{eqnarray*}
+
+\slideplain{The Kaurnaugh Model of DNNs}
+
+\vfil
+\centerline{\includegraphics[width = 1.5in]{../images/Kmap1} \hspace{1.0in} \includegraphics[width=3.0in]{../images/Kmap2}}
+
+Many very different circuits compute the same function.
+
+\slideplain{A Kaurnaugh Person Detector}
+
+{\color{red}
+  
+\centerline{Wheel or Face}
+
+\vfill
+\centerline{Hand or Flower \hspace{2.5in} Hand or Flower}
+
+\vfill
+\centerline{Leg or Tree  \includegraphics[height=1.5in]{../images/StickFig} Leg or Tree}
+}
+
+\vfill
+The set of locally minimal models (circuits) could be vast (exponential) without damaging performance.
+
+\vfill
+Is a Boolean circuit a distributed representation?
+
+\slide{END}
+
+}
+\end{document}
