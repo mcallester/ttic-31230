@@ -1,4 +1,4 @@
- <title>TTIC 31230: Fundamentals of Deep Learning</title>
+<title>TTIC 31230: Fundamentals of Deep Learning</title>
 
 <header>TTIC 31230: Fundamentals of Deep Learning</header>
 
@@ -9,20 +9,600 @@
 <p>TA: Pedro Savarese</p>
 
 <p>This class is intended to provide students with an understanding of the technical content of current
-research in deep learning. Students successfully completing the class should be able to read and understand
-current deep learning research papers and posses the technical knowledge necessary to both reproduce
-research results and to do original research in deep learning.  The course covers current methods in computer vision,
-natural language processing and reinforcement learning for games and robotics. One of the
-amazing aspects of deep learning is that much the conceptual knowledge needed for research in these areas is shared
-among the areas making such broad coverage possible. </p>
+  research in deep learning. Students successfully completing the class should be able to read and understand
+  current deep learning research papers and posses the technical knowledge necessary to both reproduce
+  research results and to do original research in deep learning.  The course covers current methods in computer vision,
+  natural language processing and reinforcement learning for games and robotics. One of the
+  amazing aspects of deep learning is that much the conceptual knowledge needed for research in these areas is shared
+  among the areas making such broad coverage possible. </p>
 
 
 <p>The official meeting time is MWF 1:50-2:40.  However, this will be an on-line class and
-recorded lectures will be available in advance.  The class time will be used for on-line office hours (by zoom)
-for Prof. McAllester.</p>
+  recorded lectures will be available in advance.  The class time will be used for on-line office hours (by zoom)
+  for Prof. McAllester.</p>
 
-<!--- The grade will be based on five problem sets (20/% of grade) and five timed quizzes (80% of grade)
-which will occur in lieu of lecture every other Wednesday.  Problem set and quiz solutions can be done
-on pencil and paper and photographed for electronic submission to Canvas. -->
+<p><a href = ../index.html>Course Material from Winter 2020</a></p>
 
-<a href = ../index.html>Course Material from Winter 2020</a>
+<p>Preliminary Course Material for Autumn 2020:</p>
+
+<ol>
+  
+  <li> <b> Introduction:</b>  Reviewed at class time office hours Friday Oct 2.
+    
+    <p> <table>
+	<tr>
+	  <td align = "left" style = "padding:10pt">The History of Deep Learning and Moore's Law of AI</td>
+	  <td align = "left" style = "padding:10pt"> <a href = 01intro/history.pdf> Slides</a> </td>
+	  <td align = "left" style = "padding:10pt"> Video</td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt">The Fundamental Equations of Deep Learning </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 01intro/fundamentals.pdf>  Slides</a> </td>
+	  <td align = "left" style = "padding:10pt"> Video</td>
+	</tr>
+	
+	<tr><td align = "left" style = "padding:10pt"><a href = 01intro/problems.pdf>Problems</a></td></tr>
+    </table> </p>
+  </li>
+  
+  
+  <li> <b> Frameworks and Back-Propagation:</b> Reviewed Monday Oct. 5 and Wednesday Oct. 7. MNIST in EDF coding problem due Friday Oct.9.
+    
+    <p> <table>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Deep Learning Frameworks </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 02MLP/frameworks.pdf> Slides </a>
+	  </td> <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Backpropagation for Scalar Source Code </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 02MLP/Backprop.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Backpropagation for Tensor Source Code </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 02MLP/backprop2.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt">  Minibatching: The Batch Index </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 02MLP/minibatching.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt">  The Educational Framework (EDF) </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 02MLP/EDFslides.pdf> Slides</a></td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+        
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = 02MLP/problems.pdf> Problems</a></td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = 02MLP/PS1.zip> EDF source code</a> 150 lines of Python/NumPy</td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = 02MLP/edf.py> MNIST in EDF problem <a href = 02MLP/PS1.zip> set</a></td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = https://pytorch.org/tutorials/> PyTorch  tutorial</a></td>
+	</tr>
+    </table></p>
+    
+  <li><b> Einstein Notation and Convolutional Neural Networks (CNNs):</b>  Reviewed Friday Oct. 9.
+
+    <p> <table>
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Einstein Notation  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 03CNNs/Einstein.pdf> Slides  </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> CNNs  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 03CNNs/CNNs.pdf> Slides  <a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"><a href = https://pytorch.org/docs/stable/nn.functional.html?highlight=convolution> Pytorch Convolution Functions</a></td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"><a href = 03CNNs/CNNb.html> Invariant Theory (optional)</td>
+	</tr>
+	
+
+  </table> </p> </li>
+
+
+  <li> <b> Trainability, Residual Connections and RNNs:</b> Reviewed Monday Oct. 12.
+    
+    <p> <table>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Trainability: Relu, Initialization, Batch Normalization and Residual Connections (ResNet)  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 03CNNs/trainability.pdf> Slides  </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Language Modeling </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 05Rnns/LangModels.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Recurrent Neural Networks (RNNs) </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 05RNNs/RNNs.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+  	<tr>
+	  <td align = "left" style = "padding:10pt"><a href = 03CNNs/problems.pdf><a href = 03CNNs/problems.pdf>Problems<a></td>
+	</tr>
+
+  </table> </p> </li>
+
+  
+
+  <li> <b> Attention, Machine Translation and the Transformer:</b> Reviewed Wednesday Oct. 14   Quiz 1 is Friday Oct. 16.
+    
+    <p> <table>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Machine Translation and Attention </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 05RNNs/Translation.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> The Transformer </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 05RNNs/Transformer.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Statistical Machine Translation (optional) </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 05RNNs/Phrases.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video(?) </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"><a href = 05RNNs/problems.pdf> Problems</a></td>
+	</tr>
+	
+    </p></table>
+    
+  <li><b> Stochastic Gradient Descent I</b> Reviewed Monday Oct. 19.
+    
+    <p> <table>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> The Classical Convergence Theorem </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Classical.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Decoupling the Learning Rate from the Batch Size </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Decoupling1.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Momentum as a Running Average and Decoupled Momentum </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Momentum.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+    </table> </p> </li>
+
+
+  <li> <b> Stochastic Gradient Descent II:</b> Reviewed Wednesday Oct. 21, Problem set 2 due Friday Oct. 22.
+    
+    <p> <table>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> RMSProp, and Adam and Decoupled Versions </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/RMS.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Gradient Flow </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/flow.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Heat Capacity with Loss as Energy and Learning Rate as Temperature </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Heat.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+  </table> </p> </li>
+
+
+  <li> <b> Stochastic Gradient Descent III:</b> Reviewed Friday Oct. 22.
+    <p> <table>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Continuous Time Noise and Stationary Parameter Densities </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Langevin.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/SGDproblems.pdf> Problems</a></td>
+	</tr>
+	
+	
+	
+  </table></p></li>
+    
+  <li><b> Generalization and Regularization I:</b> Reviewed Monday Oct 26.
+    
+    <p> <table>
+	<tr>
+	  <td align = "left" style = "padding:10pt">Early Stopping, Shrinkage and Decoupled Shrinkage </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 07regularization/Early.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	
+  </table></p></li>
+    
+  <li><b> Generalization and Regularization II:</b> Wednesday Oct 28. Quiz 2 on Friday Oct 30.
+    
+    <p> <table>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt">PAC-Bayes Generalization Theory </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 07regularization/PCABayes.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt">Implicit Regularization </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 07regularization/Implicit.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt">Double Descent </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 07regularization/Double.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = 07regularization/REGproblems.pdf> Problems</a></td>
+	</tr>
+	<td align = "left" style = "padding:10pt"> <a href = https://arxiv.org/abs/1307.2118> PAC-Bayes  Tutorial </a></td>
+	
+	
+  </p></table></li>
+  <li><b> Deep Graphical Models I:</b> Reviewed Monday Nov. 2.
+    <p> <table>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Exponential Softmax </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 09GraphicalModels/DGMs1.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Speech Recognition: Connectionist Temporal Classification (CTC) </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 09GraphicalModels/CTC.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Backprogation for Exponential Softmax: The Model Marginals </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 09GraphicalModels/DGMs2.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+  </p></table></li>
+  <li><b> Deep Graphical Models II:</b> Reviewed Wednesday Nov. 4.  Problem set 3 Due Friday Nov. 6.
+    <p> <table>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Monte-Carlo Markov Chain (MCMC) Sampling </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 09GraphicalModels/MCMC.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Pseudo-Likelihood and Contrastive Divergence </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 09GraphicalModels/MCMC.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Loopy Belief Propagation (Loopy BP) </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 09GraphicalModels/Loopy.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Noise Contrastive Estimation </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 09GraphicalModels/Contrastive.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = 09GraphicalModels/DGMproblems.pdf> Problems</a></td>
+	</tr>
+	
+	
+	
+    </p></table>
+    
+  <li><b> Generative Adversarial Networks (GANs):</b> Reviewed Friday Nov. 6
+    
+    <p> <table>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Overview and Timeline of GAN Development </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 14Gans/Gans.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt">Replacing the Loss Gradient with the Margin Gradient. </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 14Gans/Patch.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt">Optimal Discrimination and Jensen-Shannon Divergence </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 14Gans/Jensen.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt">Contrastive GANs </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 14Gans/Contrastive.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = 14GANs/GANproblems.pdf> Problems</a></td>
+	</tr>
+	
+	
+	
+  </p></table></li>
+  <li><b> Rate-Distortion Autoencoders:</b>  Reviewed Monday Nov. 9
+    <p> <table>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt">Perils of Differential Entropy </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 08InfoTheory/information.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Rate-Distortion Autoencoders (RDAs) </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 11AutoEncoders/Rate.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Noisy Channel RDAs  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 11AutoEncoders/Noisy.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Gaussian Noisy Channel RDAs  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 11AutoEncoders/GaussianRDAs.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+		
+  </p></table></li>
+  <li><b> Latent Variables and Variational Autoencoders:</b>  Reviewed Wednesday Nov 11.  Quiz3, Friday Nov. 13
+    <p> <table>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Interpretability of Latent Variables </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 11AutoEncoders/Latent.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> The Evidence Lower Bound (ELBO) and Variational Autoencoders (VAEs) </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 11AutoEncoders/ELBO.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Gaussian VAEs  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 11AutoEncoders/GaussianVAEs.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Posterior Collapse, VAE Non-Identifiability, and beta-VAEs  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 11AutoEncoders/Collapse.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Vector Quantized VAEs  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 11AutoEncoders/VQVAE.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = 11AutoEncoders/Rateproblems.pdf> Problems</a></td>
+	</tr>
+	
+	
+  </p></table></li>
+  <li><b> Pretraining:</b> Reviewed Monday Nov. 16
+    <p> <table>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Pretraining for NLP </td>
+	  <td align = "left" style = "padding:10pt"> <a href = pretraining/NLPpretraining.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Supervised ImageNet Pertraining </td>
+	  <td align = "left" style = "padding:10pt"> <a href = pretraining/supervised.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt">Self-Supervised Pretraining for Vision </td>
+	  <td align = "left" style = "padding:10pt"> <a href = pretraining/self.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt">Contrastive Predictive Coding </td>
+	  <td align = "left" style = "padding:10pt"> <a href = pretraining/CPC.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt">Mutual Information Coding </td>
+	  <td align = "left" style = "padding:10pt"> <a href = pretraining/MI.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = pretraining/PREproblems.pdf> Problems</a></td>
+	</tr>
+	
+	
+  </p></table></li>
+  <li><b>  Reinforcement Learning (RL):</b> Reviewed Wednesday Nov. 18.  Problem set 4 due Friday, Nov 20.
+    <p> <table>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Basic Definitions, Q-learning, Deep Q Networks (DQN) for Atari </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 15RL/RL.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> The REINFORCE algorithm, Actor-Critic algorithms, A3C for Atari  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 15RL/REINFORCE.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = 15RL/RLproblems.pdf> Problems</a></td>
+	</tr>
+	
+	
+	
+    </p></table>
+    
+  <li><b>  AlphaZero and AlphaStar:</b> Reviewed Monday December 7
+    
+    <p> <table>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Background Algorithms </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 16alpha/alphago.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> The AlphaZero Training Algorithm </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 16alpha/algorithm.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Some Quantitative Empirical Results </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 16alpha/results.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> The Policy as a Q-Function </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 16alpha/analysis.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> What Happened to alpha-beta? </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 16alpha/alphabeta.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> AlphaStar </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 16alpha/alphastar.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = 16alpha/alphaproblems.pdf> Problems</a></td>
+	</tr>
+	
+	
+	
+    </p></table>
+    
+  <li><b> The Quest for Artificial General Intelligence (AGI):</b> Reviewed Wednesday, December 9, Quiz 4 on Friday December 11.
+    
+    <p> <table>
+	<tr>
+	  <td align = "left" style = "padding:10pt"> The Free Lunch Theorem and The Intelligence Explosion </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 18AGI/arch.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Representing Functions with Shallow Circuits: The Classical Universality Theorems  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 18AGI/classical.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Representing Functions with Deep Circuits: Circuit Complexity Theory  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 18AGI/circuits.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Representing Functions with Programs: Python, Assembler and the Turing Tarpit </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 18AGI/programs.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Representing Functions and Knowledge with Logic  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 18AGI/logic.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Representing Choices and Knowledge with Natural Language  </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 18AGI/NLP.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> Video </td>
+	</tr>	
+</ol>
+
+
+
+
+
+
