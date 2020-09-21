@@ -1,0 +1,41 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+  \centerline{\bf TTIC 31230,  Fundamentals of Deep Learning}
+  \vfill
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Self-Supervised Pretraining in Vision}
+  \vfill
+  \vfill
+  
+\slidetwo{Learning Representations for Colorization}{Larsson et al., 2016}
+
+\vfill
+\centerline{\includegraphics[width = 5in]{../images/colorizationGreg2}}
+\centerline{$x$ \hspace{4em} $y_\Phi(x)$ \hspace{4em} $y$}
+
+\vfill
+Trained to minimize $L_2$ image distortion between $y_\Phi(x)$ and $y$.
+
+\slidetwo{Self-Supervised Pretraining in Vision}{Feature Learning by Inpainting, Pathak et al., 2016}
+
+\centerline{\includegraphics[width = 3in]{../images/LearnRepInpa}}
+
+Trained to minimize distortion between $y_\Phi(x)$ and $y$ and to {\color{red} maximize} discriminator loss for distinguishing $y_\Phi(x)$ from $y$.
+
+\slide{Evaluation}
+
+Self-supervised representations (features) are tested by training a {\color{red} linear} classifier for ImageNet.
+
+\vfill
+Results are given in the slides on contrastive predictive coding (CPC).
+
+\slide{END}
+
+}
+\end{document}

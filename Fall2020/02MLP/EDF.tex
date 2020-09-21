@@ -1,0 +1,298 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2019}
+  \vfill
+  \vfill
+  \centerline{\bf The EDF Framework}
+  \vfill
+  \vfill
+
+\slide{The Educational Framework (EDF)}
+
+The educational frameword (EDF) is a simple Python-NumPy implementation of a deep learning framework.
+
+\vfill
+In EDF we write
+
+\vfill
+\begin{eqnarray*}
+  y & = & F(x) \\
+  z & = & G(y,x) \\
+  u & = & H(z) \\
+  {\cal L} &  = &  u
+\end{eqnarray*}
+\medskip
+
+\vfill
+This is Python code where variables are bound to objects (inputs, parameters and compnodes).
+
+\anaslide{The EDF Framework}
+
+\begin{eqnarray*}
+  y & = & F(x) \\
+  z & = & G(y,x) \\
+  u & = & H(z) \\
+  {\cal L} &  = &  u
+\end{eqnarray*}
+
+\vfill
+This is Python code where variables are bound to objects.
+
+\vfill
+$x$ is an object in the class {\tt Input}.
+
+\vfill
+$y$ is an object in the class $F$ (subclass of {\tt CompNode}).
+
+\vfill
+$z$ is an object in the class $G$ (subclass of {\tt CompNode}).
+
+\medskip
+$u$ and ${\cal L}$ are the same object in the class $H$ (suclass of {\tt CompNode}).
+
+\slide{The Core of EDF}
+
+\begin{verbatim}
+def Forward():
+    for c in CompNodes: c.forward()
+
+def Backward(loss):
+    for c in CompNodes + Parameters: c.grad = 0
+    loss.grad = 1.
+    for c in CompNodes[::-1]: c.backward()
+
+def SGD():
+    for p in Parameters:
+        p.value -= eta*p.grad
+\end{verbatim}
+\vfill
+
+
+\anaslideplain{$y = F(x)$}
+
+\begin{tabbing}
+  class \=$F$(CompNode): \\
+  \\
+    \>def \=\_\_init\_\_(self, x): \\
+        \>\>CompNodes.append(self) \\
+        \>\>self.x = x \\
+\\
+    \>def forward(self): \\
+        \>\>self.value = ... compute the value ... \\
+\\
+    \>def backward(self): \\
+        \>\>self.x.addgrad(... compute the gradient ...)
+\end{tabbing}
+
+\slide{Nodes of the Computation Graph}
+
+There are three kinds of nodes in a computation graph --- inputs, parameters and computation nodes.
+
+\vfill
+\begin{tabbing}
+class \=Input: \\
+    \>def \=\_\_init\_\_(self): \\
+        \>\>pass \\
+    \>def \>addgrad(self, delta): \\
+    \>\>pass
+\end{tabbing}
+
+\vfill
+\begin{tabbing}
+class \=CompNode: \#initialization is handled by the subclass \\
+   \>def \=addgrad(self, delta): \\
+   \>\>self.grad += delta
+\end{tabbing}
+
+\slide{}
+
+\begin{tabbing}
+class \=Parameter: \\
+    \\
+    \>def \=\_\_init\_\_(self,value): \\
+        \>\>Parameters.append(self) \\
+        \>\>self.value = value \\
+\\
+    \>def \>addgrad(self, delta): \\
+          \>\>\#sums over the minibatch \\
+    \>\>self.grad += np.sum(delta, axis = 0)/nBatch \\
+\end{tabbing}
+
+\anaslide{MLP in EDF}
+\medskip
+
+The following Python code constructs the computation graph of a multi-layer perceptron (NLP) with one hidden layer.
+
+\vfill
+\begin{verbatim}
+  L1 = Sigmoid(Affine(Phi1,x))
+  Q = Softmax(Sigmoid(Affine(Phi2,L1))
+  ell = LogLoss(Q,y)
+\end{verbatim}
+
+\vfill
+Here {\tt x} and {\tt y} are input computation nodes
+whose value have been set.
+Here {\tt Phi1} and {\tt Phi2} are ``parameter packages'' (a matrix and a bias vector in this case).
+We have computation node classes {\tt Affine}, {\tt Relu}, {\tt Sigmoid}, {\tt LogLoss} each of which has
+a forward and a backward method.
+
+\slide{The {\tt Sigmoid} Class}
+
+\begin{eqnarray*}
+y[b,i] & = &  \sigma(x[b,i]) \\
+\\
+y & = & \frac{1}{1 + e^{-x}} \\
+\\
+\frac{d y}{dx} & = & \frac{e^{-x}}{(1 + e^{-x})^2} \\
+\\
+& = & y(1-y) \\
+\\
+x.\grad[b,i] & \pluseq & y.\grad[b,i]y.\mathrm{value}[b,i](1-y.\mathrm{value}[b,i])
+\end{eqnarray*}
+
+
+
+\slide{The {\tt Sigmoid} Class}
+
+\begin{verbatim}
+class Sigmoid:
+  def __init__(self,x):
+    CompNodes.append(self)
+    self.x = x
+
+  def forward(self):
+    self.value = 1. / (1. + np.exp(-self.x.value))
+
+  def backward(self):
+    self.x.addgrad(self.grad*self.value*(1.-self.value))
+\end{verbatim}
+
+
+\slide{The {\tt Affine} Class}
+\vspace{-3ex}
+\begin{eqnarray*}
+  \tilde{y}[b,j] & = & \sum_i\;W[i,j]\;x[b,i] {\color{red}\;\; = xW}  \\
+  y[b,j] & = & \tilde{y}[b,j] - B[j] {\color{red} \;\;=\;\tilde{y} - B}\; \mathrm{(broadcasting)}
+  \end{eqnarray*}
+
+\vspace{-2ex}
+{\color{red}
+\begin{eqnarray*}
+  \tilde{y}.\mathrm{grad}[b,j] &\pluseq & y.\mathrm{grad}[b,j] \\
+  B.\mathrm{grad}[j] & \minuseq & \frac{1}{B} \sum_b\;y.\mathrm{grad}[b,j] \\
+  \\
+  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;y.\mathrm{grad}[b,j]W[i,j] = yW^\top\\
+  \\
+  W.\mathrm{grad}[i,j] & \pluseq & \frac{1}{B} \sum_b\;y.\mathrm{grad}[b,j]x[b,i] =\; ???
+\end{eqnarray*}
+}
+
+\vfill
+\eject
+\begin{verbatim}
+class Affine(CompNode):
+
+    def __init__(self,Phi,x):
+        CompNodes.append(self)
+        self.x = x
+        self.Phi = Phi
+
+    def forward(self):
+        self.value = (np.matmul(self.x.value,
+                               self.Phi.w.value)
+                      - self.Phi.b.value)
+\end{verbatim}
+\vfill
+\eject
+\vfill
+\begin{verbatim}
+    def backward(self):
+
+        self.x.addgrad(
+           np.matmul(self.grad,
+                     self.Phi.w.value.transpose()))
+
+        self.Phi.b.addgrad(- self.grad)
+
+        self.Phi.w.addgrad(self.x.value[:,:,np.newaxis]
+                           * self.grad[:,np.newaxis,:])
+\end{verbatim}
+
+
+\slide{Procedures in EDF}
+
+\begin{verbatim}
+def MLP(Phi,x)
+
+   if len(Phi) = 0
+      return x
+
+   return Sigmoid(Affine(Phi[0],MLP(Phi[1:],x)))
+\end{verbatim}
+
+\ignore{
+\slide{NumPy: Reshaping Tensors}
+
+For an ndarray $x$ (tensor) we have that $x.\mathrm{shape}$ is a tuple of dimensions.  The product of the dimensions is the number of numbers.
+
+\vfill
+In NumPy an ndarray (tensor) $x$ can be reshaped into any shape with the same number of numbers.
+
+\slide{NumPy: Broadcasting}
+
+Shapes can contain dimensions of size 1.
+
+\vfill
+Dimensions of size 1 are treated as ``wild card'' dimensions in operations on tensors.
+
+\vfill
+\begin{eqnarray*}
+  x.\mathrm{shape} & = & (5,1) \\
+  y.\mathrm{shape} & = & (1,10) \\
+  z & = & x*y \\
+  z.\mathrm{shape} & = & (5,10) \\
+  z[i,j] & = & x[i,0] * y[0,j]
+\end{eqnarray*}
+
+\vfill
+\eject
+\vfill
+\begin{verbatim}
+class Affine(CompNode):
+    ...
+    def backward(self):
+        ...
+        # W.grad[i,j] += y.grad[b,j]x.value[b,i]
+        self.Phi.W.addgrad(self.grad[:,np.newaxis,:]
+                           *self.x.value[:,:,np.newaxis])
+
+class Parameter:
+    ...
+    def addgrad(self, delta):
+        self.grad += np.sum(delta, axis = 0)
+\end{verbatim}
+
+\slide{NumPy: Broadcasting}
+
+When a scalar is added to a matrix the scalar is reshaped to shape $(1,1)$ so that it is added to each element of the matrix.
+
+\vfill
+When a vector of shape $(k)$ is added to a matrix the vector is reshaped to $(1,k)$ so that it is added to each row of the matrix.
+
+\vfill
+In general when two tensors of different order (number of dimensions) are added, unit dimensions are prepended to the shape of the tensor of smaller order
+to make the orders match.
+}
+
+\slide{END}
+}
+
+\end{document}

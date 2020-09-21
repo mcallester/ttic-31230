@@ -1,0 +1,360 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\newcommand{\solution}[1]{\bigskip {\bf Solution}: #1}
+
+\begin{document}
+
+{\Huge
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester}
+  \centerline{An SGD Algorithm from Winter 2017}
+  \vfill
+  \centerline{\bf A Quenching SGD Algorithm}
+  \vfill
+
+\slide{Quenching}
+
+Steel is a mixture of iron and carbon. At temperatures below 727$^\circ$ C the carbon ``freezes out'' of the iron and we get iron grains separated
+by carbon sheets.  But above 727$^o$ the carbon sheets ``evaporate'' into the iron and we get a homogeneous mixture of iron and carbon that is still a crystaline solid
+but with a different crystal structure (steel melts around 1510$^\circ$).  If we heat steel above 727$^\circ$ and then drop it in water the carbon does not have time
+to segregate out of the steel and we get ``hardened steel'' with a different lattice structure from slowly cooled grainy ``soft steel''.
+Hardened steel can be used as a cutting blade in a drill bit to drill into soft steel.
+
+\slide{Annealing and Tempering}
+
+Annealing is a process of gradually reducing the temperature.  Gradual annealing produces soft grainy steel.
+
+\vfill
+Tempering is a process of re-heating quenched steel to temperatures high enough to change its properties but below the original pre-quenching temperature.
+This can make the steel less brittle while preserving its hardness.
+
+\vfill
+Acknowledgments to my eighth grade shop teacher.
+
+\slide{Is Quenching Desirable?}
+
+These slides describe an SGD algorithm that I designed at a time when I assumed that quenching was desirable --- that one should design SGD to reach a local minimum as quickly as possible.
+
+\slide{A Quenching Algorithm}
+
+Suppose that we want to quench the parameters --- to reach a local minimum as quickly as possible.
+
+\vfill
+We must consider
+
+\vfill
+\begin{itemize}
+\item {\bf Gradient Estimation.} The accuracy of $\hat{g}$ as an estimate of $g$.
+
+  \vfill
+\item {\bf Gradient Drift (second order structure).} The fact that $g$ changes as the parameters change.
+\end{itemize}
+
+\slide{Analysis Plan}
+
+We will calculate a batch size $B^*$ and learning rate $\eta^*$ by optimizing an improvement guarantee for a single batch update.
+
+\vfill
+We then use learning rate scaling to derive the learning rate  $\eta_B$ for a batch size $B << B^*$.
+
+\slide{Deriving Learning Rates}
+
+If we can calculate $B^*$ and $\eta^*$ for optimal loss reduction in a single batch
+we can calculate $\eta_B$.
+
+\vfill
+$$\eta_B = B\;\eta_1$$
+
+\vfill
+$$\eta^* = B^* \eta_1$$
+
+\vfill
+$$\eta_1 = \frac{\eta^*}{B^*}$$
+
+\vfill
+$${\color{red} \eta_B = \frac{B}{B^*} \;\eta^*}$$
+
+\slide{Calculating $B^*$ and $\eta^*$ in One Dimension}
+
+We will first calculate values $B^*$ and $\eta^*$ by optimizing the loss reduction over a single batch update in one dimension.
+
+\vfill
+\begin{eqnarray*}
+  g & = & \hat{g} \pm \frac{2\hat{\sigma}}{\sqrt{B}} \\
+  \\
+  \\
+  \\
+  \hat{\sigma} & = & \sqrt{E_{(x,y) \sim \mathrm{Batch}} \left(\frac{d\;\mathrm{loss}(\beta,x,y)}{d \beta} - \hat{g}\right)^2}
+\end{eqnarray*}
+
+\slide{The Second Derivative of $\mathrm{loss}(\beta)$}
+
+\begin{eqnarray*}
+  \mathrm{loss}(\beta) & = & E_{(x,y) \sim \mathrm{Train}}\;\mathrm{loss}(\beta,x,y) \\
+  \\
+  d^2 \mathrm{loss}(\beta)/d \beta^2 & \leq & L \;\;\;\mbox{\Large (Assumption)} \\
+  \\
+  \mathrm{loss}(\beta - \Delta\beta) & \leq & \mathrm{loss}(\beta) - g\Delta \beta + \frac{1}{2}L\Delta \beta^2 \\
+  \\
+  \\
+  \mathrm{loss}(\beta - \eta\hat{g}) & \leq & \mathrm{loss}(\beta) - g(\eta\hat{g}) + \frac{1}{2}L(\eta\hat{g})^2
+\end{eqnarray*}
+
+\slide{A Progress Guarantee}
+
+\begin{eqnarray*}
+  \mathrm{loss}(\beta - \eta\hat{g}) & \leq & \mathrm{loss}(\beta) - g(\eta\hat{g}) + \frac{1}{2}L(\eta\hat{g})^2 \\
+  \\
+  \\
+  & = &  \mathrm{loss}(\beta) - \eta (\hat{g} - (\hat{g} -g)) \hat{g} + \frac{1}{2}L\eta^2 \hat{g}^2 \\
+  \\
+  \\
+  & \leq &  \mathrm{loss}(\beta) - \eta \left(\hat{g} - \frac{2\hat{\sigma}}{\sqrt{B}}\right)\hat{g} + \frac{1}{2}L \eta^2 \hat{g}^2
+\end{eqnarray*}
+
+\slideplain{Optimizing $B$ and $\eta$}
+
+$$\mathrm{loss}(\beta - \eta\hat{g}) \leq \mathrm{loss}(\beta) - \eta \left(\hat{g} - \frac{2\hat{\sigma}}{\sqrt{B}} \right)\hat{g}  + \frac{1}{2}L \eta^2 \hat{g}^2$$
+
+\vfill
+We optimize progress per gradient calculation by optimizing the right hand side divided by $B$.  The derivation at the end of the slides gives
+
+\vfill
+$$B^*  =  \frac{16\hat{\sigma}^2}{\hat{g}^2},\;\;\;\;\eta^*  =  \frac{1}{2L}$$
+
+\vfill
+$${\color{red} \eta_B} = \frac{B}{B^*} \eta^* = {\color{red} \frac{B \hat{g}^2}{32\hat{\sigma}^2L}}$$
+
+\vfill
+Recall this is all just in one dimension.
+
+\slide{Estimating $\hat{g}_{B^*}$ and $\hat{\sigma}_{B^*}$}
+
+$${\color{red} \eta_B = \frac{B \hat{g}^2}{32\hat{\sigma}^2L}}$$
+
+\vfill
+We are left with the problem that $\hat{g}$ and $\hat{\sigma}$ are defined in terms of batch size $B^* >> B$.
+
+\vfill
+We can estimate $\hat{g}_{B^*}$ and $\hat{\sigma}_{B^*}$ using a running average with a time constant corresponding to $B^*$.
+
+\slide{Estimating $\hat{g}_{B^*}$}
+
+\begin{eqnarray*}
+  \hat{g}_{B^*} & = & \frac{1}{B^*} \sum_{(x,y) \sim \mathrm{Batch}(B^*)}\; \frac{d\;\mathrm{Loss}(\beta,x,y)}{d\beta} \\
+  \\
+  \\
+  & = & \frac{1}{N} \sum_{s=t-N+1}^t \hat{g}^s\;\;\;\;\;\mbox{with}\;N= \frac{B^*}{B} \;\mbox{for batch size}\;B \\
+  \\
+  \\
+  \tilde{g}^{t+1} & = & \left(1-\frac{B}{B^*}\right)\tilde{g}^t + \frac{B}{B^*} \hat{g}^{t+1}
+\end{eqnarray*}
+
+\vfill
+We are still working in just one dimension.
+
+\slide{A Complete Calculation of $\eta$ (in One Dimension)}
+\begin{eqnarray*}
+  \tilde{g}^{t+1} & = & \left(1-\frac{B}{B^*(t)}\right)\tilde{g}^t + \frac{B}{B^*(t)} \hat{g}^{t+1} \\
+  \\
+  \tilde{s}^{t+1} & = & \left(1-\frac{B}{B^*(t)}\right)\tilde{s}^t + \frac{B}{B^*(t)} (\hat{g}^{t+1})^2 \\
+  \\
+  \tilde{\sigma}^t & = & \sqrt{\tilde{s}^t - (\tilde{g}^t)^2} \\
+  \\
+  B^*(t) &= & \left\{\begin{array}{ll} K & \mbox{for}\;\; t \leq K \\
+  16(\tilde{\sigma}^t)^2/((\tilde{g}^t)^2 + \epsilon) & \mbox{otherwise} \end{array}\right.
+\end{eqnarray*}
+
+\slide{A Complete Calculation of $\eta$ (in One Dimension)}
+
+$$\eta^t = \left\{\begin{array}{ll} 0 & \mbox{for}\;\;t \leq K \\ \frac{(\tilde{g}^t)^2}{32(\tilde{\sigma}^t)^2L} & \mbox{otherwise}
+\end{array}\right.$$
+
+\vfill
+As $t \rightarrow \infty$ we expect $\tilde{g}^t \rightarrow 0$ and $\tilde{\sigma}^t \rightarrow \sigma > 0$ which implies
+$\eta^t \rightarrow 0$.
+
+\slide{The High Dimensional Case}
+
+So far we have been considering just one dimension.
+
+\vfill
+We now propose treating each dimension $\Phi[i]$ of a high dimensional parameter vector $\Phi$ independently using the one dimensional analysis.
+
+\vfill
+We can calculate $B^*[i]$ and $\eta^*[i]$ {\bf for each individual parameter} $\Phi[i]$.
+
+\vfill
+Of course the actual batch size $B$ will be the same for all parameters.
+
+\slide{A Complete Algorithm}
+\begin{eqnarray*}
+  \tilde{g}^{t+1}[i] & = & \left(1-\frac{B}{B^*(t)[i]}\right)\tilde{g}^t[i] + \frac{B}{B^*(t)[i]} \hat{g}^{t+1}[i] \\
+  \\
+  \tilde{s}^{t+1}[i] & = & \left(1-\frac{B}{B^*(t)[i]}\right)\tilde{s}^t[i] + \frac{B}{B^*(t)[i]} \hat{g}^{t+1}[i]^2 \\
+  \\
+  \tilde{\sigma}^t[i] & = & \sqrt{\tilde{s}^t[i] - \tilde{g}^t[i]^2} \\
+  \\
+  B^*(t)[i] &= & \left\{\begin{array}{ll} K & \mbox{for}\;\; t \leq K \\
+  \lambda_B\tilde{\sigma}^t[i]^2/(\tilde{g}^t[i]^2 + \epsilon) & \mbox{otherwise} \end{array}\right.
+\end{eqnarray*}
+
+\slide{A Complete Algorithm}
+
+$$\eta^t[i] = \left\{\begin{array}{ll} 0 & \mbox{for}\;\;t \leq K \\
+        \frac{\lambda_\eta\tilde{g}^t[i]^2}{\tilde{\sigma}^t[i]^2} & \mbox{otherwise}
+\end{array}\right.$$
+
+\vfill
+$$\Phi^{t+1}[i] = \Phi^t[i] - \eta^t[i] \hat{g}^t[i]$$
+
+\vfill
+Here we have meta-parameters $K$, $\lambda_B$, $\epsilon$ and $\lambda_\eta$.
+
+\slide{Appendix: Optimizing $B$ and $\eta$}
+
+$$\mathrm{loss}(\beta - \eta\hat{g}) \leq \mathrm{loss}(\beta) - \eta \hat{g}\left(\hat{g} - \frac{2\hat{\sigma}}{\sqrt{B}} \right)  + \frac{1}{2}L \eta^2 \hat{g}^2$$
+
+Optimizing $\eta$ we get
+
+\begin{eqnarray*}
+ \hat{g}\left(\hat{g} - \frac{2\hat{\sigma}}{\sqrt{B}} \right) & = & L \eta \hat{g}^2
+\end{eqnarray*}
+
+
+\begin{eqnarray*}
+\eta^*(B) & = & \frac{1}{L}\left(1 - \frac{2\hat{\sigma}}{\hat{g}\sqrt{B}}\right)
+\end{eqnarray*}
+
+\vfill
+Inserting this into the guarantee gives
+$$\mathrm{loss}(\Phi - \eta \hat{g}) \leq \mathrm{loss}(\Phi) - \frac{L}{2}\eta^*(B)^2\hat{g}^2$$
+
+\slide{Optimizing $B$}
+
+Optimizing progress per sample, or maximizing $\eta^*(B)^2/B$, we get
+
+\begin{eqnarray*}
+\frac{\eta^*(B)^2}{B} & = & \frac{1}{L^2}\left(\frac{1}{\sqrt{B}} - \frac{2\hat{\sigma}}{\hat{g}B}\right)^2 \\
+\\
+0 & = &  - \frac{1}{2} B^{-\frac{3}{2}} + \frac{2\hat{\sigma}}{\hat{g}} B^{-2} \nonumber \\
+\\
+B^* & = & \frac{16\hat{\sigma}^2}{\hat{g}^2} \\
+\\
+\eta^*(B^*) = \eta^*  & = & \frac{1}{2L}
+\end{eqnarray*}
+
+\slide{Appendix II: A Formal Bound for the Vector Case}
+
+We will prove that minibatch SGD for a {\bf sufficiently large batch size} (for gradient estimation) and a {\bf sufficient small learning rate} (to avoid gradient drift)
+is guaranteed (with high probability) to reduce the loss.
+
+\vfill
+This guarantee has two main requirements.
+
+\vfill
+\begin{itemize}
+\item A smoothness condition to limit gradient drift.
+
+  \vfill
+\item A bound on the gradient norm allowing high confidence gradient estimation.
+\end{itemize}
+  
+
+\slide{Smoothness: The Hessian}
+
+We can make a second order approximation to the loss.
+
+\begin{eqnarray*}
+  \ell(\Phi + \Delta \Phi) & \approx & \ell(\Phi) + g^\top \Delta \Phi + \frac{1}{2} \Delta \Phi^\top H \Delta \Phi \\
+  \\
+  g & = & \nabla_\Phi\;\ell(\Phi) \\
+  \\
+  H & = & \nabla_\Phi \nabla_\Phi\; \ell(\Phi)
+\end{eqnarray*}
+
+
+\slide{The Smoothness Condition}
+
+We will assume
+
+$$||H\Delta \Phi|| \leq L||\Delta \Phi||$$
+
+We now have
+
+\vfill
+$$\Delta \Phi^\top H \Delta \Phi \leq L ||\Delta \Phi||^2$$
+
+\vfill
+Using the second order mean value theorem one can prove
+
+\begin{eqnarray*}
+  \ell(\Phi + \Delta \Phi)  & \leq &    \ell(\Phi) + g^\top \Delta \Phi + \frac{1}{2} L ||\Delta \Phi||^2
+\end{eqnarray*}
+
+
+\slide{A Concentration Inequality for Gradient Estimation}
+
+Consider a vector mean estimator where the vectors $g_n$ are drawn IID.
+
+$$g_n = \nabla_\Phi \ell_n(\Phi) \;\;\;\;\;\;\hat{g} = \frac{1}{k} \sum_{n=1}^k g_n \;\;\;\; \;\;\;\;\;\;\;\; g = \expectsub{n}{\nabla_\Phi\;\ell_n(\Phi)}$$
+
+\vfill
+{\bf If with probability 1 over the draw of $n$ we have $|(g_n)_i - g_i| \leq b$ for all $i$} then with probability of at least $1-\delta$ over the draw of the sample
+
+\vfill
+
+$$||\hat{g} - g|| \leq \frac{\eta}{\sqrt{k}} \;\;\;\;\;\;\;\;\;\;\;\;\;\; \eta = b\left(1 + \sqrt{2 \ln (1/ \delta) }\right)$$
+
+
+\vfill
+{\huge Norkin and Wets ``Law of Small Numbers as Concentration Inequalities ...'', 2012, theorem 3.1}
+
+\begin{eqnarray*}
+ \ell(\Phi + \Delta \Phi) & \leq &   \ell(\Phi) + g^\top \Delta \Phi + \frac{1}{2} L ||\Delta \Phi||^2 \\
+  \\
+\ell(\Phi - \eta\widehat{g}) & \leq & \ell(\Phi) - \eta g^\top \widehat{g} + \frac{1}{2}L \eta^2 ||\widehat{g}||^2\\
+  \\
+  & = &  \ell(\Phi) - \eta (\widehat{g} - (\widehat{g} -g))^\top \widehat{g} + \frac{1}{2}L\eta^2 ||\widehat{g}||^2 \\
+  \\
+  & = &  \ell(\Phi) - \eta ||\widehat{g}||^2 + \eta(\widehat{g} -g)^\top \widehat{g} + \frac{1}{2}L \eta^2 ||\widehat{g}||^2 \\
+  \\
+  & \leq &  \ell(\Phi) - \eta ||\widehat{g}||^2 + \eta\frac{\eta}{\sqrt{k}}||\widehat{g}|| + \frac{1}{2}L \eta^2 ||\widehat{g}||^2 \\
+  \\
+  & = & \ell(\Phi) - \eta ||\widehat{g}||\left(||\widehat{g}|| - \frac{\eta}{\sqrt{k}} \right)  + \frac{1}{2}L \eta^2 ||\widehat{g}||^2 \\
+\end{eqnarray*}
+
+\slideplain{Optimizing $\eta$}
+
+Optimizing $\eta$ we get
+
+\begin{eqnarray*}
+ ||\widehat{g}||\left(||\widehat{g}|| - \frac{\eta}{\sqrt{k}} \right) & = & - L \eta ||\widehat{g}||^2
+\end{eqnarray*}
+
+
+\begin{eqnarray*}
+\eta & = & \frac{1}{L}\left(1 - \frac{\eta}{||\widehat{g}||\sqrt{k}}\right)
+\end{eqnarray*}
+
+\vfill
+Inserting this into the guarantee gives
+$$\ell(\Phi - \eta \widehat{g}) \leq \ell(\Phi) - \frac{L}{2}\eta^2||\widehat{g}||^2$$
+
+\slide{Optimizing $k$}
+
+Optimizing progress per sample, or maximizing $\eta^2/k$, we get.
+
+\begin{eqnarray*}
+\frac{\eta^2}{k} & = & \frac{1}{L^2}\left(\frac{1}{\sqrt{k}} - \frac{2\hat{\sigma}}{||\widehat{g}||k}\right)^2 \\
+\\
+0 & = &  - \frac{1}{2} k^{-\frac{3}{2}} + \frac{2\hat{\sigma}}{||\widehat{g}||} k^{-2} \nonumber \\
+\\
+k & = & \left(\frac{22\hat{\sigma}}{||\widehat{g}||}\right)^2 \\
+\\
+\eta & = & \frac{1}{2L}
+\end{eqnarray*}
+\slide{END}
+\end{document}

@@ -1,0 +1,204 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Noise Contrastive Estimation}
+\vfill
+\vfill
+
+\slidetwo{Noise Contrastive Estimation}{Gutmann and Hyv\"{a}rinen, 2010}
+
+{\color{red}
+$$\Psi^* = \argmin_\Psi E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}} \;- \ln P_\Psi(i|y_1,\ldots,y_{N})$$
+\centerline{$p_\Phi$ is fixed ``noise''}
+}
+
+\vfill
+Assume $p_\Phi$ is both samplable and computable --- we can sample from $p_\Phi$ and for any given $y$ we can compute $p_\Phi(y)$.
+
+\vfill
+Assume $P_\Psi(i|y_1,\ldots,y_{N}) = \softmax_i s_\Psi(y_i)$
+
+\vfill
+Assume $\Psi$ universal
+
+
+\anaslide{Noise Contrastive Estimation}
+
+$$\Psi^* = \argmin_\Psi E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}} \;- \ln P_\Psi(i|y_1,\ldots,y_{N})$$
+\centerline{$p_\Phi$ is fixed ``noise''}
+
+\vfill
+Theorem: {\color{red} $\popd(y) = \softmax_y\;\;\; s_{\Psi^*}(y) + \ln p_\Phi(y)$}
+
+\vfill
+We then have a computable score function (energy function) for the population.  We do not have the partition function $Z$.
+
+\anaslide{Noise Contrastive Estimation}
+
+$$\Psi^* = \argmin_\Psi E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}} \;- \ln P_\Psi(i|y_1,\ldots,y_{N})$$
+\centerline{$p_\Phi$ is fixed ``noise''}
+
+\vfill
+Lemma: {\color{red} $P_{\Psi^*}(i|y_1,\ldots,y_{N})  =  \softmax_i\;\; \ln \frac{\popd(y_i)}{p_\Phi(y_i)}$}
+
+\slide{Lemma Proof}
+{\huge
+\begin{eqnarray*}
+{\color{red} \tilde{p}_\Phi^{(N)}(i \;\mathrm{and}\;y_1,\ldots,y_{N})} & = & \frac{1}{N}\;\popd(y_i)\prod_{j \not = i}p_\Phi(y_j) \\
+\\
+& = & \alpha \frac{\popd(y_i)}{p_\Phi(y_i)},\;\;\;\alpha = \frac{1}{N} \prod_i p_\Phi(y_i) \\
+\\
+\\
+{\color{red} \tilde{p}_\Phi^{(N)}(i\;|\;y_1,\ldots y_{N})} & = & \frac{\tilde{p}_\Phi^{(N)}(i\;\mbox{and} \; y_1,\ldots,y_{N})}{\sum_i \;\tilde{p}_\Phi^{(N)}(i \;\mbox{and}\; y_1,\ldots,y_{N})} \;=\;\frac{1}{Z} \;\frac{\popd(y_i)}{p_\Phi(y_i)} \\
+\\
+\\
+& = & {\color{red} \softmax_i\; \left(\ln \frac{\popd(y_i)}{p_\Phi(y_i)}\right)}
+\end{eqnarray*}
+}
+
+\slide{Theorem Proof}
+
+$$\softmax_i s_{\Psi^*}(y_i) =  \softmax_i \ln \frac{\popd(y_i)}{p_\Phi(y_i)}$$
+
+\vfill
+is solved by
+
+\vfill
+$$s_{\Psi^*}(y) = \ln \frac{\popd(y)}{p_\Phi(y)} + \ln Z$$
+
+\vfill
+giving
+
+$$\popd(y) = \frac{1}{Z} \exp(s_\Psi(y) + \ln p_\Phi(y))$$
+
+\slide{Another Theorem}
+
+\begin{eqnarray*}
+  && E_{(i,y_1,\dots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;- \ln p^{(N)}_{\Psi^*}(i|y_1,\ldots,y_{N}) \\
+  \\
+  \\
+  \\
+  & \geq & \ln N - \frac{N-1}{N}(KL(\popd,p_\Phi) + KL(p_\Phi,\popd))
+\end{eqnarray*}
+
+\vfill
+Note that the bound holds with equality for $p_\Phi = \popd$.
+
+\vfill
+This is analogous to the JSD expression for the optimal discriminator.
+\slide{Proof Part A.}
+
+{\huge
+ \begin{eqnarray*}
+    & & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln p_{\Psi^*}(i|y_1,\ldots,y_{N}) \\
+    \\
+    & = & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln \left(\softmax_i \;\ln \frac{\popd(y_i)}{p_\Phi(y_i)}\right)[i] \\
+    \\
+    & = & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \ln\left(\sum_j \frac{\popd(y_j)}{p_\Phi(y_j)} \right) \\
+    \\
+    & = & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} - \ln\left(\frac{1}{N}\sum_j \frac{\popd(y_j)}{p_\Phi(y_j)} \right) - \ln\;N
+  \end{eqnarray*}
+}
+
+\slide{Proof Part B.}
+{\huge
+ \begin{eqnarray*}
+    & & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} {\color{red} - \ln\left(\frac{1}{N}\sum_j \frac{\popd(y_j)}{p_\Phi(y_j)} \right)} - \ln\;N \\
+    \\
+    & {\color{red} \leq} & E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}}\;\ln\frac{\popd(y_i)}{p_\Phi(y_i)} {\color{red} - \frac{1}{N} \sum_j \ln\frac{\popd(y_j)}{p_\Phi(y_j)}} - \ln\;N \\
+    \\
+    & = & E_{y \sim \popd} \ln \frac{\popd(y)}{p_\Phi(y)} -  E_{(i,y_1,\ldots,y_N) \sim \tilde{p}^{(N)}_\Phi} \frac{1}{N} \sum_j \ln\frac{\popd(y_j)}{p_\Phi(y_j)} - \ln N \\
+    \\
+    & = & \frac{N-1}{N}(KL(\popd,p_\Phi) + KL(p_\Phi,\popd)) - \ln\;N \\
+  \end{eqnarray*}
+}
+
+
+\slide{Noise Descriminiative Estimation}
+
+As in noise contrastive estimation we assume a noise distribution $p_\Phi$ that is both samplable and computable.
+
+\vfill
+For noise descriminative estimation, and for for $i \in \{-1,1\}$, we define a probability distribution over pairs
+$\tuple{i,y}$ as in GANs.
+
+\vfill
+
+\begin{eqnarray*}
+\tilde{p}_\Phi(i = 1) & = & 1/2 \\
+\tilde{p}_\Phi(y|i=1) & =&  \popd(y) \\
+\tilde{p}_\Phi(y|i=-1) & = & p_\Phi(y)
+\end{eqnarray*}
+
+\slide{Noise Discriminative Estimation}
+
+\begin{eqnarray*}
+  \Psi^* & = & \argmin_\Psi\;E_{\tuple{i,y} \sim \tilde{p}_\Phi}\;-\ln P_\Psi(i|y)
+\end{eqnarray*}
+
+\vfill
+Assume $P_\Psi(i|y) = \softmax_i \;is_\Psi(y) = \frac{1}{1+e^{-2is_\Psi(y)}}$
+
+\vfill
+Assume $\Psi$ universal.
+
+\anaslide{Noise Discriminative Estimation}
+
+$$\Psi^* = \argmin_\Psi E_{(i,y) \sim \tilde{p}_\Phi} \;- \ln P_\Psi(i|y)$$
+
+\vfill
+Theorem: {\color{red} $\popd(y) = \softmax_y\;\;\; s_{\Psi^*}(y) + \ln p_\Phi(y)$}
+
+\vfill
+As with noise contrastive estimation, we have a computable score function (energy function) for the population.  We do not have the partition function $Z$.
+
+\anaslide{Noise Discriminative Estimation}
+
+$$\Psi^* = \argmin_\Psi E_{(i,y_1,\ldots,y_{N}) \sim \tilde{p}_\Phi^{(N)}} \;- \ln P_\Psi(i|y_1,\ldots,y_{N})$$
+
+\vfill
+Lemma: {\color{red} $P_{\Psi^*}(i|y)  =  \softmax_i\;is_{\Psi^*}(y)$}
+
+\slide{Lemma Proof}
+{\huge
+\begin{eqnarray*}
+{\color{red} \tilde{p}_\Phi^{(N)}(i \;\mathrm{and}\;y_1,\ldots,y_{N})} & = & \frac{1}{N}\;\popd(y_i)\prod_{j \not = i}p_\Phi(y_j) \\
+\\
+& = & \alpha \frac{\popd(y_i)}{p_\Phi(y_i)},\;\;\;\alpha = \frac{1}{N} \prod_i p_\Phi(y_i) \\
+\\
+\\
+{\color{red} \tilde{p}_\Phi^{(N)}(i\;|\;y_1,\ldots y_{N})} & = & \frac{\tilde{p}_\Phi^{(N)}(i\;\mbox{and} \; y_1,\ldots,y_{N})}{\sum_i \;\tilde{p}_\Phi^{(N)}(i \;\mbox{and}\; y_1,\ldots,y_{N})} \;=\;\frac{1}{Z} \;\frac{\popd(y_i)}{p_\Phi(y_i)} \\
+\\
+\\
+& = & {\color{red} \softmax_i\; \left(\ln \frac{\popd(y_i)}{p_\Phi(y_i)}\right)}
+\end{eqnarray*}
+}
+
+\slide{Theorem Proof}
+
+$$\softmax_i s_{\Psi^*}(y_i) =  \softmax_i \ln \frac{\popd(y_i)}{p_\Phi(y_i)}$$
+
+\vfill
+is solved by
+
+\vfill
+$$s_{\Psi^*}(y) = \ln \frac{\popd(y)}{p_\Phi(y)} + \ln Z$$
+
+\vfill
+giving
+
+$$\popd(y) = \frac{1}{Z} \exp(s_\Psi(y) + \ln p_\Phi(y))$$
+
+\slide{END}
+
+}
+\end{document}

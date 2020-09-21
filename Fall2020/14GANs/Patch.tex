@@ -1,0 +1,86 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Replacing the Loss Gradient}
+  \vfill
+  \centerline{\bf with the Margin Gradient}
+\vfill
+\vfill
+
+\slide{GANs}
+
+The generator tries to fool the discriminator.
+
+\vfill
+\begin{eqnarray*}
+\Phi^* & = & \argmax_\Phi\;\;\min_\Psi\;E_{\tuple{i,y} \sim \tilde{p}_\Phi}\;-\ln P_\Psi(i|y)
+\end{eqnarray*}
+
+\vfill
+Assuming universality of both the generator $p_\Phi$ and the discriminator $P_\Psi$ we have {\color{red} $p_{\Phi^*} = \popd$}.
+
+\slide{The Discrimator Tends to Win}
+
+The log loss for the binary discrimination classifier is quickly driven to very near zero.
+
+\vfill
+This causes the learning gradient to also become essentially zero and the learning stops.
+
+\slide{Review of Binary Classification}
+
+In the case of binary classification cross-entropy loss becomes the log loss of the margin
+
+\begin{eqnarray*}
+\Psi^* & = & \argmin_\Psi \;\expectsub{(i,y) \sim \tilde{p}_\Phi}{- \ln P_\Psi(i|y)} \\
+\\
+& = & \argmin_\Psi \expectsub{(i,y) \sim \tilde{p}_\Phi}{\;\;\;\ln(1 + e^{-m}}) \\
+\\
+m & = & 2is_\Psi(i|y)\;\;\;\mbox{for $\begin{array}{rcl} s_\Psi(-1|y) & = & -s_\Psi(1|y) \\\;P_\Psi(i|y) & = & \softmax_i\;s_\Psi(i|y) \end{array}$}
+\end{eqnarray*}
+
+
+\centerline{\includegraphics[height= 1.5in]{../images/logloss}}
+
+\slideplain{Vanishing Gradients}
+
+For $i = 1$ and $y \sim \popd$:
+$$\Psi \;\pluseq \; \eta\;\frac{e^{-m}}{1 + e^{-m}}\;\nabla_\Psi \; m \;\;\approx 0 \;\mbox{for}\;m >> 1$$
+
+\vfill
+For $i = -1$ and $y \sim p_\Phi$:
+
+$$\Psi \;\pluseq \; \eta\;\frac{e^{-m}}{1 + e^{-m}}\;\nabla_\Psi\;m \;\;\approx 0 \;\mbox{for}\;m >> 1$$
+
+\vfill
+$$\Phi \;\minuseq \; \eta\;\frac{e^{-m}}{1 + e^{-m}}\;\nabla_\Phi\;m \;\;\approx 0 \;\mbox{for}\;m >> 1$$
+
+\vfill
+The gradients vanish when the discriminator achieves large margins.
+
+\slide{A Heuristic Patch}
+
+Replace
+
+$$\Phi \;\minuseq \; \eta\;\frac{e^{-m}}{1 + e^{-m}}\;\nabla_\Phi\; m \;\;\approx 0 \;\mbox{for}\;m >> 1$$
+
+\vfill
+with
+
+$$\Phi \;\minuseq \; \eta\;\nabla_\Phi\;m$$
+
+\vfill
+This allows the generator to recover.
+
+\slide{END}
+
+}
+\end{document}

@@ -1,0 +1,157 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \vfil
+  \centerline{\bf Posterior Collapse}
+  \vfill
+  \centerline{\bf VAE Non-Identifiability}
+  \vfill
+  \centerline{\bf $\beta$-VAEs}
+  \vfill
+  \vfill
+
+\slide{Posterior Collapse}
+
+Assume Universal Expressiveness for $P_\Phi(y|z)$.
+
+\vfill
+This allows $P_\Phi(y|z) = \pop(y)$ independent of $z$.
+
+\vfill
+We then get a completely optimized model with $z$ taking a single (meaningless) determined value.
+
+\vfill
+$$\hat{P}_\Phi(z|y) = P_\Phi(z|y) = 1$$
+
+\anaslide{Colorization with Latent Segmentation}
+\medskip
+\centerline{\includegraphics[width = 5in]{../images/colorizationGreg2}}
+\centerline{$x$ \hspace{4em} $\hat{y}$ \hspace{4em} $y$}
+\centerline{\huge Larsson et al., 2016}
+
+\vfill
+Can colorization be used to learn latent segmentation?
+
+\vfill
+We introduce a latent segmentation into the model.
+
+\vfill
+In practice the latent segmentation is likely to ``collapse'' because the colorization can be done just as well without it.
+
+
+\slide{Independent Universality}
+
+$$\Phi^* = \argmin_\Phi E_{y\sim \pop,\;z \sim \hat{P}_\Phi(z|y)}\;\;-\ln \frac{P_\Phi(z,y)}{\hat{P}_\Phi(z|y)}$$
+
+\vfill
+It is natural to assume  that $\Phi$ has independent parameters for each distribution.  In practice parameters are often shared.
+
+\vfill
+Since $\Phi$ can independently parameterize each distribution, we will here assume independent universality ---
+that $\Phi$ can represent any triple of distributions $\hat{P}(z|y)$, $P(z)$ and $P(y|z)$.
+
+
+\slide{Independent Universality}
+
+More formally, we assume that for any triple of distributions $\hat{P}(z|y)$, $P(z)$ and $P(y|z)$ there exists a $\Phi$ that {\color{red} simultaneously} satisfies
+
+\begin{eqnarray*}
+\hat{P}_\Phi(z|y) & = & \hat{P}(z|y) \\
+P_\Phi(z) & = & P(z) \\
+P_\Phi(y|z) & = & P(y|z)
+\end{eqnarray*}
+
+\vfill
+This assumption allows each distribution to be independently optimized while holding the others fixed.
+
+
+\slide{VAE Non-Identifiability}
+
+A model is non-identifiable if different model parameters yield the same data distribution and hence cannot be distinguished based on the data.
+
+\begin{eqnarray*}
+  \Phi^* & = & \argmin_\Phi E_{y\sim \pop,\;z \sim \hat{P}(z|y)}\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{\hat{P}_\Phi(z|y)}
+\end{eqnarray*}
+
+\vfill
+We will now hold $\hat{P}_\Phi(z|y)$ fixed at an arbitrary distribution and optimize $P_\Phi(z)$ and $P_\phi(y|z)$ assuming independent
+universality.
+
+\slide{VAE Non-Identifiability}
+
+\begin{eqnarray*}
+  \Phi^* & = & \argmin_\Phi E_{y\sim \pop,\;z \sim \hat{P}(z|y)}\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{\hat{P}_\Phi(z|y)}
+\end{eqnarray*}
+
+\vfill
+We will show that the optimal distributions for $P_\Phi(z)$ and $P_\Phi(y|z)$ occur when these are the distributions defined by
+$y \sim \pop$ and $z \sim \hat{P}_\Phi(z|y)$.
+
+\vfill
+\begin{eqnarray*}
+  P^*(z) & = & E_{y \sim \pop}\;\hat{P}_\Phi(z|y) \\
+  \\
+  P^*(y|z) & = & \frac{\pop(y)\hat{P}_\Phi(z|y)}{P^*(z)}
+\end{eqnarray*}
+
+
+\slide{VAE Non-Identifiability}
+
+\begin{eqnarray*}
+  & & E\;-\ln \frac{P^*(z)P^*(y|z)}{\hat{P}_\Phi(z|y)} \\
+  \\
+  \\
+  & = & E\;-\ln \frac{P^*(z)P^*(y|z)}{\pop(y)\hat{P}_\Phi(z|y)} - \ln \pop(y) \\
+  \\
+  \\
+    & = & E\;- \ln \pop(y) \;=\;H(y)
+\end{eqnarray*}
+
+\vfill
+Hence any choice of $\hat{P}_\Phi(z|y)$ gives optimal modeling of $y$.
+
+\slide{The $\beta$-VAE}
+
+$\beta$-VAE: Learning Basic Visual Concepts With A
+Constrained Variational Framework, Higgins et al., ICLR 2017.
+
+\vfill
+The $\beta$-VAE introduces a parameter $\beta$ allow control of the rate-distortion trade off.
+
+\slide{The $\beta$-VAE}
+
+To control $I(y,z)$ we introduce a weighting $\beta$
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \; \beta I_\Phi(y,z) + H_\Phi(y|z) \\
+\mbox{$\beta$-VAE}\;\; \Phi^* & = & \argmin_\Phi E_{y\sim\pop,z\sim\hat{P}_\Phi(z|y)}\;-\beta \ln \frac{P_\Phi(z)}{\hat{P}_\Phi(z|y)} - \ln P_\Phi(y|z)
+\end{eqnarray*}
+
+\vfill
+For $\beta < 1$ we no longer have an upper bound on $H_\popd(y)$ but we can force the use of $z$ (avoid posterior collapse).
+
+\vfill
+For $\beta > 1$ the bound on $H_\pop(y)$ becomes weaker and the latent variables carry less information.
+
+\slide{RDAs vs. $\beta$-VAEs}
+
+Noisy channel RDAs and $\beta$-VAEs are essentially the same.
+
+\vfill
+RDA: $\Phi^* = \argmin_\Phi E_{y,\;z \sim P_\Phi(z|y)}\;-\ln \frac{\hat{P}_\Phi(z)}{P_\Phi(z|y)} + \lambda \mathrm{Dist}(y,y_\Phi(z))$
+
+\vfill
+$\beta$-VAE: $\Phi^* = \argmin_\Phi E_{y,\;z \sim \hat{P}_\Phi(z|y)}\;-\beta \ln \frac{P_\Phi(z)}{\hat{P}_\Phi(z|y)} \;-\;\ln P_\Phi(y|z)$
+
+\slide{END}
+
+\end{document}

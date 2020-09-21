@@ -1,0 +1,118 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2019}
+  \vfill
+  \centerline{\bf Speech Recognition}
+  \vfill
+  \centerline{\bf Connectionist Temporal Classification (CTC)}
+\vfill
+\vfill
+\vfill
+
+\slide{Connectionist Temporal Classification (CTC)}
+
+Connectionist Temporal Classification: Labelling Unsegmented
+Sequence Data with Recurrent Neural Networks
+
+\vfill
+Alex Graves, Santiago Fern\'{a}ndez, Faustino Gomez, J\"{u}rgen Schmidhuber, ICML 2006
+
+\vfill
+This is currently the dominant approach to speech recognition.
+
+\slide{CTC}
+In CTC a grachical model is computed by a deep network where the probability of the gold label in that model can be computed exactly by dynamic programming.
+
+\vfill
+When the loss can be computed exactly one can simply backpropagate on the loss computation.
+
+\vfill
+Later we will consider cases where computing the loss exactly is intractible.
+
+\slide{CTC}
+A speech signal $x[T,J]$ is labeled with a phone sequence $y[N]$ with $N << T$.
+
+\vfill
+$x[t,J]$ is a speech signal vector.
+
+\vfill
+$y[n] \in {\cal P}$ for a set of phonemes ${\cal P}$.
+
+
+\vfill
+The length $N$ of $y[N]$ is not determined by $T$ and the correspondence between $n$ and $t$ is not given.
+
+\vfill
+{\color{red} $$\Phi^* = \argmin_\Phi\;E_{\tuple{x,y} \sim \mathrm{Train}}\;\;- \ln P_\Phi(y[N]\;|\;x[T,J]) \;\;\;N << T$$}
+
+
+\slide{The CTC Model}
+
+
+We define a model
+
+$$P_\Phi(z[T]\;|\;x[T,J])$$
+
+$$z[t] \in {\cal P} \cup \{\bot\}$$
+
+\vfill
+$y[N]$ is the result of removing $\bot$ from $z[T]$.
+
+\begin{eqnarray*}
+z[T] & \Rightarrow & y[N] \\
+\\
+\bot,a_1,\bot,\bot,\bot,a_2,\bot,\bot,a_3,\bot  & \Rightarrow & a_1,a_2,a_3
+\end{eqnarray*}
+
+
+\slide{The CTC Model}
+
+For $p \in {\cal P} \cup \{\bot\}$ we have an embedding vector $e[p,I]$.  The embedding is a parameter of the model.
+
+\vfill
+We take the phonemes $z[t]$ to be independently distributed.
+
+$$p_\Phi(Z[T]\;|\; x[T,J]) = \prod_t \;P_\Phi(z[t]\;|\;x[T,J])$$
+
+\begin{eqnarray*}
+  h[T,\tilde{J}] & = & \mathrm{RNN}_\Phi(x[T,J]) \\
+  \\
+  P_\Phi(z[t]\;|\;x[T,J]) & = & \softmax_{z[t]} \;e[z[t],I]\;W[I,\tilde{J}]\;h[t,\tilde{J}]
+\end{eqnarray*}
+
+\slide{Dynamic Programming}
+
+Let $\vec{y}[t]$ to be the prefix of $y[N]$ emitted by the first $t$ elements of $z$.
+
+\begin{eqnarray*}
+  \vec{y}[t] & = & z[1:t] -\bot \\
+  {\color{red} F[n,t]} & = & P(\vec{y}[t] = y[1:n])
+\end{eqnarray*}
+
+\vfill
+\begin{tabbing}
+  {\color{red} $F[0,0] = 1$} \\
+  For $n = 1,\ldots,N$ {\color{red} $F[n,0] = 0$} \\
+  Fo\=r $t = 1,\dots,T$ \\
+      \>{\color{red} $F[0,t] = P(z[t] = \bot) F[0,t-1]$} \\
+      \> Fo\=r $n = 1,\ldots, N$ \\
+      \>     \> {\color{red} $F[n,t] = P(z[t] = \bot) F[n,t-1] + P(z[t] = y[n])F[n-1,t-1]$}
+\end{tabbing}
+
+\slide{Back-Propagation}
+
+{\color{red} $${\cal L} = - \ln F[N,T]$$}
+
+We can now back-propagate through this computation.
+
+\slide{END}
+}
+
+\end{document}

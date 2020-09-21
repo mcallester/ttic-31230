@@ -1,0 +1,118 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \vfil
+  \centerline{\bf The Evidence Lower Bound (ELBO)}
+  \vfill
+  \centerline{\bf and Variational Auto Encoders (VAEs)}
+  \vfill
+  \vfill
+
+\slide{Modeling $y$}
+
+We would like to use the fundamental equation
+
+$$\Phi^* = \argmin_\Phi\;E_{y \sim \pop}\;- \ln P_\Phi(y)$$
+
+\bigskip
+\bigskip
+But even when $P_\Phi(z)$ and $P_\Phi(y|z)$ are samplable and computable we cannot typically compute $P_\Phi(y)$.
+
+\vfill
+Specifically, for $P_\Phi(y)$ defined by a generator we cannot compute $P_\Phi(y)$ for a test image $y$.
+
+\slide{Interpretable Latent Variables}
+
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z) = E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)$$}
+
+\vfill
+$P_\Phi(z)$ is called the prior.
+
+\vfill
+Given an observation of $y$ (the evidence) $P_\Phi(z|y)$ is called the posterior.
+
+\vfill
+Variational Bayesian inference involves approximating the posterior.
+
+\slide{The Evidence Lower Bound (The ELBO)}
+
+To model $y$ (the evidence about $z$) we introduce a samplable and computable model $\hat{P}_\Phi(z|y)$ to approximate $P_\Phi(z|y)$.
+
+{\huge
+\begin{eqnarray*}
+ {\color{red} \ln P_\Phi(y)} & = & E_{z \sim \hat{P}_\Phi(z|y)} \ln \frac{P_\Phi(y)P_\Phi(z|y)}{P_\Phi(z|y)} \\
+        \\
+ & = & E_{z \sim \hat{P}_\Phi(z|y)} \left(\ln \frac{P_\Phi(z,y)}{\hat{P}_\Phi(z|y)} + \ln \frac{\hat{P}_\Phi(z|y)}{P_\Phi(z|y)}\right) \\
+ \\
+  & = & \left(E_{z \sim \hat{P}_\Phi(z|y)} \ln \frac{P_\Phi(z,y)}{\hat{P}_\Phi(z|y)}\right) + KL(\hat{P}_\Phi(z|y),P_\Phi(z|y)) \\
+  \\
+  & {\color{red} \geq} & {\color{red} E_{z \sim \hat{P}_\Phi(z|y)} \ln \frac{P_\Phi(z,y)}{\hat{P}_\Phi(z|y)}}\;\;\mbox{The ELBO}
+\end{eqnarray*}
+}
+
+
+\slide{The Variational Auto-Encoder (VAE)}
+
+$$\Phi^* = \argmin_\Phi\; E_{y \sim \pop,\;z \sim \hat{P}_\Phi(z|y)}\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{\hat{P}_\Phi(z|y)}$$
+
+\slide{EM is Alternating Optimization of the ELBO}
+
+Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_\Phi(z|y)$ is samplable and computable.
+EM alternates exact optimization of $\hat{P}_\Phi$ and $P_\Phi$.
+
+\vfill
+VAE: $\Phi^* = \argmin_\Phi E_{y\sim \mathrm{Train},\;z \sim \hat{P}_\Phi(z|y)}\;\;- \ln \frac{P_\Phi(z,y)}{\hat{P}_\Phi(z|y)}$
+
+\vfill
+EM: $\Phi^{\color{red} t+1} =  \argmin_\Phi\;E_{y \sim \mathrm{Train}}\;E_{z \sim P_{\Phi^{\color{red} t}}(z|y)}\; - \ln P_\Phi(z,y)$ \\
+\\
+\centerline{\hspace{1em} Update \hspace{6em} Inference \hspace{2.5em}~}
+\centerline{(M Step) \hspace{5em} (E Step) \hspace{1.5em}~}
+\centerline{Hold $\hat{P}$ fixed \hspace{2.5em} $\hat{P}(z|y) = P_{\Phi^{\color{red} t}}(z|y)$ \hspace{0em}~}
+
+\anaslide{RDAs vs. VAEs}
+
+\bigskip
+Noisy Channel RDA:
+$$\Phi^* = \argmin_\Phi E_{y,z \sim P_\Phi(z|y)}\;-\ln \frac{\hat{P}_\Phi(z)}{P_\Phi(z|y)} + \lambda \mathrm{Dist}(y,y_\Phi(z))$$
+
+\bigskip
+VAE:
+$$\Phi^* = \argmin_\Phi E_{y,z \sim \hat{P}_\Phi(z|y)}\;- \ln \frac{P_\Phi(z)}{\hat{P}_\Phi(z|y)} \;-\;\ln P_\Phi(y|z)$$
+
+\bigskip
+The RDA is a bi-criterion (rate and distortion) while the VAE has a single objective.
+
+\bigskip
+But otherwise they are extremely similar.
+
+\slide{$-\ln p_\Phi(y|z)$ as Distortion}
+
+For $p_{\Phi,\sigma}(y|z) \propto \exp(-||y - y_\Phi(z)||^2/(2\sigma^2))$ we get
+
+\begin{eqnarray*}
+\Phi^*,\sigma^* & = & \argmin_{\Phi,\sigma} E_{y,\epsilon}\;-\ln \frac{p_\Phi(z)}{q_\Phi(z|y)} - \ln p_{\Phi,\sigma}(y|z) \\
+\\
+\Phi^*       & = & \argmin_{\Phi} E_{y,\epsilon}\;-\ln \frac{p_\Phi(z)}{q_\Phi(z|y)} +\left(\frac{1}{2{\sigma^*}^2}\right)||y - y_\Phi(z)||^2 + d\ln \sigma^*
+\end{eqnarray*}
+
+\vfill
+where
+
+\centerline{$d$ is the dimension of $y$ and $\sigma^*  =  \sqrt{\frac{1}{d}\;E_{y,\epsilon}\; ||y - y_\Phi(z)||^2}$}
+
+\vfill
+Here we have $L_2$ distortion but no rate-distortion bi-criterion.
+
+\slide{END}
+
+\end{document}

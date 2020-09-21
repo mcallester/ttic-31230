@@ -1,0 +1,46 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+\parskip = 1ex
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+
+\bigskip
+
+\centerline{\bf Problems for Source Coding.}
+
+\bigskip
+\bigskip
+
+{\bf Problem 1}
+In the early days of computing attempts were made to build hardware with three level logic --- voltage levels representing
+0, 1 and 2.  Suppose we use codes written in strings over a three letter alphabet to select code words for a given population
+distribution $\pop$ over a discrete set.  We want to find a prefix-free code $c(y)$ over three letter code words
+for each item $y$.
+
+\medskip
+(a) Give a function $g(\pop)$ of the population distribution $\pop$ such that we are guaranteed
+that there exists a code satisfying
+$$E_{y \sim \pop}\;|c(y)| \leq g(\pop)$$
+where $|c(y)|$ is the number of characters in the three letter code for $c(y)$ for $y$.
+Give your answer in nats.  The convention in this class is that $H(\pop)$ is in units of nats.
+
+
+\solution{
+  $$E_{y \sim \pop}\;|y| \leq \frac{H(\pop)}{\ln 3} + 1$$
+}
+
+\medskip
+(b) Repeat part (a) for an alphabet of size $k$.
+
+\solution{
+  $$E_{y \sim \pop}\;|y| \leq \frac{H(\pop)}{\ln k} + 1$$
+}
+
+\end{document}

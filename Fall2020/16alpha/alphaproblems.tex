@@ -1,0 +1,219 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+\bigskip
+\centerline{\bf AlphaZero Problems.}
+
+\bigskip
+\bigskip
+{\bf Backgound.}
+A version of AlphaZero can be defined as follows.
+
+\medskip
+To select a move in the game, first construct a search tree over possible moves to evaluate options.
+
+\medskip
+The tree is grown by running ``simulations''.  Each simulation descends into the tree from the root selecting a move from each position
+until the selected move has not been explored before.  When the simulation reaches an unexplored move it expands the tree by adding a node for that move.
+Each simulation returns the value $V_\Phi(s)$ for the newly added node $s$.
+
+\medskip
+Each node in the search tree represents a board position $s$ and stores the following information which can be initialized
+by running the value and policy networks on position $s$.
+
+\begin{itemize}
+\item $V_\Phi(s)$ --- the value network value for the position $s$.
+\item For each legal move $a$ from $s$, the policy network probability $\pi_\Phi(s,a)$.
+\item For each legal move $a$ from $s$, the number $N(s,a)$ of simulations that have taken move $a$ from $s$. This is initially zero.
+\item For each legal move $a$ from $s$ with $N(s,a) > 0$, the average $\hat{\mu}(s,a)$ of the values of the simulations that have
+  taken move $a$ from position $s$.
+\end{itemize}
+
+\medskip
+In descending into the tree, simulations select the move $\argmax_a U(s,a)$ where we have
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda_u \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1)$$
+
+\medskip
+When the search is completed, we must select a move from the root position.  For this we use a post-search stochastic policy
+$$\pi_{s_{\mathrm{root}}}(a) \propto N(s_{\mathrm{root}},a)^\beta\;\;\;\;\;(2)$$
+where $\beta$ is a temperature hyperparameter.
+
+\medskip
+For training we construct
+
+\medskip
+\centerline{a replay buffer of triples $(s_{\mathrm{root}},\pi_{s_{\mathrm{root}}},z)$ \hspace{2em}$(3)$}
+
+\medskip
+accumulated from self play where $s_{\mathrm{root}}$ is a root position from a search during a game,
+$\pi_{s_{\mathrm{root}}}$ is the post-search policy constructed for $s_{\mathrm{root}}$, and $z$ is the outcome of that game.
+
+\medskip
+Training is then done by SGD on the following objective function.
+
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,z) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - z)^2 \\ \\ - \lambda_1\log \pi_\Phi(a|s) \\ \\ + \lambda_2||\Phi||^2\end{array}\right)\;\;\;\;(4)$$
+
+  
+~{\bf Problem 1. AlphaZero for BLEU Translation Score.}
+
+A version of AlphaZero can be defined as follows.
+
+\medskip
+To select a move in the game, first construct a search tree over possible moves to evaluate options.
+
+\medskip
+The tree is grown by running ``simulations''.  Each simulation descends into the tree from the root selecting a move from each position
+until the selected move has not been explored before.  When the simulation reaches an unexplored move it expands the tree by adding a node for that move.
+Each simulation returns the value $V_\Phi(s)$ for the newly added node $s$.
+
+\medskip
+Each node in the search tree represents a board position $s$ and stores the following information which can be initialized
+by running the value and policy networks on position $s$.
+
+\begin{itemize}
+\item $V_\Phi(s)$ --- the value network value for the position $s$.
+\item For each legal move $a$ from $s$, the policy network probability $\pi_\Phi(s,a)$.
+\item For each legal move $a$ from $s$, the number $N(s,a)$ of simulations that have taken move $a$ from $s$. This is initially zero.
+\item For each legal move $a$ from $s$ with $N(s,a) > 0$, the average $\hat{\mu}(s,a)$ of the values of the simulations that have
+  taken move $a$ from position $s$.
+\end{itemize}
+
+\medskip
+In descending into the tree, simulations select the move $\argmax_a U(s,a)$ where we have
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda_u \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1)$$
+
+\medskip
+When the search is completed, we must select a move from the root position.  For this we use a post-search stochastic policy
+$$\pi_{s_{\mathrm{root}}}(a) \propto N(s_{\mathrm{root}},a)^\beta\;\;\;\;\;(2)$$
+where $\beta$ is a temperature hyperparameter.
+
+\medskip
+For training we construct
+
+\medskip
+\centerline{a replay buffer of triples $(s_{\mathrm{root}},\pi_{s_{\mathrm{root}}},z)$ \hspace{2em}$(3)$}
+
+\medskip
+accumulated from self play where $s_{\mathrm{root}}$ is a root position from a search during a game,
+$\pi_{s_{\mathrm{root}}}$ is the post-search policy constructed for $s_{\mathrm{root}}$, and $z$ is the outcome of that game.
+
+\medskip
+Training is then done by SGD on the following objective function.
+
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,z) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - z)^2 \\ \\ - \lambda_1\log \pi_\Phi(a|s) \\ \\ + \lambda_2||\Phi||^2\end{array}\right)\;\;\;\;(4)$$
+
+\bigskip
+
+
+Reformulate this algorithm to optimizing BLEU score in machine translation. More specifically,
+
+\medskip
+(a) Define the optimization of the BLEU score as a tree search problem.  What are the nodes and what are the moves?
+
+\solution{
+    The tree is defined by sequentially choosing words. Each node correspond to a sequences of moves --- a node at depth $d$ in the tree corresponds to a prefix of length $d$ (the first $d$ words)
+    of a possible translation.  The moves from a given node correspond to the choice of the next word.
+    }
+
+\medskip
+(b) AlphaZero has three levels --- complete games resulting in a final outcome $z$ --- move selection at each position in a complete game based on UTC algorithm ---
+and simulations within the UTC algorithm.  Describe how each of these can be interpreted in an algorithm for optimizing BLEU score in machine translation.
+
+\solution{
+  A ``complete game'' consists of selecting a move (word) at each position in the game ending one specific translation.
+
+  \medskip
+  Move selection corresponds to selecting the next word using athe UCT tree search algorithm.
+
+  \medskip
+  We can use the same simulation algorithm as in AlphaZero.  It might also be possible to let each simulation generate a full translation, although there is a danger of the simulation getting very deep.
+}
+
+\medskip
+(c) What do we take $z$ to be in the replay buffer and in equation (4)?
+
+\solution{$z$ should be taken to be the BLEU score of the final translation generated in the ``game''.}
+  
+
+\bigskip
+{\bf Problem 2. Tuning $\lambda_u$}
+    
+\medskip
+(a) If we increase $\lambda_u $ encourage more diversity or less diversity in the actions selected by simulations? Explain your answer.
+
+\solution{
+  Increasing $\lambda_u$ leads to more diversity because larger values of $\lambda_u$ cause $U(s,a)$ to decline
+  as $N(s,a)$ increases leading to the simulation moving away from $a$ as $N(s,a)$ increases.
+}
+
+\medskip
+(b) Consider the case of very large $\lambda_u$ so that the term $\lambda_u \pi_\Phi(a|s)/N(s,a) >> \hat{\mu}(s,a)$.  Equvalently we can change the definition
+of $U(s,a)$ to be
+$$U(s,a) = \frac{\pi_\Phi(a|s)}{\min(1,N(s,a))} \;\;(5)$$
+After running a some number of simulations from $s$ define $a^*$ by
+$$a^* = \argmax_a U(s,a)$$
+In other words $a^*$ is the move that would be expanded in the next simulation visiting $S$.
+Consider a move $a$ othr than $a^*$.  Give a lower bound on $N(s,a)$ in terms of $U(s,a^*)$ and $\pi_\Phi(s,a)$ where $U(s,a)$ is defined by (5).
+
+\solution{
+  \begin{eqnarray*}
+    U(s,a^*) & \geq & U(s,a) \\
+    \\
+    U(s,a^*) & \geq & \frac{\pi_\Phi(a|s)}{N(s,a)} \\
+    \\
+    N(s,a) & \geq & \frac{\pi_\Phi(s|a)}{U(s,a^*)} \;\;\;(6)
+  \end{eqnarray*}
+  Note that (6) holds for all $a$.  So for very large $\lambda_u$ the number of simulations visiting an action $a$ is
+  proportional to $\pi_\Phi(a|s)$ for some top $k$ actions.
+}
+
+
+\bigskip
+{\bf Problem 2.  Replacing the Policy with a $Q$-function.}
+We consider replacing the policy network $\pi_\Phi$ with a $Q$-value network $Q_\Phi$ so that each node $s$ stores the $Q$-values $Q_\Phi(s,a)$ rather than
+the policy probabilities $\pi_\Phi(s,a)$.  We then replace (1) with
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u Q_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda_u Q_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1')$$
+and leave (2) and (3) unchanged.  Rewrite (4) to train $Q_\Phi(s,a)$ by minimizing a squared ``Bellman Error'' between $Q_\Phi(s,a)$ and the outcome $z$ over actions drawn from the replay buffer's stored policy.
+Presumably this version does not work as well.
+
+\solution{
+  
+  $$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,z) \sim \mathrm{Replay},\;a \sim \pi}\;
+  \left(\begin{array}{l} (V_\Phi(s) - z)^2 \\ \\ - \lambda_1(Q(s,a) - z)^2 \\ \\ + \lambda_2||\Phi||^2\end{array}\right)$$
+}
+
+\bigskip
+{\bf Problem 3. An advantage actor-critic version.}
+We consider replacing the policy network $\pi_\Phi$ with an advantage network $A_\Phi$ so that each node $s$ stores the $A$-values $A_\Phi(s,a)$ rather than
+the policy probabilities $\pi_\Phi(s,a)$.  We now have each node $s$ also store $\hat{\mu}(s)$ which equals the average value of the simulations that go through state $s$.
+We then replace (1) with
+$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u(A_\Phi(s,a) + V_\Phi(s)) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) + \lambda_u(A_\Phi(s,a) + V_\Phi(s))/N(s,a) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(1'')$$
+and leave (2) unchanged and replace (3) by
+
+\medskip
+\centerline{a replay buffer of tuples $(s_{\mathrm{root}},\pi_{s_{\mathrm{root}}},z,\hat{\mu}(s_{\mathrm{root}}),\hat{\mu}(s_{\mathrm{root}},a))$ \hspace{2em}$(3')$}
+
+\medskip
+Rewrite (4) to train $A_\Phi(s,a)$ by minimizing a squared ``Bellman Error'' between $A_\Phi(s,a)$ and $\hat{A}(s,a)$ defined as follows
+$$\hat{A}(s,a) =  \left\{\begin{array}{ll}A_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \hat{\mu}(s,a) - \hat{\mu}(s) & \mbox{otherwise} \end{array}\right.\;\;\;\;\;(5)$$
+
+\solution{
+
+  $$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - z)^2
+    \\ \\
+    \lambda_A\;(A_\Phi(s,a) - \hat{A}(s,a))^2 \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)\;\;\;\;(2)$$
+
+}
+
+\medskip
+Although a valiant attempt, this version also presumably also does not work as well.
+
+\end{document}

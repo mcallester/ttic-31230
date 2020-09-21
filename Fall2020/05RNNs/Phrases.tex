@@ -1,0 +1,90 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Statistical Machine Translation}
+  \vfill
+  \vfill
+
+\slide{Statistical Machine Translation (SMT)}
+
+
+Phrase based SMT dominanted machine translation before deep Seq2Seq models.
+
+\vfill
+SMT is still used for low resource languages, such as regional African languages, and in unsupervised machine translation.
+
+\slide{Statistical Machine Translation (SMT)}
+
+
+Step I:   Learn a phrase table --- a set of triples $(p,q,s)$ where
+
+\vfill
+\begin{itemize}
+\item $p$ is a (short) sequence of source words.
+  \vfill
+\item $q$ is a (short) sequence of target words.
+  \vfill
+\item $s$ is a score.
+\end{itemize}
+
+\vfill
+(``au'', ``to the'', .5) \hfill (``au banque'', ``for the bank'', .01)
+
+\vfill
+For a phrase triple $P$ we will write $P.\mathrm{source}$ for the source phrase, $P.\mathrm{target}$ for the target phrase, and $P.\mathrm{score}$ for the score.
+
+\slide{Derivations}
+
+Consider an input sentence $x$ of length $T$.
+
+\vfill
+We will write $x[s:t]$ for the substring $x[s]$, $\ldots$, $x[t-1]$.
+
+\vfill
+A derivation $d$ from $x$ is a sequence $(P_1,s_1,t_1,)$, $\ldots$, $(P_K,s_K,t_K)$ where $P_k.\mathrm{source} = x[s_k:t_k]$.
+
+\vfill
+The substrings $x[s_k:t_k]$ should be disjoint and ``cover'' $x$.
+
+\vfill
+For $d = [(P_1,s_1,t_1,)$, $\ldots$, $(P_L,s_K,t_K)]$ we define
+
+$$ y(d) \equiv P_1.\mathrm{target}\;\cdots P_K.\mathrm{target}$$
+
+\vfill
+We let $D(x)$ be the set of derivations from $x$.
+
+\slide{Scoring}
+
+For $d \in D(x)$ we define a score $s(d)$
+
+\vfill
+$$s(d) = \alpha \ln P_\mathrm{LM}(y(d)) + \beta \sum_k P_k.\mathrm{score} + \gamma \;\mathrm{distortion}(d)$$
+
+\vfill
+where $P_{\mathrm{LM}}(y)$ is the probability assigned to string $y$ under a language model for the target language
+
+\vfill
+and $\mathrm{distortion}(d)$ is a measure of consistency of word ordering between source and target strings as defined by
+the indeces $(s_1,t_1)$, $\ldots$, $(s_K,t_K)$.
+
+\slide{Translation}
+
+\begin{eqnarray*}
+  y(x) & = & y(d^*(x)) \\
+  \\
+  \\
+  d^*(x) & = & \argmax_{d \in D(x)} \;s(d)
+\end{eqnarray*}
+
+\slide{END}
+}
+\end{document}

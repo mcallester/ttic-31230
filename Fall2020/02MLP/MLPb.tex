@@ -1,0 +1,746 @@
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+  
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2018}
+  \vfill
+  \vfill
+  \centerline{Computation Graphs and Backpropagation}
+  \vfill
+  \centerline{The Educational Framework (EDF)}
+  \vfill
+  \centerline{Minibatching}
+  \vfill
+  \centerline{Explicit Index Notation}
+  \vfill
+  \vfill
+
+\slide{Computation Graphs}
+
+A computation graph (sometimes called a ``computation{\color{red} al} graph'') is a sequence of assignment statements.
+
+
+\vfill
+\begin{eqnarray*}
+  L^0[j] & = & \mathrm{Relu}\left(\left(\sum_i\;W^0[j,i] \;x[i]\right) + b^0[j]\right) \\
+  \\
+  L^1[\hat{y}] & = & \sigma\left(\left(\sum_j\;W^1[\hat{y},j]\;L^0[j]\right) + b^1[\hat{y}]\right) \\
+  \\
+  P(\hat{y}) & = & \frac{1}{Z} \;e^{L^1[\hat{y}]}
+\end{eqnarray*}
+
+\slide{Computation Graphs}
+A simpler example:
+
+\vfill
+$$\ell = \sqrt{x^2 + y^2}$$
+\begin{eqnarray*}
+  u & = & x^2  \\
+  v & = & y^2 \\
+  r & =& u + v \\
+  \ell & = & \sqrt{r}
+\end{eqnarray*}
+
+\vfill
+A computation graph defines a DAG (a directed acyclic graph) where the variables are the nodes. Each assignment determines
+one or more directed edges from the left hand variable to the right hand variables.
+
+\anaslide{Computation Graphs}
+\vspace{-1ex}
+$$\begin{array}{lcl}
+ 1.\;u & = & x^2  \\
+ 2.\;w & = & y^2 \\
+ 3.\;r & =& u + w \\
+  4.\;\ell & = & \sqrt{r}
+\end{array}$$
+
+\vfill
+For each variable $z$ we can consider $\partial \ell/\partial z$.
+
+\vfill
+Gradients are computed in the reverse order.
+
+\vfill
+$$\begin{array}{lcl}
+(4)\; \partial\ell/\partial r & = & \frac{1}{2\sqrt{r}} \\
+(3)\; \partial\ell/\partial u & = & \partial \ell/\partial r \\
+(3)\; \partial\ell/\partial w & = & \partial \ell/\partial r\\
+(2)\; \partial\ell/\partial y & = & (\partial \ell/\partial w) * (2y) \\
+(1)\; \partial\ell/\partial x & = & (\partial \ell/\partial u) * (2x)
+\end{array}$$
+
+\anaslide{A More Abstract Example}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  u & = & h(z) \\
+  \ell & = & u
+\end{eqnarray*}
+
+\medskip
+For now assume all values are scalars.
+
+\medskip
+We will ``backpopagate'' the assignments the reverse order.
+
+\anaslide{Backpropagation}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  u & = & h(z) \\
+  \ell &  = & {\color{red} u}
+\end{eqnarray*}
+
+\medskip
+{\color{red} ${\partial \ell}/{\partial u} = 1$}
+
+\anaslide{Backpropagation}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  u & = & h({\color{red} z}) \\
+  \ell &  = &  u
+\end{eqnarray*}
+
+\medskip
+${\partial \ell}/{\partial u} = 1$
+
+\medskip
+{\color{red} ${\partial \ell}/{\partial z} = ({\partial \ell}/{\partial u})\; ({\partial h}/{\partial z})$} (this uses the value of $z$)
+
+\anaslide{Backpropagation}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g({\color{red} y},x) \\
+  u & = & h(z) \\
+  \ell &  = &  u
+\end{eqnarray*}
+
+\medskip
+${\partial \ell}/{\partial u} = 1$
+
+\medskip
+${\partial \ell}/{\partial z} = ({\partial \ell}/{\partial u})\; ({\partial h}/{\partial z})$
+
+\medskip
+{\color{red} ${\partial \ell}/{\partial y} = ({\partial \ell}/{\partial z})\; ({\partial g}/{\partial y})$} (this uses the value of $y$ and $x$)
+
+\anaslide{Backpropagation}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f({\color{red} x}) \\
+  z & = & g(y,{\color{red} x}) \\
+  u & = & h(z) \\
+  \ell &  = &  u
+\end{eqnarray*}
+
+\medskip
+${\partial \ell}/{\partial u} = 1$
+
+\medskip
+${\partial \ell}/{\partial z} = ({\partial \ell}/{\partial u})\; ({\partial h}/{\partial z})$
+
+\medskip
+${\partial \ell}/{\partial y} = ({\partial \ell}/{\partial z})\; ({\partial g}/{\partial y})$
+
+\medskip
+{\color{red} ${\partial \ell}/{\partial x} =$ ???} Oops, we need to add up multiple occurrences.
+
+\anaslide{Backpropagation}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f({\color{red} x}) \\
+  z & = & g(y,{\color{red} x}) \\
+  u & = & h(z) \\
+  \ell &  = &  u
+\end{eqnarray*}
+
+\medskip
+We let {\color{red} $x.\grad$} be an attribute (as in Python) of node {\color{red} $x$}.
+
+\bigskip
+\bigskip
+We will initialize {\color{red} $x.\mathrm{grad}$} to zero.
+
+\bigskip
+\bigskip
+During backpropagation we will accumulate contributions to {\color{red} ${\partial \ell}/{\partial x}$} into {\color{red} $x.\grad$}.
+
+
+\anaslide{Backpropagation}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  u & = & h(z) \\
+  {\color{red} \ell} &  {\color{red} =} & {\color{red}  u}
+\end{eqnarray*}
+
+
+\medskip
+$z.\grad = y.\grad = x.\grad = 0$
+
+\medskip
+$u.\grad = 1$
+
+\medskip
+{\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial \ell/\partial w$ as defined by the set of assignments already processed.
+
+\anaslide{Backpropagation}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  {\color{red} u} & {\color{red} =} & {\color{red} h(z)} \\
+  {\color{red} \ell} & {\color{red}  =} &  {\color{red} u}
+\end{eqnarray*}
+
+\medskip
+$z.\grad = y.\grad = x.\grad = 0$
+
+\medskip
+$u.\grad = 1$
+
+\medskip
+{\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial \ell/\partial w$ as defined by the set of assignments already processed.
+
+\medskip
+$z.\grad\;\pluseq\; u.\grad * {\partial h}/{\partial z}$
+
+\anaslide{Backpropagation}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  {\color{red} z} & {\color{red} =} & {\color{red} g(y,x)} \\
+  {\color{red} u} & {\color{red} =} & {\color{red} h(z)} \\
+  {\color{red} \ell} & {\color{red} =} & {\color{red}  u}
+\end{eqnarray*}
+
+\medskip
+$z.\grad = y.\grad = x.\grad = 0$
+
+\medskip
+$u.\grad = 1$
+
+\medskip
+    {\bf Loop Invariant}: For any variable $w$ whose definition has not yet been processed we have that $w.\grad$ is $\partial \ell/\partial w$ as defined by the set of assignments already processed.
+
+\medskip
+$z.\grad\;\pluseq\; u.\grad * {\partial h}/{\partial z}$
+
+\medskip
+$y.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial y}$
+
+\medskip
+$x.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial x}$
+
+\anaslideplain{Backpropagation}
+\vspace{-3ex}
+\begin{eqnarray*}
+  {\color{red} y} & {\color{red} =} & {\color{red} f(x)} \\
+  {\color{red} z} & {\color{red} =} & {\color{red} g(y,x)} \\
+  {\color{red} u} & {\color{red} =} & {\color{red} h(z)} \\
+  {\color{red} \ell} & {\color{red} =} & {\color{red} u}
+\end{eqnarray*}
+
+\medskip
+$z.\grad = y.\grad = x.\grad = 0$
+
+\medskip
+$u.\grad = 1$
+
+\medskip
+$z.\grad\;\pluseq\; u.\grad * {\partial h}/{\partial z}$
+
+\medskip
+$y.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial y}$
+
+\medskip
+$x.\grad \;\pluseq\; z.\grad * {\partial g}/{\partial x}$
+
+\medskip
+$x.\grad \;\pluseq\; y.\grad * {\partial f}/{\partial x}$
+
+\anaslide{The Vector-Valued Case}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  u & = & h(z) \\
+  \ell & = & u
+\end{eqnarray*}
+
+\vfill
+Now suppose the variables can be  vector-valued.
+
+\vfill
+The loss $\ell$ is still a scalar.
+
+\vfill
+In this case
+$$x.\mathrm{grad} = \nabla_x\;\ell$$
+
+\vfill
+These are now vectors of the same dimension with
+$$x.\mathrm{grad}[i] = \partial \ell/\partial x[i]$$
+
+\slide{The Tensor-Valued Case}
+
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  u & = & h(z) \\
+  \ell & = & u
+\end{eqnarray*}
+
+\vfill
+Now suppose the variables can be  tensor-valued (the values are multi-dimensional arrays).  The loss is still a scalar.
+
+\vfill
+The computation is now a ``tensor flow''.
+
+\slide{The Tensor-Valued Case}
+For the tensor case we simply view tensors as a special case of vectors.  The indeces of $x.\mathrm{grad}$ are the
+same as the indeces of $x$.
+$$x.\mathrm{grad}.\mathrm{shape} = x.\mathrm{shape}$$
+
+\vfill
+The backpropagation equation for $y = f(x)$ is
+
+$$x.\mathrm{grad}[i_1,\ldots,i_n] = (y.\mathrm{grad})[j_1,\ldots,j_k] \nabla_x f(x)[j_1,\ldots,j_k,i_1,\ldots,i_n]$$
+
+\vfill
+$j_1,\ldots,j_k$ are indeces of $y$ and $i_1,\ldots,i_n$ are indeces of $x$.
+
+\vfill
+Indeces not on the left of the equation are implicitly summed.
+
+
+\slide{The EDF Framework}
+
+The educational frameword (EDF) is a simple Python-NumPy implementation of a deep learning framework.
+
+\vfill
+In EDF we write
+
+\vfill
+\begin{eqnarray*}
+  y & = & F(x) \\
+  z & = & G(y,x) \\
+  u & = & H(z) \\
+  \ell &  = &  u
+\end{eqnarray*}
+\medskip
+
+\vfill
+This is Python code where variables are bound to objects.
+
+\anaslide{The EDF Framework}
+
+\begin{eqnarray*}
+  y & = & F(x) \\
+  z & = & G(y,x) \\
+  u & = & H(z) \\
+  \ell &  = &  u
+\end{eqnarray*}
+
+\vfill
+This is Python code where variables are bound to objects.
+
+\vfill
+$x$ is an object in the class {\tt Input}.
+
+\vfill
+$y$ is an object in the class $F$.
+
+\vfill
+$z$ is an object in the class $G$.
+
+\medskip
+$u$ and $\ell$ are the same object in the class $H$.
+
+\anaslideplain{$y = F(x)$}
+
+\begin{tabbing}
+  class \=$F$(CompNode): \\
+  \\
+    \>def \=\_\_init\_\_(self, x): \\
+        \>\>CompNodes.append(self) \\
+        \>\>self.x = x \\
+\\
+    \>def forward(self): \\
+        \>\>self.value = f(self.x.value) \\
+\\
+    \>def backward(self): \\
+        \>\>self.x.addgrad(self.grad$ \;*\; \nabla_x\;f(x)$) \hspace{2em} \#needs x.value
+\end{tabbing}
+
+\slide{Nodes of the Computation Graph}
+
+There are three kinds of nodes in a computation graph --- inputs, parameters and computation nodes.
+
+\vfill
+\begin{tabbing}
+class \=Input: \\
+    \>def \=\_\_init\_\_(self): \\
+        \>\>pass \\
+    \>def \>addgrad(self, delta): \\
+    \>\>pass
+\end{tabbing}
+
+\vfill
+\begin{tabbing}
+class \=CompNode: \#initialization is handled by the subclass \\
+   \>def \=addgrad(self, delta): \\
+   \>\>self.grad += delta
+\end{tabbing}
+
+\slide{}
+
+\begin{tabbing}
+class \=Parameter: \\
+    \\
+    \>def \=\_\_init\_\_(self,value): \\
+        \>\>Parameters.append(self) \\
+        \>\>self.value = value \\
+\\
+    \>def \>addgrad(self, delta): \\
+          \>\>\#sums over the minibatch \\
+    \>\>self.grad += np.sum(delta, axis = 0) \\
+    \\
+    \>def \>SGD(self): \\
+    \>\>self.value -= learning\_rate*self.grad
+\end{tabbing}
+
+\anaslide{MLP in EDF}
+\medskip
+
+The following Python code constructs the computation graph of a multi-layer perceptron (NLP) with one hidden layer.
+
+\vfill
+\begin{verbatim}
+  L1 = Relu(Affine(Phi1,x))
+  Q = Softmax(Sigmoid(Affine(Phi2,L1))
+  ell = LogLoss(Q,y)
+\end{verbatim}
+
+\vfill
+Here {\tt x} and {\tt y} are input computation nodes
+whose value have been set.
+Here {\tt Phi1} and {\tt Phi2} are ``parameter packages'' (a matrix and a bias vector in this case).
+We have computation node classes {\tt Affine}, {\tt Relu}, {\tt Sigmoid}, {\tt LogLoss} each of which has
+a forward and a backward method.
+
+\vfill
+\eject
+\begin{verbatim}
+class Affine(CompNode):
+
+    def __init__(self,Phi,x):
+        CompNodes.append(self)
+        self.x = x
+        self.Phi = Phi
+
+    def forward(self):
+        self.value = (np.matmul(self.x.value,
+                               self.Phi.w.value)
+                      + self.Phi.b.value)
+\end{verbatim}
+\vfill
+\eject
+\vfill
+\begin{verbatim}
+    def backward(self):
+
+        self.x.addgrad(
+           np.matmul(self.grad,
+                     self.Phi.w.value.transpose()))
+
+        self.Phi.b.addgrad(self.grad)
+
+        self.Phi.w.addgrad(self.x.value[:,:,np.newaxis]
+                           * self.grad[:,np.newaxis,:])
+\end{verbatim}
+
+\slide{The Core of EDF}
+
+\begin{verbatim}
+def Forward():
+    for c in CompNodes: c.forward()
+
+def Backward(loss):
+    for c in CompNodes + Parameters: c.grad = 0
+    loss.grad = 1/nBatch
+    for c in CompNodes[::-1]: c.backward()
+
+def SGD():
+    for p in Parameters:
+        p.SGD()
+\end{verbatim}
+\vfill
+
+\slide{Minibatching}
+
+Ther running time of EDF, and of any framework, is greatly improved by minibatching.
+
+ \vfill
+{\bf Minibatching}: We run some number of instances together (or in parallel) and then do a parameter update based on the average
+gradients of the instances of the batch.
+
+\vfill
+For NumPy minibatching is not so much about parallelism as about making the vector operations larger so that the vector operations dominate
+the slowness of Python.  On a GPU minibatching allows parallelism over the batch elements.
+\vfill
+
+\slide{Minibatching}
+\vfill
+With minibatching each input value and each computed value is actually a batch of values.
+
+\vfill
+We add a batch index as an additional first tensor dimensionfor each input and computed node.
+
+\vfill
+For example, if a given input is a $D$-dimensional vector then the value of an input node
+has shape $(B,D)$ where $B$ is size of the minibatch.
+
+\vfill
+Parameters do not have a batch index.
+
+\vfill
+\eject
+\vfill
+\begin{tabbing}
+class \=Parameter: \\
+    \\
+    \>def \=\_\_init\_\_(self,value): \\
+        \>\>Parameters.append(self) \\
+        \>\>self.value = value \\
+\\
+    \>def \>addgrad(self, delta): \\
+          \>\>\#sums over the minibatch \\
+    \>\>self.grad += np.sum(delta, axis = 0) \\
+    \\
+    \>def \>SGD(self): \\
+    \>\>self.value -= learning\_rate*self.grad
+\end{tabbing}
+
+\slide{forward and backward must handle minibatching}
+
+The forward and backward methods must be written to handle minibatching.  We will consider some examples.
+
+
+\slide{An MLP}
+
+\vfill
+\begin{verbatim}
+  L1 = Relu(Affine(Phi1,x))
+  P = Softmax(Sigmoid(Affine(Phi2,L1))
+  ell = LogLoss(P,y)
+\end{verbatim}
+
+
+\slide{The {\tt Sigmoid} Class}
+
+The Sigmoid and Relu classes just work.
+
+\begin{verbatim}
+class Sigmoid:
+    def __init__(self,x):
+        CompNodes.append(self)
+        self.x = x
+
+    def forward(self):
+        self.value = 1. / (1. + np.exp(-self.x.value))
+
+    def backward(self):
+        self.x.grad += self.grad
+                       * self.value
+                       * (1.-self.value)
+\end{verbatim}
+
+
+\vfill
+\eject
+\begin{verbatim}
+y = Affine([W,B],x)
+
+ forward:
+  y.value[b,j] = x.value[b,i]W.value[i,j]
+  y.value[b,j] += B.value[j]
+
+ backward:
+    x.grad[b,i] += y.grad[b,j]W.value[i,j]
+    W.grad[i,j] += y.grad[b,j]x.value[i]
+    B.grad[j] += y.grad[b,j]
+\end{verbatim}
+
+\vfill
+\eject
+\begin{verbatim}
+class Affine(CompNode):
+
+    def __init__(self,Phi,x):
+        CompNodes.append(self)
+        self.x = x
+        self.Phi = Phi
+
+    def forward(self):
+        # y.value[b,j] = x.value[b,i]W.value[i,j]
+        # y.value[b,j] += B.value[j]
+        self.value = (np.matmul(self.x.value,
+                                self.Phi.W.value)
+                      + self.Phi.B.value)
+\end{verbatim}
+\vfill
+\eject
+\vfill
+\begin{verbatim}
+    def backward(self):
+
+        self.x.addgrad(
+           # x.grad[b,i] += y.grad[b,j]W.value[i,j]
+           np.matmul(self.grad,
+                     self.Phi.W.value.transpose()))
+
+        # B.grad[j] += y.grad[b,j]
+        self.Phi.B.addgrad(self.grad)
+
+        # W.grad[i,j] += y.grad[b,j]x.value[b,i]
+        self.Phi.W.addgrad(self.x.value[:,:,np.newaxis]
+                           * self.grad[:,np.newaxis,:])
+\end{verbatim}
+
+
+\slide{Explicit Index Notation}
+
+$$A[x_1,\ldots,x_n] \; \pluseq\; e[x_1,\ldots,x_n,y_1,\ldots,y_k]$$
+
+abbreviates
+$$\mbox{for}\;x_1,\ldots,x_n,y_1,\ldots,y_k:\; A[x_1,\ldots,x_n]\;\pluseq\; e[x_1,\ldots,x_n,y_1,\ldots,y_k]$$
+
+\vfill
+\vfill
+$$A[x_1,\ldots,x_n] = e[x_1,\ldots,x_n,y_1,\ldots,y_k]$$
+
+abbreviates
+$$\mbox{for}\;x_1,\ldots,x_n: \;A[x_1,\ldots,x_n] = 0$$
+$$A[x_1,\ldots,x_n] \; \pluseq\; e[x_1,\ldots,x_n,y_1,\ldots,y_k]$$
+
+\slide{Affine Transformation with Batch Index}
+
+\begin{eqnarray*}
+  y[b,i] & = & x[b,j]W[j,i] \\
+  y[b,i] & \pluseq & B[i]
+\end{eqnarray*}
+
+\slide{The Swap Rule for Tensor Products}
+
+For backprop swap an input with the output and add ``grad''.
+
+\begin{eqnarray*}
+  y[b,i] & = & x[b,j]W[j,i] \\
+  \\
+  x.\mathrm{grad}[b,j] & \pluseq & y.\mathrm{grad}[b,i]W[j,i] \\
+  \\
+  W.\mathrm{grad}[i,j] & \pluseq & x[b,j] y.\mathrm{grad}[b,i] \\
+  \\
+  \\
+  y[b,i] & \pluseq & B[i] \\
+  \\
+  B.\mathrm{grad}[i] & \pluseq & y.\mathrm{grad}[b,i]
+\end{eqnarray*}
+
+\slideplain{The Swap Rule for Functions of Tensor Products}
+
+For backprop swap an input with the output and add ``grad'' and $\dot{f}$.
+
+\begin{eqnarray*}
+  y[b,i] & = & f(x[b,j]W[j,i]) \\
+  \\
+  x.\mathrm{grad}[b,j] & \pluseq & y.\mathrm{grad}[b,i]\;\dot{f}\;W[j,i] \\
+  \\
+  W.\mathrm{grad}[i,j] & \pluseq & y.\mathrm{grad}[b,i]\;\dot{f}\;x[b,j]
+\end{eqnarray*}
+
+\vfill
+Here $f$ is scalar to scalar.
+
+\slide{NumPy: Reshaping Tensors}
+
+For an ndarray $x$ (tensor) we have that $x.\mathrm{shape}$ is a tuple of dimensions.  The product of the dimensions is the number of numbers.
+
+\vfill
+In NumPy an ndarray (tensor) $x$ can be reshaped into any shape with the same number of numbers.
+
+\slide{NumPy: Broadcasting}
+
+Shapes can contain dimensions of size 1.
+
+\vfill
+Dimensions of size 1 are treated as ``wild card'' dimensions in operations on tensors.
+
+\vfill
+\begin{eqnarray*}
+  x.\mathrm{shape} & = & (5,1) \\
+  y.\mathrm{shape} & = & (1,10) \\
+  z & = & x*y \\
+  z.\mathrm{shape} & = & (5,10) \\
+  z[i,j] & = & x[i,0] * y[0,j]
+\end{eqnarray*}
+
+\vfill
+\eject
+\vfill
+\begin{verbatim}
+class Affine(CompNode):
+    ...
+    def backward(self):
+        ...
+        # W.grad[i,j] += y.grad[b,j]x.value[b,i]
+        self.Phi.W.addgrad(self.grad[:,np.newaxis,:]
+                           *self.x.value[:,:,np.newaxis])
+
+class Parameter:
+    ...
+    def addgrad(self, delta):
+        self.grad += np.sum(delta, axis = 0)
+\end{verbatim}
+
+\slide{NumPy: Broadcasting}
+
+When a scalar is added to a matrix the scalar is reshaped to shape $(1,1)$ so that it is added to each element of the matrix.
+
+\vfill
+When a vector of shape $(k)$ is added to a matrix the vector is reshaped to $(1,k)$ so that it is added to each row of the matrix.
+
+\vfill
+In general when two tensors of different order (number of dimensions) are added, unit dimensions are prepended to the shape of the tensor of smaller order
+to make the orders match.
+
+\slide{Appendix: The Jacobian Matrix}
+Consider $y =f(x)$ in vector-valued case.
+\vfill
+In the vector-valued case the backpropagation equation is
+\vfill
+$$x.\mathrm{grad}\; \mbox{\tt +=}\; (y.\mathrm{grad})^\top\; \nabla_x f(x)$$
+\vfill
+where
+$$(\nabla_x f(x))[i,j] = {\cal J}[i,j] = \partial f(x)[i] /\partial x[j]$$
+
+\vfill
+The matrix ${\cal J}[i,j]$ is the Jacobian of $f$.
+
+\vfill
+Index Types: $j$ is an $x$-index and $i$ is a $y$-index.
+
+\slide{END}
+}
+\end{document}

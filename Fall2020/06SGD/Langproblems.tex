@@ -1,0 +1,43 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+\bigskip
+\centerline{\bf Langevin Dynamics Problems.}
+
+{\bf Problem 1.} This problem is on batch size scaling of Langevin dynamics.  We consider batched SGD as defined by
+$$\Phi \;\minuseq \; \eta \hat{g}^B$$
+where $\hat{g}^B$ is the average of $B$ sampled gradients.  Let $g$ be the average gradient $g = E\;\hat{g}$.
+
+\medskip The covariance matrix at batch size $B$ is
+$$\Sigma^B[i,j] = E\;(\hat{g}^B[i] - g[i])(\hat{g}^B[j] - g[j]).$$
+
+\medskip Langevin dynamics is
+$$\Phi(t + \Delta t) = \Phi(t) - g\Delta t + \epsilon \sqrt{\Delta t}\;\;\;\epsilon \sim {\cal N}(0,\eta\Sigma^B)$$
+Show that for $\eta = B\eta_0$ the Langevin dynamics is determined by $\eta_0$ independent of $B$.
+
+\solution{
+  \begin{eqnarray*}
+    \Sigma^B[i,j] & = & E\;(\hat{g}^B[i] - g[i])(\hat{g}^B[j] - g[j]) \\
+    \\
+    & = & \frac{1}{B^2} E \left(\sum_b \hat{g}_b[i] - g[i] \right)\left(\sum_b \hat{g}_b[j] - g[j]\right) \\
+    \\
+    & = & \frac{1}{B^2} E \sum_{b,b'}\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b'}[j] - g[j]\right) \\
+    \\
+    & = & \frac{1}{B^2} \sum_{b,b'}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b'}[j] - g[j]\right) \\
+    \\
+    & = & \frac{1}{B^2} \sum_{b}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b}[j] - g[j]\right) \\
+    \\
+    & = & \frac{1}{B} \Sigma^1[i,j]
+  \end{eqnarray*}
+
+  So for $\eta = B\eta_0$ we have $\eta\Sigma^B  = \eta_0\Sigma^1$ which yields the equivalence.
+}
+\end{document}

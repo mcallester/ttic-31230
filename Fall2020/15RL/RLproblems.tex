@@ -1,0 +1,123 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+\bigskip
+\centerline{\bf RL Problems.}
+
+
+\bigskip
+{\bf Problem 1. REINFORCE for BLEU Translation Score.}
+Consider training machine translation on a corpus of translation pairs $(x,y)$ where $x$ is, say, an English sentence $x_1,\ldots,\mathrm{EOS}$ and $y$ is a French sentence $y_1,\ldots,\mathrm{EOS}$
+where EOS is the ``end of sentence'' tag.
+
+\medskip
+Suppose that we have a parameterized autoregressive model defining $P_\Phi(y_t|x,y_1,\ldots,y_{t-1})$ so that $P_\Phi (y_1,\ldots,y_{T}|x) = \prod_{t=1}^{T'}P_\Phi(y_t|x,y_1,\ldots,y_{t-1})$ where $y_T$ is EOS.
+
+\medskip
+For a sample $\hat{y}$ from $P_\Phi(y|x)$ we have a non-differentiable BLEU score $\mathrm{BLEU}(\hat{y},y) \geq 0$ that is not computed until the entire output $y$ is complete
+and which we would like to maximize.
+
+\medskip
+(a) Give an SGD update equation for the parameters $\Phi$ for the REINFORCE algorithm for maximizing $E_{\hat{y} \sim P_\Phi(y|x)}$ for this problem.
+
+\solution{
+  For $\tuple{x,y}$ samples form the training corpus of translation pairs, and for $\hat{y}_1,\ldots,\hat{y}_T$ sampled from $P_\Phi(\hat{y}|x)$
+  we update $\Phi$ by
+  $$ \Phi \; \pluseq \; \eta\mathrm{BLEU}(\hat{y},y)\sum_{t = 1}^T \; \nabla_\Phi\;\ln P_\Phi(\hat{y}_t|x,\hat{y}_1,\ldots,\hat{y}_{t-1})$$
+  Samples with higher BLEU scores have their probabilities increased.
+  }
+
+\medskip
+(b) Suppose that somehow we reach a parameter setting $\Phi$ where $P_\Phi(y|x)$ assigns probability very close to 1 for a particular translation $\hat{y}$
+so that in practice we will always sample the same $\hat{y}$.  Suppose that this translation $\hat{y}$ has less than optimal BLEU score.
+Can the REINFORCE algorithm recover from this situation and consider other translations?  Explain your answer.
+
+\solution{No.  The REINFORCE algorithm will not recover. The update will only increase the probability of the single translation which it always selects.
+A deterministic policy has zero gradient and is stuck.}
+
+\medskip
+(c) Modify the REINFORCE update equations to use a value function approximation $V_\Phi(x)$ to reduce the variance in the gradient samples and where
+$V_\Phi$ is trained by Bellman Error.
+Your equations should include updates to train
+$V_\Phi(x)$ to predict $E_{\hat{y} \sim P(y|x)}\;\mathrm{BLEU}(\hat{y},y)$.  (Replace the reward by the ``advantage'' of the particular translation).
+
+\solution{
+  For $\tuple{x,y}$ sampled form the training corpus of translation pairs, and for $\hat{y}_1,\ldots,\hat{y}_T$ sampled from $P_\Phi(\hat{y}|x)$
+  we udate $\Phi$ by
+  \begin{eqnarray*}
+    \Phi & \pluseq & \eta(\mathrm{BLEU}(\hat{y},y)-V_\Phi(x))\sum_{t = 1}^T \; \nabla_\Phi\;\ln P_\Phi(\hat{y}_t|x,\hat{y}_1,\ldots,\hat{y}_{t-1}) \\
+    \\
+    \Phi & \minuseq & \eta \nabla_\Phi (V_\Phi(x) - \mathrm{BLEU}(\hat{y},y))^2  \;=\; 2\eta(V_\Phi(x) - \mathrm{BLEU}(\hat{y},y))\nabla_\Phi V_\Phi(x)
+    \end{eqnarray*}
+}
+
+\bigskip
+~{\bf Problem 2. Rapid Mixing for Asymptotic Avergage Reward.}
+
+\medskip
+We consider a case where we are interested in asymptotic average reward.
+
+$$R(\pi) \; = \;\lim{T \rightarrow \infty}\;\frac{1}{T} \sum_{t=1}^T r_t$$
+
+\vfill
+For a given policy $\pi$ we have a Markov process over states --- a well defined state transition probability $P_\pi(s_{t+1}|s_t)$ defined by
+$$P_\pi(s_{t+1}|s_t) \;=\;\sum_a \pi(a|s_1)P_\pi(s_2|s_1,a)$$
+Under very mild conditions a Markov process has a well define stationary distribution on states which we will write $P_\pi(s)$.  This distribution is ``stationary''
+in the sense that
+$$\sum_{s_1} P_\pi(s_1)P_\pi(s_2|s_1) \;=\;P_\pi(s_2)$$
+
+(a) Write the asymptotic average reward $R(\pi)$ in terms of the stationary distribution $P_\pi$, the policy $\pi(a|s)$ and the reward function $R(s,a)$
+
+\solution{
+  $$R(\pi) = E_{s \sim P_\pi(s),\;a \sim \pi(a|s)} \;R(s,a)$$
+}
+
+(b) Now for $\Delta t >1$ we define $P_\pi(s_{t+\Delta t}|s_t)$ recursively as by
+
+$$P_\pi(s_{t+\Delta t}|s_t) = \sum_{s_{t+\Delta t - 1}}\;P_\pi(s_{t+\Delta t-1}|s_t)P_\pi(s_{t+\Delta t}|s_{t+\Delta t -1})$$
+
+We now assume a ``mixing parameter'' $0 < \gamma < 1$ for $\pi$ defined by the property
+
+$$\sum_{s_{t + \Delta t}}\;|P_\pi(s_{t+\Delta t}|s_t) - P_\pi(s_{t+\Delta t})| \leq \gamma^{\Delta t}$$
+
+We now define an advantage function on state-action pairs to be the ``extra'' reward we get by taking action $a$ (rather than drawing from $\pi(a|s)$) summed over all time.
+
+$$A(s,a) = E\;\sum_{t=0}^\infty (r_t - R(\pi)) \;\;|\;\;s_0 = s,\;a_0 = a$$
+
+Assuming the reward is bounded by $r_\mathrm{max}$ and that we have the above mixing parameter $\gamma$, give a (finite) upper bound on the infinite sum $A(s,a)$.
+
+\solution{
+  \begin{eqnarray*}
+    & & E\;r_{t} - R(\pi) \;\;|s_0 = s,\;a_0 = a, t> 0 \\
+    \\
+    & = & \left(\sum_{s_{t}} P_\pi(s_{t}|s_0) E_{a \sim \pi(a|s_{t})}\;R(s_{t},a)\right) - R(\pi) \\
+    \\
+    & = & \left(\sum_{s_{t}}\;(P_\pi(s_{t}) + P_\pi(s_{t}|s_0) - P_\pi(s_{t})) E_{a \sim \pi(a|s_{t})}\;R(s_{t},a)\right) - R(\pi) \\
+    \\
+    & = & R(\pi) +\left(\sum_{s_{t}}\; (P_\pi(s_{t}|s_0) - P_\pi(s_{t})) E_{a \sim \pi(a|s_{t})}\;R(s_{t},a)\right) -R(\pi)\\
+    \\
+    & = & \sum_{s_{t}}\; (P_\pi(s_{t}|s_0) - P_\pi(s_{t})) r_\mathrm{max} \\
+    \\
+    & \leq &  r_\mathrm{max} \gamma^t \\
+    \\
+    A(s,a) & \leq & r_\mathrm{max} \sum_{t=0}^\infty \gamma^t = \frac{r_\mathrm{max}}{1-\gamma}
+  \end{eqnarray*}
+}
+
+It can be shown that
+
+$$\nabla_\Phi R(\pi_\Phi) = E_{s \sim P_\pi(s),\;a\sim \pi(a|s)}\;\nabla_\Phi \ln \pi_\Phi(a|s) \;A(s,a)$$
+
+You do not have to prove this.
+
+
+
+\end{document}

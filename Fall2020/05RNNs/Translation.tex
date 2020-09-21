@@ -1,0 +1,212 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Machine Translation and Attention}
+
+\slide{Machine Translation}
+%\centerline{\includegraphics[width = 4in]{../images/SeqToSeq}}
+
+%\centerline{\large [Figure from Luong et al.]}
+
+$$w_1,\ldots,w_{T_{\mathrm{in}}} \Rightarrow \tilde{w}_1,\ldots,\tilde{w}_{T_{\mathrm{out}}}$$
+
+\vfill
+Translation is a {\bf sequence to sequence} (seq2seq) task.
+
+\vfill
+{\bf Sequence to Sequence Learning with Neural Networks}, Sutskever, Vinyals and Le, NIPS 2014, arXiv Sept 10, 2014.
+
+\vfill
+We describe a simplification of the paper.
+
+\slide{Machine Translation}
+
+%\centerline{\includegraphics[width = 4in]{../images/SeqToSeq}}
+
+%\centerline{\large [Figure from Luong et al.]}
+
+\vfill
+We define a model
+
+\vfill
+$$P_\Phi\left(\tilde{w}_1,\ldots,\tilde{w}_{T_{\mathrm{out}}}\;|\; w_1,\ldots,w_{T_{\mathrm{in}}}\right)$$
+
+\vfill
+\begin{eqnarray*}
+\Phi^*  & = & \argmin_\Phi\; E_{\mathrm{Pop}} \;-\ln\;P_\Phi\left(\tilde{w}_1,\ldots,\tilde{w}_{T_{\mathrm{out}}}\;|\; w_1,\ldots,w_{T_{\mathrm{in}}}\right) \\
+\\
+& = & \argmin_\Phi \; E_{\tuple{x,y} \sim \mathrm{Pop}} \; -\ln P_\Phi(y|x)
+\end{eqnarray*}
+
+
+\slide{A Simple RNN Translation Model}
+
+\vfill
+The final state of a right-to-left RNN, $\cev{h}_{\mathrm{in}}[1,J]$, is viewed as a ``thought vector'' representation of the input sentence.
+
+\vfill
+We use the input thought vector $\cev{h}_{\mathrm{in}}[1,J]$ as the initial hidden state a left-to-right RNN language model
+generating the output sentence.
+
+\vfill
+Taking a the thought vector at the beginning of the input sentence facilitates getting a good start in left-to-right modeling of the output.
+
+\slide{Machine Translation Decoding}
+
+We can sample a translation
+
+$$w_t \sim P(w_t\;|\;\cev{h}_{\mathrm{in}}[1,J],\;w_1,\ldots,w_{t-1})$$
+
+\vfill
+or we can do greedy decoding
+
+$$w_t = \argmax_{w_t}\; P(w_t\;|\;\cev{h}_{\mathrm{in}}[1,J],\;w_1,\ldots,w_{t-1})$$
+
+\vfill
+or we might try maximize total probability.
+
+\begin{eqnarray*}
+w_1,\ldots,w_{T_{\mathrm{out}}}
+& = & \argmax_{w_1,\ldots,w_{T_{\mathrm{out}}}} \;P_\Phi\left(w_1,\ldots,w_{T_{\mathrm{out}}} \;|\; \cev{h}_{\mathrm{in}}[1,J]\right)
+\end{eqnarray*}
+
+\slideplain{Greedy Decoding vs. Beam Search}
+
+We would like
+
+\vfill
+$$W_{\mathrm{out}}[T_{\mathrm{out}}]^* = \argmax_{W_{\mathrm{out}}[T_{\mathrm{out}}]}
+P_\Phi(W_{\mathrm{out}}[T_{\mathrm{out}}] \;|\;W_{\mathrm{in}}[T_{\mathrm{in}}])$$
+
+\vfill
+But a greedy algorithm may do well
+
+\vfill
+$$w_t = \argmax_{w_t}\; P_\Phi(w_t\;|\;W_{\mathrm{in}}[T_{\mathrm{in}}],\;w_1,\ldots,w_{t-1})$$
+
+\vfill
+But these are not the same.
+
+\slide{Example}
+
+``Those apples are good'' vs. ``Apples are good''
+
+\vfill
+$$P_\Phi(\mbox{Apples are Good {\tt <eos>}}) > P_\Phi(\mbox{Those apples are good {\tt <eos>}})$$
+
+\vfill
+$$P_\Phi(\mbox{Those}|\varepsilon) > P_\Phi(\mbox{Apples}|\varepsilon)$$
+    
+\slide{Beam Search}
+
+At each time step we maintain a list the $K$ best words and their associated hidden vectors.
+
+\vfill
+This can be used to produce a list of $k$ ``best'' decodings which can then be compared to select
+the most likely one.
+
+\slide{Machine Translation with Attention}
+
+{\bf Neural Machine Translation by Jointly Learning to {\color{red} Align} and Translate}
+Dzmitry Bahdanau, Kyunghyun Cho, Yoshua Bengio, ICLR 2015 (arXiv Sept. 1, 2014)
+
+\vfill
+We describe a simplification of the paper.
+
+\slide{Representing Sentences by Vector Sequences}
+We first run a bidirectional RNN on the
+input sentence to get a sequence $\dvec{h}_\mathrm{in}[T_{\mathrm{in}},J]$ of hidden vectors $\dvec{h}_\mathrm{in}[t_\mathrm{in},J]$ for $1 \leq t_\mathrm{in} \leq T_{\mathrm{in}}$.
+
+\vfill
+We then define an autoregressive conditional output language model
+$$P_\Phi(w_1,\ldots,w_{T_\mathrm{out}}\;|\; \dvec{h}[T_{\mathrm{in}},J])$$
+
+\slide{Machine Translation with Attention}
+\begin{eqnarray*}
+  \vec{h}_\mathrm{out}[0,J] & = & \cev{h}_\mathrm{in}[1,J/2];\vec{h}_\mathrm{in}[T_\mathrm{in},J/2] \\
+  \\
+   P(w_{t_\mathrm{out}}\;|\;w_0,\cdots,w_{t-1})
+   & = & \softmax_{w_{t_\mathrm{out}}}\;e[w_{t_\mathrm{out}},J]\;\vec{h}_\mathrm{out}[t_\mathrm{out}-1,J]
+\end{eqnarray*}
+
+\vfill
+We first define the probability distribution over the next word $w_{t_\mathrm{out}}$ using the previous hidden state $\vec{h}_\mathrm{out}[t_\mathrm{out}-1,J]$.
+
+\slide{Machine Translation with Attention}
+\begin{eqnarray*}
+  \vec{h}_\mathrm{out}[0,J] & = & \cev{h}_\mathrm{in}[1,J/2];\vec{h}_\mathrm{in}[T_\mathrm{in},J/2] \\
+  \\
+   P(w_{t_\mathrm{out}}\;|\;w_0,\cdots,w_{t-1})
+   & = & \softmax_{w_{t_\mathrm{out}}}\;e[w_{t_\mathrm{out}},J]\;\vec{h}_\mathrm{out}[t_\mathrm{out}-1,J]
+\end{eqnarray*}
+
+\vfill
+The computation of the hidden state $\vec{h}_\mathrm{out}[t_\mathrm{out},J]$ involves the selected $w_{t_\mathrm{out}}$ and an alignment of $t_\mathrm{out}$ with input times.
+
+\slide{Machine Translation with Attention}
+\begin{eqnarray*}
+ P(w_{t_\mathrm{out}}\;|\;w_0,\cdots,w_{t-1})
+   & = & \softmax_{w_{t_\mathrm{out}}}\;e[w_{t_\mathrm{out}},J]\;\vec{h}_\mathrm{out}[t_\mathrm{out}-1,J] \\
+  \\
+  \alpha[t_\mathrm{out},t_{\mathrm{in}}]& =& \softmax_{t_\mathrm{in}} \;e[w_{t_\mathrm{out}},J]\;\dvec{h}_\mathrm{in}[t_{\mathrm{in}},J]
+\end{eqnarray*}
+
+\vfill
+$\alpha[t_\mathrm{out},T_\mathrm{in}]$ is a convex weighting (a probability distribution) over $T_\mathrm{in}$.
+
+\vfill
+$\alpha[t_\mathrm{out},T_\mathrm{in}]$ defines a ``soft alignment'' between  $w_{t_\mathrm{out}}$ and the input words.
+
+\slide{Machine Translation with Attention}
+\begin{eqnarray*}
+  \alpha[t_\mathrm{out},t_{\mathrm{in}}]& =& \softmax_{t_\mathrm{in}} \;e[w_{t_\mathrm{out}},J]\;\dvec{h}_\mathrm{in}[t_{\mathrm{in}},J]
+\end{eqnarray*}
+
+\vfill
+$\alpha[t_\mathrm{out},T_\mathrm{in}]$ is called ``an attention'' over $T_\mathrm{in}$.
+
+\slide{Machine Translation with Attention}
+\begin{eqnarray*}
+  \alpha[t_\mathrm{out},t_{\mathrm{in}}]& =& \softmax_{t_\mathrm{in}} \;e[w_{t_\mathrm{out}},J]\;\dvec{h}_\mathrm{in}[t_{\mathrm{in}},J] \\
+\\
+\tilde{h}_\mathrm{in}[t_\mathrm{out},J]& = & \alpha[t_\mathrm{out},T_{\mathrm{in}}]\;\dvec{h}_\mathrm{in}[T_{\mathrm{in}},J]
+\end{eqnarray*}
+
+\vfill
+$\tilde{h}_\mathrm{in}[t_\mathrm{out},J]$ is a convex combination of the input hidden states aligned with $t_\mathrm{out}$.
+
+
+\slide{Machine Translation with Attention}
+\begin{eqnarray*}
+  \alpha[t_\mathrm{out},t_{\mathrm{in}}]& =& \softmax_{t_\mathrm{in}} \;e[w_{t_\mathrm{out}},J]\;\dvec{h}_\mathrm{in}[t_{\mathrm{in}},J] \\
+\\
+\tilde{h}_\mathrm{in}[t_\mathrm{out},J]& = & \alpha[t_\mathrm{out},T_{\mathrm{in}}]\;\dvec{h}_\mathrm{in}[T_{\mathrm{in}},J] \\
+\\
+\vec{h}_\mathrm{out}[t_\mathrm{out},J] & = & \mathrm{CELL}(\vec{h}_\mathrm{out}[t-1,J],\;\tilde{h}_\mathrm{in}[t_\mathrm{out},J],\;e[w_{t_\mathrm{out}-1},I])
+\end{eqnarray*}
+
+\slide{Attention in Image Captioning}
+We can treat image captioning as translating an image into a caption.
+
+\vfill
+In translation with attention involves an attention over the input aligning output words with positions in the input.
+
+\vfill
+For each output word we get an attention over the image positions.
+
+\slide{Attention in Image Captioning}
+
+\centerline{\includegraphics[height = 4.8in]{../images/AttentionInCaptioning1}}
+\centerline{\Large Xu et al. ICML 2015}
+
+\slide{END}
+}
+\end{document}

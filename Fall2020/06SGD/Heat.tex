@@ -1,0 +1,124 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Stochastic Gradient Descent (SGD)}
+  \vfill
+  \centerline{\bf Heat Capacity with}
+  \vfill
+  \centerline{\bf Loss as Energy}
+  \vfill
+  \centerline{\bf and Learning Rate as Temperature}
+  \vfill
+  \vfill
+  \vfill
+
+\slide{MCMC models of SGD}
+
+\centerline{\includegraphics[width = 7in]{../images/annealing}}
+
+\vfill
+These Plots are from the original ResNet paper.  Left plot is for CNNs without residual skip connections, the right plot is ResNet.
+
+\vfill
+Thin lines are training error, thick lines are validataion error.
+
+\vfill
+In all cases $\eta$ is reduced twice, each time by a factor of 2.
+
+\slide{Converged Loss as a Function of $\eta$}
+
+\centerline{\includegraphics[width = 4in]{../images/annealing}}
+For each value of $\eta$ we converge at a loss ${\cal L}(\eta)$.
+\begin{eqnarray*}
+{\cal L}(0) & \doteq & \lim_{\eta \rightarrow 0}\;{\cal L}(\eta) \\
+\\
+& = & {\cal L}(\Phi^*)\;\;\;\;\mbox{$\Phi^*$ a local optimum}
+\end{eqnarray*}
+
+\vfill
+Can we do a Taylor expansion of ${\cal L}(\eta)$?
+$${\cal L}(\eta) = {\cal L}(\Phi^*) + \left(\left.\frac{d{\cal L}}{d \eta}\right|_{\eta = 0}\right)\eta + \ldots$$
+
+\slide{Heat Capacity}
+
+$${\cal L}(\eta) = {\cal L}(\Phi^*) + \left(\left.\frac{d{\cal L}}{d \eta}\right|_{\eta = 0}\right)\eta + \ldots$$
+
+\vfill
+Let $i$ index a training example and let $g_i$ denote $\nabla_\Phi {\cal L}_i(\Phi)$ at $\Phi = \Phi^*$.
+
+\vfill
+Heat Capacity Theorem:
+
+\vfill
+$${\color{red} \left.\frac{\partial {\cal L}(\eta)}{\partial \eta}\right|_{\eta = 0} \;\;=\;\; \frac{1}{4}\; E_i\; ||g_i||^2}$$
+
+\slide{Proof Step 1}
+
+\vfill
+Let $i$ index a training example and let ${\cal L}_i(\Phi^* + \Delta \Phi)$ be the loss on training example $i$
+with model parameters $\Phi^* + \Delta\Phi$. 
+
+\vfill
+We take a second order Taylor expansion.
+
+\begin{eqnarray*}
+{\cal L}(\Phi) & = & E_i\;{\cal L}_i(\Phi) \\
+\\
+{\cal L}_i(\Phi^* + \Delta \Phi) & = & {\cal L}_i(\Phi^*) + g_i \Delta \Phi + \frac{1}{2} \Delta\Phi^\top H_i \Delta\Phi \\
+\\
+E_i\; g_i & = & 0\\
+\\
+E_i\; H_i & & \mbox{is positive definite}
+\end{eqnarray*}
+
+\slide{Proof: Step 2}
+
+Let $Q_\eta$ be the stationary distribution on $\Phi$ defined by the SGD stochastic process.
+
+\vfill
+Let $P_\eta$ be the distribution on $\Delta\Phi = \Phi - \Phi^*$ with $\Phi \sim Q_\eta$.
+
+\begin{eqnarray*}
+{\cal L}(\eta) & = & \;\;\; E_{\Delta \Phi \sim P_\eta}\;E_i \;\;\;\; {\cal L}_i + g_i\Delta _\Phi + \frac{1}{2}\;\Delta \Phi^\top H_i \Delta \Phi \\
+\\
+& = & E_i\; {\cal L}_i(\Phi^*) + E_{\Delta \Phi \sim P_\eta} \;\;\;\;(E_i\;g_i) \;\Delta \Phi + \frac{1}{2}\;\Delta \Phi^\top (E_i\; H_i) \Delta \Phi \\
+\\
+& = & {\cal L}(\Phi^*)\;\; + \;\; E_{\Delta \Phi \sim P_\eta}\;\;\;\frac{1}{2}\;\Delta \Phi^\top (E_i\;H_i) \Delta \Phi
+\end{eqnarray*}
+
+\slide{Proof: Step 3}
+Because $P_\eta$ is a stationary distribution on $\Delta \Phi$ we must have
+
+$$E_{\Delta \Phi \sim P_\eta}E_i\; ||\Delta \Phi - \eta (g_i + H_i\Delta \Phi)||^2 = E_{\Delta \Phi \sim P_\eta}\; ||\Delta \Phi||^2$$
+
+\vfill
+$$E_{\Delta \Phi \sim P_\eta}E_i\;-2\eta \Delta \Phi^\top (g_i + H_i\Delta \Phi) +\eta^2||(g_i + H_i\Delta \Phi)||^2 = 0$$
+
+\vfill
+$$E_{\Delta \Phi \sim P_\eta}\;\left(\frac{1}{2}\Delta \Phi^\top (E_i \;H_i)\Delta \Phi\right) = \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_i \;||(g_i + H_i\Delta \Phi)||^2$$
+
+\vfill
+$${\color{red} {\cal L}(\eta)  = {\cal L}(\Phi^*) + \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_i \;||(g_i + H_i\Delta \Phi)||^2}$$
+
+\slide{Proof Step 4}
+
+\begin{eqnarray*}
+{\color{red} {\cal L}(\eta)}  & {\color{red} =} & {\color{red} {\cal L}(\Phi^*) + \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_i \;||(g_i + H_i\Delta \Phi)||^2} \\
+\\
+\\
+{\color{red} \left.\frac{\partial {\cal L}(\eta)}{\partial \eta}\right|_{\eta = 0}} & = & \frac{1}{4} \; \lim_{\eta \rightarrow 0} \; E_{\Delta \Phi \sim P_\eta}\; E_i \;||(g_i + H_i\Delta \Phi)||^2 \\
+\\
+\\
+& {\color{red} =} & {\color{red} \frac{1}{4}\; E_i\;||g_i||^2}
+\end{eqnarray*}
+
+
+\slide{END}
+\end{document}

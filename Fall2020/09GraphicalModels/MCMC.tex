@@ -1,0 +1,149 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \vfill
+  \centerline{\bf Monte-Carlo Markov Chain (MCMC) Sampling}
+\vfill
+\vfill
+\vfill
+
+\slide{Sampling From the Model}
+
+For backpropagation through an exponential softmax we will estimate the model marginals by sampling from the exponential model distribution.
+
+Theorem:
+\begin{eqnarray*}
+    s_n.\mathrm{grad}[i,c] & = &   P_{\hat{y} \sim P_s}(\;\;{\color{red} \hat{y}}[i] = c\;\;) \\
+    & & \;\;\;\;\;- \bbone[\;\;{\color{red} y}[i] = c\;\;] \\
+    \\
+    s_e.\mathrm{grad}[\tuple{i,j},c,c'] & = &  P_{\hat{y} \sim P_s}(\;\;{\color{red} \hat{y}}[i] = c \; \wedge \; {\color{red} \hat{y}}[j] = c'\;\;) \\
+    & & \;\;\;\;\;- \bbone[\;\;{\color{red} y}[i] = c\; \wedge \; {\color{red} y}[j] =
+    c'\;\;]
+\end{eqnarray*}
+
+\slide{MCMC Sampling}
+The model marginals, such as the node marginals
+ ${\color{red} P_s(\hat{y}[i]=c)}$, can be estimated by sampling $\hat{y}$ from $P_s(\hat{y})$.
+
+\vfill
+There are various ways to design a Markov process whose states are node labelings $\hat{y}$ and whose stationary distribution is $P_s$.
+
+\vfill
+Given such a process we can sample $\hat{y}$ from $P_s$ by running the process past its mixing time.
+
+\vfill
+We will consider Metropolis MCMC and the Gibbs MCMC.  But there are more (like Hamiltonian MCMC).
+
+\slide{Metroplis MCMC}
+
+We assume a neighor relation on node assignments and let $N(\hat{y})$ be the set of neighbors of assignment $\hat{y}$.
+
+\vfill
+For example, $N(\hat{y})$ can be taken to be the set of assignments $\hat{y}'$ that differ form $\hat{y}$ on exactly one node.
+
+\vfill
+For the correctness of Metropolis MCMC we need that all states have the same number of neighbors and that the neighbor relation is symmetric ---
+$\hat{y}' \in N(\hat{y})$ if and only if $\hat{y} \in N(\hat{y}')$.
+
+\slide{Metropolis MCMC}
+
+Pick an initial state $\hat{y}_0$ and for $t \geq 0$ do
+\vspace{-2ex}
+\begin{quotation}
+
+    \noindent \begin{enumerate}
+    \item Pick a neighbor $\hat{y}' \in N(\hat{y}_t)$ uniformly at random.
+
+    \vfill      
+    \item If $P_s(\hat{y}') > P_s(\hat{y}_t)$ then {\color{red} $\hat{y}_{t+1} = \hat{y}'$}
+
+    \vfill      
+    \item If $P_s(\hat{y}') \leq P_s(\hat{y})$ then with probability
+$$e^{-\Delta s} = e^{-(s(\hat{y}) - s(\hat{y}'))}   = \frac{e^{s(\hat{y}')}}{e^{s(\hat{y})}} = \frac{P_s(\hat{y}')}{P_s(\hat{y})}$$
+   do  {\color{red} $\hat{y}_{t+1} = \hat{y}'$} and otherwise {\color{red} $\hat{y}_{t+1} = \hat{y}_t$} 
+  \end{enumerate}  
+\end{quotation}
+
+\slide{The Metropolis Markov Chain}
+We need to show that $P_s$ is a stationary distribution of this process.
+
+\vfill
+We must show that if we select $\hat{y}_t$ from $P_s$, and then select $\hat{y}_{t+1}$ using the transition probabilities,
+then the distribution on $\hat{y}_{t+1}$ is also $P_s$.
+
+\slide{Stationarity Condition}
+
+\begin{eqnarray*}
+P'(\hat{y}) & = & \sum_{\hat{y}'}\;P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') \\
+\\
+& = & P_s(\hat{y}) + \mbox{flow-in} - \mbox{flow-out} \\
+\\
+& = & P_s(\hat{y}) + \sum_{\hat{y}' \in N(\hat{y})}\;P_s(\hat{y}'){P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}')}
+- P_s(\hat{y}){P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})}
+\end{eqnarray*}
+
+
+\slide{Detailed Balance}
+
+Detailed balance means that for each pair of neighboring assignments $\hat{y}$, $\hat{y}'$ we have equal flows in both directions.
+
+\vfill
+$$P_s(\hat{y}')P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') = P_s(\hat{y})P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})$$
+
+\vfill
+Without loss generality assume $P_s(\hat{y}') \geq P_s(\hat{y})$.
+
+\vfill
+Metropolis is defined by
+$$P_{\mathrm{Trans}}(\hat{y}\;|\;\hat{y}') = e^{-\Delta s}\;P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y}) = \frac{P_s(\hat{y})}{P_s(\hat{y}')}\;P_{\mathrm{Trans}}(\hat{y}'\;|\;\hat{y})$$
+
+\slide{Gibbs Sampling}
+
+The Metropolis algorithm wastes time by rejecting proposed moves.
+
+\vfill
+Gibbs sampling avoids this move rejection.
+
+\vfill
+In Gibbs sampling we select a node $i$ at random and change that node by drawing a new node value conditioned on the current values of the other nodes.
+
+\vfill
+We let {\color{red} $\hat{y} \backslash i$} be the assignment of labels given by $\hat{y}$ except that no label is assigned to node $i$.
+
+\vfill
+We let {\color{red} $\hat{y}[N(i)]$} be the assignment that $\hat{y}$ gives to the nodes (pixels) that are the neighbors of node $i$ (connected to $i$ by an edge.)
+
+\slide{Gibbs Sampling}
+
+Markov Blanket Property:
+{\color{red} $$P_s(\hat{y}[i] \;|\;\hat{y} \backslash i) = P_s(\hat{y}[i] \;|\; \hat{y}[N(i)])$$}
+\vfill
+Gibbs Sampling, Repeat:
+
+\begin{itemize}
+\item   Select $i$ at random
+
+\item {\color{red} draw $c$ from $P_s(\hat{y}[i]\;|\;y\backslash i) = P_s(\hat{y}[i] \;|\;\hat{y}[N(i)])$}
+
+\item $\hat{y}[i] = c$
+\end{itemize}
+
+\vfill
+This algorithm does not require knowledge of $Z$.
+
+\vfill
+The stationary distribution is $P_s$.
+
+\slide{END}
+
+}
+
+\end{document}

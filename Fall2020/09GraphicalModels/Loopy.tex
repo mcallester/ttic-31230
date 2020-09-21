@@ -1,0 +1,91 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \vfill
+  \centerline{\bf Loopy Belief Propagation (Loopy BP)}
+\vfill
+\vfill
+\vfill
+
+\slide{Loopy Belief Propagation (Loopy BP)}
+
+We design an algorithm that is correct for tree graphs and use it on non-tree (loopy) graphs.
+
+\anaslide{Belief Propagation on Trees}
+
+\centerline{\includegraphics[height=1.5in]{../images/Tree}}
+
+\vfill
+Belief Propagation is a message passing procedure (actually dynamic programming).
+
+\vfill
+For each edge $\{i,j\}$ and possible value $\tilde{y}$ for node $i$ we define {\color{red} $Z_{j \rightarrow i}[c]$}
+to be  the partition function for the subtree attached to $i$ through $j$ and
+with $\hat{y}[i]$ restricted to $c$.
+
+\vfill
+The function $Z_{j \rightarrow i}$ on the possible values of node $i$ is called the {\bf message} from $j$ to $i$.
+
+\vfill
+The reverse direction message $Z_{i \rightarrow j}$ is defined similarly.
+
+\slide{Dynamic Programming Computes the Messages}
+
+\centerline{\includegraphics[height=2.0in]{../images/Tree}}
+
+\vfill
+\begin{eqnarray*}
+  Z_{j\rightarrow i}[c] & = & \sum_{c'}  e^{s_n[j,c'] + s_e[j,i,c',c]}
+    \left(\prod_{k \in N(j),\;k \not = i}\;Z_{k\rightarrow j}[c']\right)
+\end{eqnarray*}
+
+\slide{Loopy BP}
+
+In a Loopy Graph we can initializing all message $Z_{i \rightarrow j}[c] = 1$ and then repeating (until convergence) the updates
+\vfill
+\begin{eqnarray*}
+  \tilde{Z}_{j \rightarrow i}[c] & = & \frac{1}{Z_{j \rightarrow i}}\;Z_{j \rightarrow i}[c] \;\;\;\;\;Z_{j \rightarrow i} = \sum_{c} Z_{j \rightarrow i}[c] \\
+  \\
+  \\
+  Z_{j\rightarrow i}[c] & = & \sum_{c'}  e^{s_n[j,c'] + s_e[j,i,c',c]}
+    \left(\prod_{k \in N(j),\;k \not = i}\;\tilde{Z}_{k\rightarrow j}[c']\right)
+\end{eqnarray*}
+
+\anaslide{Computing Node Marginals from Messages}
+
+\centerline{\includegraphics[height=1.5in]{../images/Tree}}
+
+\begin{eqnarray*}
+Z_i(c) & \doteq & \sum_{\hat{y}:\; \hat{y}[i] = c} \;e^{s(\hat{y})} \\
+\\
+& = & e^{s_i[c]} \left(\prod_{j\in N(i)} Z_{j \rightarrow i}[c]\right) \\
+\\
+{\color{red} P_i(c)} & = & Z_i(c)/Z,\;\;\;\;\; Z = \sum_{c}\;Z_i(c)
+\end{eqnarray*}
+
+
+\anaslide{Computing Edge Marginals from Messages}
+
+\begin{eqnarray*}
+Z_{i,j}(c,c') & \doteq & \sum_{\hat{y}:\; \hat{y}[i] = c,\;\hat{y}[j] = c'} \;e^{s(\hat{y})} \\
+\\
+& = & e^{s_n[i,c] + s_n[j,c'] +s_e[i,j,c,c']} \\
+& & \prod_{k\in N(i),\;k \not = j} Z_{k \rightarrow i}[c] \\
+& & \prod_{k\in N(j),\;k \not = i} Z_{k \rightarrow j}[c'] \\
+\\
+{\color{red} P_{i,j}(c,c')} & = & Z_{i,j}(c,c')/Z\;\;\;Z = \sum_{c,c'}\;Z_{i,j}(c,c')
+\end{eqnarray*}
+
+\slide{END}
+
+}
+
+\end{document}

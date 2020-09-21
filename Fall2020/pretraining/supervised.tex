@@ -1,0 +1,66 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+  \centerline{\bf TTIC 31230,  Fundamentals of Deep Learning}
+  \vfill
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Supervised Imagenet Pretraining}
+  \vfill
+  \vfill
+  
+\slide{Supervised ImageNet Pretraining}
+
+CBNet: A Novel Composite Backbone Network Architecture for Object Detection
+Liu et al., Sept. 2019 (COCO leader as of February 26, 2020).
+
+\vfill
+\begin{quotation}
+Generally speaking, in a typical CNN based object detector, a backbone network is used to extract basic features for detecting objects, which is usually designed for
+the image classification task and pretrained on the ImageNet
+dataset.
+\end{quotation}
+
+\slide{Instagram Pretraining, Mahajan et al., May 2018}
+
+In our experiments, we train standard convolutional network architectures to
+predict hashtags on up to 3.5 billion public Instagram images.
+
+\vfill
+To make training at this scale practical, we adopt a distributed synchronous implementation of
+stochastic gradient descent with large (8k image) minibatches, following Goyal et al. 2017.
+
+\slide{Instagram Pretraining}
+
+\centerline{\includegraphics[width=10.0 in]{../images/InstagramPre}}
+
+\slide{Rethinking ImageNet Pretraining, He et al., Nov. 2018}
+
+We report competitive results on object detection and instance segmentation on the COCO dataset using standard
+models trained from {\bf random initialization}.
+
+
+\slide{Rethinking ImageNet Pretraining, He et al., Nov. 2018}
+
+\centerline{\includegraphics[width=6.0 in]{../images/RethinkingPre}}
+
+\slide{CBNet (COCO leader as of Feb, 2020)}
+
+\centerline{\includegraphics[height=5.2 in]{\images/CBNet}}
+
+
+\slide{CBNet (COCO leader as of Feb, 2020)}
+
+\begin{quotation}
+We initialize each assembled backbone of CBNet with the pretrained model of the single backbone which is widely and
+freely available today, such as ResNet and ResNeXt
+\end{quotation}
+
+\slide{END}
+
+}
+\end{document}

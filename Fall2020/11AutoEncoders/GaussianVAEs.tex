@@ -1,0 +1,71 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{Gaussian VAEs}
+  \vfill
+  \vfill
+
+\anaslide{A General Autoencoder}
+
+\bigskip
+\centerline{$y$\includegraphics[width=4in]{\images/deconvleft} $\;\;z\;\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
+
+\bigskip
+\bigskip
+In generall we have either $P_\Phi(z)$ for $z$ discrete or $\hat{p}_\Phi(z)$ for $z$ continuous.
+
+\anaslide{A General Autoencoder}
+
+\bigskip
+\centerline{$y$\includegraphics[width=4in]{\images/deconvleft} $\;\;z\;\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
+
+\bigskip
+\bigskip
+For the continuous case with $p_\Phi(z|y)$ and $\hat{p}_\Phi(z)$ both Gaussian we can assume without loss
+of generality that
+\bigskip
+$$\hat{p}_\Phi(z) = {\cal N}(0,I)$$
+
+\slide{Gaussian VAEs: The Reparameterization Trick}
+
+\begin{eqnarray*}
+- \ln p_\Phi(y) & \leq & E_{z \sim \hat{p}_\Phi(z|y)}\;-\ln \frac{p_\Phi(z)p_\Phi(y|z)}{\hat{p}_\Phi(z|y)} \\
+\\
+\\
+& = & E_\epsilon\;-\ln \frac{p_\Phi(z)p_\Phi(y|z)}{\hat{p}_\Phi(z|y)}\;\;\;z := f_\Phi(y,\epsilon)
+\end{eqnarray*}
+
+\vfill
+$\epsilon$ is parameter-independent noise.
+
+\vfill
+This supports SGD: $\nabla_\Phi \;E_{y,\epsilon}\; [\ldots] = E_{y,\epsilon}\; \nabla_\Phi\;[\ldots]$
+
+\slide{Gaussian VAEs} 
+$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;-\ln \frac{p_\Phi(z)p_\Phi(y|z)}{\hat{p}_\Phi(z|y)}$$
+
+{\color{red}
+\begin{eqnarray*}
+z & = & z_\Phi(y) + \sigma_\Phi(y) \odot \epsilon\;\;\;\epsilon \sim {\cal N}(0,I) \\
+\\
+\hat{p}_\Phi(z[i]|y) & = & {\cal N}(z_\Phi(y)[i],\sigma_\Phi(y)[i]) \\
+\\
+p_\Phi(z[i]) & = & {\cal N}(\mu_p,\sigma_p[i]) \;\;\mbox{WLOG} = {\cal N}(0,1) \\
+\\
+p_\Phi(y|z) & = & {\cal N}(y_\Phi(z),\;\sigma^2I)
+\end{eqnarray*}
+}
+
+\slide{END}
+
+}
+\end{document}

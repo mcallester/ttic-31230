@@ -1,0 +1,137 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+
+  \vfill
+  \centerline{\bf AlphaZero Quantitative Results}
+  \vfill
+  \vfill
+
+\slide{The Go-Chess-Shogi Networks}
+
+\centerline{\includegraphics[height=3.0in]{../images/alphagoArchitecture2}}
+
+\vfill
+In AlphaZero the networks are either 20 block or 40 block ResNets and either separate networks or one dual-headed network.
+
+\slide{Training Time}
+
+Single 20 block dual-headed ResNet on Go.
+
+\vfill
+4.9 million Go games of self-play
+
+\vfill
+0.4s thinking time per move
+
+\vfill
+About 8 years of Go thinking time in training was completed in three days
+
+\vfill
+About 1000 fold parallelism.
+
+\slide{Elo Learning Curve for Go}
+
+\centerline{\includegraphics[height = 5in]{../images/alphalearning1}}
+
+\slide{Learning Curve for Predicting Human Go Moves}
+
+\centerline{\includegraphics[height = 5in]{../images/alphalearning2}}
+
+\slide{Ablation Study for Resnet and Dual-Head}
+
+\centerline{\includegraphics[height = 5in]{../images/alphaablation}}
+
+\slide{Increasing Blocks and Training}
+
+Increasing the number of Resnet blocks from 20 to 40.
+
+\vfill
+Increasing the number of training days from 3 to 40.
+
+\vfill
+Gives a Go Elo rating over 5000.
+
+\slide{Final Go Elo Ratings}
+
+\centerline{\includegraphics[height = 5in]{../images/alpha40}}
+
+\slide{Is Chess a Draw?}
+
+In 2007 Jonathan Schaeffer at the University of Alberta showed that checkers is a draw.
+
+\vfill
+Using alpha-beta and end-game dynamic programming, Schaeffer computed drawing strategies for each player.
+
+\vfill
+This was listed by Science Magazine as one of the top 10 breakthroughs of 2007.
+
+\vfill
+It is generally believed that chess is a draw.  It was even conjectured that Stockfish could not be defeated ...
+
+\slide{AlphaZero vs. Stockfish in Chess}
+
+From white Alpha won 25/50 and lost none.
+
+\vfill
+From black Alpha won 3/50 and lost none.
+
+\vfill
+AlphaZero evaluates 70 thousand positions per second.
+
+\vfill
+Stockfish evaluates 80 million positions per second.
+
+\slide{END}
+
+
+
+}
+\end{document}
+
+\ignore{
+\slideplain{Conspiracy Numbers}
+
+Conspiracy Numbers for Min-Max search, McAllester, 1988
+
+\vfill
+Each node $s$ has a min-max value $V(s)$ determined by the leaf values.
+
+\vfill
+For any positive integer $N$ and potential value $V$ we define $L(N,V)$ to be the set of leaf nodes $s_1$ such that
+there exist $N-1$ other leaf nodes $s_2$, $\ldots$, $s_N$ such that by changing the values of $s_1$, $\ldots$, $s_N$ the root node
+can be changed to $V$.
+
+
+\vfill
+{\bf Algorithm:}
+
+
+\vfill
+Repeatedly select some $N$ and $V$ such that $L(N,V)$ is non empty and expand some leaf in $L(N,V)$.
+}
+
+\ignore{
+\slide{Simulation}
+
+To find an upper-confidence leaf for the root and value $U$:
+
+\vfill
+At a max node pick the child minimizing $N(s,U)$.
+
+\vfill
+At a min node select any child $s$ with $V(s) < U$.
+
+\vfill
+\slide{Refinement}
+
+Let the static evaluator associate leaf nodes with values $U(s,N)$ and $L(s,N)$
+}
+

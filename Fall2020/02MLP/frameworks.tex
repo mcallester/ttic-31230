@@ -1,0 +1,185 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+  
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \vfill
+  \centerline{\bf Deep Learning Frameworks}
+  \vfill
+  \vfill
+
+\slideplain{Deep Learning Frameworks}
+
+A framework provides a high level language for writing models $P_\Phi(y|x)$.
+
+\vfill
+A framework compiles a model into an optimization algorithm.
+\vfill
+{\color{red} $$\Phi^* \approx \argmin_\Phi E_{(x,y) \sim \mathrm{Train}} \; -\ln P_\Phi(y|x)$$}
+
+\vfill
+A framework also typically provides support for managing large training sets and pre-trained model parameter values (also called ``models'').
+
+
+\slide{Some Frameworks}
+
+\begin{itemize}
+
+\item PyTorch
+
+\vfill
+\item Tensorflow
+
+\vfill
+\item Keras
+
+\vfill
+\item Microsoft Cogntive Toolkit
+
+\vfill
+\item Chainer
+
+$\vdots$
+
+\item EDF (Educational Framework in Python/NumPy for earlier versions of this class).
+\end{itemize}
+
+\slide{An Example}
+
+We consider the problem of taking an input $x$ (such as an image of a hand written digit) and classifying it into some small number of classes (such as the digits $0$ through $9$)
+using a multi layer perceptron (MLP).
+
+\vfill
+\centerline{\includegraphics[width= 4.0in]{../images/MNIST}}
+  
+\slide{Multiclass Classification}
+
+Assume a population distribution on pairs $(x,y)$ for $x \in \reals^d$ and $y \in \{y_1,\ldots, y_k\}$.
+
+\vfill
+For MNIST $x$ is a $28 \times 28$ image which we take to be a 784 dimensional vector giving $x \in \reals^{784}$.
+
+\vfill
+For MNIST $k = 10$.
+
+\vfill
+Let $\mathrm{Train}$ be a sample $(x_0,y_0),\;\ldots,\;(x_{N-1},y_{N-1})$ drawn IID from the population.
+
+\slide{A Multi Layer Perceptron (MLP)}
+\begin{eqnarray*}
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - b^0\right) \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} - b^1 \right) \\
+  {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
+\end{eqnarray*}
+
+\vfill
+$W^1$ and $W^2$ are matrices. $b_1$ and $b_2$ are vectors.
+
+\vfill
+$\sigma$ is a scalar-to-scalar activation function applied to each component of a vector.
+
+\slide{Activation Functions}
+
+An activation function $\sigma:\reals \rightarrow \reals$ (scalar-to-scalar) is applied to each component of a vector.
+
+\vfill
+\centerline{{\color{red} $\sigma(u) = \frac{1}{1+e^{-u}}$}\hspace{3em}\includegraphics[width=1.5in]{../images/sigmoid}, {\color{red} $\sigma(m) = P(y|m)$ for margin $m$}.}
+
+\vfill
+other common activation functions are
+
+\vfill
+\centerline{{\color{red} $\mathrm{ReLU}(u) = \max(0,u)$}\includegraphics[width=1.5in]{../images/relu},
+{\color{red} $\mathrm{tanh}(u) = 2\sigma(u)-1$}\includegraphics[width=1.5in]{../images/tanh}}
+
+\slideplain{The Framework Source Code}
+
+The source code is a sequence of assignment statements taking as input a training point, typically $\tuple{x,y}$,
+and outputs a loss value ${\cal L}$, typically $-\ln P_\Phi(y|x)$.
+
+\begin{eqnarray*}
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - b^0\right) \\
+  \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} - b^1 \right) \\
+  \\
+  {\color{red} P[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]} \\
+  \\
+  {\cal L} & = & - \ln P[y]
+\end{eqnarray*}
+
+\slide{Source Code}
+
+\begin{eqnarray*}
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - b^0\right) \\
+  \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} - b^1 \right) \\
+  \\
+  {\color{red} P[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]} \\
+  \\
+  {\cal L} & = & - \ln P[y]
+\end{eqnarray*}
+
+\vfill
+The source code is sometimes called a {\bf computational graph}.  I prefer to call it the source code.
+
+\slide{Source Code}
+
+\begin{eqnarray*}
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - b^0\right) \\
+  \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} - b^1 \right) \\
+  \\
+  {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]} \\
+  \\
+  {\cal L} & = & - \ln P[y]
+\end{eqnarray*}
+
+\vfill
+The framework automatically computes $\nabla_\Phi \; {\cal L}_\Phi(\tuple{x,y})$
+where $\Phi = (W^0,\;b^0,\;W^1,\;b^1)$.
+
+\slide{\bf Frameworks Automate Stochastic Gradient Descent (SGD)}
+
+$$\Phi^* = \argmin_\Phi E_{z \sim \mathrm{Train}} \; {\cal L}_\Phi(z)$$
+
+\vfill
+\begin{enumerate}
+\item Randomly Initialize $\Phi$ (initialization is important and must be done with care).
+
+  \vfill
+  \item Repeat until ``converged'':
+
+    \vfill
+    \begin{itemize}
+    \item draw $z \sim \mathrm{Train}$ at random.
+      \vfill
+    \item $\Phi \;\;\minuseq\;\; \eta \nabla_\Phi\;{\cal L}_\Phi(z)$
+    \end{itemize}
+\end{enumerate}
+
+\slide{Epochs}
+
+In practice we cycle through the training data visiting each training pair once.
+
+\vfill
+One pass through the training data is called an {\bf Epoch}.
+
+\slideplain{Summary}
+
+A framework provides a high level language for defining {\color{red} ${\cal L}_\Phi(z)$}.
+
+\vfill
+The framework compiles the source code for ${\cal L}_\Phi(z)$ into an optimization algorithm.
+\vfill
+{\color{red} $$\Phi^* = \argmin_\Phi E_{z \sim \mathrm{Train}} \; {\cal L}_\Phi(z)$$}
+
+\slide{END}
+}
+
+\end{document}

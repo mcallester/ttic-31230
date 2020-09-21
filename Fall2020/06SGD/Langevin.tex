@@ -1,0 +1,234 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Stochastic Gradient Descent (SGD)}
+  \vfill
+  \centerline{\bf Continuous Time Noise}
+  \vfill
+  \centerline{\bf Stationary Parameter Densities}
+  \vfill
+  \vfill
+  \vfill
+
+\slide{Modeling the Noise}
+
+Can we analytically solve for stationary distributions?
+
+\vfill
+Is the stationary distributin some kind of Gibbs Distribution?
+
+\vfill
+It is possible to model both the stationary distribution and non-stationary stochastic dynamics
+with a {\color{red} continuous time} stochastic differential equation.
+
+\slide{Continuous Time Noise}
+
+
+\vfill
+Consider SGD with batch size 1.
+
+$$\Phi_{i+1} = \Phi_i - \eta\hat{g}_i$$
+
+\vfill
+To model noise we consider holding $\eta > 0$ fixed.
+
+\vfill
+As in gradient flow, taking ``time'' to be the sum of the learning rates over the updates.
+For $N$ steps of SGD we define $\Delta t = N \eta$ or equivalently
+\begin{eqnarray*}
+\Phi(t) & = & \Phi_{i(t)} \\
+\\
+i(t) & = & \lfloor t/\eta \rfloor
+\end{eqnarray*}
+
+
+\slide{Continuous Time Noise}
+
+
+
+\vfill
+We consider $\Delta t$ large compared to $\eta$ so that $\Delta t$ corresponds to many SGD updates.
+
+\vfill
+We consider $\Delta t$ small enough so that the gradient distribution does not change during the many-update interval $\Delta t$.
+
+\slide{Continuous Time Noise}
+
+If the mean gradient $g(\Phi)$ is approximately constant over the interval $\Delta t = N \eta$ we have
+
+$$\Phi(t + \Delta t)  \approx \Phi(t) -g(\Phi)\Delta t + \eta \sum_{i=1}^N (g(\Phi) - \hat{g}_i)$$
+
+\vfill
+The random variables in the last term have zero mean.
+
+\vfill
+By the law of large numbers a sum (not the average) of $N$ random vectors will approximate a Gaussian distribution where the standard deviation
+grows like $\sqrt{N}$.
+
+\slide{Continuous Time Noise}
+
+Let $\Sigma$ be the covariance matrix of the random variable $\hat{g}$ and assume this is approximately constant over the interval $\Delta t$.
+
+\vfill
+Let $\epsilon$ be a zero mean Gaussian random variable with the same covariance matrix $\Sigma$.
+
+\begin{eqnarray*}
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i) \\
+\\
+& \approx & \Phi(t) -g(\Phi)\Delta t + \eta \epsilon \sqrt{N} \\
+\\
+& = & \Phi(t) -g(\Phi)\Delta t + \eta \epsilon \sqrt{\frac{\Delta t}{\eta}}
+\end{eqnarray*}
+
+
+\slide{Continuous Time Noise}
+
+\begin{eqnarray*}
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \epsilon \sqrt{{\color{red} \eta}\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma) \\
+\\
+& = & \Phi(t) -g(\Phi)\Delta t + \epsilon \sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,{\color{red} \eta}\Sigma)
+\end{eqnarray*}
+
+\vfill
+We can take this last equation to hold for all (arbitrarily small) $\Delta t$ in which case we get a continuous time stochastic process.  This process can be written as
+
+{\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\Sigma)$$}
+
+\vfill
+For $g(\Phi) = 0$ and $\Sigma = I$ we get Brownian motion.
+
+\slide{Continuous Time Noise}
+
+\begin{eqnarray*}
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \epsilon\sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\Sigma)
+\end{eqnarray*}
+
+\vfill
+Note that for $\eta \rightarrow 0$ the noise term vanishes.  If we then take $\Delta t \rightarrow 0$ (at a slower rate) we are back to gradient flow.
+
+\vfill
+To model noise we hold $\eta > 0 $ fixed.
+
+\slide{Stationary Distributions}
+
+SGD (at batch size 1) defines a Markov process
+
+$$\Phi_{i+1} = \Phi_i - \eta \hat{g}_i$$
+
+\vfill
+We will model the stationary distribution as a continuous density in parameter space.
+
+\vfill
+If the noise covariance matrix is isotropic (all eigenvalues are the same) we get a Gibbs distribution.
+
+
+\slide{The 1-D Stationary Distribution}
+
+Consider SGD on a single parameter.
+
+\vfill
+Let $p$ be a probability density on $x$.
+
+\vfill
+Assume that the gradient $\hat{g}$ has variance $\sigma$ everywhere.
+
+\vfill
+There is a diffusion flow proportional to $\eta^2\sigma^2\;dp/dx$.
+
+\vfill
+There is a gradient flow equal to $\eta p \;d {\cal L}/dx$.
+
+\vfill
+For a stationary distribution the two flows cancel giving.
+
+\vfill
+{\color{red} $$\alpha \eta^2 \sigma^2 \frac{dp}{dx} = - \eta p\frac{d{\cal L}}{dx}$$}
+
+
+\slide{The 1-D Stationary Distribution}
+
+\vspace{-2ex}
+\begin{eqnarray*}
+\alpha \eta^2 \sigma^2 \frac{dp}{dx} & = & - \eta p\frac{d{\cal L}}{dx} \\
+\\
+\frac{dp}{p} & = & \frac{-d{\cal L}}{\alpha\eta\sigma^2} \\
+\\
+\ln p & = & \frac{-{\cal L}}{\alpha \eta \sigma^2} + C \\
+\\
+{\color{red} p(x)} & = & {\color{red} \frac{1}{Z}\exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma^2}\right)}\;\;\alpha \approx 1/10
+\end{eqnarray*}
+
+\vfill
+We get a Gibbs distribution!
+
+\slide{A 2-D Stationary Distribution}
+
+Let $p$ be a probability density on two parameters $(x,y)$.
+
+\vfill
+We consider the case where $x$ and $y$ are completely independent with
+$${\cal L}(x,y) = {\cal L}(x) + {\cal L}(y)$$
+
+\vfill
+For completely independent variables we have
+\begin{eqnarray*}
+p(x,y) & = & p(x)p(y) \\
+\\
+&= & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta \sigma_y^2}\right)
+\end{eqnarray*}
+
+\slide{A 2-D Stationary Distribution}
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta \sigma_y^2}\right) \\
+\\
+\\
+& = & \frac{1}{Z} \exp\left(-\beta_x{\cal L}(x) - \beta_y{\cal L}(y)\right)
+\end{eqnarray*}
+
+\vfill
+This is not a Gibbs distribution!
+
+\vfill
+It has two different temperature parameters!
+
+\slide{Noise Models and RMSProp}
+
+Suppose we use parameter-specific learning rates $\eta_x$ and $\eta_y$
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta_x \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta_y \sigma_y^2}\right)
+\end{eqnarray*}
+
+Setting $\eta_x = \eta'/\sigma^2_x$ and $\eta_y = \eta'/\sigma^2_y$ gives
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta'} + \frac{-{\cal L}(y)}{\alpha \eta'}\right) \\
+\\
+& = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x,y)}{\alpha \eta'}\right)\;\;\;\mathrm{Gibbs!}
+\end{eqnarray*}
+
+\slide{Noise Models and RMSProp}
+
+Suppose we use parameter-specific learning rates $\eta_x$ and $\eta_y$
+
+Setting $\eta_x = \eta'/\sigma^2_x$ and $\eta_y = \eta'/\sigma^2_y$ gives
+
+\vfill
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x,y)}{\alpha \eta'}\right)\;\;\;\mathrm{Gibbs!}
+\end{eqnarray*}
+
+\vfill
+RMSProp sets $\eta_x = \eta'/\sigma_x$ rather than $\eta_x = \eta'/\sigma_x^2$.  Empirically RMSProp seems better than the more
+theoretically motivated algorithm.
+
+\slide{END}
+\end{document}

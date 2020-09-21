@@ -1,0 +1,173 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{Rate-Distortion Autoencoders (RDAs)}
+  \vfill
+  \vfill
+
+\slide{The Fundamental Equation for Continuous $y$}
+
+If $y$ is continuous then the fundamental equation for estimating the distribution on $y$ (cross entropy) involves continuous probability densities.
+
+\vfill
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)$$
+
+\vfill
+This occurs in unsupervised pretraining for sounds and images.
+
+\vfill
+But differential entropy and differential cross-entropy are conceptually problematic.
+
+\slide{Rate-Distortion Autoencoders (RDAs)}
+
+A rate-distortion autoencoder (RDA) replaces differential cross-entropy with a bi-objective --- a compression rate and
+the reconstruction distortion.
+
+\vfill
+The primary example is lossy compression of images and audio.
+
+\vfill
+A compressed image does not have all the information of the original and the reconstructed image is a ``distorted'' version of the original.
+
+\vfill
+The rate is given by the size of the compressed image (in bits or bytes).
+
+\slide{Rate-Distortion Autoencoders (RDAs)}
+
+We compress a continuous signal $y$ to a bit string $\tilde{z}_\Phi(y)$.
+
+\vfill
+We decompress $\tilde{z}_\Phi(y)$ to $y_\Phi(\tilde{z}_\Phi(y))$.
+
+\vfill
+We can then define a rate-distortion loss.
+
+{\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$}
+
+\vfill
+where $|\tilde{z}|$ is the number of bits in the bit string $\tilde{z}$.
+
+\slide{Common Distortion Functions}
+
+$$\Phi^* = \argmin_\Phi\;E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
+
+\vfill
+It is common to take
+
+$$\mathrm{Dist}(y,\hat{y}) = ||y-\hat{y}||^2 \hspace{4em}(L_2)$$
+
+\vfill
+or
+
+$$\mathrm{Dist}(y,\hat{y}) = ||y-\hat{y}||_1 \hspace{4em} (L_1)$$
+
+\slide{CNN-based Image Compression}
+
+These slides are loosely based on
+
+\vfill
+End-to-End Optimized Image Compression, Balle, Laparra, Simoncelli, ICLR 2017.
+
+
+\vfill
+\centerline{$y$\includegraphics[width=4in]{\images/deconvleft} $\;\tilde{z}\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
+
+
+\slide{Rounding a Tensor}
+
+Take $z_\Phi(y)$ can be a layer in a CNN applied to image $y$.  $z_\Phi(y)$ can have with both spatial and feature dimensions.
+
+\vfill
+Take $\tilde{z}_\Phi(y)$ to be the result of rounding each component of the continuous tensor $z_\Phi(y)$ to the nearest integer.
+
+\vfill
+$$\tilde{z}_\Phi(y)[x,y,i] = \lfloor z_\Phi(y)[x,y,i] + 1/2 \rfloor$$
+
+\slide{Rounding is not Differentiable}
+
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
+
+\vfill
+Because of rounding, $\tilde{z}_\Phi(y)$ is discrete and the gradients are zero.
+
+\vfill
+We will train using a differentiable approximation.
+
+\slide{Rate: Replacing Code Length with Differential Entropy}
+
+\begin{eqnarray*}
+{\cal L}_{\mathrm{rate}}(\Phi) & = & E_{y \sim \pop}\;|\tilde{z}_\Phi(y)|
+\end{eqnarray*}
+
+\vfill
+Recall that {\color{red} $\tilde{z}_\Phi(y)$} is a rounding of a continuous encoding {\color{red} $z_\Phi(y)$}.
+
+\vfill
+Any probability distribution on integers can be approximated by a continuous density $p_\Phi$ on the reals.  For example we can take $p_\Phi$ to be continuous and
+piecewise linear so that the rate becomes differentiable.
+
+\vfill
+{\color{red} $$|\tilde{z}_\Phi(y)| \approx \sum_{x,y,i} -\ln p_\Phi(z_\Phi(y)[x,y,i])$$}
+
+\slide{Distortion: Replacing Rounding with Noise}
+
+We can make distortion differentiable by modeling rounding as the addition of noise.
+
+\begin{eqnarray*}
+{\cal L}_{\mathrm{dist}}(\Phi) & = & E_{y \sim \mathrm{Pop}} \;\mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y))) \\
+\\
+& \approx & E_{y,\epsilon} \;\mathrm{Dist}(y,\;y_\Phi(z_\Phi(y) + \epsilon))
+\end{eqnarray*}
+
+\vfill
+Here $\epsilon$ is a noise vector each component of which is drawn uniformly from $(-1/2,1/2)$.
+
+\slide{Rate: Differential Entropy vs. Discrete Entropy}
+
+\bigskip
+\centerline{\includegraphics[height=3in]{../images/RateDist6}}
+
+Each point is a rate for an image measured in both differential entropy and discrete entropy.  The size of the rate changes as we change the weight $\lambda$.
+
+\slide{Distortion: Noise vs. Rounding}
+
+\centerline{\includegraphics[height=3in]{../images/RateDist5}}
+
+Each point is a distortion for an image measured in both a rounding model and a noise model.  The size of the distortion changes as we change the weight $\lambda$.
+
+\anaslide{JPEG at 4283 bytes or .121 bits per pixel}
+
+\bigskip
+\centerline{\includegraphics[height=5in]{../images/RateDist2}}
+
+\anaslide{JPEG 2000 at 4004 bytes or .113 bits per pixel}
+
+\bigskip
+\centerline{\includegraphics[height= 5in]{../images/RateDist3}}
+
+\anaslide{Deep Autoencoder at 3986 bytes or .113 bits per pixel}
+
+\bigskip
+\centerline{\includegraphics[height = 5in]{../images/RateDist4}}
+
+
+\slide{Rate-Distortion Autoencoders (RDAs)}
+
+$$\Phi^* = \argmin_\Phi E_{y \sim \popd} - \ln P_\Phi(z_\Phi(y)) + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y)))$$
+
+\vfill
+$z_\Phi(y)$ discrete.
+
+\slide{END}
+
+}
+\end{document}

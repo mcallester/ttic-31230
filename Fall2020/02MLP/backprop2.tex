@@ -1,0 +1,105 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+  
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \vfill
+  \centerline{\bf Backpropagation with Arrays and Tensors}
+  \vfill
+  \vfill
+
+\slide{Handling Arrays}
+
+\begin{eqnarray*}
+  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - B^0\right) \\
+  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} - B^1 \right) \\
+  {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]} \\
+  {\cal L} & = & - \ln P[y]
+\end{eqnarray*}
+
+\vfill
+Each array {\color{red} $W$} is an object with attributes {\color{red} $W.\mathrm{value}$} and {\color{red} $W.\mathrm{grad}$}.
+
+\vfill
+{\color{red} $W.\mathrm{grad}$} is an array storing {\color{red} $\nabla_W{\cal L}$}.
+
+\vfill
+{\color{red} $W.\mathrm{grad}$} has same indeces (same ``shape'') as {\color{red} $W.\mathrm{value}$}.
+
+\slide{Source Code Loops}
+
+\begin{eqnarray*}
+   s & = & \sigma\left(Wh - B \right)
+\end{eqnarray*}
+
+\vfill
+Can be written as
+
+\vfill
+$$\begin{array}{lrcl}
+\mathrm{for}\;j &  \tilde{h}[j] & = & 0 \\
+\\
+\mathrm{for}\;j,i &  \tilde{h}[j] & \pluseq &  W[j,i]x[i] \\
+\\
+\mathrm{for}\; j & s[j] & = & \sigma(\tilde{h}[j] - B[j])
+\end{array}$$
+
+\slide{Backpropagation on Loops}
+the backpropagation for
+
+$$\begin{array}{lrcl}
+\mathrm{for}\;j & {\color{red} h[j]} & = & \sigma(\tilde{h}[j] - B[j])
+\end{array}$$
+
+\vfill
+is
+
+\vfill
+$$\begin{array}{lrcl}
+\mathrm{for}\;j & {\color{red} \tilde{h}.\grad[j]} & \pluseq & {\color{red} h.\grad[j]\sigma'(h[j] - B[j])} \\
+\\
+\mathrm{for}\;j & {\color{red} B.\grad[j]} & \minuseq & {\color{red} h.\grad[j]\sigma'(h[j] - B[j])}
+\end{array}$$
+
+\slide{Backpropagation on Loops}
+the backpropagation for
+
+$$\begin{array}{lrcl}
+\mathrm{for}\;j,i & {\color{red} \tilde{h}[j]} & \pluseq & {\color{red} W[j,i]x[i]}
+\end{array}$$
+
+\vfill
+is
+$$\begin{array}{lrcl}
+\mathrm{for}\;j,i & {\color{red} W.\grad[j,i]} & \pluseq & {\color{red} \tilde{h}.\grad[j] x[i]} \\
+\\
+& {\color{red} x.\grad[i]} & \pluseq & {\color{red} \tilde{h}.\grad[j] W[j,i]} \\
+\end{array}$$
+
+\slide{General Tensor Operations}
+
+In practice all deep learning source code can be written as a series of scalar assignments and loops where the body of each loop operates on scalars.
+
+\vfill
+Scalar backpropagation can then be applied to the loops.
+
+\vfill
+$$\mathrm{for} \cdots \;\;Y[\cdots] \;\pluseq\; e(A[\cdots],B[\cdots])$$
+
+\vfill
+has backpropagation loops
+
+\vfill
+$$\mathrm{for}\;\cdots \;A.\grad[\cdots] \;\pluseq\; Y.\grad[\cdots](\partial e/\partial A[\cdots])$$
+$$\mathrm{for}\;\cdots \;B.\grad[\cdots] \;\pluseq\; Y.\grad[\cdots](\partial e/\partial B[\cdots])$$
+
+\slide{END}
+}
+
+\end{document}

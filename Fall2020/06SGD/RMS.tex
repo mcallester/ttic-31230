@@ -1,0 +1,182 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\newcommand{\solution}[1]{\bigskip {\bf Solution}: #1}
+
+\begin{document}
+
+{\Huge
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Stochastic Gradient Descent (SGD)}
+  \vfill
+  \centerline{\bf RMSProp and Adam and Decoupled Versions}
+
+\slide{RMSProp and Adam}
+
+RMSProp and Adam are ``adaptive'' SGD methods --- the effective learning rate is computed from statistics of the data rather than set as a fixed hyper-parameter (although
+the adaptation algorithm itself still has hyper-parameters).
+
+\vfill
+Different effective learning rates are used for different model parameters.
+
+\vfill
+Adam is typically used in NLP while Vanilla SGD is typically used in vision.  This may be related to the fact that batch normalization is used in vision but not in NLP.
+
+\slide{RMSProp}
+
+RMSProp is based on a running average of $\hat{g}[i]^2$ for each scalar model parameter $i$.
+
+\begin{eqnarray*}
+{\color{red} s_t[i]} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
+\\
+{\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i]} + \epsilon}\;\; \hat{g}_t[i]}
+\end{eqnarray*}
+
+\slide{RMSProp}
+The second moment of a scalar random variable $x$ is $E\;x^2$
+
+\vfill
+The variance $\sigma^2$ of $x$ is $E \;(x - \mu)^2$ with $\mu = E\;x$.
+
+\vfill
+RMSProp uses an estimate $s[i]$ of the second moment of the random scalar $\hat{g}[i]$.
+
+\vfill
+For $g[i]$ small $s[i]$ approximates the variance of $\hat{g}[i]$.
+
+\vfill
+There is a ``centering'' option in PyTorch RMSProp that switches from the second moment to the variance.
+
+\slide{RMSProp Motivation}
+\begin{eqnarray*}
+{\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i]} + \epsilon}\;\; \hat{g}_t[i]}
+\end{eqnarray*}
+
+\vfill
+One interpretation of RMSProp is that a low variance gradient has less statistical uncertainty and hence needs less averaging before making the update.
+
+\slide{RMSProp is Theoretically Mysterious}
+
+{\color{red} $$\Phi[i] \;\minuseq \; \eta\;\frac{\hat{g}[i]}{\sigma[i]}\;\;(1)\hspace{5em}\Phi[i] \;\minuseq \; \eta\;\frac{\hat{g}[i]}{\sigma^2[i]}\;\;(2)$$}
+
+\vfill
+Although (1) seems to work better, (2) is better motivated theoretically.  To see this we can consider units.
+
+\vfill
+If parameters have units of ``weight'', and loss is in bits, then (2) type checks with $\eta$ having units of inverse bits --- the numerical value of $\eta$
+has no dependence on the choice of the weight unit.
+
+\vfill
+Consistent with the dimensional analysis, many theoretical analyses support (2) over (1) contrary to apparent empirical performance.
+
+\slide{Adam --- Adaptive Momentum}
+
+Adam combines momentum and RMSProp.
+
+\vfill
+PyTorch RMSProp also supports momentum.  However, it presumably uses the standard moment learning rate parameter which is strongly coupled to the momentum parameter.
+Without an understanding of the coupling, hyper-parameter optimization is then difficult.
+
+\vfill
+Adam uses a learning rate parameter that is naturally decoupled from the momentum parameter.
+
+\vfill
+Adam also uses ``bias correction''.
+
+\slide{Bias Correction}
+
+Consider a standard moving average.
+
+\begin{eqnarray*}
+\tilde{x}_0 & = & 0 \\
+\\
+\tilde{x}_t & = & \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t
+\end{eqnarray*}
+
+\vfill
+For $t < N$ the average $\tilde{x}_t$ will be strongly biased toward zero.
+
+\slide{Bias Correction}
+
+The following running average maintains the invariant that $\tilde{x}_t$ is exactly the average of $x_1,\ldots,x_t$.
+
+\begin{eqnarray*}
+\tilde{x}_t & = & \left(\frac{t-1}{t}\right)\tilde{x}_{t-1} + \left(\frac{1}{t}\right)x_t \\
+\\
+\\
+& = & \left(1-\frac{1}{t}\right)\tilde{x}_{t-1} + \left(\frac{1}{t}\right)x_t
+\end{eqnarray*}
+
+\vfill
+We now have $\tilde{x}_1 = x_1$ independent of any $x_0$.
+
+\vfill
+But this fails to track a moving average for $t >> N$.
+
+\slide{Bias Correction}
+
+The following avoids the initial bias toward zero while still tracking a moving average.
+
+\begin{eqnarray*}
+\tilde{x}_t & = & \left(1-\frac{1}{\min(N,t)}\right)\tilde{x}_{t-1} + \left(\frac{1}{\min(N,t)}\right)x_t
+\end{eqnarray*}
+
+\vfill
+The published version of Adam has a more obscure form of bias correction which yields essentially the same effect.
+
+\slide{Adam (simplified)}
+
+\begin{eqnarray*}
+  \tilde{g}_{t}[i] & = & \left(1-\frac{1}{\min(t,N_g)}\right)\tilde{g}_{t-1}[i] + \frac{1}{\min(t,N_g)} \hat{g}_t[i] \\
+  \\
+  \\
+  s_{t}[i] & = & \left(1-\frac{1}{\min(t,N_s)}\right)s_{t-1}[i] + \frac{1}{\min(t,N_s)} \hat{g}_t[i]^2 \\
+  \\
+  \\
+\Phi_{t+1}[i] & =  & \Phi_t - \frac{\eta}{\sqrt{s_{t}[i]} + \epsilon}\;\;\tilde{g}_{t}[i]
+\end{eqnarray*}
+
+\slide{Decoupled Adam}
+
+$$\Phi_{t+1}[i] =  \Phi_t - \frac{\eta}{\sqrt{s_{t}[i]} + \epsilon}\;\;\tilde{g}_{t}[i]$$
+
+\vfill
+Empirically, tuning $\epsilon$ is important.
+
+\vfill
+It seems useful to reparameterizing in terms of $\eta_0$ by
+$$\eta = \frac{\eta_0}{\epsilon}$$
+
+\vfill
+Some coupling remains between $\eta_0$ and $\epsilon$.
+
+\slide{Decoupled Adam}
+
+Decoupling Adam from the batch size $B$ is problematic.
+
+\vfill
+Rather than
+$$s_t[i] = \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2$$
+\vfill
+we would like
+\begin{eqnarray*}
+s_t[i] & = &  \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \left(\frac{1}{B} \sum_b \hat{g}_{t,b}[i]^2\right)
+\end{eqnarray*}
+
+\slide{Decoupled Adam}
+
+In PyTorch this is difficult because ``optimizers'' are defined as a function of $\hat{g}_t$.
+
+\vfill
+$\hat{g}_t[i]$ is not sufficient for computing $\sum_b \;\hat{g}_{t,b}[i]^2$.
+
+\vfill
+To compute $\sum_b \;\hat{g}_{t,b}[i]^2$ we need to modify the backward method of all PyTorch objects!
+
+\slide{END}
+
+} \end{document}
+

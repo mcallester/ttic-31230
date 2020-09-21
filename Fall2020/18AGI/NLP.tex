@@ -1,0 +1,113 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+
+\vfill
+\centerline{\bf Representing Choices and Knowledge}
+\vfill
+\centerline{\bf with Natural Language}
+  \vfill
+  \vfill
+
+\slide{Natural Langauge as a General Learning Architecture}
+
+Is natural langauage a reflection of a general learning or knowledge representation architecture?
+
+\vfill
+Will some NLP-motivated memory-based Transformer-like architecture prove to be general --- domain independent.
+
+\vfill
+Is there ultimately an important relationship between language and logic?
+
+\slide{Natural Language Semantics}
+
+Thousands of civilians have fled advances by Syrian government forces in eastern Ghouta as ...
+
+\slide{Stanford Parse Tree}
+\begin{verbatim}
+(NP (NP (NNS Thousands))
+    (PP (IN of) (NP (NNS civilians))))
+(VP (VBP have)
+    (VP (VBN fled)
+        (NP (NNS advances))
+        (PP (IN by) (NP (NP (JJ Syrian)
+                            (NN government)
+                            (NNS forces))
+                        (PP (IN in) (NP (JJ eastern)
+                                        (NNP Ghouta))))))))
+\end{verbatim}
+
+\slideplain{Stanford Dependencies}
+
+\begin{verbatim}
+root(ROOT-0, fled-5)
+  aux(fled-5, have-4)
+  nsubj(fled-5, Thousands-1)
+    nmod(Thousands-1, civilians-3)
+      case(civilians-3, of-2)
+  dobj(fled-5, advances-6)
+  nmod(fled-5, forces-10)
+    case(forces-10, by-7)
+    amod(forces-10, Syrian-8)
+    compound(forces-10, government-9)
+    nmod(forces-10, Ghouta-13)
+      case(Ghouta-13, in-11)
+      amod(Ghouta-13, eastern-12)
+\end{verbatim}
+
+\slideplain{Just Parantheses}
+
+\begin{verbatim}
+(Thousands of civilians)
+(have fled)
+(advances (by (Syrian government forces))
+          (in eastern Ghouta))
+\end{verbatim}
+
+\slideplain{Reference (Entity Linking)}
+
+{\color{blue} Thousands of civilians have fled advances by Syrian government forces in eastern Ghouta as}
+Damascus makes rapid gains against the last major rebel enclave near the capital.
+
+\vfill
+Damascus $\Rightarrow$ Assad
+
+\vfill
+Rapid Gains $\Rightarrow$ advances-6
+
+\vfill
+the last major rebel enclave ... $\Rightarrow$ Ghouta
+
+\vfill
+the capital $\Rightarrow$ Damascus
+
+\slide{Reference vs. Composition}
+
+Functional programming is compositional
+
+\vfill
+$$x = f(y,z)$$
+
+\vfill
+The meaning of $x$ is computed by $f$ from the meaning of $y$ and $z$.
+
+\vfill
+But in language we typically have that $f(y,z)$ is a mention and $x$ is its referent.
+
+\vfill
+(the last (major rebel enclave) (near (the capital)))
+
+\vfill
+$$x = (\mbox{the last $Q$ $P$})$$
+
+\slide{END}
+
+}
+\end{document}

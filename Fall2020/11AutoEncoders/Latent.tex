@@ -1,0 +1,166 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \vfil
+  \centerline{\bf Interpretable Latent Variables}
+  \vfill
+  \vfill
+
+\slide{Latent Variables}
+
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z) = E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)$$}
+
+Or
+
+\vfill
+{\color{red} $$P_\Phi(y|x) = \sum_z\;P_\Phi(z|x)P_\Phi(y|z,x) = E_{z \sim P_\Phi(z|x)}\;P_\Phi(y|z,x)$$}
+
+\vfill
+Here {\color{red} $z$} is a latent variable.
+
+\slide{Interpretable Latent Variables}
+
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z) = E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)$$}
+
+Here we often think of $z$ as the causal source of $y$.
+
+\vfill
+For example $z$ might be a physical scene causing image $y$.
+
+\vfill
+Or $z$ might be the intended utterance causing speech signal $y$.
+
+\vfill
+In these situations a latent variable model should more accurately represent the distribution on $y$.
+
+\slide{Interpretable Latent Variables}
+
+{\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z) = E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)$$}
+
+\vfill
+$P_\Phi(z)$ is called the prior.
+
+\vfill
+Given an observation of $y$ (the evidence) $P_\Phi(z|y)$ is called the posterior.
+
+\vfill
+Variational Bayesian inference involves approximating the posterior.
+
+\anaslide{Colorization with Latent Segmentation}
+\medskip
+\centerline{\includegraphics[width = 5in]{../images/colorizationGreg2}}
+\centerline{$x$ \hspace{4em} $\hat{y}$ \hspace{4em} $y$}
+\centerline{\huge Larsson et al., 2016}
+
+\vfill
+Colorization is a natural self-supervised learning problem --- we delete the color and then try to recover it from the grey-level image.
+
+\vfill
+Can colorization be used to learn segmentation?
+
+\vfill
+Segmentation is latent --- not determined by the color label.
+
+\anaslide{Colorization with Latent Segmentation}
+\medskip
+\centerline{\includegraphics[width = 5in]{../images/colorizationGreg2}}
+\centerline{$x$ \hspace{4em} $\hat{y}$ \hspace{4em} $y$}
+\centerline{\huge Larsson et al., 2016}
+
+\vfill
+$x$ is a grey level image.
+
+\vfill
+$y$ is a color image drawn from $\pop(y|x)$.
+
+\vfill
+$\hat{y}$ is an arbitrary color image.
+
+\vfill
+$P_\Phi(\hat{y}|x)$ is the probability that model $\Phi$ assigns to the color image $\hat{y}$ given grey level image $x$.
+
+\anaslide{Colorization with Latent Segmentation}
+\medskip
+\centerline{\includegraphics[width = 5in]{../images/colorizationGreg2}}
+\centerline{$x$ \hspace{4em} $\hat{y}$ \hspace{4em} $y$}
+
+\vfill
+{\color{red} $$P_\Phi(\hat{y}|x) = \sum_z\;P_\Phi(z|x)P_\Phi(\hat{y}|z,x).$$}
+\begin{eqnarray*}
+\mbox{input}\; x \\
+P_\Phi(z|x) & = & \ldots \;\;\mbox{\color{red} semantic segmentation} \\
+P_\Phi(\hat{y}|z,x) & = & \ldots \;\;\mbox{\color{red} segment colorization} \\
+\end{eqnarray*}
+
+\anaslide{Assumptions}
+
+\bigskip
+\bigskip
+We assume models $P_\Phi(z)$ and $P_\Phi(y|z)$ are both samplable and computable.
+
+\vfill
+In other words, we can sample from these distributions and for any given $z$ and $y$ we can compute $P_\Phi(z)$ and $P_\Phi(y|z)$.
+
+\vfill
+These are nontrivial assumptions.
+
+\vfill
+A loopy graphical model is neither (efficiently) samplable nor computable.
+
+\slide{Cases Where the Assumptions Hold}
+
+In CTC we have that $z$ is the sequence with blanks and $y$ is the result of removing the blanks from $z$.
+
+\vfill
+In a hidden markov model $z$ is the sequence of hidden states and $y$ is the sequence of emissions.
+
+\vfill
+An autoregressive model, such as an autoregressive language model, is both samplable and computable.
+
+\anaslide{Image Generators}
+
+\bigskip
+\centerline{$z$\hspace{5in}$y_\Phi(z)$}
+\centerline{\includegraphics[width=6in]{\images/generator2}}
+
+\bigskip
+We can generate an image $y$ form noise $z$ where $p_\Phi(z)$ and $p_\Phi(y|z)$ are both samplable and computable.
+
+\bigskip
+Typically $p_\Phi(z)$ is ${\cal N}(0,I)$ reshaped as $z[X,Y,J]$
+
+
+\anaslide{Image Generators}
+
+\bigskip
+\centerline{$z$\hspace{5in}$y_\Phi(z)$}
+\centerline{\includegraphics[width=6in]{\images/generator2}}
+
+\bigskip
+Our assumptions hold for image generators such as GANs, but $z$ is typically viewed as ``noise'' and is not interpretable.
+
+\anaslide{Modeling $y$}
+
+\vfill
+We would like to use the fundamental equation
+
+$$\Phi^* = \argmin_\Phi\;E_{y \sim \pop}\;- \ln P_\Phi(y)$$
+
+\bigskip
+\bigskip
+But even when $P_\Phi(z)$ and $P_\Phi(y|z)$ are samplable and computable we cannot typically compute $P_\Phi(y)$.
+
+\vfill
+Specifically, for $P_\Phi(y)$ defined by a generator we cannot compute $P_\Phi(y)$ for a test image $y$.
+\slide{END}
+
+\end{document}

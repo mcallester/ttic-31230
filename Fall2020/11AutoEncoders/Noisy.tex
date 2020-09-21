@@ -1,0 +1,139 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{Noisy Channel RDAs}
+  \vfill
+  \vfill
+
+\slide{The Fundamental Equation for Continuous $y$}
+
+If $y$ is continuous then the fundamental equation for estimating the distribution on $y$ (cross entropy) involves continuous probability densities.
+
+\vfill
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)$$
+
+\vfill
+This occurs in unsupervised pretraining for sounds and images.
+
+\vfill
+But differential entropy and differential cross-entropy are conceptually problematic.
+
+\slide{Noisy Channel RDAs}
+
+In a noisy channel RDA we do not compress $y$ into a finite number of bits.
+
+\vfill
+Instead we add noise to a continuous representation.
+
+\vfill
+{\bf As in the image compression RDA, the addition of noise is similar to rounding.}
+
+\vfill
+But instead of viewing the addition of noise as a hack to allow differentiation, we can reinterpret ``rate'' as mutual information
+and eliminate the discrete representation.
+
+\anaslide{Noisy Channel RDAs}
+
+\bigskip
+\bigskip
+\begin{eqnarray*}
+z & = & z_\Phi(y,\epsilon) \;\;\mbox{$\epsilon$ is fixed (parameter independent) noise} \\
+\\
+\Phi^* & = & \argmin_\Phi \;I_\Phi(y,z) + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))
+\end{eqnarray*}
+
+\bigskip
+By the channel capacity theorem {\color{red} $I(y,z)$} is the {\bf rate} of information transfer from $y$ to $z$.
+
+\anaslide{Noisy Channel RDAs}
+
+\bigskip
+\bigskip
+\begin{eqnarray*}
+z & = & z_\Phi(y,\epsilon) \;\;\mbox{$\epsilon$ is fixed (parameter independent) noise} \\
+\\
+\Phi^* & = & \argmin_\Phi \;I_\Phi(y,z) + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))
+\end{eqnarray*}
+        
+\bigskip
+Using parameter-independent noise is called the ``reparameterization trick'' and allows SGD.
+\begin{eqnarray*}
+& & \nabla_\Phi \;E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon))) \\
+\\
+& = & E_{y,\epsilon}\; \nabla_\Phi\;\mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))
+\end{eqnarray*}
+
+\slide{Mutual Information as a Channel Rate}
+
+Typically $z_\Phi(y,\epsilon)$ is simple.  For example
+
+\begin{eqnarray*}
+\epsilon & \sim & {\cal N}(0,I) \\
+\\
+z_\Phi(y,\epsilon) & = & \mu_\Phi(y) +\sigma_\Phi(y)\odot \epsilon
+\end{eqnarray*}
+
+\vfill
+In this example {\color{red} $p_\Phi(z|y)$ is easily computed.}
+
+\slide{Mutual Information Replaces Rate}
+
+\begin{eqnarray*}
+I_\Phi(y,z)  & = & E_{y,\epsilon}\; \ln \frac{\mathrm{pop}(y)p_\Phi(z|y)}{\mathrm{pop}(y)p_{\mathrm{pop},\Phi}(z)} \\
+\\
+\\
+& = & E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{p_{\mathrm{pop},\Phi}(z)} \\
+\\
+\\
+\mathrm{where}\;\;\;\;p_{\mathrm{pop},\Phi}(z) & = & E_{y\sim \mathrm{pop}}\;\;p_\Phi(z|y)
+\end{eqnarray*}
+
+\slide{A Variational Bound}
+
+$$p_{\mathrm{pop},\Phi}(z)  = E_{y\sim \mathrm{pop}}\;\;p_\Phi(z|y)$$
+
+\vfill
+We cannot compute $p_{\mathrm{pop},\Phi}(z)$.
+
+\vfill
+Instead we will use a model $\hat{p}_\Phi(z)$ to approximate $p_{\popd,\Phi}(z)$.
+
+\slide{A Variational Bound}
+
+\begin{eqnarray*}
+{\color{red} I(y,z)}  & = & E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{p_{\mathrm{pop},\Phi}(z)} \\
+\\
+& = & E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{\hat{p}_\Phi(z)} + E_{y,\epsilon}\;\ln\frac{\hat{p}_\Phi(z)}{p_{\mathrm{pop},\Phi}(z)} \\
+\\
+& = & E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{\hat{p}_\Phi(z)} - KL(p_{\mathrm{pop},\Phi}(z),\hat{p}_\Phi(z)) \\
+\\
+& {\color{red} \leq} & {\color{red} E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{\hat{p}_\Phi(z)}}
+\end{eqnarray*}
+
+\slide{The Noisy Channel RDA}
+
+\begin{eqnarray*}
+& & \mbox{RDA: $z_\Phi(y)$ discrete} \\
+\\
+\Phi^* & = & \argmin_\Phi E_{y \sim \popd} - \ln P_\Phi(z_\Phi(y)) + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y))) \\
+\\
+\\
+& & \mbox{Noisy Channel RDA: $z_\Phi(y,\epsilon)$ continuous} \\
+\\
+\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z_\Phi(y,\epsilon)|y)}{\hat{p}_\Phi(z_\Phi(y,\epsilon))}
++ \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))
+\end{eqnarray*}
+
+\slide{END}
+
+}
+\end{document}
