@@ -8,34 +8,56 @@
   \vfill
   \centerline{David McAllester, Autumn 2020}
   \vfill
-  \centerline{\bf Some Information Theory}
+\centerline{Some Information Theory}
 
-\slideplain{Entropy of a Distribution}
+\slide{Why Information Theory?}
+
+The fundamental equation involves cross-entropy.
+
+\vfill
+Cross-entropy is an information-theoretic concept.
+
+\vfill
+Information theory arises in many places and many forms in deep learning.
+
+\slide{Entropy of a Distribution}
 
 The entropy of a distribution $P$ is defined by
 
+\vfill
 $${\color{red} H(P) = E_{y \sim \pop} \;- \ln P(y)}\;\;\mbox{in units of ``nats''}$$
 
+\vfill
 $${\color{red} H_2(P) = E_{y \sim \pop} \;- \log_2 P(y)}\; \mbox{in units of bits}$$
 
-\vfill
-Example: Let $Q$ be a uniform distribution on 256 values.
+\slide{Why Bits?}
 
-$$E_{y \sim Q}\;-\log_2 Q(y) = - \log_2 \frac{1}{256} = \log_2 256 = 8\;\mathrm{bits} = 1\;\mathrm{byte}$$
+Why is $-\log_2\;P(y)$ a number of bits?
+
+\vfill
+Example: Let $P$ be a uniform distribution on 256 values.
+
+\vfill
+$$E_{y \sim P}\;-\log_2 P(y) = - \log_2 \frac{1}{256} = \log_2 256 = 8\;\mathrm{bits} = 1\;\mathrm{byte}$$
 
 \vfill
 \centerline{\color{red} 1 nat = $\frac{1}{\ln 2}$ bits $\approx$ 1.44 bits}
 
 \slide{Shannon's Source Coding Theorem}
 
-We can interpret {\color{red} $H_2(Q)$} as the number of bits required an average to represent items drawn from distribution $Q$.
+Why is $-\log_2\;P(y)$ a number of bits?
 
 \vfill
-We want to use fewer bits for common items.
+A prefix-free code for ${\cal Y}$ assigns a bit string $c(y)$ to each $y \in {\cal Y}$ such that no code string is prefix of any other code string.
 
 \vfill
-For any probability distribution $P$ on a (discrete) set ${\cal Y}$
-there exist a code mapping ${\cal Y}$ to bit strings such that the number of bits used to represent $y$ is no larger than $- \log_2 P(y) + 1$.
+For a probability distribution $P$ on ${\cal Y}$ we consider the average code length $E_{y \sim P} \;|c(y)|$.
+
+\vfill
+Theorem: For any $c$ we have {\color{red} $E_{y \sim P}\;|c(y)| \geq H_2(P)$}.
+
+\vfill
+Theorem: There exists $c$ with {\color{red} $E_{y \sim P} \;|c(y)| \leq H_2(P) +1$}.
 
 \ignore{
 For any bit string $c$ let $|c|$ be the number of bits in (the length of) $c$.
@@ -144,13 +166,13 @@ $$E[f(x)] \geq f(E[x])$$
 \slide{Proving $KL(P,Q) \geq 0$}
 
 \begin{eqnarray*}
-  KL(P,Q) & = & \expectsub{y \sim P}{- \log \frac{Q(y)}{P(y)}} \\
+  KL(P,Q) & = & \expectsub{y \sim P}{- \ln \frac{Q(y)}{P(y)}} \\
   \\
-  & \geq & - \log \expectsub{y\sim P}{\frac{Q(y)}{P(y)}} \\
+  & \geq & - \ln \expectsub{y\sim P}{\frac{Q(y)}{P(y)}} \\
   \\
-  & = & - \log \sum_y\; P(y) \frac{Q(y)}{P(y)}  \\
+  & = & - \ln \sum_y\; P(y) \frac{Q(y)}{P(y)}  \\
   \\
-  & = & - \log \sum_y Q(y) \\
+  & = & - \ln \sum_y Q(y) \\
   \\
   & = & 0
 \end{eqnarray*}
@@ -164,7 +186,7 @@ Anything that can be done conditionally $P_\Phi(y|x)$ can also be done unconditi
 We have unconditional cross-entropy training.
 
 \begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi \;\;E_{y \sim \mathrm{Pop}}  -\log P_\Phi(y)
+  \Phi^* & = & \argmin_\Phi \;\;E_{y \sim \mathrm{Pop}}  -\ln P_\Phi(y)
 \end{eqnarray*}
 
 \vfill
@@ -199,7 +221,7 @@ By ``unsupervised learning'' we will mean learning from {\bf massively available
 
 \slide{Colorization}
 
-$$\Phi^* = \argmin_\Phi \expectsub{(x,y) \sim \mathrm{Pop}}{-\log P_\Phi(y|x)}$$
+$$\Phi^* = \argmin_\Phi \expectsub{(x,y) \sim \mathrm{Pop}}{-\ln P_\Phi(y|x)}$$
 
 \vfill
 \centerline{\includegraphics[height=2in]{\images/Colorization}}
@@ -210,6 +232,23 @@ We have massive data for colorization.
 \vfill
 Colorization is unsupervised structured labeling.
 }
+
+
+\slide{Appendix: The Rearrangement Trick}
+
+\begin{eqnarray*}
+KL(P,Q) & = & E_{x \sim P} \ln \;\frac{P(x)}{Q(x)} \\
+\\
+& = & E_{x \sim P} \left[(- \ln Q(x)) - (- \ln P(x))\right] \\
+\\
+& = & (E_{x\sim P} \;-\ln Q(x)) - (E_{x \sim P}\;-\ln P(x)) \\
+\\
+& = & H(P,Q) - H(P)
+\end{eqnarray*}
+
+\vfill
+In general $E_{x \sim P} \;\ln \left(\prod_i A_i\right) = E_{x \sim P} \;\sum_i \ln A_i$ 
+
 
 \slide{Summary}
 
@@ -254,21 +293,7 @@ H(P,Q) & \doteq & E_{x \sim P} \;-\ln Q(x) \\
 }
 }
 
-\slideplain{Appendix: The Rearrangement Trick}
-
-\begin{eqnarray*}
-KL(P,Q) & = & E_{x \sim P} \ln \;\frac{P(x)}{Q(x)} \\
-\\
-& = & E_{x \sim P} \left[(- \ln Q(x)) - (- \ln P(x))\right] \\
-\\
-& = & (E_{x\sim P} \;-\ln Q(x)) - (E_{x \sim P}\;-\ln P(x)) \\
-\\
-& = & H(P,Q) - H(P)
-\end{eqnarray*}
-
-\vfill
-In general $E_{x \sim P} \;\ln \left(\prod_i A_i\right) = E_{x \sim P} \;\sum_i \ln A_i$ 
-
+\ignore{
 \slideplain{Appendix: The Rearrangement Trick}
 
 \begin{eqnarray*}
@@ -282,7 +307,8 @@ In general $E_{x \sim P} \;\ln \left(\prod_i A_i\right) = E_{x \sim P} \;\sum_i 
 \end{eqnarray*}
 
 \vfill
-Each of the last two expressions can be grouped three different ways leading to six ways of writing the ELBO.
+Each of the last two expressions can be grouped three different ways leading to six ways of writing the ELBO.}
+
 \slideplain{END}
 
 }
