@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -7,7 +7,7 @@
   
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
   \vfill
   \vfill
   \centerline{\bf Deep Learning Frameworks}
@@ -47,7 +47,7 @@ A framework also typically provides support for managing large training sets and
 
 $\vdots$
 
-\item EDF (Educational Framework in Python/NumPy for earlier versions of this class).
+\item EDF (Educational Framework in Python/NumPy used for the first problem set in this class).
 \end{itemize}
 
 \slide{An Example}
@@ -56,7 +56,7 @@ We consider the problem of taking an input $x$ (such as an image of a hand writt
 using a multi layer perceptron (MLP).
 
 \vfill
-\centerline{\includegraphics[width= 4.0in]{../images/MNIST}}
+\centerline{\includegraphics[width= 4.0in]{\images/MNIST}}
   
 \slide{Multiclass Classification}
 
@@ -89,14 +89,14 @@ $\sigma$ is a scalar-to-scalar activation function applied to each component of 
 An activation function $\sigma:\reals \rightarrow \reals$ (scalar-to-scalar) is applied to each component of a vector.
 
 \vfill
-\centerline{{\color{red} $\sigma(u) = \frac{1}{1+e^{-u}}$}\hspace{3em}\includegraphics[width=1.5in]{../images/sigmoid}, {\color{red} $\sigma(m) = P(y|m)$ for margin $m$}.}
+\centerline{{\color{red} sigmoid: $\;\sigma(u) = \frac{1}{1+e^{-u}}$}\hspace{1em}\includegraphics[width=1.5in]{\images/sigmoid}, {\color{red} $\sigma(m) = P(y|m)$ for margin $m$}.}
 
 \vfill
 other common activation functions are
 
 \vfill
-\centerline{{\color{red} $\mathrm{ReLU}(u) = \max(0,u)$}\includegraphics[width=1.5in]{../images/relu},
-{\color{red} $\mathrm{tanh}(u) = 2\sigma(u)-1$}\includegraphics[width=1.5in]{../images/tanh}}
+\centerline{{\color{red} $\mathrm{ReLU}(u) = \max(0,u)$}\includegraphics[width=1.5in]{\images/relu},
+{\color{red} $\mathrm{tanh}(u) = 2\sigma(u)-1$}\includegraphics[width=1.5in]{\images/tanh}}
 
 \slideplain{The Framework Source Code}
 

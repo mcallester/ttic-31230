@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -24,7 +24,8 @@
 \end{eqnarray*}
 
 \vfill
-Each array {\color{red} $W$} is an object with attributes {\color{red} $W.\mathrm{value}$} and {\color{red} $W.\mathrm{grad}$}.
+Each array (matrix) {\color{red} $W$} is represented by an object with attributes
+{\color{red} $W.\mathrm{value}$} and {\color{red} $W.\mathrm{grad}$}.
 
 \vfill
 {\color{red} $W.\mathrm{grad}$} is an array storing {\color{red} $\nabla_W{\cal L}$}.
@@ -43,18 +44,18 @@ Can be written as
 
 \vfill
 $$\begin{array}{lrcl}
-\mathrm{for}\;j &  \tilde{h}[j] & = & 0 \\
+\mathrm{for}\;j &  \tilde{s}[j] & = & 0 \\
 \\
-\mathrm{for}\;j,i &  \tilde{h}[j] & \pluseq &  W[j,i]x[i] \\
+\mathrm{for}\;j,i &  \tilde{s}[j] & \pluseq &  W[j,i]h[i] \\
 \\
-\mathrm{for}\; j & s[j] & = & \sigma(\tilde{h}[j] - B[j])
+\mathrm{for}\; j & s[j] & = & \sigma(\tilde{s}[j] - B[j])
 \end{array}$$
 
 \slide{Backpropagation on Loops}
 the backpropagation for
 
 $$\begin{array}{lrcl}
-\mathrm{for}\;j & {\color{red} h[j]} & = & \sigma(\tilde{h}[j] - B[j])
+\mathrm{for}\;j & {\color{red} s[j]} & = & \sigma(\tilde{s}[j] - B[j])
 \end{array}$$
 
 \vfill
@@ -62,42 +63,44 @@ is
 
 \vfill
 $$\begin{array}{lrcl}
-\mathrm{for}\;j & {\color{red} \tilde{h}.\grad[j]} & \pluseq & {\color{red} h.\grad[j]\sigma'(h[j] - B[j])} \\
+\mathrm{for}\;j & {\color{red} \tilde{s}.\grad[j]} & \pluseq & {\color{red} s.\grad[j]\sigma'(\tilde{s}[j] - B[j])} \\
 \\
-\mathrm{for}\;j & {\color{red} B.\grad[j]} & \minuseq & {\color{red} h.\grad[j]\sigma'(h[j] - B[j])}
+\mathrm{for}\;j & {\color{red} B.\grad[j]} & \minuseq & {\color{red} s.\grad[j]\sigma'(\tilde{s}[j] - B[j])}
 \end{array}$$
 
 \slide{Backpropagation on Loops}
 the backpropagation for
 
 $$\begin{array}{lrcl}
-\mathrm{for}\;j,i & {\color{red} \tilde{h}[j]} & \pluseq & {\color{red} W[j,i]x[i]}
+\mathrm{for}\;j,i & {\color{red} \tilde{s}[j]} & \pluseq & {\color{red} W[j,i]h[i]}
 \end{array}$$
 
 \vfill
 is
 $$\begin{array}{lrcl}
-\mathrm{for}\;j,i & {\color{red} W.\grad[j,i]} & \pluseq & {\color{red} \tilde{h}.\grad[j] x[i]} \\
+\mathrm{for}\;j,i & {\color{red} W.\grad[j,i]} & \pluseq & {\color{red} \tilde{s}.\grad[j] h[i]} \\
 \\
-& {\color{red} x.\grad[i]} & \pluseq & {\color{red} \tilde{h}.\grad[j] W[j,i]} \\
+& {\color{red} h.\grad[i]} & \pluseq & {\color{red} \tilde{s}.\grad[j] W[j,i]} \\
 \end{array}$$
 
 \slide{General Tensor Operations}
 
-In practice all deep learning source code can be written as a series of scalar assignments and loops where the body of each loop operates on scalars.
+In practice all deep learning source code can be written unsing scalar assignments and loops over scalar assignments.
+For example:
 
-\vfill
-Scalar backpropagation can then be applied to the loops.
-
-\vfill
-$$\mathrm{for} \cdots \;\;Y[\cdots] \;\pluseq\; e(A[\cdots],B[\cdots])$$
+$$\begin{array}{rrcl}
+\mathrm{for}\; h,i,j,k & \tilde{Y}[h,i,j] & \;\pluseq\; & A[h,i,k],B[h,j,k] \\
+\mathrm{for}\; h,i,j & Y[h,i,j] & = & \sigma(\tilde{Y}[i,j,k])
+\end{array}$$
 
 \vfill
 has backpropagation loops
 
-\vfill
-$$\mathrm{for}\;\cdots \;A.\grad[\cdots] \;\pluseq\; Y.\grad[\cdots](\partial e/\partial A[\cdots])$$
-$$\mathrm{for}\;\cdots \;B.\grad[\cdots] \;\pluseq\; Y.\grad[\cdots](\partial e/\partial B[\cdots])$$
+$$\begin{array}{rrcl}
+\mathrm{for}\;i,j,k & \tilde{Y}.\grad[i,j,k] & \pluseq & \sigma'(Y.\grad[i,j,k]) \\
+\mathrm{for}\;h,i,j,k & A.\grad[h,i,k] & \pluseq & \tilde{Y}.\grad[h,i,j] \;B[h,j,k] \\
+\mathrm{for}\;h,i,j,k & B.\grad[h,j,k] & \pluseq & \tilde{Y}.\grad[h,i,j]\;A[h,i,k]
+\end{array}$$
 
 \slide{END}
 }
