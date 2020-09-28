@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -7,7 +7,7 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
 
     \vfill
   \centerline{\bf Convolutional Neural Networks (CNNs)}
@@ -20,7 +20,7 @@
 1000 kinds of objects.
 
 \vfill
-\centerline{\includegraphics[height=4.2in]{../images/IVLSRC}}
+\centerline{\includegraphics[height=4.2in]{\images/IVLSRC}}
 2016 is 3.0\%, is 2017 2.25\%
 
 \medskip
@@ -29,12 +29,12 @@ SOTA as of January 2020 is 1.3\%
 \slidetwoplain{What is a CNN?}
 {VGG, Zisserman, 2014}
 
-\centerline{\includegraphics[width = 8.0in]{../images/VGG}}
+\centerline{\includegraphics[width = 8.0in]{\images/VGG}}
 \centerline{\large Davi Frossard}
 
 
 \slideplain{A Convolution Layer}
-\centerline{\includegraphics[height = 2.0in]{../images/VGG}}
+\centerline{\includegraphics[height = 2.0in]{\images/VGG}}
 
 \vfill
 Each box is a tensor $L_\ell[b,x,y,i]$
@@ -44,23 +44,12 @@ Each value $L_\ell[b,x,y,i]$ (for $\ell > 0$) is the output of a single linear t
 
 \slideplain{A Convolution Layer}
 
-\centerline{\includegraphics[width = 2.5in]{../images/Convolution}}
+\centerline{\includegraphics[width = 2.5in]{\images/Convolution}}
 \centerline{$W[\Delta x,\Delta y,i,j]$\hspace{6ex}$L_{{\ell}}[b,x,y,i]$\hspace{6ex}$L_{{\ell+1}}[b,x,y,j]$}
 \centerline{\large River Trail Documentation}
 
-\vfill
 \begin{eqnarray*}
  & &  L_{{\ell+1}}[b,x,y,j] \\
- \\
- & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)\end{eqnarray*}
-
-\slide{Convolution Layer in Einstein Notation}
-
-\begin{eqnarray*}
- & &  L_{{\ell+1}}[b,x,y,j] \\
- \\
- & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right) \\
- \\
  \\
   & = &   \sigma\left(W[\Delta X, \Delta Y, I,j]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, I] - B[j]\right)
 \end{eqnarray*}
@@ -106,7 +95,7 @@ conv2d({\bf input, weight, bias, stride, padding, dilation, groups})
 
 \slide{Padding}
 
-\centerline{\includegraphics[height = 2.0in]{../images/padding2}}
+\centerline{\includegraphics[height = 2.0in]{\images/padding2}}
 \centerline{\large Jonathan Hui}
 
 \vfill
@@ -138,12 +127,12 @@ If the input is padded but the output is not padded then $\Delta x$ and $\Delta 
 
 \slide{Reducing Spatial Dimention}
 
-\centerline{\includegraphics[width = 8.0in]{../images/VGG}}
+\centerline{\includegraphics[width = 8.0in]{\images/VGG}}
 
 
 \slide{Reducing Spatial Dimensions: Max Pooling}
 
-\centerline{\includegraphics[width = 2.5in]{../images/Convolution}}
+\centerline{\includegraphics[width = 2.5in]{\images/Convolution}}
 
 \vfill
 $$L_{{\ell+1}}[b,{\color{red}x},{\color{red}y},i] = {\color{red} \max_{\Delta x, \Delta y}}\; L_{{\ell}}[b,{\color{red} s*x} + \Delta x,\; {\color{red} s*y} + \Delta y,\; i]$$
@@ -166,7 +155,7 @@ For strides greater than 1 the spatial dimention is reduced.
 
 \slide{Fully Connected (FC) Layers}
 
-\centerline{\includegraphics[width = 8.0in]{../images/VGG}}
+\centerline{\includegraphics[width = 8.0in]{\images/VGG}}
 
 
 \slide{Fully Connected (FC) Layers}
@@ -175,117 +164,6 @@ We reshape $L_{{\ell}}[b,x,y,i]$ to $L_{{\ell}}[b,i']$ and then
 
 \vfill
 $$L_{{\ell+1}}[b,j] = \sigma\left(W[j,I]\;L_{{\ell}}[b,I] - B[j]\right)$$
-
-\ignore{
-\slideplain{Image to Column (Im2C)}
-
-Reduce convolution to matrix multiplication
-
-\vfill
-more space but faster.
-
-\vfill
-\begin{eqnarray*}
-  & & \tilde{L}_{{\ell+1}}[b,x,y,j] \\
-  \\
-  & = & \left(\sum_{\Delta x, \Delta y, i} W[\Delta x, \Delta y, i, j] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[j]
-  \end{eqnarray*}
-
-\vfill
-We make a bigger tensor $\tilde{L}$ with two additional indeces.
-
-$$\tilde{L}_{{\ell}}[b,x,y,\Delta x,\Delta y,i] = L_{{\ell}}[b,x+\Delta x,y+\Delta y,i]$$
-
-\slideplain{Image to Column (Im2C)}
-
-\begin{eqnarray*}
-  & & \tilde{L}_{{\ell+1}}[b,x,y,j] \\
-  \\
-  & = & \left(\sum_{\Delta x, \Delta y, i} W[\Delta x, \Delta y, i, j] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[j] \\
-  \\
-      & = & \left(\sum_{\Delta x, \Delta y, i} \begin{array}{l}
-                                              \tilde{L}_{{\ell}}[b,x,y,\Delta x,\Delta y,i]
-                                              * W[\Delta x, \Delta y, i, j] \\
-  \end{array}\right) + B[j] \\
-  \\
-    & = & \left(\sum_{(\Delta x, \Delta y, i)} \begin{array}{l}
-                                              \tilde{L}_{{\ell}}[(b,x,y),(\Delta x,\Delta y,i)]
-                                              * W[(\Delta x, \Delta y, i), j] \\
-                                           \end{array}\right) + B[j]
-\end{eqnarray*}
-}
-
-\slideplain{Dilation}
-
-A CNN for image classification typically reduces an $N \times N$ image to a single feature vector.
-
-\vfill
-Dilation is a trick for treating the whole CNN as a ``filter'' that can be passed over an $M \times M$ image with $M > N$.
-
-\vfill
-\centerline{\includegraphics[width = 2.5in]{../images/Convolution}}
-
-\vfill
-An output tensor with full spatial dimension can be useful in, for example, image segmentation.
-
-\slide{Dilation}
-
-\centerline{\includegraphics[width=8.0in]{../images/dilation}}
-
-\vfill
-This is called a ``fully convolutional'' CNN.
-
-\slide{Dilation}
-
-To implement a fully convolutional CNN we can ``dilate'' the filters by a dilation parameter $d$.
-
-\vfill
-\begin{eqnarray*}
- & & L_{{\ell+1}}[b,x,y,j] \\
- \\
- & = &  \sigma(W[\Delta X, \Delta Y, I, j] L_{{\ell}}[b,x + {\color{red} d*\Delta X}, y + {\color{red} d*\Delta Y}, I] + B[j])
-\end{eqnarray*}
-
-
-\slide{Vector Concatenation}
-
-We will write
-
-\vfill
-$$L[b,x,y,J_1+J_2] = L_1[b,x,y,J_1]\;;L[b,x,y,J_2]$$
-
-\vfill
-To mean that the vector $L[b,x,y,J_1+J_2]$ is the concatenation of the vectors $L_1[b,x,y,J_1]$ and $L_2[b,x,y,J_2]$.
-
-\slide{Hypercolumns}
-
-For a given image location $\tuple{x,y}$ we concatenate all the feature vectors of all layers above the point $\tuple{x,y}$.
-
-\vfill
-\begin{eqnarray*}
-& & L\left[b,x,y,\sum_\ell\;J_\ell\right] \\
-\\
-& = & L_0\left[b,x,y,J_0\right] \\
- & & \vdots \\
-& &  ;L_\ell\left[b,\floor{x\left(\frac{X_\ell}{X_1}\right)},\floor{y\left(\frac{Y_\ell}{Y_0}\right)},J_\ell\right] \\
- & & \vdots \\
- & & ;L_{{\cal L}-1}[b,J_{{\cal L}-1}]
-\end{eqnarray*}
-
-\slide{Grouping}
-
-The input features and the output features are each divided into $G$ groups.
-$$L_{\ell+1}[b,x,y,J] = L^0_{\ell+1}[b,x,y,J/G];\cdots;L^{G-1}_{\ell+1}[b,x,y,J/G]$$
-where we have $G$ filters $W^g[\Delta X, \Delta Y,I/G,J/G]$ with
-
-\begin{eqnarray*}
- & & L^g_{{\ell+1}}[b,x,y,j] \\
- \\
- & = & \sigma(W^g[\Delta X, \Delta Y,I/G,j]L_\ell^g[x+\Delta X,y+\Delta Y,I/G,j] - B^g[j])
- \end{eqnarray*}
-
-\vfill
-This uses a factor of $G$ fewer weights.
 
 \slide{2D CNN in PyTorch}
 
@@ -311,6 +189,9 @@ conv2d({\bf input, weight, bias, stride, padding, dilation, groups})
 
 \medskip
 {\bf groups} – split input into groups. Default: 1
+
+\vfill
+Dilation and grouping are discussed in a separate unit.
 
 \slide{Modern Trends}
 
@@ -342,17 +223,17 @@ s[1000] & = & \relu(\mathrm{FC}(L_{10},\Phi_s)) \;\;\mbox{class scores}
 }
 
 \slideplain{VGG, 2014}
-\centerline{\includegraphics[height=4.5in]{../images/VGGStack}}
+\centerline{\includegraphics[height=4.5in]{\images/VGGStack}}
 \centerline{\large Stanford CS231}
 
 \slide{Inception, Google, 2014}
 
-\centerline{\includegraphics[width = 9.0in]{../images/inception1}}
+\centerline{\includegraphics[width = 9.0in]{\images/inception1}}
 \vfill
-\centerline{\includegraphics[width = 3.5in]{../images/inception2}}
+\centerline{\includegraphics[width = 3.5in]{\images/inception2}}
 \slideplain{ResNet, 2015}
 
-\centerline{\includegraphics[height= 5.2in]{../images/ResNetStack} {\large [Kaiming He]}}
+\centerline{\includegraphics[height= 5.2in]{\images/ResNetStack} {\large [Kaiming He]}}
 
 
 \slide{Imagenet Classification}
@@ -360,7 +241,7 @@ s[1000] & = & \relu(\mathrm{FC}(L_{10},\Phi_s)) \;\;\mbox{class scores}
 1000 kinds of objects.
 
 \vfill
-\centerline{\includegraphics[height=4.2in]{../images/IVLSRC}}
+\centerline{\includegraphics[height=4.2in]{\images/IVLSRC}}
 2016 is 3.0\%, is 2017 2.25\%
 
 \medskip

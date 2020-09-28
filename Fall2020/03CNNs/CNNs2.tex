@@ -1,0 +1,90 @@
+\input ../../SlidePreamble
+\input ../../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Autumn 2020}
+
+    \vfill
+  \centerline{\bf Dilation, Hypercolumns, and Grouping}
+  \vfill
+  
+\slide{Dilation}
+
+A CNN for image classification typically reduces an $N \times N$ image to a single feature vector.
+
+\vfill
+Dilation is a trick for treating the whole CNN as a ``filter'' that can be passed over an $M \times M$ image with $M > N$.
+
+\vfill
+\centerline{\includegraphics[width = 2.5in]{\images/Convolution}}
+
+\vfill
+An output tensor with full spatial dimension can be useful in, for example, image segmentation.
+
+\slide{Dilation}
+
+\centerline{\includegraphics[width=8.0in]{\images/dilation}}
+
+\vfill
+This is called a ``fully convolutional'' CNN.
+
+\slide{Dilation}
+
+To implement a fully convolutional CNN we can ``dilate'' the filters by a dilation parameter $d$.
+
+\vfill
+\begin{eqnarray*}
+ & & L_{{\ell+1}}[b,x,y,j] \\
+ \\
+ & = &  \sigma(W[\Delta X, \Delta Y, I, j] L_{{\ell}}[b,x + {\color{red} d*\Delta X}, y + {\color{red} d*\Delta Y}, I] + B[j])
+\end{eqnarray*}
+
+
+\slide{Vector Concatenation}
+
+We will write
+
+\vfill
+$$L[b,x,y,J_1+J_2] = L_1[b,x,y,J_1]\;;L[b,x,y,J_2]$$
+
+\vfill
+To mean that the vector $L[b,x,y,J_1+J_2]$ is the concatenation of the vectors $L_1[b,x,y,J_1]$ and $L_2[b,x,y,J_2]$.
+
+\slide{Hypercolumns}
+
+For a given image location $\tuple{x,y}$ we concatenate all the feature vectors of all layers above the point $\tuple{x,y}$.
+
+\vfill
+\begin{eqnarray*}
+& & L\left[b,x,y,\sum_\ell\;J_\ell\right] \\
+\\
+& = & L_0\left[b,x,y,J_0\right] \\
+ & & \vdots \\
+& &  ;L_\ell\left[b,\floor{x\left(\frac{X_\ell}{X_1}\right)},\floor{y\left(\frac{Y_\ell}{Y_0}\right)},J_\ell\right] \\
+ & & \vdots \\
+ & & ;L_{{\cal L}-1}[b,J_{{\cal L}-1}]
+\end{eqnarray*}
+
+\slide{Grouping}
+
+The input features and the output features are each divided into $G$ groups.
+$$L_{\ell+1}[b,x,y,J] = L^0_{\ell+1}[b,x,y,J/G];\cdots;L^{G-1}_{\ell+1}[b,x,y,J/G]$$
+where we have $G$ filters $W^g[\Delta X, \Delta Y,I/G,J/G]$ with
+
+\begin{eqnarray*}
+ & & L^g_{{\ell+1}}[b,x,y,j] \\
+ \\
+ & = & \sigma(W^g[\Delta X, \Delta Y,I/G,j]L_\ell^g[x+\Delta X,y+\Delta Y,I/G,j] - B^g[j])
+ \end{eqnarray*}
+
+\vfill
+This uses a factor of $G$ fewer weights.
+
+\slide{END}
+}
+\end{document}
