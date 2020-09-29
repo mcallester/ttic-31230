@@ -54,20 +54,6 @@ Each value $L_\ell[b,x,y,i]$ (for $\ell > 0$) is the output of a single linear t
   & = &   \sigma\left(W[\Delta X, \Delta Y, I,j]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, I] - B[j]\right)
 \end{eqnarray*}
 
-\slide{Many ``Neurons'' (Linear Threshold Units)}
-
-Each $L_{{\ell+1}}[b,x,y,j]$ is the output of a single linear threshold unit.
-
-\bigskip
-\begin{eqnarray*}
- & &  L_{{\ell+1}}[b,x,y,j] \\
- \\
-  & = &   \sigma\left(W[\Delta X, \Delta Y, I,j]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, I] - B[j]\right)
-\end{eqnarray*}
-
-\vfill
-In this equation the input to the activation function $\sigma$ is a scalar value --- this is a single linear threshold unit.
-
 \slide{2D CNN in PyTorch}
 
 conv2d({\bf input, weight, bias, stride, padding, dilation, groups})
@@ -235,17 +221,6 @@ s[1000] & = & \relu(\mathrm{FC}(L_{10},\Phi_s)) \;\;\mbox{class scores}
 
 \centerline{\includegraphics[height= 5.2in]{\images/ResNetStack} {\large [Kaiming He]}}
 
-
-\slide{Imagenet Classification}
-
-1000 kinds of objects.
-
-\vfill
-\centerline{\includegraphics[height=4.2in]{\images/IVLSRC}}
-2016 is 3.0\%, is 2017 2.25\%
-
-\medskip
-SOTA as of January 2020 is 1.3\%
 \slideplain{END}
 
 }

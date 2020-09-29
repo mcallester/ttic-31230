@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -10,72 +10,55 @@
   \centerline{David McAllester, Winter 2020}
   \vfill
   \vfill
-  \centerline{\bf Einstein Notation}
+  \centerline{\bf CNNs: Einstein Notation}
   \vfill
   \vfill
   \vfill
 
-\slide{Tensors}
 
-An array with more than two indeces is called a {\color{red} tensor}.
+\slide{Einstein Notation}
+
+For the representation of general relativity, Einstein introduced the convention of explicitly writing all indeces of tensors where repeated indeces in a product of tensors are implicitly summed.
 
 \vfill
-In a convolutional neural network (CNN) for vision a ``layer'' in the model is a three index (third order) tensor {\color{red} $L[b,x,y,i]$}.
+Writing indeces explicitly improves the clarity of the notation at the expense of not being in correspondence with framework notation.  Most frameworks hide indeces.
 
 \vfill
-{\color{red} $L[b,x,y,i]$} is the value of feature $i$ for batch element $b$ at image position $\tuple{x,y}$.
+This course will focus on conceptual understanding rather than framework implementations.  For conceptual understanding Einstein notation seems preferable.
 
-\slideplain{A Convolution Layer}
 
-\centerline{\includegraphics[width = 2.5in]{../images/Convolution}}
-\centerline{$W[\Delta x,\Delta y,i,j]$\hspace{6ex}$L_{{\ell}}[b,x,y,i]$\hspace{6ex}$L_{{\ell+1}}[b,x,y,j]$}
-\centerline{\large River Trail Documentation}
+\slide{Einstein Notation}
+
+Einstein notation improves tensor equations for tensors with many indeces.
+
+\vfill
+However, we start by considering just vectors and matrices.
+
+\vfill
+We will use a modified form of Einstein notation where captial letters are used to denote slices of a tensor.  For example:
+
+\vfill
+\begin{itemize}
+\item $M[i,j]$ denotes one element of the matrix $M$.
+\item $M[i,J]$ denotes the $i$th row of $M$.
+\item $M[I,j]$ denotes the $j$th collumn of $M$.
+\item $M[I,J]$ denotes the full matrix $M$.
+\end{itemize}
+
+\slide{Einstein Notation}
+Repeated capital letters in a product of tensors denote summation over those letters.
 
 \vfill
 \begin{eqnarray*}
- & &  L_{{\ell+1}}[b,x,y,j] \\
- \\
- & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right)\end{eqnarray*}
+y = Wx &\;\;\;\equiv\;\;\; & y[i] = \sum_j \;W[i,j]x[j] \\
+& \;\;\;\equiv \;\;\; & y[i] = W[i,J]x[J] \\
+\\
+\\
+y = x^\top\;W & \;\;\;\equiv \;\;\; & y[j] = \sum_i \;W[i,j]x[i] \\
+& \;\;\;\equiv \;\;\; & y[j] = W[I,j]x[I]
+\end{eqnarray*}
 
-\slide{Einstein Notation}
-
-The convolution equation can be written more compactly in Einstein notation.
-
-\vfill
-Capital letter indices will used to indicate subtensors (slices) so that, for example,  $M[I,J]$ denotes a matrix
-while $M[i,j]$ denotes one element of the matrix, $M[i,J]$ denotes the $i$th row, and $M[I,j]$ denotes the $j$th collumn.
-
-\vfill
-By abuse of notation, capital letters will also be used to indicate the range of the indices.  A vector $x[I]$ has $I$ dimensions with values   
-$x[0]$, $\ldots$, $x[I-1]$.  A Matrix $M[I,J]$ has $I \times J$ entries.
-
-
-\slide{Einstein Notation}
-
-$y = Wx$ \hfill abbreviates \hfill $y[i] = \sum_j \;W[i,j]x[j]$.
-
-\vfill
-
-$y = x^\top\;W$ \hfill abbreviates \hfill $y[j] = \sum_i \;W[i,j]x[i]$.
-
-\vfill $i$ is a ``row index'' and $j$ is a ``column index'' of $W$.
-
-\vfill
-Linear algebra suppresses indeces.
-
-\vfill
-Einstein notation uses explicit indeces.
-
-\slide{Einstein Notation}
-
-Einstein notation is the convention that repeated capital indeces in a product of tensors are implicitly summed.
-
-\vfill
-$y = Wx$ \hfill abbreviates \hfill $y[i] = \sum_j \;W[i,j]x[j] = W[i,J]x[J]$.
-
-\vfill
-
-$y = x^\top\;W$ \hfill abbreviates \hfill $y[j] = \sum_i \;W[i,j]x[i] = W[I,j]x[I]$.
+\ignore{
 
 \slide{An MLP in Einstein Notation}
 
@@ -86,39 +69,32 @@ $y = x^\top\;W$ \hfill abbreviates \hfill $y[j] = \sum_i \;W[i,j]x[i] = W[I,j]x[
   \\
   {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]}
 \end{eqnarray*}
+}
 
-\slide{Convolution in Einstein Notation}
+\slide{Einstein Notation for Convolution}
 
-\begin{eqnarray*}
- & &  L_{{\ell+1}}[b,x,y,j] \\
- \\
- & = &   \sigma\left(\left(\sum_{\Delta x, \Delta y, i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i]\right) - B[j]\right) \\
- \\
- \\
-  & = &   \sigma\left(W[\Delta X, \Delta Y, I,j]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, I] - B[j]\right)
-\end{eqnarray*}
-
-
-\slide{Why Einstein Notation?}
-
-We will need to work with tensors --- arrays with more than two indeces.
+CNNs provide a good example of the advantage of Einstein Notation.
 
 \vfill
-For 2D CNNS the weight tensor and the data tensor each have four indeces (including the batch index of the data tensor).
+{\color{red} $L[b,x,y,i]$} is the value of ``neuron'' $i$ for batch element $b$ at image position $\tuple{x,y}$.
 
-\vfill
-For higher order tensors suppressing indeces becomes confusing.
+\slide{Convolution}
+\centerline{\includegraphics[width = 2.5in]{\images/Convolution}}
+\centerline{$W[\Delta x,\Delta y,i,j]$\hspace{6ex}$L_{{\ell}}[b,x,y,i]$\hspace{6ex}$L_{{\ell+1}}[b,x,y,j]$}
+\centerline{\large River Trail Documentation}
 
-\vfill
-Einstein went back to explicit index notation (Einstein notation) when working with the higher order tensors in his theory of gravitation.
+$$L_{{\ell+1}}[b,x,y,j] = \sigma\left(W[\Delta X, \Delta Y, I,j]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, I] - B[j]\right)$$
 
-\slide{Why Einstein Notation?}
+\slide{Types and Einstein Notation}
 
-Also, the indeces of tensors generally have types such as a ``time index'', ``x coordinate'', ``y coordinate'', ``batch index'', or ``feature index''.
+The indeces of tensors generally have types such as a ``time index'', ``x coordinate'', ``y coordinate'', ``batch index'', or ``neuron index''.
 
 \vfill
 Writing a matrix as $W[T,I]$ where $T$ is a time index and $I$ is a feature index makes the type of the matrix $W$ clear and clarifies
 the order of the indeces (disambiguates $W$ from $W^\top$).
+
+\vfill
+Writing a layer of a CNN as $L[B,X,Y,I]$ clarifies both the types and the positions of the four indeces.
 
 \slide{END}
 }
