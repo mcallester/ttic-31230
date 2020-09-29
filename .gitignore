@@ -4,7 +4,6 @@
 *.aux
 *.log
 *.gz
-*.zip
 *.txt
 *.fls
 *.fdb_latexmk
