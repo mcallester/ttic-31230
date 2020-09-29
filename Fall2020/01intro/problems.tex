@@ -1,5 +1,5 @@
 \documentclass{article}
-\input ../preamble
+\input ../../preamble
 \parindent = 0em
 
 %\newcommand{\solution}[1]{}
@@ -289,7 +289,7 @@ $$KL(P,Q) =  \left(E_{y \sim P} \;\ln \frac{G(y)}{Q(y)}\right) + KL(P,G)$$
 $$KL(P,Q) =  \sup_G \;E_{y \sim P}\; \ln \frac{G(y)}{Q(y)}$$
 
   \solution{
-    Part (a) implies that $$KL(P,Q) \leq \;E_{y \sim P}\; \ln \frac{G(y)}{Q(y)}$$
+    Part (a) implies that $$KL(P,Q) \geq \;E_{y \sim P}\; \ln \frac{G(y)}{Q(y)}$$
     and also implies that for $G = Q$ we have equality.
   }
   
