@@ -63,7 +63,14 @@ def load_mnist(section="training", offset=0, count=None, ret='xy',
                     't10k-labels-idx1-ubyte',
                     10000),
     }
-
+    
+    resources = {
+        'training' : ['http://yann.lecun.com/exdb/mnist/train-images-idx3-ubyte.gz',
+                      'http://yann.lecun.com/exdb/mnist/train-labels-idx1-ubyte.gz'],
+        'testing' : ['http://yann.lecun.com/exdb/mnist/t10k-images-idx3-ubyte.gz',
+                     'http://yann.lecun.com/exdb/mnist/t10k-labels-idx1-ubyte.gz'],
+    }
+                         
     if count is None:
         count = files[section][2] - offset
 
@@ -80,6 +87,21 @@ def load_mnist(section="training", offset=0, count=None, ret='xy',
     except KeyError:
         raise ValueError("Data set must be 'testing' or 'training'")
 
+    if not (os.path.exists(images_fname) and os.path.exists(labels_fname)):
+        try:
+            if not os.path.exists(path):
+                os.makedirs(path)
+            
+            for resource in resources[section]:
+                import urllib, gzip
+                filename = resource.rpartition('/')[2]
+                fpath = os.path.join(path, filename)
+                urllib.request.urlretrieve(resource, fpath)
+                with open(fpath.replace('.gz',''), "wb") as out_f, gzip.GzipFile(fpath) as zip_f:
+                    out_f.write(zip_f.read())
+        except KeyError:
+            raise ValueError("Failed to download data. Collect it manually from http://yann.lecun.com/exdb/mnist/")
+            
     returns = ()
     if 'x' in ret:
         with open(images_fname, 'rb') as fimg:

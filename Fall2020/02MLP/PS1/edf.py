@@ -1,7 +1,6 @@
 import numpy as np
 
 class Model:
-        
     def __init__(self, loss):
         self.components = []
         self.loss =loss
@@ -27,7 +26,6 @@ class Model:
         self.update()
                 
 class Component:
-
     def __init__(self):
         self.inputs = []
         self.users = []
@@ -82,9 +80,10 @@ class Parameter(Input):
 """model verification"""
 
 def verify(M, epsilon = .001):
+
     """this compares backpropagation to numerical differentiation
-at every component of a Model.  This is used to debug the backward method
-of a component implementation and should used on small circuits."""
+    at every component of a Model.  This is used to debug the backward method
+    of a component implementation and should used on small circuits."""
     
     M.forward()
     M.backward()
@@ -124,7 +123,7 @@ def forward_users(c):
 class Norm(Component):
 
     """for y = Norm(x) we create new parameters alpha and beta with the same shape as x and then
-y[i1,...,ik] = alpha[i1,...ik]x[i1,...,ik] + beta[i1,...,ik]"""
+    y[i1,...,ik] = alpha[i1,...ik]x[i1,...,ik] + beta[i1,...,ik]"""
     
     def __init__(self, x):
         self.value = np.empty(x.shape)
@@ -195,7 +194,7 @@ class NegLog(Component):
 class VDot(Component):
 
     """Matrix vector product: For y = VDot(A,x) we assume that A has shape (I,J) and
-x has shape J in which case y has shape (I) with y[i] = sum_j  A[i,j] x[j]."""
+    x has shape J in which case y has shape (I) with y[i] = sum_j  A[i,j] x[j]."""
     
     def __init__(self,A,x):
         if not isinstance(A,Parameter):
@@ -225,8 +224,8 @@ x has shape J in which case y has shape (I) with y[i] = sum_j  A[i,j] x[j]."""
 class Aref(Component):
 
     """ for y = Aref(x,i) we require that x has shape (N) and i has shape (1)
-in which case y has shape (1) with y[0] = x[,i[0]].
-In general scalars will be treated as tensors of shape (1)."""
+    in which case y has shape (1) with y[0] = x[,i[0]].
+    In general scalars will be treated as tensors of shape (1)."""
 
     def __init__(self,a,i):
         if not (len(a.shape) == 1 and len(i.shape) == 1):
@@ -249,10 +248,8 @@ In general scalars will be treated as tensors of shape (1)."""
 class Softmax(Component):
 
     """for y = Softmax(x) we have that y is the softmax of x over the last index of x.
-
     y[b,i] = (1/Z[b]) exp(x[b,i])  where Z[b] =- sum_i exp(x[b,i])
-
-we can construct a softmax over another index using a transposition view."""
+    we can construct a softmax over another index using a transposition view."""
 
     def __init__(self,x):
         self.value = np.empty(x.shape)
