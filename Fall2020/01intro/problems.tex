@@ -255,7 +255,7 @@ the terms other than $\ln Q_\Phi(y)$ as entropies or cross entropies.
 }
 
 \bigskip
-{\bf b.}  Now rewrite the ELBO by separating it into one the term for $P_\Phi(y)$ and one term for the other two combined and write the combined term
+{\bf b.}  Now rewrite the ELBO by separating it into one the term for $Q_\Phi(y)$ and one term for the other two combined and write the combined term
 as a KL divergence.  Explain why your expression implies that the ELBO is a lower bound on $\ln Q_\Phi(y)$.
 
 \solution{
@@ -289,7 +289,7 @@ $$KL(P,Q) =  \sup_G \;E_{y \sim P}\; \ln \frac{G(y)}{Q(y)}$$
 
   \solution{
     Part (a) implies that $$KL(P,Q) \geq \;E_{y \sim P}\; \ln \frac{G(y)}{Q(y)}$$
-    and also implies that for $G = Q$ we have equality.
+    and also implies that for $G = P$ we have equality.
   }
   
 (c) Now define
