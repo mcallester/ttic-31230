@@ -90,14 +90,14 @@ For example:
 
 $$\begin{array}{rrcl}
 \mathrm{for}\; h,i,j,k & \tilde{Y}[h,i,j] & \;\pluseq\; & A[h,i,k],B[h,j,k] \\
-\mathrm{for}\; h,i,j & Y[h,i,j] & = & \sigma(\tilde{Y}[i,j,k])
+\mathrm{for}\; h,i,j & Y[h,i,j] & = & \sigma(\tilde{Y}[h,i,j])
 \end{array}$$
 
 \vfill
 has backpropagation loops
 
 $$\begin{array}{rrcl}
-\mathrm{for}\;i,j,k & \tilde{Y}.\grad[i,j,k] & \pluseq & \sigma'(Y.\grad[i,j,k]) \\
+\mathrm{for}\;h,i,j & \tilde{Y}.\grad[h,i,j] & \pluseq & \sigma'(Y.\grad[h,i,j]) \\
 \mathrm{for}\;h,i,j,k & A.\grad[h,i,k] & \pluseq & \tilde{Y}.\grad[h,i,j] \;B[h,j,k] \\
 \mathrm{for}\;h,i,j,k & B.\grad[h,j,k] & \pluseq & \tilde{Y}.\grad[h,i,j]\;A[h,i,k]
 \end{array}$$
