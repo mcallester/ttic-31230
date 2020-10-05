@@ -97,7 +97,7 @@ $$\begin{array}{rrcl}
 has backpropagation loops
 
 $$\begin{array}{rrcl}
-\mathrm{for}\;h,i,j & \tilde{Y}.\grad[h,i,j] & \pluseq & \sigma'(Y.\grad[h,i,j]) \\
+\mathrm{for}\;h,i,j & \tilde{Y}.\grad[h,i,j] & \pluseq & Y.\grad[h,i,j]\sigma'(\tilde{Y}.\grad[h,i,j]) \\
 \mathrm{for}\;h,i,j,k & A.\grad[h,i,k] & \pluseq & \tilde{Y}.\grad[h,i,j] \;B[h,j,k] \\
 \mathrm{for}\;h,i,j,k & B.\grad[h,j,k] & \pluseq & \tilde{Y}.\grad[h,i,j]\;A[h,i,k]
 \end{array}$$
