@@ -89,7 +89,7 @@ In practice all deep learning source code can be written unsing scalar assignmen
 For example:
 
 $$\begin{array}{rrcl}
-\mathrm{for}\; h,i,j,k & \tilde{Y}[h,i,j] & \;\pluseq\; & A[h,i,k],B[h,j,k] \\
+\mathrm{for}\; h,i,j,k & \tilde{Y}[h,i,j] & \;\pluseq\; & A[h,i,k]\;B[h,j,k] \\
 \mathrm{for}\; h,i,j & Y[h,i,j] & = & \sigma(\tilde{Y}[h,i,j])
 \end{array}$$
 
