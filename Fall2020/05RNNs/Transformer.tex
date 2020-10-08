@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 
 \begin{document}
@@ -130,7 +130,7 @@ We take the input English sentence followed by a special token and then generate
 \slide{Continuing from a Prompt}
 
 
-GPT-2 from Open AI.
+GPT-2 from Open AI (1.5 billion parameters, June 2018)
 
 \vfill
 {\color{red} Continue from:}
@@ -153,6 +153,55 @@ Pérez and his friends were astonished to see the unicorn herd. ...
 While examining these bizarre creatures the scientists discovered that the creatures also spoke some fairly regular English. Pérez stated, “We can see, for example, that they have a common ‘language,’ something like a dialect or dialectic.”
 
 Dr. Pérez believes that the unicorns may have originated in Argentina ... some believe that perhaps the creatures were created when a human and a unicorn met each other in a time before human civilization. ... However, Pérez also pointed out that it is likely that the only way of knowing for sure if unicorns are indeed the descendants of a lost alien race is through DNA. ...
+
+
+\slide{Continuing from a Prompt}
+
+GPT-3 from Open AI (175 billion parameters, July 2020, ArXiv 2005.14165)
+
+\vfill
+{\color{red} Continue from: Feeling unproductive? Maybe you should stop overthinking.}
+
+\vfill
+To In order to get something done, maybe we need to think less. Seems counter-intuitive, but I believe sometimes our thoughts can get in the way of the creative process. We can work better at times when we "tune out" the external world and focus on what's in front of us.
+
+\vfill
+I've been thinking about this lately, so I thought it would be good to write an article about it. 
+
+\vfill
+So what exactly does this mean? Well, for starters, let's start with some definitions.
+
+\vfill
+Definition \#1: Creative Thinking (CT) is the act of using your mind to come up with ideas that are not already present in reality or that have never existed before. It is a form of mental activity that involves the use of logic and reason.
+
+\vfill
+Definition \#2: Over-Thinking (OT) is the act of trying to come up with ideas that have already been thought through by someone else. OT usually results in ideas that are impractical, impossible, or even stupid.
+
+\vfill
+...
+
+\slide{Few Shot Learning}
+
+GPT-3 can be prompted with a sequence of German-to-English translation pairs ending in a German sentence without the English translation.
+
+\vfill
+GPT-3 continues with the English Trnanslition of the given German.
+
+\vfill
+The translaion is not close to state of the art but still startling.
+
+\vfill
+Various other tasks can be done with few-shot examples in this way.  For example question answering, unscrambling words and three digit arithmetic.
+
+\slide{Few Shot Learners}
+
+A very recent paper (Sept. 15, 2020, ArXiv 2009.07118) has shown that the few-shot learning accomplishments of GPT-3 can be done with far fewer parameters.
+
+\vfill
+GPT-3 has 175 billion parameters.  The same few-shot performance can be achieved with 223 million parameters --- three orders of magnitude fewer.
+
+\vfill
+The new paper uses a method they call PET (Pattern Exploiting Training) involving ``distillation'' (student-teacher network-to-network training).
 
 \slide{END}
 
