@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \newcommand{\solution}[1]{\bigskip {\bf Solution}: #1}
 
@@ -8,13 +8,9 @@
 {\Huge
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
   \vfill
-  \centerline{\bf Stochastic Gradient Descent (SGD)}
-  \vfill
-  \centerline{\bf Momentum as a Running Average}
-  \vfill
-  \centerline{\bf Decoupled Momentum}
+  \centerline{\bf SGD with Momentum}
   \vfill
   \vfill
 
@@ -28,7 +24,31 @@ The standard (PyTorch) momentum SGD equations are
   {\color{red} \Phi_{t+1}} & {\color{red} =} & {\color{red} \Phi_t -  v_t} \\
 \end{eqnarray*}
 
-We wil refer to $\eta$ in these equations as the {\bf PyTorch Learning Rate Parameter}.
+\slide{Decoupling Hyper-Parameters}
+
+\begin{eqnarray*}
+  {\color{red} v_t} & {\color{red} =} & {\color{red} \mu v_{t-1} + \eta * \hat{g}_t} \;\;\;\mbox{$\mu$ is typically .9 or .99}\\
+  \\
+  {\color{red} \Phi_{t+1}} & {\color{red} =} & {\color{red} \Phi_t -  v_t} \\
+\end{eqnarray*}
+
+\vfill
+We will argue that by setting
+
+{\color{red} $$\eta = (1-\mu)B\eta_0$$}
+
+\vfill
+the learning will be sensitive to the choice of $\eta_0$ but largely independent of the choice of the momentum parameter $\mu$ or the batch size $B$.
+
+\slide{The Bottom Line On Momentum}
+
+{\color{red} $$\eta = (1-\mu)B\eta_0$$}
+
+\vfill
+Emprical evidence for this setting of $\eta$ is given in
+
+\vfill
+{\bf Don't Decay the Learning Rate, Increase the Batch Size}, Smith et al., 2018
 
 \slide{Momentum}
 

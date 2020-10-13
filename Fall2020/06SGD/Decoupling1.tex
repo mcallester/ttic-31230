@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \newcommand{\solution}[1]{\bigskip {\bf Solution}: #1}
 
@@ -8,7 +8,7 @@
 {\Huge
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
   \vfill
   \centerline{\bf Stochastic Gradient Descent (SGD)}
   \vfill
@@ -29,47 +29,17 @@ Where $\hat{g}_{t,b}$ is the gradient of the element $b$ of the batch.
 
 \slide{Decoupling $\eta$ from $B$}
 
-We can compare batch size $B$ to batch size 1.
-
-\vfill
 For batch size 1 on the same sequence of data points with $b \in \{1,\ldots,B\}$ and with learning rate $\eta_0$ we have
 
-\vfill
-$$\Phi_{t+b} = \Phi_{t+b-1} - \eta_0\;\nabla_\Phi\; {\cal L}(b,\Phi_{t+b-1})$$
+\begin{eqnarray*}
+\Phi_{t+B} & = &  \Phi_{t} - \sum_b \;\eta_0\;\nabla_\Phi {\cal L}(b,\Phi_{t+b-1}) \\
+\\
+& \approx & \eta_0 \sum_b \nabla_\Phi {\cal L}(b,\Phi_t) \\
+\\
+& = & B\eta_0\; \hat{g}_t
+\end{eqnarray*}
 
-\vfill
-where ${\cal L}(b,\Phi_{t+b-1})$ is the gradient of the batch element $b$ at parameter value $\Phi_{t+b-1}$.
-
-\slide{Decoupling $\eta$ from $B$}
-
-$$\Phi_{t+b} = \Phi_{t+b-1} - \eta_0\;\nabla_\Phi\; {\cal L}(b,\Phi_{t+b-1})$$
-
-\vfill
-If the parameters are moving slowing we have
-
-\vfill
-$$\nabla_\Phi \;{\cal L}(b,\Phi_{t+b-1}) \approx \nabla_\Phi \;{\cal L}(b,\Phi_{t}) = \hat{g}_{t,b}$$
-
-\vfill
-So for Batch size 1 we get
-
-$$\Phi_{t+B} \approx \Phi_{t} - \eta_0\;\sum_b \;\hat{g}_{t,b}$$
-
-\slide{Decoupling $\eta$ from $B$}
-
-For batch size 1 we have
-$$\Phi_{t+B} \approx \Phi_{t} - \eta_0\;\sum_b \;\hat{g}_{t,b}$$
-
-\vfill
-For batch size $B$ we have
-$$\Phi_{t+1} = \Phi_{t} - \eta\;\frac{1}{B}\;\sum_b \;\hat{g}_{t,b}$$
-
-\vfill
-If $\eta_0$ causes convergence to a desirable loss at batch size 1 then
-$$\eta = B \eta_0$$
-
-\vfill
-will cause a similar convergence at batch size $B$.
+If $\eta_0$ is the optimal learning rate for $B = 1$ then $B\eta_0$ should be the optimal learning rate for general $B$.
 
 \slide{Decoupling $\eta$ from $B$}
 
