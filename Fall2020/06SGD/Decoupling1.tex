@@ -12,11 +12,34 @@
   \vfill
   \centerline{\bf Stochastic Gradient Descent (SGD)}
   \vfill
-  \centerline{\bf Decoupling the Learning Rate From the Batch Size}
-  
-\slide{Decoupling $\eta$ from $B$}
+  \centerline{\bf The Learning Rate as Temperature}
 
-For vanilla SGD with minibatching we have
+\slide{Learning Rate as Temperature}
+
+The learning rate can be interpreted as a temperture.
+
+\vfill
+If we run for a long time at a large learning rate we converge to a noisy (hot) stationary distribution with a high loss value.
+
+\vfill
+At a lower learning rate we converge to a cooler stationary distribution with a lower loss value.
+
+\slide{Learning Rate as Temperature}
+
+\centerline{\includegraphics[width = 7in]{\images/annealing}}
+
+\vfill
+These Plots are from the original ResNet paper.  Left plot is for CNNs without residual skip connections, the right plot is ResNet.
+
+\vfill
+Thin lines are training error, thick lines are validation error.
+
+\vfill
+In all cases $\eta$ is reduced twice, each time by a factor of 2.
+
+\slide{Batch Size and Temperature}
+
+Vanilla SGD with minibatching typically uses the following update which defines the meaning of $\eta$.
 
 \begin{eqnarray*}
 \Phi_{t+1} & \;\minuseq\; & \eta \hat{g}_t \\
@@ -25,30 +48,35 @@ For vanilla SGD with minibatching we have
 \end{eqnarray*}
 
 \vfill
-Where $\hat{g}_{t,b}$ is the gradient of the element $b$ of the batch.
+Here $\hat{g}_{b}$ is average gradient over the batch.
 
-\slide{Decoupling $\eta$ from $B$}
+\vfill
+Under this update {\bf increasing the batch size (while holding $\eta$ fixed) reduces the temperature.}
 
-For batch size 1 on the same sequence of data points with $b \in \{1,\ldots,B\}$ and with learning rate $\eta_0$ we have
+\slide{Making Temperature Independent of $B$}
+
+For batch size 1 with learning rate $\eta_0$ we have
 
 \begin{eqnarray*}
-\Phi_{t+B} & = &  \Phi_{t} - \sum_b \;\eta_0\;\nabla_\Phi {\cal L}(b,\Phi_{t+b-1}) \\
+\Phi_{t+1} & = &  \Phi_{t} - \eta_0\;\nabla_\Phi {\cal L}(t,\Phi_{t}) \\
 \\
-& \approx & \eta_0 \sum_b \nabla_\Phi {\cal L}(b,\Phi_t) \\
+\Phi_{t+B} & = &  \Phi_{t} - \sum_{b=0}^{B-1} \;\eta_0\;\nabla_\Phi {\cal L}(t+b,\Phi_{t+b-1}) \\
 \\
-& = & B\eta_0\; \hat{g}_t
+& \approx & \Phi_t - \eta_0 \sum_b \nabla_\Phi {\cal L}(t+b,\Phi_t) \\
+\\
+& = & \Phi_t - B\eta_0\; \hat{g}_t
 \end{eqnarray*}
 
-If $\eta_0$ is the optimal learning rate for $B = 1$ then $B\eta_0$ should be the optimal learning rate for general $B$.
+\vfill
+For batch updates $\Phi_{t+1} = \Phi_t - B\eta_0\; \hat{g}_t$ the temperature is essentially determined by $\eta_0$ independent of $B$.
 
-\slide{Decoupling $\eta$ from $B$}
+\slideplain{Making Temperature Independent of $B$}
 
 Recent work has show that using $\eta = B\eta_0$ leads to effective learning with very large (highly parallel)
 batches.
 
 \vfill
 {\bf Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour}, Goyal et al., 2017.
-
 
 \slide{END}
 
