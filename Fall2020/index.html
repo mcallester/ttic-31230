@@ -2,8 +2,6 @@
 
 <p>Autumn 2020</p>
 
-<p style= "color:red"> <a href = quiz1/quiz1.pdf style = color:red> quiz1 </a></p>
-
 <p>Lecture: David McAllester (mcallester@ttic.edu)</p>
 
 <p>TA: Pedro Savarese (savarese@ttic.edu)</p>
@@ -209,7 +207,7 @@
     </p></table>
     
   <li>
-    <p><b> Stochastic Gradient Descent I</b> Reviewed at office hours Wednesday Oct. 21. </p>
+    <p><b> SGD I: Convergence and Temperature.</b> Reviewed at office hours Wednesday Oct. 21. </p>
     <p style = "color:red"> Problem set 2 due Friday Oct. 23. </p>
 
     
@@ -222,13 +220,13 @@
 	</tr>
 	
 	<tr>
-	  <td align = "left" style = "padding:10pt"> Decoupling the Learning Rate from the Batch Size </td>
+	  <td align = "left" style = "padding:10pt"> The Learning Rate, the Batch Size, and Temperature</td>
 	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Decoupling1.pdf> Slides </a> </td>
 	  <td align = "left" style = "padding:10pt"> <a href = https://us02web.zoom.us/rec/share/YyKULF9OaWWpROdlIQk3u1OhYwCfKBJgRWcOqi-RhV9hggYBkvOhPb91Zs7akGvx.mOJxQbKYMvswc_gj?startTime=1602798534000> Video </a> </td>
 	</tr>
 	
 	<tr>
-	  <td align = "left" style = "padding:10pt"> Momentum as a Running Average and Decoupled Momentum </td>
+	  <td align = "left" style = "padding:10pt"> Momentum and Temperature</td>
 	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Momentum.pdf> Slides </a> </td>
 	  <td align = "left" style = "padding:10pt"> <a href = https://us02web.zoom.us/rec/share/aGNa44zXp_H2qf9FhSlfe-LDdFC7Z3A67zQyqPleXIdsNKUNSppYV8TPL2Z_JYzA.onGAdF8nEdszD672?startTime=1602799227000> Video </a> </td>
 	</tr>
@@ -236,50 +234,60 @@
     </table> </p> </li>
 
 
-<li> <p> <b> Stochastic Gradient Descent II:</b> Reviewed at office hours Friday Oct. 23, </p>
-    
+<li> <b> SGD II: Continuous Time Analyses.</b> Reviewed at office hours Friday Oct. 23.
     <p> <table>
 
 	<tr>
-	  <td align = "left" style = "padding:10pt"> RMSProp, and Adam and Decoupled Versions </td>
+	  <td align = "left" style = "padding:10pt"> Gradient Flow </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/flow.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> <a href = https://us02web.zoom.us/rec/share/TYSGoH38Ywg3owUOncp7mOQCU3sbyaM8BAAWmju6L0tY7BHuqDL5Q9fxeye-DA6W.JllwvYZy2NnyXnU7?startTime=1603040171000> Video </a> </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Stochastic Differential Equations (SDEs) </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Langevin.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> <a href = https://us02web.zoom.us/rec/share/oovgsAY9QtHSBV7lil3MbxOpTu4W7w0wHLHqFIfeW5aisvEDeHJxLPybL2JJ5CXs.OZkyvMGXpFI68dTd?startTime=1603047497000> Video </a> </td>
+	</tr>
+	
+	<tr>
+	  <td align = "left" style = "padding:10pt"> Stationary Distributions and Temperature </td>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Langevin2.pdf> Slides </a> </td>
+	  <td align = "left" style = "padding:10pt"> <a href = https://us02web.zoom.us/rec/share/R8d58rE9akGJPAYFkexRW2tAY2qbHLihb9tlgbU6HssCa9ZKW9pPhOgS2VPLl7hK.cDneiBjVw3EiQ57S?startTime=1603049363000> Video </a> </td>
+	</tr>
+
+	<tr>
+	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Langproblems.pdf> Problems</a></td>
+	</tr>
+
+</table> </p> </li>
+
+	
+<li> <p> <b> SGD III:  Adaptive Methods.</b> Reviewed at office hours Monday Oct. 26. </p>
+
+      <p> <table>
+
+	  
+	<tr>
+	  <td align = "left" style = "padding:10pt"> RMSProp and Adam </td>
 	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/RMS.pdf> Slides </a> </td>
 	  <td align = "left" style = "padding:10pt"> Video </td>
 	</tr>
-	
+
 	<tr>
-	  <td align = "left" style = "padding:10pt"> Gradient Flow </td>
-	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/flow.pdf> Slides </a> </td>
-	  <td align = "left" style = "padding:10pt"> Video </td>
-	</tr>
-	
-	<tr>
-	  <td align = "left" style = "padding:10pt"> Heat Capacity with Loss as Energy and Learning Rate as Temperature </td>
+	  <td align = "left" style = "padding:10pt"> Heat Capacity: Loss (Energy) as a function of Learning Rate (Temperature).
 	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Heat.pdf> Slides </a> </td>
 	  <td align = "left" style = "padding:10pt"> Video </td>
 	</tr>
 
-  </table> </p> </li>
-
-
-<li> <b> Stochastic Gradient Descent III:</b> Reviewed at office hours Monday Oct. 26.
-    <p> <table>
-
-	<tr>
-	  <td align = "left" style = "padding:10pt"> Continuous Time Noise and Stationary Parameter Densities </td>
-	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/Langevin.pdf> Slides </a> </td>
-	  <td align = "left" style = "padding:10pt"> Video </td>
-	</tr>
 	
 	<tr>
 	  <td align = "left" style = "padding:10pt"> <a href = 06SGD/SGDproblems.pdf> Problems</a></td>
 	</tr>
-	
-	
-	
+
   </table></p></li>
     
 <li>
-  <p> <b> Generalization and Regularization I:</b> Reviewed at office hours Wednesday Oct 28 </p>.
+  <p> <b> Generalization and Regularization I:</b> Reviewed at office hours Wednesday Oct 28. </p>
   <p style = "color:red">Quiz 2 on Friday Oct 30. </p>
   <p> <table>
       <tr>

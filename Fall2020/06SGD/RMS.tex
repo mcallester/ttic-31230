@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \newcommand{\solution}[1]{\bigskip {\bf Solution}: #1}
 
@@ -13,6 +13,23 @@
   \centerline{\bf Stochastic Gradient Descent (SGD)}
   \vfill
   \centerline{\bf RMSProp and Adam and Decoupled Versions}
+
+
+\slide{Forcing a Gibbs Distribution}
+
+Suppose we use parameter-specific learning rates $\eta_x$ and $\eta_y$
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta_x \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta_y \sigma_y^2}\right)
+\end{eqnarray*}
+
+Setting $\eta_x = \eta'/\sigma^2_x$ and $\eta_y = \eta'/\sigma^2_y$ gives
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta'} + \frac{-{\cal L}(y)}{\alpha \eta'}\right) \\
+\\
+& = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x,y)}{\alpha \eta'}\right)\;\;\;\mathrm{Gibbs!}
+\end{eqnarray*}
 
 \slide{RMSProp and Adam}
 

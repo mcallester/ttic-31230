@@ -1,5 +1,5 @@
 \documentclass{article}
-\input ../preamble
+\input ../../preamble
 \parindent = 0em
 
 %\newcommand{\solution}[1]{}
@@ -10,9 +10,9 @@
 
 \centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
 \bigskip
-\centerline{\bf Langevin Dynamics Problems.}
+\centerline{\bf Stationary Distributions.}
 
-{\bf Problem 1.} This problem is on batch size scaling of Langevin dynamics.  We consider batched SGD as defined by
+{\bf Problem 1. The stationary distribution with minibatching.} This problem is on batch size scaling and stationary distributions (temperature).  We consider batched SGD as defined by
 $$\Phi \;\minuseq \; \eta \hat{g}^B$$
 where $\hat{g}^B$ is the average of $B$ sampled gradients.  Let $g$ be the average gradient $g = E\;\hat{g}$.
 
@@ -21,7 +21,7 @@ $$\Sigma^B[i,j] = E\;(\hat{g}^B[i] - g[i])(\hat{g}^B[j] - g[j]).$$
 
 \medskip Langevin dynamics is
 $$\Phi(t + \Delta t) = \Phi(t) - g\Delta t + \epsilon \sqrt{\Delta t}\;\;\;\epsilon \sim {\cal N}(0,\eta\Sigma^B)$$
-Show that for $\eta = B\eta_0$ the Langevin dynamics is determined by $\eta_0$ independent of $B$.
+Show that for $\eta = B\eta_0$ the stationary distribution is determined by $\eta_0$ independent of $B$.
 
 \solution{
   \begin{eqnarray*}
@@ -40,4 +40,27 @@ Show that for $\eta = B\eta_0$ the Langevin dynamics is determined by $\eta_0$ i
 
   So for $\eta = B\eta_0$ we have $\eta\Sigma^B  = \eta_0\Sigma^1$ which yields the equivalence.
 }
+
+\eject
+
+{\bf Problem 2. The stationary distribution with momentum.}  In this problem we consider the more general principle that the
+stationary distribution (the temperature) is determined by the effect of each individual training point on the parameter vector.  This principle was used in the
+claim that in the presence of momentum setting the learning rate by $\eta = (1-\mu)B\eta_0$ yields a temperature determined by $\eta_0$ independent of
+$\mu$ and $B$.
+In this problem we justify the general principle of examining the influence of each individual training point.
+
+\medskip
+Let $\hat{g}_1, \ldots, \hat{g}_N$
+be the loss gradients of $N$ individual training points (Batch size 1).  Consider a weighted sum (such as that used in momentum).
+
+$$\Delta \Phi = \sum_i\; \alpha_i\hat{g}_i$$
+
+Assume the updates are small so that for any given training point $i$ we have that $\hat{g}_i$ is uneffected by the drift in the parameter vector.
+In that case, even if parameter updates are being made between gradient measurements, the random variables $g_i$ are essentially independent
+and identically distributed (over the random draw of a training point).  Let $\Sigma_g$ be the covariance matrix of the distribution of the
+random variable $\hat{g}_i$.  Let $\Sigma_{\Delta \Phi}$ be the covariance matrix of the random variable $\Delta \Phi$.
+Show
+
+$$\Sigma_{\Delta \Phi} = \left(\sum_i \alpha_i\right)\Sigma_g$$
+
 \end{document}
