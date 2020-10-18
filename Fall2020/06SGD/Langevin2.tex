@@ -1,0 +1,177 @@
+\input ../../SlidePreamble
+\input ../../preamble
+
+\begin{document}
+
+{\Huge
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Autumn 2020}
+  \vfill
+  \centerline{\bf Stationary Distributions of SDEs and Temperature}
+  \vfill
+  \vfill
+  \vfill
+
+\slide{The Stationary Distribution}
+
+\begin{eqnarray*}
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \epsilon \sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,{\color{red} \eta}\Sigma)
+\end{eqnarray*}
+
+\vfill
+For an SDE we have a stationary continuous density in parameter space.
+
+\vfill
+We have a probability mass flow due to the loss gradient and a diffusion probability mass flow proportional to the density gradient.
+
+
+\slide{The Stationary Distribution}
+
+We consider the one dimensional case --- a single parameter $x$ --- and a probability density $p(x)$.
+
+\vfill
+The gradient flow is equal to $- p(x)g$.
+
+\vfill
+The diffusion flow is proportional to $- \eta\sigma^2\;dp(x)/dx$ (see the appendix).
+
+
+\vfill
+For a stationary distribution the sum of the two flows is zero giving.
+
+\vfill
+{\color{red} $$\alpha \eta \sigma^2 \frac{dp}{dx} = - p\frac{d{\cal L}}{dx}$$}
+
+
+\slide{The 1-D Stationary Distribution}
+
+\vspace{-2ex}
+\begin{eqnarray*}
+\alpha \eta^2 \sigma^2 \frac{dp}{dx} & = & - \eta p\frac{d{\cal L}}{dx} \\
+\\
+\frac{dp}{p} & = & \frac{-d{\cal L}}{\alpha\eta\sigma^2} \\
+\\
+\ln p & = & \frac{-{\cal L}}{\alpha \eta \sigma^2} + C \\
+\\
+{\color{red} p(x)} & = & {\color{red} \frac{1}{Z}\exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma^2}\right)}
+\end{eqnarray*}
+
+\vfill
+We get a Gibbs distribution with $\eta$ as temperature!
+
+\slide{A 2-D Stationary Distribution}
+
+Let $p$ be a probability density on two parameters $(x,y)$.
+
+\vfill
+We consider the case where $x$ and $y$ are completely independent with
+$${\cal L}(x,y) = {\cal L}(x) + {\cal L}(y)$$
+
+\vfill
+For completely independent variables we have
+\begin{eqnarray*}
+p(x,y) & = & p(x)p(y) \\
+\\
+&= & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta \sigma_y^2}\right)
+\end{eqnarray*}
+
+\slide{A 2-D Stationary Distribution}
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta \sigma_y^2}\right)
+\end{eqnarray*}
+
+\vfill
+This is not a Gibbs distribution!
+
+\vfill
+It has two different temperature parameters!
+
+\slide{Forcing a Gibbs Distribution}
+
+Suppose we use parameter-specific learning rates $\eta_x$ and $\eta_y$
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta_x \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta_y \sigma_y^2}\right)
+\end{eqnarray*}
+
+Setting $\eta_x = \eta'/\sigma^2_x$ and $\eta_y = \eta'/\sigma^2_y$ gives
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta'} + \frac{-{\cal L}(y)}{\alpha \eta'}\right) \\
+\\
+& = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x,y)}{\alpha \eta'}\right)\;\;\;\mathrm{Gibbs!}
+\end{eqnarray*}
+
+\slidetwo{The Case of Locally Constant Noise}
+{and Locally Quadratic Loss}
+
+In this case we can impose a change of coordinates under which the Hessian is the identity matrix.  So without loss of generality we can take the
+Hessian to be the identity.
+
+\vfill
+We can consider the covariance matrix of the vectors $\hat{g}$ in the Hessian-normalized coordinate system.
+
+\slidetwo{The Case of Locally Constant Noise}
+{and Locally Quadratic Loss}
+
+If we assume constant noise covariance in the neighborhood of the stationary distribution then, in the Hessian normalized
+coordinate system, we get a stationary distribution
+$$p(\Phi) \propto \exp\left(-\sum_i \frac{{\Phi_i^2}}{\alpha\eta\sigma_i^2}\right)$$
+
+\vfill
+where $\Phi_i$ is the projection of $\Phi$ onto to a unit vector in the direction of the $i$th eigenvector of the noise covariance matrix and $\sigma^2_i$
+is the corresponding noise eigenvalue (the variance of the $\hat{g}_i$).
+
+\slide{END}
+
+\slide{Appendix: Diffusion Flow}
+
+In the SDE formalism we move stochastically from $x$ to $x + \epsilon \sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,\eta\sigma^2)$.
+
+\vfill
+To get the order of dependence on $\eta$ and $\sigma$ replace this with drawing $\epsilon$ from the uniform distribution on
+$[-\sqrt{\eta}\sigma,\sqrt{\eta}\sigma]$.
+
+\slide{Appendix: Diffusion Flow}
+
+We will draw $\Delta x$ the uniform distribution on $[-\Delta,\Delta]$ with $\Delta = \sqrt{\eta}\sigma\sqrt{\Delta t}$.
+
+\vfill
+The quantity of mass transfer in the interval $\Delta t$ from values below $x$ to values above $x$ is then the following where $x-z$ is the source of the mass.
+
+{\Large
+\begin{eqnarray*}
+& & \int_{z = 0}^\Delta p(\Delta x \geq z) p(x - z) dz  \\
+\\
+& =  & \int_{z = 0}^\Delta \frac{\Delta - z}{2\Delta}\;\left(p(x) - \frac{dp}{dx}z\right) dz \\
+\\
+& = & \frac{1}{4}p(x) \Delta - \frac{1}{12}\frac{d p}{dx}\Delta^2
+\end{eqnarray*}
+}
+
+\slide{Appendix: Diffusion Flow}
+
+{\huge
+The mass transfer from below $x$ to above $x$ in interval $\Delta t$ is now
+$$\frac{1}{4}p(x) \Delta - \frac{1}{12}\frac{d p}{dx}\Delta^2 \;\;\;\mbox{for}\;\;\Delta = \sqrt{\eta}\sigma\sqrt{\Delta t}.$$
+
+\vfill
+Subtracting a similar calculation for the downward mass transfer cancels the first term and doubles the second term.
+
+\vfill
+We then get that the net mass transfer is
+
+$$- \frac{1}{6} \frac{dp}{dx} \eta\sigma^2 \Delta t$$
+
+\vfill
+So the mass transfer per unit time --- the diffusion flow --- is
+
+$$-\frac{1}{6}\eta \sigma^2 \frac{dp}{dx}$$
+
+\vfill
+The constant $1/6$ must be adjusted for Gaussian noise rather than uniform noise.
+
+\slide{END}
+\end{document}
