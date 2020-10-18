@@ -12,40 +12,21 @@
   \vfill
   \centerline{\bf Stochastic Gradient Descent (SGD)}
   \vfill
-  \centerline{\bf RMSProp and Adam and Decoupled Versions}
-
-
-\slide{Forcing a Gibbs Distribution}
-
-Suppose we use parameter-specific learning rates $\eta_x$ and $\eta_y$
-
-\begin{eqnarray*}
-p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta_x \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta_y \sigma_y^2}\right)
-\end{eqnarray*}
-
-Setting $\eta_x = \eta'/\sigma^2_x$ and $\eta_y = \eta'/\sigma^2_y$ gives
-
-\begin{eqnarray*}
-p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta'} + \frac{-{\cal L}(y)}{\alpha \eta'}\right) \\
-\\
-& = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x,y)}{\alpha \eta'}\right)\;\;\;\mathrm{Gibbs!}
-\end{eqnarray*}
+  \centerline{\bf RMSProp and Adam}
 
 \slide{RMSProp and Adam}
 
-RMSProp and Adam are ``adaptive'' SGD methods --- the effective learning rate is computed from statistics of the data rather than set as a fixed hyper-parameter (although
-the adaptation algorithm itself still has hyper-parameters).
+RMSProp and Adam are ``adaptive'' SGD methods --- they use different learning rates for different model parameters where the parameter-specific learning rate is
+computed from statistics of the data.
 
 \vfill
-Different effective learning rates are used for different model parameters.
-
-\vfill
-Adam is typically used in NLP while Vanilla SGD is typically used in vision.  This may be related to the fact that batch normalization is used in vision but not in NLP.
+Adam can be viewed as an elaboration of RMSProp.
 
 \slide{RMSProp}
 
 RMSProp is based on a running average of $\hat{g}[i]^2$ for each scalar model parameter $i$.
 
+\
 \begin{eqnarray*}
 {\color{red} s_t[i]} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
 \\
@@ -68,12 +49,30 @@ For $g[i]$ small $s[i]$ approximates the variance of $\hat{g}[i]$.
 There is a ``centering'' option in PyTorch RMSProp that switches from the second moment to the variance.
 
 \slide{RMSProp Motivation}
-\begin{eqnarray*}
-{\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i]} + \epsilon}\;\; \hat{g}_t[i]}
-\end{eqnarray*}
+
+If we assume constant noise covariance and locally positive definite quadratic loss in the neighborhood of the stationary distribution then, in a coordinate system
+where The Hessian is the identity matrix, Vanilla SGD has a stationary distribution of the form
+$$p(\Phi) \propto \exp\left(-\sum_i \frac{{\Phi_i^2}}{\alpha\eta\sigma_i^2}\right)$$
 
 \vfill
-One interpretation of RMSProp is that a low variance gradient has less statistical uncertainty and hence needs less averaging before making the update.
+where, because we have used the Hessian-normalized coordinate system, we have 
+$${\cal L} = ||\Phi||^2$$
+
+\slide{RMSProp Motivation}
+
+If we set $\eta_i = \eta_0/\sigma_i^2$ this becomes
+
+$$p(\Phi) \propto \exp\left(-\sum_i \frac{{\cal L}}{\alpha\eta_0}\right)$$
+
+\vfill
+The Gibbs stationary distribution seems desirable for exploration.
+
+\slide{RMSProp Motivation}
+
+However, computing the Hessian is extremely challenging and RMSprop works in the given coordinates.
+
+\vfill
+Also, centered RMSProp divides by $\sigma_i$ rather than $\sigma_i^2$.
 
 \slide{RMSProp is Theoretically Mysterious}
 
@@ -94,11 +93,11 @@ Consistent with the dimensional analysis, many theoretical analyses support (2) 
 Adam combines momentum and RMSProp.
 
 \vfill
-PyTorch RMSProp also supports momentum.  However, it presumably uses the standard moment learning rate parameter which is strongly coupled to the momentum parameter.
-Without an understanding of the coupling, hyper-parameter optimization is then difficult.
+PyTorch RMSProp also supports momentum.  However, it presumably uses the standard momentum learning rate parameter which couples the temperature to both
+the learning rate and the momentum parameter.  Without an understanding of the coupling to temperature, hyper-parameter optimization is then difficult.
 
 \vfill
-Adam uses a learning rate parameter that is naturally decoupled from the momentum parameter.
+Adam uses a momentum parameter that is naturally decoupled from temperature.
 
 \vfill
 Adam also uses ``bias correction''.
@@ -191,7 +190,7 @@ In PyTorch this is difficult because ``optimizers'' are defined as a function of
 $\hat{g}_t[i]$ is not sufficient for computing $\sum_b \;\hat{g}_{t,b}[i]^2$.
 
 \vfill
-To compute $\sum_b \;\hat{g}_{t,b}[i]^2$ we need to modify the backward method of all PyTorch objects!
+To compute $\sum_b \;\hat{g}_{t,b}[i]^2$ we would need to maintain a batch index in the gradiant attribute of parameters.
 
 \slide{END}
 
