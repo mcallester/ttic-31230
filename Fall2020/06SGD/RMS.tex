@@ -8,7 +8,7 @@
 {\Huge
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
   \vfill
   \centerline{\bf Stochastic Gradient Descent (SGD)}
   \vfill
@@ -20,13 +20,15 @@ RMSProp and Adam are ``adaptive'' SGD methods --- they use different learning ra
 computed from statistics of the data.
 
 \vfill
-Adam can be viewed as an elaboration of RMSProp.
+Adam is variant of RMSProp with momentum and ``debiasing''.
 
 \slide{RMSProp}
 
+RMSProp was introduced in Hinton's class lecture slides.
+
+\vfill
 RMSProp is based on a running average of $\hat{g}[i]^2$ for each scalar model parameter $i$.
 
-\
 \begin{eqnarray*}
 {\color{red} s_t[i]} & {\color{red} =} & {\color{red} \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
 \\
@@ -43,7 +45,7 @@ The variance $\sigma^2$ of $x$ is $E \;(x - \mu)^2$ with $\mu = E\;x$.
 RMSProp uses an estimate $s[i]$ of the second moment of the random scalar $\hat{g}[i]$.
 
 \vfill
-For $g[i]$ small $s[i]$ approximates the variance of $\hat{g}[i]$.
+If the mean $g[i]$ is small then $s[i]$ approximates the variance of $\hat{g}[i]$.
 
 \vfill
 There is a ``centering'' option in PyTorch RMSProp that switches from the second moment to the variance.
@@ -51,7 +53,7 @@ There is a ``centering'' option in PyTorch RMSProp that switches from the second
 \slide{RMSProp Motivation}
 
 If we assume constant noise covariance and locally positive definite quadratic loss in the neighborhood of the stationary distribution then, in a coordinate system
-where The Hessian is the identity matrix, Vanilla SGD has a stationary distribution of the form
+where the Hessian is the identity matrix, vanilla SGD has a stationary distribution of the form
 $$p(\Phi) \propto \exp\left(-\sum_i \frac{{\Phi_i^2}}{\alpha\eta\sigma_i^2}\right)$$
 
 \vfill
@@ -155,23 +157,22 @@ The published version of Adam has a more obscure form of bias correction which y
 \Phi_{t+1}[i] & =  & \Phi_t - \frac{\eta}{\sqrt{s_{t}[i]} + \epsilon}\;\;\tilde{g}_{t}[i]
 \end{eqnarray*}
 
-\slide{Decoupled Adam}
+\slide{Decoupling $\eta$ from $\epsilon$}
 
 $$\Phi_{t+1}[i] =  \Phi_t - \frac{\eta}{\sqrt{s_{t}[i]} + \epsilon}\;\;\tilde{g}_{t}[i]$$
 
 \vfill
-Empirically, tuning $\epsilon$ is important.
+The optimal $\epsilon$ is often large.
+For large $\epsilon$ it is useful to set $\eta = \epsilon\eta_0$ in which case we get
+
+$$\Phi_{t+1}[i] =  \Phi_t - \frac{\eta_0}{1 + \frac{1}{\epsilon}\sqrt{s_{t}[i]}}\;\;\tilde{g}_{t}[i]$$
 
 \vfill
-It seems useful to reparameterizing in terms of $\eta_0$ by
-$$\eta = \frac{\eta_0}{\epsilon}$$
+We then get standard SGD  as $\epsilon \rightarrow \infty$ holding $\eta_0$ fixed.
 
-\vfill
-Some coupling remains between $\eta_0$ and $\epsilon$.
+\slide{Making Adam Independent of $B$}
 
-\slide{Decoupled Adam}
-
-Decoupling Adam from the batch size $B$ is problematic.
+Making Adam independent of the batch size $B$ is difficult.
 
 \vfill
 Rather than
@@ -182,7 +183,7 @@ we would like
 s_t[i] & = &  \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \left(\frac{1}{B} \sum_b \hat{g}_{t,b}[i]^2\right)
 \end{eqnarray*}
 
-\slide{Decoupled Adam}
+\slide{Making Adam Independent of $B$}
 
 In PyTorch this is difficult because ``optimizers'' are defined as a function of $\hat{g}_t$.
 
@@ -190,7 +191,7 @@ In PyTorch this is difficult because ``optimizers'' are defined as a function of
 $\hat{g}_t[i]$ is not sufficient for computing $\sum_b \;\hat{g}_{t,b}[i]^2$.
 
 \vfill
-To compute $\sum_b \;\hat{g}_{t,b}[i]^2$ we would need to maintain a batch index in the gradiant attribute of parameters.
+To compute $\sum_b \;\hat{g}_{t,b}[i]^2$ we need to maintain a batch index in the gradiant attribute of parameters.
 
 \slide{END}
 
