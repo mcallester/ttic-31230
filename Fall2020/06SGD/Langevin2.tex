@@ -128,50 +128,112 @@ is the corresponding noise eigenvalue (the variance of the $\hat{g}_i$).
 
 \slide{Appendix: Diffusion Flow}
 
-In the SDE formalism we move stochastically from $x$ to $x + \epsilon \sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,\eta\sigma^2)$.
+{\Large
+We consider the one dimensional case. In the SDE formalism we move stochastically from $x$ to $x + \epsilon \sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,\eta\sigma^2)$
+where $\eta$ is the learning rate and $\sigma^2$ is the variance of the random gradients $\hat{g}_{t,b}$.
 
 \vfill
-To get the order of dependence on $\eta$ and $\sigma$ replace this with drawing $\epsilon$ from the uniform distribution on
-$[-\sqrt{\eta}\sigma,\sqrt{\eta}\sigma]$.
+To avoid confusion between different probability densities we will us $\rho(x)$ for the probability mass distribution in $x$ and use $p_\epsilon(\Psi)$
+for the probability that $\Psi$ holds under a random draw of $\epsilon$.
+
+}
 
 \slide{Appendix: Diffusion Flow}
+{\Large
 
-We will draw $\Delta x$ the uniform distribution on $[-\Delta,\Delta]$ with $\Delta = \sqrt{\eta}\sigma\sqrt{\Delta t}$.
+We move stochastically from $x$ to $x + \epsilon \sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,\eta\sigma^2)$
 
 \vfill
-The quantity of mass transfer in the interval $\Delta t$ from values below $x$ to values above $x$ is then the following where $x-z$ is the source of the mass.
+This is the same as moving stochastically from $x$ to $x + \epsilon\sqrt{\eta}\sigma\sqrt{t}$ with $\epsilon \sim {\cal N}(0,1)$.
 
-{\Large
+\vfill
+The quantity of mass transfer in the time interval $\Delta t$ from values above $x$ to values below $x$ is
+
+
 \begin{eqnarray*}
-& & \int_{z = 0}^\Delta p(\Delta x \geq z) p(x - z) dz  \\
+& & \int_{z = 0}^\infty  \rho(x + z)\;p_\epsilon(\epsilon\sqrt{\eta}\sigma\sqrt{t} \leq -z) d\delta  \\
 \\
-& =  & \int_{z = 0}^\Delta \frac{\Delta - z}{2\Delta}\;\left(p(x) - \frac{dp}{dx}z\right) dz \\
+& = & \int_{z = 0}^\infty  \rho(x + z)\;p_\epsilon\left(\epsilon \leq \frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz  \\
 \\
-& = & \frac{1}{4}p(x) \Delta - \frac{1}{12}\frac{d p}{dx}\Delta^2
+& =  & \int_{z = 0}^\infty \rho(x+z)\;\Phi\left(\frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz
+\end{eqnarray*}
+
+\vfill
+where $\Phi$ is the cummulative function of the Gaussian.
+}
+
+\slide{Appendix: Diffusion Flow}
+{\Large
+
+The quantity of mass transfer in the time interval $\Delta t$ from values above $x$ to values below $x$ is
+
+
+\begin{eqnarray*}
+&  & \int_{z = 0}^\infty \rho(x+z)\;\Phi\left(\frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz
+\end{eqnarray*}
+
+By a change of variables $u = z/(\sqrt{\eta}\sigma\sqrt{t})$ we get
+
+\begin{eqnarray*}
+&  & \int_{u = 0}^\infty \rho(x+\sqrt{\eta}\sigma\sqrt{t}\;u)\;\Phi(-u) \sqrt{\eta}\sigma\sqrt{t}\;du
+\end{eqnarray*}
+
+\vfill
+As $\Delta t \rightarrow 0$ we can use the first order Taylor expansion of the density.
+
+\begin{eqnarray*}
+&  & \sqrt{\eta}\sigma\sqrt{t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du
 \end{eqnarray*}
 }
 
 \slide{Appendix: Diffusion Flow}
+{\Large
 
-{\huge
-The mass transfer from below $x$ to above $x$ in interval $\Delta t$ is now
-$$\frac{1}{4}p(x) \Delta - \frac{1}{12}\frac{d p}{dx}\Delta^2 \;\;\;\mbox{for}\;\;\Delta = \sqrt{\eta}\sigma\sqrt{\Delta t}.$$
+\begin{eqnarray*}
+&  & \sqrt{\eta}\sigma\sqrt{t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du \\
+\\
+& = & \sqrt{\eta}\sigma\sqrt{t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) +  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+\end{eqnarray*}
 
-\vfill
-Subtracting a similar calculation for the downward mass transfer cancels the first term and doubles the second term.
+A similar alanysis shows that the mass transfer from lower values to higher values is
 
-\vfill
-We then get that the net mass transfer is
-
-$$- \frac{1}{6} \frac{dp}{dx} \eta\sigma^2 \Delta t$$
-
-\vfill
-So the mass transfer per unit time --- the diffusion flow --- is
-
-$$-\frac{1}{6}\eta \sigma^2 \frac{dp}{dx}$$
+\begin{eqnarray*}
+& = & \sqrt{\eta}\sigma\sqrt{t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) -  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+\end{eqnarray*}
 
 \vfill
-The constant $1/6$ must be adjusted for Gaussian noise rather than uniform noise.
+The net mass transfer in the positive $x$ direction is the second minus the first or
+
+\begin{eqnarray*}
+& = & - 2\eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+\end{eqnarray*}
+}
+
+\slide{Appendix: Diffusion Flow}
+{\Large
+
+The net mass transfer in the positive $x$ direction is
+
+\begin{eqnarray*}
+& & - 2\eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+\end{eqnarray*}
+
+\vfill
+Note that the mass transfer is proportional to $\Delta t$.  Dividing by $\Delta t$ gives the flow per unit time.
+
+\vfill
+$$\mbox{Diffusion flow}\;\;= - \alpha \eta\sigma^2 \frac{d\rho(x)}{dx}\;\;\;\;\;\alpha = 2\int_{u=0}^\infty u\Phi(-u) du$$
+
+\vfill
+For dimension larger than 1 we have
+
+\vfill
+$$\mbox{Diffusion flow}\;\;= - \alpha \eta\Sigma \nabla_x \rho$$
+
+\vfill
+Where $\Sigma = E\;(\hat{g} - g)(\hat{g} - g)^\top$ is the covariance matrix of the gradient noise.
+
+}
 
 \slide{END}
 \end{document}
