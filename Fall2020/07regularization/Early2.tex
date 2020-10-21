@@ -1,0 +1,126 @@
+\input ../../SlidePreamble
+\input ../../preamble
+
+
+\begin{document}
+
+{\Huge
+
+
+\centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+\bigskip
+\centerline{David McAllester, Autumn 2020}
+
+\vfill
+\centerline{\bf Early Stopping meets Shrinkage}
+\vfill
+\centerline{\bf $L_1$ Regularization and Sparsity}
+\vfill
+\centerline{\bf Ensembles}
+\vfill
+\vfill
+
+\slide{Shrinkage meets Early Stopping}
+
+Early stopping can limit $||\Phi||$.
+
+\vfill
+But early stopping more directly limits $||\Phi - \Phi_\mathrm{init}||$.
+
+\vfill
+It seems better to take the prior on $\Phi$ to be
+
+\vfill
+{\color{red} $$p(\Phi) \propto \exp\left(-\frac{||\Phi - \Phi_{\mathrm{init}}||^2}{2\sigma^2}\right)$$}
+
+\vfill
+giving
+
+\vfill
+$$\Phi_{t+1} = \Phi_t - \eta\hat{g} - \gamma(\Phi_t - \Phi_{\mathrm{init}})$$
+
+\slide{$L_1$ Regularization}
+
+\begin{eqnarray*}
+p(\Phi) & \propto & e^{-\lambda ||\Phi||_1} \;\;\;\;\;\;\;\;||\Phi||_1 = \sum_i |\Phi_i| \\
+\\
+\Phi^* & = & \argmax_\Phi \; \;\;p(\Phi) \prod_i P_\Phi(y_i|x_i) \\
+\\
+\Phi^* & = & \argmin_\Phi \; \;\;\left(\sum_i\; -\ln P_\Phi(y_i|x_i)\right) \;+ \; \;\lambda||\Phi||_1 \\
+\\
+\Phi^* & = & \argmin_\Phi \; \;\;\hat{\cal L}(\Phi) \;+ \; \;\frac{\lambda}{N_{\mathrm{Train}}}||\Phi||_1
+\end{eqnarray*}
+
+\slide{$L_1$ Regularization}
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \; \;\;\hat{\cal L}(\Phi) \;+ \; \;\frac{\lambda}{N_{\mathrm{Train}}}||\Phi||_1 \\
+\\
+\\
+\Phi_i & \minuseq & \eta \left(\hat{g}_i + \frac{\lambda}{N_{\mathrm{Train}}}\;\mathrm{sign}(\Phi_i)\right) \\
+\\
+\\
+\eta & = & (1-\mu)B\eta_0
+\end{eqnarray*}
+
+\slide{Sparsity}
+
+$$\Phi_i \;\;  \minuseq \;\;  \eta \left(\hat{g}_i + \frac{\lambda}{N_{\mathrm{Train}}}\;\mathrm{sign}(\Phi_i)\right)$$
+\vfill
+
+\vfill
+For $\Phi^*$ the gradient of the objective, and hence the average update, must be zero:
+
+\vfill
+$$\begin{array}{rcll}
+\Phi^*_i &  = & 0  & \;\;\;\;\;\mbox{if} \;|g_i| <  \lambda/N_{\mathrm{Train}} \\
+\\
+g_i & = &  -(\lambda/N_{\mathrm{Train}}) \mathrm{sign}(\Phi_i) &\;\;\;\;\; \mbox{otherwise}
+\end{array}$$
+
+\vfill
+But in practice $\Phi_i$ will never be exactly zero.
+
+\slide{Ensembles}
+
+Train several models $\mathrm{Ens} = (\Phi_1,\;\ldots,\; \Phi_K)$ from different initializations and/or under different meta parameters.
+
+\vfill
+We define the ensemble model by
+
+$$P_\mathrm{Ens}(y|x) = \frac{1}{K} \sum_k\; P_{\Phi_k}(y|x) = E_k \;P_k(y|x)$$
+
+\vfill
+Ensemble models almost always perform better than any single model.
+
+
+\vfill
+\slide{Ensembles Under Cross Entropy Loss}
+
+\begin{eqnarray*}
+{\cal L}\left(P_\mathrm{Ens}\right) & = & E_{\tuple{x,y} \sim \pop}\;\;-\ln P_\mathrm{Ens}(y|x) \\
+\\
+ & = & E_{\tuple{x,y} \sim \pop}\;\;-\ln E_k P_k(y|x) \\
+\\
+& \leq & E_{\tuple{x,y} \sim \pop} \;E_k\;\;-\ln P_k(y|x) \\
+\\
+& = & E_k\; {\cal L}(P_k)
+\end{eqnarray*}
+
+\slide{Ensembles Under Cross Entropy Loss}
+
+It is important to note that
+
+\vfill
+$$-\ln E_k \;P_k(y|x) \;\;\leq E_k -\ln P_k(y|x)$$
+
+\vfill
+for each individual pair $\tuple{x,y}$.
+
+\vfill
+This may explain why in practice an ensemble model is typically better than any single component model.
+
+\slide{END}
+
+}
+\end{document}
