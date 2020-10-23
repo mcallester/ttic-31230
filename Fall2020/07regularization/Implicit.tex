@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 
 \begin{document}
@@ -9,7 +9,7 @@
 
 \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
 \bigskip
-\centerline{David McAllester, Winter 2020}
+\centerline{David McAllester, Autumn 2020}
 
 \vfill
 \centerline{\bf Implicit Regularization}
@@ -41,24 +41,42 @@ Any zero-loss (squared loss) solution can be projected on the span of training v
 \vfill
 It can be shown that when the training vectors are linearly independent any zero loss solution in the span of the training vectors is a least-norm solution.
 
-\slide{A PAC-Bayes Analysis of Implicit Regularization}
+\slide{Implicit Regularization of SGD}
 
-Let $A$ be an algorithm that stochastically maps a training set to a model parameter vector.
-
-\vfill
-In the case of SGD we take the stochasticity to include both the random initialization and the random sequence of training batches.
-
-\slide{A PAC-Bayes Analysis of Implicit Regularization}
+In a labeling problem a model with parameters $\Phi$ defines a model propbability $P_\Phi(y|x)$.
 
 \vfill
-Let $p(\Phi|A,\mathrm{Train})$ be the probability desity on parameter vectors defined by the stochasticity of the algorithm $A$.
+This defines a log loss $-\ln P_\Phi(y|x)$ on which we do gradient descent.
 
 \vfill
-Define
-$$p(\Phi|A) = E_{\parens{\mathrm{Train} \sim \pop^{N_\mathrm{Train}}}} p(\Phi|A,\mathrm{Train})$$
+Let {\color{red} $\mathrm{SGD}\!\brackets{P_\Phi,\Phi_{\mathrm{Init}},\train}$} be the vector that results from running SGD on model $P_\Phi$ with initial parameters $\Phi_{\mathrm{Init}}$
+using training data $\train$ (and a fixed set of hyperparameters, learning rate schedule, and fixed order in which training instances are considered,
+and fixed number of iterations).
+
+
+\slide{Implicit Regularization of SGD}
+
+To get a generalization bound when learning a continuous parameter vector we add Gaussian noise to simulate limited precision of the real numbers.
+
+$$\Phi' = \mathrm{SGD}\!\brackets{P_\Phi,\Phi_{\mathrm{Init}},\mathrm{Train}} + \epsilon$$
 
 \vfill
-The density $p(\Phi|A)$ is independent of any choice of training data and can be used as the prior in a BAC-Bayesian bound.
+The algorithm defines an {\bf implicit prior:}
+$$p\!\parens{\Phi'\;|\;P_\Phi,\Phi_{\mathrm{Init}},\pop} = E_{\parens{\mathrm{Train} \sim \pop^N}}\;\;p\!\parens{\Phi'\;|\;P_\Phi,\Phi_{\mathrm{Init}},\train}$$
+
+\vfill
+The implicit prior $p\!\parens{\Phi'\;|\;P_\Phi,\Phi_{\mathrm{Init}},\pop}$ is a valid prior!  It does not depend on training data!
+
+\slide{Implict Priors: the General Case}
+
+Let $A$ be any algorithm mapping a training set to a probability density over model parameters.
+
+\vfill
+Let $p(\Phi|A,\mathrm{Train})$ be the probability density on parameter vectors defined by the stochasticity of the algorithm $A$ run on the given training set.
+
+\vfill
+The implicit prior defined by algorithm $A$ and the given population distribution is
+$$p(\Phi|A,\pop) = E_{\parens{\mathrm{Train} \sim \pop^{N}}} p(\Phi|A,\mathrm{Train})$$
 
 \slide{A PAC-Bayes Analysis of Implicit Regularization}
 
@@ -78,7 +96,7 @@ $${\cal L}(A) \leq \frac{10}{9}\parens{
 \begin{array}{ll} & \hat{\cal L}(A) \\
                   + & \frac{5\lmax}{N_\mathrm{Train}}\parens{\begin{array}{ll} & E_{\mathrm{Train} \sim \pop^{N_{\mathrm{Train}}}} \\
                                                                                 \\                                                           
-                                                                              & ~~~~~~KL(p(\Phi|A,\mathrm{Train}),p(\Phi|A)) \\
+                                                                              & ~~~KL(p(\Phi|A,\mathrm{Train}),p(\Phi|A,\pop)) \\
                                                                                 \\
                                                                              + & \ln\frac{1}{\delta}\end{array}}
  \end{array}}$$
@@ -87,7 +105,7 @@ $${\cal L}(A) \leq \frac{10}{9}\parens{
 There is no obvious way to calculate this guarantee.
 
 \vfill
-However, it can be shown that $p(\Phi|A)$ is the optimal PAC-Bayeisan prior for algorithm $A$ making this the best possible PAC-Bayesian bound for $A$.
+However, it can be shown that $p(\Phi|A,\pop)$ is the optimal PAC-Bayeisan prior for algorithm $A$ when run on the given population.
 
 \slide{END}
 

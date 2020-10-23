@@ -1,0 +1,88 @@
+\input ../../SlidePreamble
+\input ../../preamble
+
+\begin{document}
+
+{\Huge
+
+
+\centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+\bigskip
+\centerline{David McAllester, Autumn 2020}
+
+\vfill
+\centerline{\bf Learning Theory II}
+\vfill
+\centerline{\bf The Role of Compression}
+\vfill
+\centerline{\bf The PAC-Bayes Guarantee}
+
+\vfill
+\vfill
+
+
+\slide{The Compression Guarantee}
+
+Let $|\Phi|$ be the number of bits used to represent $\Phi$ under some fixed compression scheme.
+
+\vfill
+Let $P(\Phi) = 2^{-|\Phi|}$
+
+\vfill
+    $${\cal L}(\Phi) \leq \frac{10}{9}\parens{\hat{\cal L}(\Phi) + \frac{5 L_\mathrm{max}}{N_\mathrm{Train}}\parens{(\ln 2)|\Phi| + \ln\frac{1}{\delta}}}$$
+
+
+\slide{The PAC-Bayes Guarantee}
+
+Let $p$ be any ``prior'' and $q$ be any ``posterior'' on any  (possibly continuous) model space.
+Define
+\begin{eqnarray*}
+  L(q) & =  &\expectsub{h \sim q}{L(h)} \\
+  \\
+  \hat{L}(q) & =  &\expectsub{h \sim q}{\hat{L}(h)}
+\end{eqnarray*}
+
+
+\vfill
+For any $p$ and any $\lambda > \frac{1}{2}$, with probability
+at least $1-\delta$ over the draw of the training data, the following holds simultaneously for all $q$.
+\vfill
+$$L(q) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{L}(q) + \frac{\lambda \lmax}{N_\mathrm{Train}}\parens{KL(q,p) + \ln \frac{1}{\delta}}}$$
+
+\slide{Adding Noise Simulates Limiting Precision}
+
+Assume $0 \leq {\cal L}(\Phi,x,y) \leq \lmax$.
+
+\vfill
+Define:
+\begin{eqnarray*}
+{\cal L}(\Phi) & = & E_{\;(x,y)\sim \pop,\;\epsilon \sim {\cal N}(0,\sigma)^d}\;{{\cal L}(\Phi+\epsilon,x,y)} \\
+\\
+\hat{{\cal L}}(\Phi) & = & E_{\;(x,y)\sim \mathrm{Train},\;\epsilon \sim {\cal N}(0,\sigma)^d}\;{{\cal L}(\Phi+\epsilon,x,y)} \\
+\end{eqnarray*}
+
+\vfill
+Theorem: With probability at least $1-\delta$ over the draw of training data the following holds {\bf simultaneously} for all $\Phi$.
+\begin{eqnarray*}
+   {\color{red} {\cal L}(\Phi)} & {\color{red} \leq} & {\color{red} \frac{10}{9}\parens{\hat{{\cal L}}(\Phi)
+   + \frac{5 \lmax}{N_\mathrm{Train}}\parens{\frac{||\Phi-\Phi_{\mathrm{init}}||^2}{2\sigma^2} + \ln \frac{1}{\delta}}}}
+\end{eqnarray*}
+
+\slide{Non-Vacuous Generalization Guarantees}
+
+Model compression has recently been used to achieve ``non-vacuous'' PAC-Bayes generalization guarantees for ImageNet classification
+--- error rate guarantees less than 1.
+
+\vfill
+Non-Vacuous PAC-Bayes Bounds at ImageNet Scale.
+
+\bigskip
+Wenda Zhou, Victor Veitch, Morgane Austern, Ryan P. Adams, Peter Orbanz
+
+\bigskip
+ICLR 2019
+
+\slide{END}
+
+}
+\end{document}

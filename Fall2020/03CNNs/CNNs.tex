@@ -223,5 +223,42 @@ s[1000] & = & \relu(\mathrm{FC}(L_{10},\Phi_s)) \;\;\mbox{class scores}
 
 \slideplain{END}
 
+\slideplain{Image to Column (Im2C)}
+
+Reduce convolution to matrix multiplication
+
+\vfill
+more space but faster.
+
+\vfill
+\begin{eqnarray*}
+  & & \tilde{L}_{{\ell+1}}[b,x,y,j] \\
+  \\
+  & = & \left(\sum_{\Delta x, \Delta y, i} W[\Delta x, \Delta y, i, j] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[j]
+  \end{eqnarray*}
+
+\vfill
+We make a bigger tensor $\tilde{L}$ with two additional indeces.
+
+$$\tilde{L}_{{\ell}}[b,x,y,\Delta x,\Delta y,i] = L_{{\ell}}[b,x+\Delta x,y+\Delta y,i]$$
+
+\slideplain{Image to Column (Im2C)}
+
+\begin{eqnarray*}
+  & & \tilde{L}_{{\ell+1}}[b,x,y,j] \\
+  \\
+  & = & \left(\sum_{\Delta x, \Delta y, i} W[\Delta x, \Delta y, i, j] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[j] \\
+  \\
+      & = & \left(\sum_{\Delta x, \Delta y, i} \begin{array}{l}
+                                              \tilde{L}_{{\ell}}[b,x,y,\Delta x,\Delta y,i]
+                                              * W[\Delta x, \Delta y, i, j] \\
+  \end{array}\right) + B[j] \\
+  \\
+    & = & \left(\sum_{(\Delta x, \Delta y, i)} \begin{array}{l}
+                                              \tilde{L}_{{\ell}}[(b,x,y),(\Delta x,\Delta y,i)]
+                                              * W[(\Delta x, \Delta y, i), j] \\
+                                           \end{array}\right) + B[j]
+\end{eqnarray*}
+
 }
 \end{document}
