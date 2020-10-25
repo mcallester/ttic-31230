@@ -69,43 +69,33 @@ The implicit prior $p\!\parens{\Phi'\;|\;P_\Phi,\Phi_{\mathrm{Init}},\pop}$ is a
 
 \slide{Implict Priors: the General Case}
 
-Let $A$ be any algorithm mapping a training set to a probability density over model parameters.
-
-\vfill
-Let $p(\Phi|A,\mathrm{Train})$ be the probability density on parameter vectors defined by the stochasticity of the algorithm $A$ run on the given training set.
+Let $A$ be any algorithm mapping a training set $\train$ to a probability density $q_{A,\train}(\Phi')$ over model parameters $\Phi'$.
 
 \vfill
 The implicit prior defined by algorithm $A$ and the given population distribution is
-$$p(\Phi|A,\pop) = E_{\parens{\mathrm{Train} \sim \pop^{N}}} p(\Phi|A,\mathrm{Train})$$
+
+$$p_{A,\pop}(\Phi') = E_{\parens{\mathrm{Train} \sim \pop^{N}}} \;\;q_{A,\train}(\Phi')$$
 
 \slide{A PAC-Bayes Analysis of Implicit Regularization}
 
 \begin{eqnarray*}
-{\cal L}(\Phi,\pop) & = & E_{\tuple{x,y} \sim \pop}\;{\cal L}(\Phi,x,y) \\
+{\cal L}(q_{A,\train}) & = & E_{\tuple{x,y} \sim {\color{red}  \pop}, \;\;\Phi' \sim q_{A,\train}}\;{\cal L}(\Phi',x,y) \\
 \\
-{\cal L}(\Phi,\mathrm{Train}) & = & E_{\tuple{x,y} \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y) \\
-\\
-{\cal L}(A) & = & E_{\parens{\mathrm{Train} \sim \pop^{N_\mathrm{Train}}}}\;E_{\Phi \sim p(\Phi\;|A,\;\mathrm{Train})}\;{\cal L}(\Phi,\pop) \\
-\\
-\hat{\cal L}(A) & = & E_{\parens{\mathrm{Train} \sim \pop^{N_\mathrm{Train}}}}\;E_{\Phi \sim p(\Phi\;|A,\;\mathrm{Train})}\;{\cal L}(\Phi,\mathrm{Train})
+\hat{\cal L}(q_{A,\train}) & = & E_{\tuple{x,y} \sim {\color{red} \train}, \;\;\Phi' \sim q_{A,\train}}\;{\cal L}(\Phi',x,y)
 \end{eqnarray*}
 
 \slide{A PAC-Bayes Analysis of Implicit Regularization}
-\vfill
-$${\cal L}(A) \leq \frac{10}{9}\parens{
-\begin{array}{ll} & \hat{\cal L}(A) \\
-                  + & \frac{5\lmax}{N_\mathrm{Train}}\parens{\begin{array}{ll} & E_{\mathrm{Train} \sim \pop^{N_{\mathrm{Train}}}} \\
-                                                                                \\                                                           
-                                                                              & ~~~KL(p(\Phi|A,\mathrm{Train}),p(\Phi|A,\pop)) \\
-                                                                                \\
-                                                                             + & \ln\frac{1}{\delta}\end{array}}
- \end{array}}$$
 
+With probability at least $1-\delta$ over the draw of $\train$ we have
+\vfill
+{\huge
+$${\cal L}(q_{A,\train}) \leq \frac{10}{9}\parens{ \hat{\cal L}(q_{A,\train}) + \frac{5\lmax}{N_\mathrm{Train}}\parens{KL(q_{A,\train},p_{A,\pop})+ \ln\frac{1}{\delta}}}$$
+}
 \vfill
 There is no obvious way to calculate this guarantee.
 
 \vfill
-However, it can be shown that $p(\Phi|A,\pop)$ is the optimal PAC-Bayeisan prior for algorithm $A$ when run on the given population.
+However, it can be shown that $p_{A,\pop}$ is the optimal PAC-Bayeisan prior for algorithm $A$ run on data drawn from $\pop$.
 
 \slide{END}
 
