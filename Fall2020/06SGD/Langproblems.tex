@@ -31,7 +31,11 @@ Show that for $\eta = B\eta_0$ the stationary distribution is determined by $\et
     \\
     & = & \frac{1}{B^2} E \sum_{b,b'}\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b'}[j] - g[j]\right) \\
     \\
-    & = & \frac{1}{B^2} \sum_{b,b'}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b'}[j] - g[j]\right) \\
+    & = & \frac{1}{B^2} \sum_{b}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b}[j] - g[j]\right)
+    + \sum_{b,b'\not = b}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b'}[j] - g[j]\right) \\
+    \\
+    & = & \frac{1}{B^2} \sum_{b}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b}[j] - g[j]\right)
+    + \sum_{b,b'\not = b}\;\left(E\;\hat{g}_b[i] - g[i] \right)\left(E\; \hat{g}_{b'}[j] - g[j]\right) \\
     \\
     & = & \frac{1}{B^2} \sum_{b}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b}[j] - g[j]\right) \\
     \\
