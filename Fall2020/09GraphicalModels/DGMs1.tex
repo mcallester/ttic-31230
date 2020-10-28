@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -7,10 +7,12 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2019}
+  \centerline{David McAllester, Autumn 2020}
   \vfill
   \vfill
-  \centerline{\bf Exponential Softmax}
+  \centerline{\bf Deep Graphical Models}
+  \vfill
+  \centerline{\bf aka, Energy Based Models}
 \vfill
 \vfill
 \vfill
@@ -27,10 +29,10 @@ $$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Pop}}\;-\ln \;P(y)$$
 
 {\color{red} The structured case:} $y \in {\cal Y}$ where ${\cal Y}$ is discrete but {\color{red} iteration over $\hat{y} \in {\cal Y}$ is infeasible}.
 \slide{Semantic Segmentation}
-\centerline{\includegraphics[height = 2.5in]{../images/SemSeg}}
+\centerline{\includegraphics[height = 2.5in]{\images/SemSeg}}
 
 \vfill
-We want to assign each pixel to one of $C$ semantic classes.
+We want to assign each pixel to one of $Y$ semantic classes.
 
 \vfill
 For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
@@ -40,51 +42,49 @@ For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
 We construct a graph whose nodes are the pixels and where there is an edges between each pixel and its four nearest neighboring pixels.
 
 \vfill
-$$\begin{array}{ccccc}
- & & {\color{red} j(i,\mathrm{up})} \\
- & & | \\
- {\color{red} j(i,\mathrm{left})}\;\;\;\; & -& i & -& \;\;\;\;{\color{red} j(i,\mathrm{right})} \\
- & & | \\
- & & {\color{red} j(i,\mathrm{down})}
- \end{array}$$
+\centerline{\includegraphics[height= 4in]{\images/grid}}
 
-\slide{Labeling the Nodes of the Graph}
+\slide{Labeling the Nodes of a Graph}
+\centerline{\includegraphics[height= 1.5in]{\images/Graph}}     
+\medskip
 
-$\hat{y} $ assigns a semantic class $\hat{y}[i]$ to each node (pixel) $i$.
+$\hat{y} $ assigns a semantic class $\hat{y}[n]$ to each node (pixel) $n$.
 
 \vfill
 We assign a score to $\hat{y}$ by assigning a score to each node and each edge of the graph.
 
-{\color{red} $$s(\hat{y}) = \sum_{i \in \mathrm{Nodes}}\; s_n[i,\hat{y}[i]]\; + \sum_{\tuple{i,j} \in \mathrm{Edges}}\;s_e[\tuple{i,j},\hat{y}[i],\hat{y}[j]]$$}
+{\color{red} $$s(\hat{y}) = \sum_{n \in \mathrm{Nodes}}\; s^N[n,\hat{y}[n]]\; + \sum_{\tuple{n,m} \in \mathrm{Edges}}\;s^E[\tuple{n,m},\hat{y}[n],\hat{y}[m]]$$}
 \centerline{Node Scores \hspace{6em}Edge Scores \hspace{3em}~}
 
-\slide{Computing the Node and Edge Tensors}
+\slide{Using Deep Networks}
 
 For input $x$ we use a network to compute the score tensors.
 
 \vfill
 \begin{eqnarray*}
-s_n[I,C] & = & f^n_\Phi(x) \\
+s^N[N,Y] & = & f^N_\Phi(x) \\
 \\
 \\
-s_e[E,C,C] & = & f^e_\Phi(x)
+s^E[E,Y,Y] & = & f^E_\Phi(x)
 \end{eqnarray*}
 
 \slide{Exponential Softmax}
 
+{\huge
 $$\begin{array}{lrcl}
-\mbox{for}\;\hat{y} & {\color{red} s(\hat{y})} & = & \sum_i\;s_n[i,\hat{y}[i]] + \sum_{\tuple{i,j} \in \mathrm{Edges}}\;s_e[\tuple{i,j},\hat{y}[i],\;\hat{y}[j]] \\
+\mbox{for}\;\hat{y} & {\color{red} s(\hat{y})} & = & \sum_n\;s^N[n,\hat{y}[n]] + \sum_{\tuple{n,m} \in \mathrm{Edges}}\;s^E[\tuple{n,m},\hat{y}[n],\;\hat{y}[m]] \\
 \\
 \\
-\mbox{for}\;\hat{y} & {\color{red} P_s(\hat{y})} & = & \softmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
+\mbox{for}\;\hat{y} & {\color{red} P_s(\hat{y})} & = & \softmax_{\hat{y}}\;s(\hat{y}) \;\;\;\mbox{\color{red} all possible $\hat{y}$} \\
 \\
- & {\cal L} & = & - \ln P_s(y) \;\;\;{\color{red} \mbox{gold label (training label) $y$}}
+ & {\cal L} & = & - \ln P_s(y) \;\;\;{\color{red} \;\;\;\;\;\;\mbox{gold label (training label) $y$}}
 \end{array}$$
+}
 
 \slide{Exponential Softmax is Typically Intractable}
-\centerline{\includegraphics[height= 1.5in]{../images/Graph}}
+\centerline{\includegraphics[height= 1.5in]{\images/Graph}}
 \medskip
-$\hat{y} $ assigns a label $\hat{y}[i]$ to each node $i$.
+$\hat{y} $ assigns a label $\hat{y}[n]$ to each node $n$.
 
 \vfill
 $s(\hat{y})$ is defined by a sum over node and edge tensor scores.
@@ -97,21 +97,21 @@ Computing $Z$ in general is \#P hard (there is an easy direct reduction from SAT
 
 \slidetwo{Compactly Representing Scores}{on Exponentially Many Labels}
 
-The tensor {\color{red} $s_n[I,C]$} holds $IC$ scores.
+The tensor {\color{red} $s^N[N,Y]$} holds $NY$ scores.
 
 \vfill
-The tensor {\color{red} $s_e[E,C,C]$} holds $EC^2$ scores where $e$ ranges over edges $\tuple{i,j} \in \mathrm{Edges}$.
+The tensor {\color{red} $s^E[E,Y,Y]$} holds $EY^2$ scores where $e$ ranges over edges $\tuple{n,m} \in \mathrm{Edges}$.
 
 \slide{Back-Propagation Through Exponential Softmax}
 
 \begin{eqnarray*}
-s_n[I,C] & = & f^n_\Phi(x) \\
-s_e[E,C,C] & = & f^e_\Phi(x)
+s^N[I,Y] & = & f^N_\Phi(x) \\
+s^E[E,Y,Y] & = & f^E_\Phi(x)
 \end{eqnarray*}
 
 \vfill
 \begin{eqnarray*}
-{\color{red} s(\hat{y})} & = & \sum_i\;s_n[i,\hat{y}[i]] + \sum_{\tuple{i,j} \in \mathrm{Edges}}\;s_e[\tuple{i,j},\hat{y}[i],\;\hat{y}[j]] \\
+{\color{red} s(\hat{y})} & = & \sum_n\;s^N[n,\hat{y}[n]] + \sum_{\tuple{n,m} \in \mathrm{Edges}}\;s^E[\tuple{n,m},\hat{y}[n],\;\hat{y}[m]] \\
 \\
 {\color{red} P_s(\hat{y})} & = & \softmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
 \\
@@ -119,7 +119,7 @@ s_e[E,C,C] & = & f^e_\Phi(x)
 \end{eqnarray*}
 
 \vfill
-We want the gradients {\color{red} $s_n.\grad[I,C]$} and {\color{red} $s_e.\grad[E,C,C]$}.
+We want the gradients {\color{red} $s^N.\grad[N,Y]$} and {\color{red} $s^E.\grad[E,Y,Y]$}.
 
 
 \slide{END}
