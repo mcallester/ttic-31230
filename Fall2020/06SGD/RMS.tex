@@ -154,7 +154,7 @@ The published version of Adam has a more obscure form of bias correction which y
   s_{t}[i] & = & \left(1-\frac{1}{\min(t,N_s)}\right)s_{t-1}[i] + \frac{1}{\min(t,N_s)} \hat{g}_t[i]^2 \\
   \\
   \\
-\Phi_{t+1}[i] & =  & \Phi_t - \frac{\eta}{\sqrt{s_{t}[i]} + \epsilon}\;\;\tilde{g}_{t}[i]
+\Phi_{t+1}[i] & =  & \Phi_t[i] - \frac{\eta}{\sqrt{s_{t}[i]} + \epsilon}\;\;\tilde{g}_{t}[i]
 \end{eqnarray*}
 
 \slide{Decoupling $\eta$ from $\epsilon$}
