@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 
 \begin{document}
@@ -40,7 +40,7 @@ discriminator in place of cross-entropy.
 
 \bigskip
 \centerline{$z$\hspace{5in}$y_\Phi(z)$}
-\centerline{\includegraphics[width=6in]{\images/generator2}}
+\centerline{\includegraphics[width=6in]{\images/generator1}}
 
 \bigskip
 The random input $z$ defines a probability density on images $y_\Phi(z)$.  We will write this as $p_\Phi(y)$ for the image $y$.
@@ -49,7 +49,7 @@ The random input $z$ defines a probability density on images $y_\Phi(z)$.  We wi
 
 \bigskip
 \centerline{$z$\hspace{5in}$y_\Phi(z)$}
-\centerline{\includegraphics[width=6in]{\images/generator2}}
+\centerline{\includegraphics[width=6in]{\images/generator1}}
 
 \bigskip
 We want $p_\Phi(y)$ to model a natural image distribution such as the distribution over human faces.
@@ -59,14 +59,14 @@ We want $p_\Phi(y)$ to model a natural image distribution such as the distributi
 
 \bigskip
 \centerline{$z$\hspace{5in}$y_\Phi(z)$}
-\centerline{\includegraphics[width=6in]{\images/generator2}}
+\centerline{\includegraphics[width=6in]{\images/generator1}}
 
 \bigskip
 We can sample from $p_\Phi(y)$ by sampling $z$.  But we cannot compute $p_\phi(y)$ for $y$ sampled from the population.
 
 \slidetwo{Increasing Spatial Dimension}{(ConvTranspose in PyTorch)}
 
-\centerline{\includegraphics[width=3in]{\images/generator2}}
+\centerline{\includegraphics[width=3in]{\images/generator1}}
 
 \vfill
 To increase spatial dimension we use 4 times the desired number of output features.
@@ -76,7 +76,7 @@ To increase spatial dimension we use 4 times the desired number of output featur
 \end{eqnarray*}
 
 \vfill
-We then reshape $L'_{\ell+1}[X,Y,I]$ to $L'_{\ell+1}[2X,2Y,I/4]$.
+We then convert $L'_{\ell+1}[X,Y,I]$ to $L'_{\ell+1}[2X,2Y,I/4]$.
 
 \slide{Generative Adversarial Networks (GANs)}
 
@@ -126,24 +126,24 @@ as
 $$\frac{1}{2} E_{y \sim \popd}\;-\ln P_\Psi(1|y) \;\;\;+\;\;\; \frac{1}{2} E_z\;-\ln P_\Psi(-1|y_\Phi(z))$$
 
 \slidetwo{Generative Adversarial Nets}{Goodfellow et al., June 2014}
-\centerline{\includegraphics[width = 9in]{../images/GAN2014}}
+\centerline{\includegraphics[width = 9in]{\images/GAN2014}}
 The rightmost column (yellow boarders) gives the nearest neighbor in the training data to the adjacent column.
 
 \slidetwo{Unsupervised Representation Learning ... (DC GANS)}
 {Radford et al., Nov. 2015}
 
-\centerline{\includegraphics[width = 9in]{../images/GANDCa}}
+\centerline{\includegraphics[width = 9in]{\images/GANDCa}}
 
 \slidetwo{Unsupervised Representation Learning ... (DC GANS)}
 {Radford et al., Nov. 2015}
 
-\centerline{\includegraphics[width = 9in]{../images/ImageFeatures}}
+\centerline{\includegraphics[width = 9in]{\images/ImageFeatures}}
 
 \slide{Interpolated Faces}
 
 [Ayan Chakrabarti, January 2017]
 
-\centerline{\includegraphics[height = 4.5in]{../images/interp}}
+\centerline{\includegraphics[height = 4.5in]{\images/interp}}
 
 
 \slidetwo{Image-to-Image Translation (Pix2Pix)}
@@ -151,7 +151,7 @@ The rightmost column (yellow boarders) gives the nearest neighbor in the trainin
 
 We assume a corpus of ``image translation pairs'' such as images paired with semantic segmentations.
 
-\centerline{\includegraphics[width = 8.0in]{../images/cGAN0}}
+\centerline{\includegraphics[width = 8.0in]{\images/cGAN0}}
 
 \slide{Conditional GANS}
 In the conditional case we have a population distribution over pairs $\tuple{x,y}$.
@@ -191,11 +191,11 @@ $$\begin{array}{lrcl}
 \slidetwo{Image-to-Image Translation (Pix2Pix)}
 {Isola et al., Nov. 2016}
 
-\centerline{\includegraphics[height = 4.5in]{../images/cGAN1}}
+\centerline{\includegraphics[height = 4.5in]{\images/cGAN1}}
 
 \slide{Arial Photo to Map and Back}
 
-\centerline{\includegraphics[width = 8.0in]{../images/cGAN2}}
+\centerline{\includegraphics[width = 8.0in]{\images/cGAN2}}
 
 \slidetwo{Unpaired Image-to-Image Translation (Cycle GANs)}{Zhu et al., March 2017}
 
@@ -204,15 +204,15 @@ We have two corpora of images, say images of zebras and unrelated images of hors
 \vfill
 We want to construct translations between the two classes.
 
-\centerline{\includegraphics[width = 8.0in]{../images/Cycle2}}
+\centerline{\includegraphics[width = 8.0in]{\images/Cycle2}}
 
 \slide{Cycle Gans}
 
-\centerline{\includegraphics[width = 11.0in]{../images/Cycle3}}
+\centerline{\includegraphics[width = 11.0in]{\images/Cycle3}}
 
 \slide{Cycle Gans}
 
-\centerline{\includegraphics[width = 6.0in]{../images/Cycle4}}
+\centerline{\includegraphics[width = 6.0in]{\images/Cycle4}}
 
 \slidetwo{Unsupervised Machine Translation (UMT)}
          {Lample et al, Oct. 2017, also Artetxe et al., Oct. 2017}
@@ -222,7 +222,7 @@ In unsupervised machine translation the cycle loss is called {\bf back-translati
 
 \slidetwo{Feature Alignment by Discrimination}{Text to Speech (Saito et al. Sept. 2017)}
 
-\centerline{\includegraphics[width = 2.0in]{../images/Txt2spchGAN}}
+\centerline{\includegraphics[width = 2.0in]{\images/Txt2spchGAN}}
 
 \vfill
 Minimum Generation Error (MGE) uses {\color{red} perceptual distortion} ---
@@ -234,7 +234,7 @@ feature vector of the original.
 
 \slidetwo{Adversarial Discriminative Domain Adaptation}{Tzeng et al. Feb. 2017}
 
-\centerline{\includegraphics[width = 4.0in]{../images/AdvDomainAdapt}}
+\centerline{\includegraphics[width = 4.0in]{\images/AdvDomainAdapt}}
 
 A feature discrimination loss can be used to align source and target features.
 
@@ -242,19 +242,19 @@ A feature discrimination loss can be used to align source and target features.
 
 \centerline{Progressive Growing of GANs, Karras et al., Oct. 2017}
 
-\centerline{\includegraphics[height = 4.5in]{../images/GANproga}}
+\centerline{\includegraphics[height = 4.5in]{\images/GANproga}}
 
 \slide{Progressive GANs}
 
-\centerline{\includegraphics[height = 4.5in]{../images/GANprogb}}
+\centerline{\includegraphics[height = 4.5in]{\images/GANprogb}}
 
 \slide{Early GANs on ImageNet}
 
-\centerline{\includegraphics[height = 4.5in]{../images/BadGAN}}
+\centerline{\includegraphics[height = 4.5in]{\images/BadGAN}}
 
 \slide{BigGans}
 \centerline{Large Scale GAN Training, Brock et al., Sept. 2018}
-\centerline{\includegraphics[width = 9in]{../images/GANclass}}
+\centerline{\includegraphics[width = 9in]{\images/GANclass}}
 
 \vfill
 This is a class-conditional GAN --- it is conditioned on the imagenet class label.

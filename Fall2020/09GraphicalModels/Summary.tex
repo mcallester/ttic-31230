@@ -1,0 +1,58 @@
+\input ../../SlidePreamble
+\input ../../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Autumn 2020}
+  \vfill
+  \vfill
+  \centerline{\bf Deep Graphical Models Summary and Review}
+\vfill
+\vfill
+\vfill
+
+\slide{Deep Graphical Models}
+
+We are given a set of pairs $\tuple{x_1,{\cal Y}_1}, \ldots, \;\tuple{x_N,\;{\cal Y}_T}$ where each ${\cal Y}_t$ is a ``colored graph'' --- a graph with a label
+(color) assigned to each node.  Semantic segmentation is an example where pixels of an image $x$ are labeled with semantic categories.
+
+\vfill
+We have a scoring function on colorings of a fixed graph.
+
+\vfill
+{\huge
+$$s_{\Phi,x}(\hat{\cal Y}) = \sum_{n \in \mathrm{Nodes}}\;s^N_{\Phi,x}[n,\hat{\cal Y}[n]]\; + \sum_{\tuple{n,m} \in \mathrm{Edges}}\;s^E_{\Phi,x}[\tuple{n,m},\hat{\cal Y}[n],\;\hat{\cal Y}[m]]$$
+}
+
+\slide{Deep Graphical Models}
+
+{\huge
+$$s_{\Phi,x}(\hat{\cal Y}) = \sum_{n \in \mathrm{Nodes}}\;s^N_{\Phi,x}[n,\hat{\cal Y}[n]]\; + \sum_{\tuple{n,m} \in \mathrm{Edges}}\;s^E_{\Phi,x}[\tuple{n,m},\hat{\cal Y}[n],\;\hat{\cal Y}[m]]$$
+}
+\vfill
+$$P_{\Phi,x}(\hat{\cal Y}) = \softmax_{\hat{\cal Y}}\;s_{\Phi,x}(\hat{\cal Y})$$
+
+\vfill
+$${\cal L}_{\Phi,x}({\cal Y}) = - \ln P_{\Phi,x}({\cal Y})$$
+
+\slide{Deep Graphical Models}
+
+$$P_{\Phi,x}(\hat{\cal Y}) = \softmax_{\hat{\cal Y}}\;s_{\Phi,x}(\hat{\cal Y})$$
+
+\vfill
+To back-propagate from the loss $- \ln P_{\Phi,x}({\cal Y})$ through the exponential softmax to the tensors $S^N_{\Phi,x}$ and $s^E_{\Phi,x}$ we need to compute or
+estimate
+
+$$P_{\Phi,x}(\hat{\cal Y}[n] = y)\;\;\mathrm{and}\;\; P_{\Phi,x}(\hat{\cal Y}[\tuple{n,m}] = \tuple{y,y'})$$
+
+
+\vfill
+for each node $n$ and value $y$ and each edge $\tuple{n,m}$ and value $\tuple{y,y'}$.
+
+\slide{END}
+}
+\end{document}
