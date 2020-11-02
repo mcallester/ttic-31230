@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -14,18 +14,29 @@
 \vfill
 \vfill
 
-\slide{The Fundamental Equation for Continuous $y$}
+\slide{Differential Entropy and Cross Entropy}
 
-If $y$ is continuous then the fundamental equation for estimating the distribution on $y$ (cross entropy) involves continuous probability densities.
+For a probability density function $p(y)$ on continuous $y$ it is standard practice to define differential entropy and cross entropy:
 
 \vfill
-$$\Phi^* = \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)$$
+\begin{eqnarray*}
+H(p) & = & E_{y \sim p(y)}\;\;-\ln p(y) \\
+\\
+& = & \int - \ln p(x)\;\; p(x) dx \\
+\\
+\\
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)
+\end{eqnarray*}
 
+\slide{}
 \vfill
 This occurs in unsupervised pretraining for sounds and images.
 
 \vfill
-But differential entropy and differential cross-entropy are conceptually problematic.
+But differential entropy and differential cross-entropy are problematic.
+
+\vfill
+Note that GANs avoid continuous (
 
 
 \slide{Perils of Differential Entropy}
