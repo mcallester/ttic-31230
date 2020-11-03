@@ -28,42 +28,34 @@ H(p) & = & E_{y \sim p(y)}\;\;-\ln p(y) \\
 \Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)
 \end{eqnarray*}
 
-\slide{}
-\vfill
-This occurs in unsupervised pretraining for sounds and images.
-
-\vfill
-But differential entropy and differential cross-entropy are problematic.
-
-\vfill
-Note that GANs avoid continuous (
-
-
-\slide{Perils of Differential Entropy}
-
-Consider a continuous density $p(x)$.  For example
-
-\vfill
-$$p(x) = \frac{1}{\sqrt{2\pi}\; \sigma}\; e^{\frac{-x^2}{2\sigma^2}}$$
-
-\vfill
-Differential entropy is defined as
-
-\vfill
-$$H(p) \doteq \int \left(\ln \frac{1}{p(x)}\right) p(x) dx = E_{x \sim p}\;-\ln p(x)$$
-
-\slide{Perils of Differential Entropy}
+\slide{Difficulties with Differential Cross Entropy}
 
 \begin{eqnarray*}
-  H({\cal N}(0,\sigma)) & = &  \int_{-\infty}^\infty \left( \ln(\sqrt{2\pi} \sigma) + \frac{x^2}{2\sigma^2}\right) p(x) dx \\
-  \\
-  & = & \ln(\sigma) + \ln(\sqrt{2\pi}) + \frac{1}{2\sigma^2}E_{x \sim {\cal N}(0,1)} x^2 \\
-  \\
-  & = & \ln \sigma + \ln(\sqrt{2\pi}) + \frac{1}{2}  
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)
 \end{eqnarray*}
 
 \vfill
-$$\lim_{\sigma \rightarrow 0} H(N(0,\sigma)) = - \infty$$.
+Differential cross-entropy naturally occurs in modeling sounds and images.
+
+\vfill
+But differential cross-entropy is problematic, especially for structured continuous values (images and sounds).
+
+\vfill
+Note that GANs avoid differential cross entropy by defining $p_\Phi(y)$ as the distribution of $y_\Phi(z)$ for random noise $z$.
+
+\slide{Perils of Differential Entropy}
+
+For a uniform distribution over an interval on the real line of width $\Delta$ we have
+
+\begin{eqnarray*}
+H & = & E_{x \sim p} -\ln p(x) \\
+\\
+& = & \ln \Delta
+\end{eqnarray*}
+
+As $\delta \rightarrow 0$ we have $H \rightarrow -\infty$.
+
+Similarly, for a Gaussian ${\cal N}(0,\sigma))$ we have that as $\sigma \rightarrow 0$ we get$H({\cal N}(0,\sigma)) \rightarrow -\infty$.
 
 \slide{Sensitivity to the Choice of Units}
 
