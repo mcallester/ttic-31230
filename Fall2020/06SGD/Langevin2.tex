@@ -34,27 +34,27 @@ We consider the one dimensional case --- a single parameter $x$ --- and a probab
 The gradient flow is equal to $- p(x)g$.
 
 \vfill
-The diffusion flow is proportional to $- \eta\sigma^2\;dp(x)/dx$ (see the appendix).
+The diffusion flow is  $- \frac{1}{2} \;\eta\sigma^2\;dp(x)/dx$ (see the appendix).
 
 
 \vfill
 For a stationary distribution the sum of the two flows is zero giving.
 
 \vfill
-{\color{red} $$\alpha \eta \sigma^2 \frac{dp}{dx} = - p\frac{d{\cal L}}{dx}$$}
+{\color{red} $$\frac{1}{2} \eta \sigma^2 \frac{dp}{dx} = - p\frac{d{\cal L}}{dx}$$}
 
 
 \slide{The 1-D Stationary Distribution}
 
 \vspace{-2ex}
 \begin{eqnarray*}
-\alpha \eta^2 \sigma^2 \frac{dp}{dx} & = & - \eta p\frac{d{\cal L}}{dx} \\
+\frac{1}{2} \eta^2 \sigma^2 \frac{dp}{dx} & = & - \eta p\frac{d{\cal L}}{dx} \\
 \\
-\frac{dp}{p} & = & \frac{-d{\cal L}}{\alpha\eta\sigma^2} \\
+\frac{dp}{p} & = & \frac{-2d{\cal L}}{\eta\sigma^2} \\
 \\
-\ln p & = & \frac{-{\cal L}}{\alpha \eta \sigma^2} + C \\
+\ln p & = & \frac{-2{\cal L}}{\eta \sigma^2} + C \\
 \\
-{\color{red} p(x)} & = & {\color{red} \frac{1}{Z}\exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma^2}\right)}
+{\color{red} p(x)} & = & {\color{red} \frac{1}{Z}\exp\left(\frac{-2{\cal L}(x)}{\eta \sigma^2}\right)}
 \end{eqnarray*}
 
 \vfill
@@ -73,13 +73,13 @@ For completely independent variables we have
 \begin{eqnarray*}
 p(x,y) & = & p(x)p(y) \\
 \\
-&= & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta \sigma_y^2}\right)
+&= & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta \sigma_y^2}\right)
 \end{eqnarray*}
 
 \slide{A 2-D Stationary Distribution}
 
 \begin{eqnarray*}
-p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta \sigma_y^2}\right)
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta \sigma_y^2}\right)
 \end{eqnarray*}
 
 \vfill
@@ -93,15 +93,15 @@ It has two different temperature parameters!
 Suppose we use parameter-specific learning rates $\eta_x$ and $\eta_y$
 
 \begin{eqnarray*}
-p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta_x \sigma_x^2} + \frac{-{\cal L}(y)}{\alpha \eta_y \sigma_y^2}\right)
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta_x \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta_y \sigma_y^2}\right)
 \end{eqnarray*}
 
 Setting $\eta_x = \eta'/\sigma^2_x$ and $\eta_y = \eta'/\sigma^2_y$ gives
 
 \begin{eqnarray*}
-p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x)}{\alpha \eta'} + \frac{-{\cal L}(y)}{\alpha \eta'}\right) \\
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta'} + \frac{-2{\cal L}(y)}{\eta'}\right) \\
 \\
-& = & \frac{1}{Z} \exp\left(\frac{-{\cal L}(x,y)}{\alpha \eta'}\right)\;\;\;\mathrm{Gibbs!}
+& = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x,y)}{\eta'}\right)\;\;\;\mathrm{Gibbs!}
 \end{eqnarray*}
 
 \slidetwo{The Case of Locally Constant Noise}
@@ -118,7 +118,7 @@ We can consider the covariance matrix of the vectors $\hat{g}$ in the Hessian-no
 
 If we assume constant noise covariance in the neighborhood of the stationary distribution then, in the Hessian normalized
 coordinate system, we get a stationary distribution
-$$p(\Phi) \propto \exp\left(-\sum_i \frac{{\Phi_i^2}}{\alpha\eta\sigma_i^2}\right)$$
+$$p(\Phi) \propto \exp\left(-\sum_i \frac{2{\Phi_i^2}}{\eta\sigma_i^2}\right)$$
 
 \vfill
 where $\Phi_i$ is the projection of $\Phi$ onto to a unit vector in the direction of the $i$th eigenvector of the noise covariance matrix and $\sigma^2_i$
@@ -225,14 +225,33 @@ Note that the mass transfer is proportional to $\Delta t$.  Dividing by $\Delta 
 $$\mbox{Diffusion flow}\;\;= - \alpha \eta\sigma^2 \frac{d\rho(x)}{dx}\;\;\;\;\;\alpha = 2\int_{u=0}^\infty u\Phi(-u) du$$
 
 \vfill
+$\alpha$ can be calculated using integration by parts.
+
+\begin{eqnarray*}
+\alpha & = & 2 \int_{0}^\infty u \Phi(-u)du \\
+& = & \int_{0}^\infty \Phi(-u)du^2 \\
+& = & u^2 \Phi(-u)|_{0}^{\infty}+\int_{0}^\infty u^2 \phi(-u)du \;\;\mbox{where $\phi$ is the Gaussian density} \\
+& = & \int_{0}^\infty u^2 \phi(-u)du\\
+& = & \frac{1}{2}
+\end{eqnarray*}
+
+\slide{Appendix: Diffusion Flow}
+
+We now have that the diffusion flow is
+
+$$\mbox{Diffusion flow}\;\;= - \frac{1}{2}\; \eta\sigma^2 \frac{d\rho(x)}{dx}$$
+
+\vfill
 For dimension larger than 1 we have
 
 \vfill
-$$\mbox{Diffusion flow}\;\;= - \alpha \eta\Sigma \nabla_x \rho$$
+$$\mbox{Diffusion flow}\;\;= - \frac{1}{2}\;\eta\Sigma \nabla_x \rho$$
 
 \vfill
 Where $\Sigma = E\;(\hat{g} - g)(\hat{g} - g)^\top$ is the covariance matrix of the gradient noise.
 
+\vfill
+Here we have derived this from first principle but it also follows from the Fokker–Planck equation (see Wikipedia).
 }
 
 \slide{END}

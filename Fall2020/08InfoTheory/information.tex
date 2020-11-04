@@ -14,9 +14,9 @@
 \vfill
 \vfill
 
-\slide{Differential Entropy and Cross Entropy}
+\slide{Differential Entropy and Cross-Entropy}
 
-For a probability density function $p(y)$ on continuous $y$ it is standard practice to define differential entropy and cross entropy:
+For a probability density function $p(y)$ on continuous $y$ it is standard practice to define differential entropy and cross-entropy:
 
 \vfill
 \begin{eqnarray*}
@@ -28,7 +28,7 @@ H(p) & = & E_{y \sim p(y)}\;\;-\ln p(y) \\
 \Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)
 \end{eqnarray*}
 
-\slide{Difficulties with Differential Cross Entropy}
+\slide{Difficulties with Differential Cross-Entropy}
 
 \begin{eqnarray*}
 \Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)
@@ -41,7 +41,7 @@ Differential cross-entropy naturally occurs in modeling sounds and images.
 But differential cross-entropy is problematic, especially for structured continuous values (images and sounds).
 
 \vfill
-Note that GANs avoid differential cross entropy by defining $p_\Phi(y)$ as the distribution of $y_\Phi(z)$ for random noise $z$.
+Note that GANs avoid differential cross-entropy by defining $p_\Phi(y)$ as the distribution of $y_\Phi(z)$ for random noise $z$.
 
 \slide{Perils of Differential Entropy}
 
@@ -65,7 +65,7 @@ $$H(N(0,\sigma)) = C + \ln \sigma$$
 Differential entropy depends on the choice of units --- a distributions on lengths will have a different entropy
 when measuring in inches than when measuring in feet.
 
-\slide{Differential Cross Entropy can Diverge to $-\infty$}
+\slide{Differential Cross-Entropy can Diverge to $-\infty$}
 
 Consider the unsupervised training object.
 
@@ -78,7 +78,7 @@ The training set is finite (discrete).
 For each $y$ the density $p_\Phi(y)$ can go to infinity.
 
 \vfill
-This will drive the cross entropy training loss to $-\infty$.
+This will drive the cross-entropy training loss to $-\infty$.
 
 \slide{Differential Entropy is Actually Infinite}
 

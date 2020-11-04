@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 
 \begin{document}
@@ -8,38 +8,35 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
   \vfill
   \centerline{Noisy Channel RDAs}
   \vfill
   \vfill
 
-\slide{The Fundamental Equation for Continuous $y$}
 
-If $y$ is continuous then the fundamental equation for estimating the distribution on $y$ (cross entropy) involves continuous probability densities.
+\slide{Rate-Distortion Autoencoders (RDAs)}
 
-\vfill
-$$\Phi^* = \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)$$
+We compress a continuous signal $y$ to a bit string $\tilde{z}_\Phi(y)$.
 
 \vfill
-This occurs in unsupervised pretraining for sounds and images.
+We decompress $\tilde{z}_\Phi(y)$ to $y_\Phi(\tilde{z}_\Phi(y))$.
 
 \vfill
-But differential entropy and differential cross-entropy are conceptually problematic.
+{\color{red} $$\Phi^* = \argmin_\Phi\; E_{y \sim \mathrm{Pop}}\;\;\;\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$}
 
-\slide{Noisy Channel RDAs}
+\slide{Rate-Distortion Autoencoders (RDAs)}
 
-In a noisy channel RDA we do not compress $y$ into a finite number of bits.
-
-\vfill
-Instead we add noise to a continuous representation.
+Since rounding is not differentiable we train by replace rounding by additive noise.
 
 \vfill
-{\bf As in the image compression RDA, the addition of noise is similar to rounding.}
 
 \vfill
-But instead of viewing the addition of noise as a hack to allow differentiation, we can reinterpret ``rate'' as mutual information
-and eliminate the discrete representation.
+{\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;E_\epsilon \;\left\{\begin{array}{ll} &- \ln p_\Phi(z_\Phi(y) + \epsilon) \\
++ & \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + \epsilon)) \end{array}\right.$$}
+
+\vfill
+A noisy-channel RDA uses the noise version without rounding.
 
 \anaslide{Noisy Channel RDAs}
 
@@ -121,17 +118,22 @@ Instead we will use a model $\hat{p}_\Phi(z)$ to approximate $p_{\popd,\Phi}(z)$
 
 \slide{The Noisy Channel RDA}
 
+{\huge
 \begin{eqnarray*}
-& & \mbox{RDA: $z_\Phi(y)$ discrete} \\
-\\
-\Phi^* & = & \argmin_\Phi E_{y \sim \popd} - \ln P_\Phi(z_\Phi(y)) + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y))) \\
-\\
-\\
-& & \mbox{Noisy Channel RDA: $z_\Phi(y,\epsilon)$ continuous} \\
+& & \mbox{General Noisy Channel RDA:} \\
 \\
 \Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z_\Phi(y,\epsilon)|y)}{\hat{p}_\Phi(z_\Phi(y,\epsilon))}
-+ \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))
++ \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon))) \\
+\\
+\\
+& & \mbox{Uniform Box Noise (Rounding) RDA:} \\
+\\
+\Phi^* &  = & \argmin_\Phi \;E_y\;E_{\epsilon \sim [-1/2,1/2]^d} \\
+\\
+& & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; - \ln \hat{p}_\Phi(z_\Phi(y) + \epsilon) + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + \epsilon)) \\
+\\
 \end{eqnarray*}
+}
 
 \slide{END}
 
