@@ -15,103 +15,77 @@
   \vfill
 
 
-\slide{Rate-Distortion Autoencoders (RDAs)}
+\slide{Review of Rate-Distortion Autoencoders (RDAs)}
 
-We compress a continuous signal $y$ to a bit string $\tilde{z}_\Phi(y)$.
+We compress a continuous signal $y$ to a discrete value $\tilde{z}_\Phi(y)$.
 
 \vfill
 We decompress $\tilde{z}_\Phi(y)$ to $y_\Phi(\tilde{z}_\Phi(y))$.
 
 \vfill
-{\color{red} $$\Phi^* = \argmin_\Phi\; E_{y \sim \mathrm{Pop}}\;\;\;\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$}
-
-\slide{Rate-Distortion Autoencoders (RDAs)}
-
-Since rounding is not differentiable we train by replace rounding by additive noise.
+$$\Phi^* = \argmin_\Phi\; E_{y \sim \mathrm{Pop}}\;\;\;\;{\color{red} -\ln\;P_\Phi(\tilde{z}_\Phi(y))}\; +\; \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
 
 \vfill
+The loss is ``legitimate'' in that , unlike differential cross entropy, the loss terms are guaranteed to be non-negative.
 
 \vfill
-{\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;E_\epsilon \;\left\{\begin{array}{ll} &- \ln p_\Phi(z_\Phi(y) + \epsilon) \\
-+ & \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + \epsilon)) \end{array}\right.$$}
+But the discrete cross entropy term is not differentiable.
 
 \vfill
-A noisy-channel RDA uses the noise version without rounding.
+{\color{red} Noisy channel RDAs use a legitimate yet differentiable loss.}
 
-\anaslide{Noisy Channel RDAs}
+\slide{Rate as Channel Capacity}
 
-\bigskip
-\bigskip
 \begin{eqnarray*}
 z & = & z_\Phi(y,\epsilon) \;\;\mbox{$\epsilon$ is fixed (parameter independent) noise} \\
 \\
-\Phi^* & = & \argmin_\Phi \;I_\Phi(y,z) + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))
-\end{eqnarray*}
-
-\bigskip
-By the channel capacity theorem {\color{red} $I(y,z)$} is the {\bf rate} of information transfer from $y$ to $z$.
-
-\anaslide{Noisy Channel RDAs}
-
-\bigskip
-\bigskip
-\begin{eqnarray*}
-z & = & z_\Phi(y,\epsilon) \;\;\mbox{$\epsilon$ is fixed (parameter independent) noise} \\
+p_{\Phi}(z) & = & \int \popd(y)p_\Phi(z|y)dy \;=\;  E_{y}\;\;p_\Phi(z|y) \\
 \\
-\Phi^* & = & \argmin_\Phi \;I_\Phi(y,z) + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))
-\end{eqnarray*}
-        
-\bigskip
-Using parameter-independent noise is called the ``reparameterization trick'' and allows SGD.
-\begin{eqnarray*}
-& & \nabla_\Phi \;E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon))) \\
+\Phi^* & = & \argmin_\Phi\; E_{y,\epsilon} \;\; {\color{red} \ln \frac{p_\Phi(z\; |\; y)}{p_\Phi(z)}}\; +\;\lambda\mathrm{Dist}(y,y_\Phi(z)) \\
 \\
-& = & E_{y,\epsilon}\; \nabla_\Phi\;\mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))
+ & = & \argmin_\Phi \;{\color{red} I_\Phi(y,z)} + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(z))
 \end{eqnarray*}
+
+\vfill
+The mutual information {\color{red} $I_\Phi(y,z)$} is the channel capacity giving the {\bf rate} of information transfer from $y$ to $z$.
 
 \slide{Mutual Information as a Channel Rate}
 
-Typically $z_\Phi(y,\epsilon)$ is simple.  For example
+Typically we have $\epsilon \sim {\cal N}(0,I)$ and
 
+\vfill
 \begin{eqnarray*}
-\epsilon & \sim & {\cal N}(0,I) \\
-\\
 z_\Phi(y,\epsilon) & = & \mu_\Phi(y) +\sigma_\Phi(y)\odot \epsilon
 \end{eqnarray*}
 
 \vfill
-In this example {\color{red} $p_\Phi(z|y)$ is easily computed.}
+\vfill
+Here $p_\Phi(z|y)$ is a Gaussian with mean $\mu_\Phi(y)$ and a diagonal covariance matrix with diagonal entries $\sigma_\Phi(y)$.
 
-\slide{Mutual Information Replaces Rate}
+\slide{A Variational Bound on Mutual Information}
 
-\begin{eqnarray*}
-I_\Phi(y,z)  & = & E_{y,\epsilon}\; \ln \frac{\mathrm{pop}(y)p_\Phi(z|y)}{\mathrm{pop}(y)p_{\mathrm{pop},\Phi}(z)} \\
-\\
-\\
-& = & E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{p_{\mathrm{pop},\Phi}(z)} \\
-\\
-\\
-\mathrm{where}\;\;\;\;p_{\mathrm{pop},\Phi}(z) & = & E_{y\sim \mathrm{pop}}\;\;p_\Phi(z|y)
-\end{eqnarray*}
-
-\slide{A Variational Bound}
-
-$$p_{\mathrm{pop},\Phi}(z)  = E_{y\sim \mathrm{pop}}\;\;p_\Phi(z|y)$$
+$$\Phi^* = \argmin_\Phi\; E_{y,\epsilon} \;\; {\color{red} \ln \frac{p_\Phi(z\; |\; y)}{p_\Phi(z)}}\; +\;\lambda\mathrm{Dist}(y,y_\Phi(z))$$
 
 \vfill
-We cannot compute $p_{\mathrm{pop},\Phi}(z)$.
+Here $p_\Phi(z)$ is the marginal of $z$ under the distribution defined by $y$ and $\epsilon$.
 
 \vfill
-Instead we will use a model $\hat{p}_\Phi(z)$ to approximate $p_{\popd,\Phi}(z)$.
+$$p_{\Phi}(z) \; = \; \int \popd(y)p_\Phi(z|y)dy \;=\;  E_{y}\;\;p_\Phi(z|y)$$
 
-\slide{A Variational Bound}
+\vfill
+We cannot compute $p_{\Phi}(z)$.
+
+\vfill
+Instead we will use a model $\hat{p}_\Phi(z)$ to approximate $p_{\Phi}(z)$.
+
+\slide{A Variational Bound on Mutual Information}
 
 \begin{eqnarray*}
-{\color{red} I(y,z)}  & = & E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{p_{\mathrm{pop},\Phi}(z)} \\
+{\color{red} I(y,z)}  & = & E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{p_{\Phi}(z)} \\
 \\
-& = & E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{\hat{p}_\Phi(z)} + E_{y,\epsilon}\;\ln\frac{\hat{p}_\Phi(z)}{p_{\mathrm{pop},\Phi}(z)} \\
+& = & E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{\hat{p}_\Phi(z)} + E_{y,\epsilon}\;\ln\frac{\hat{p}_\Phi(z)}{p_{\Phi}(z)} \\
 \\
-& = & E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{\hat{p}_\Phi(z)} - KL(p_{\mathrm{pop},\Phi}(z),\hat{p}_\Phi(z)) \\
+& = & E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{\hat{p}_\Phi(z)} - KL(p_{\Phi}(z),\hat{p}_\Phi(z)) \\
 \\
 & {\color{red} \leq} & {\color{red} E_{y,\epsilon}\;\ln \frac{p_\Phi(z|y)}{\hat{p}_\Phi(z)}}
 \end{eqnarray*}
@@ -120,20 +94,131 @@ Instead we will use a model $\hat{p}_\Phi(z)$ to approximate $p_{\popd,\Phi}(z)$
 
 {\huge
 \begin{eqnarray*}
-& & \mbox{General Noisy Channel RDA:} \\
-\\
 \Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z_\Phi(y,\epsilon)|y)}{\hat{p}_\Phi(z_\Phi(y,\epsilon))}
-+ \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon))) \\
++ \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))
+\end{eqnarray*}
+
+\vfill
+\centerline{$y,\epsilon$\includegraphics[width=4in]{\images/deconvleft} $\;\;z\;\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
+
+
+\slide{Sampling}
+
+We can require $\hat{p}_\Phi(z)$ be Gaussian.  In that case we can sample $z$ from $\hat{p}_\Phi(z)$ and generate images (as in a GAN).
+
+\vfill
+\centerline{\includegraphics[width = 3in]{\images/VariationalFaces}}
+\centerline{[Alec Radford]}
+
+\vfill
+This is {\bf sampling} --- not compression.  We are decompressing noise.
+
+
+\anaslide{A General Autoencoder}
+
+\bigskip
+\centerline{$y$\includegraphics[width=4in]{\images/deconvleft} $\;\;z\;\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
+
+\bigskip
+\bigskip
+We show below that for $p_\Phi(z|y)$ and $\hat{p}_\Phi(z)$ both required to be Gaussian we can assume without loss
+of generality that
+\bigskip
+$$\hat{p}_\Phi(z) = {\cal N}(0,I)$$
+
+\slide{Gaussian Noisy-Channel RDA}
+
+We now show that a reparameterization can always convert $\hat{p}_\Phi(z)$ to a zero-mean identity-covariance Gaussian.
+
+\vfill
+$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z_\Phi(y,\epsilon)|y)}{\hat{p}_\Phi(z_\Phi(y,\epsilon))} + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))$$
+
+{\color{red}
+\begin{eqnarray*}
+z_\Phi(y,\epsilon) & = & \mu_\Phi(y) + \sigma_\Phi(y) \odot \epsilon\;\;\;\epsilon \sim {\cal N}(0,I) \\
 \\
+p_\Phi(z[i]|y) & = & {\cal N}(\mu_\Phi(y)[i],\sigma_\Phi(y)[i])) \\
 \\
-& & \mbox{Uniform Box Noise (Rounding) RDA:} \\
+\hat{p}_\Phi(z[i]) & = & {\cal N}(\hat{\mu}_z[i],\hat{\sigma}_z[i]) \\
 \\
-\Phi^* &  = & \argmin_\Phi \;E_y\;E_{\epsilon \sim [-1/2,1/2]^d} \\
-\\
-& & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\; - \ln \hat{p}_\Phi(z_\Phi(y) + \epsilon) + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + \epsilon)) \\
-\\
+\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||^2
 \end{eqnarray*}
 }
+
+\slide{Gaussian Noisy-Channel RDA}
+
+$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z_\Phi(y,\epsilon)|y)}{\hat{p}_\Phi(z_\Phi(y,\epsilon))} + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))$$
+
+\vfill
+We will show that we can fix $\hat{p}_\Phi(z)$ to ${\cal N}(0,I)$.
+
+{\color{red}
+\begin{eqnarray*}
+p_\Phi(z[i]|y) & = & {\cal N}(\mu_\Phi(y)[i],\sigma_\Phi(y)[i]) \\
+\\
+\hat{p}_\Phi(z[i]) & = & {\cal N}(0,1) \\
+\\
+\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||^2
+\end{eqnarray*}
+}
+
+
+\slide{Gaussian Noisy-Channel RDA}
+
+\begin{eqnarray*}
+\Phi^* &  = & \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z_\Phi(y,\epsilon)|y)}{\hat{p}_\Phi(z_\Phi(y,\epsilon))} + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon))) \\
+\\
+\\
+& = & \argmin_{\Phi}\;E_{y\sim \pop} \left(\begin{array}{l}\;\;\;\;KL(p_\Phi(z|y),\hat{p}_\Phi(z)) \\
+\\
++ \lambda \; E_\epsilon\;\mathrm{Dist}(y,\;y_\Phi(z_\Phi(y,\epsilon)))\end{array}\right)
+\end{eqnarray*}
+
+\slide{Closed Form KL-Divergence}
+
+\begin{eqnarray*}
+& & KL(p_\Phi(z|y),\hat{p}_\Phi(z)) \\
+\\
+\\
+& = & \sum_i \;\frac{\sigma_\Phi(y)[i]^2 + (\mu_\Phi(y)[i]-\mu_z[i])^2}{2 \sigma_z[i]^2}
++ \ln\frac{\sigma_z[i]}{\sigma_\Phi(y)[i]} - \frac{1}{2}
+\end{eqnarray*}
+
+
+\slide{Standardizing $\hat{p}_\Phi(z)$}
+
+\begin{eqnarray*}
+ &  & KL(p_\Phi(z|y),p_\Phi(z)) \\
+ \\
+ & = & \sum_i \;\frac{ \sigma_\Phi(y)[i]^2 +(\mu_\Phi(y)[i] - \mu_z[i])^2}{2\sigma_z[i]^2}
++ \ln\frac{\sigma_z[i]}{\sigma_\Phi(y)[i]}
+- \frac{1}{2}
+\\
+\\
+\\
+\\
+ &  & KL(p_{\Phi'}(z|y),{\cal N}(0,I)) \\
+ \\
+ & = & \sum_i \;\frac{\sigma_{\Phi'}(y)[i]^2 +\mu_{\Phi'}(y)[i]^2}{2} + \ln\frac{1}{\sigma_{\Phi'}(y)[i]} - \frac{1}{2}
+\end{eqnarray*}
+
+\slide{Standardizing $\hat{p}_\Phi(z)$}
+
+\begin{eqnarray*}
+KL_\Phi & = & \sum_i \;\frac{ \sigma_\Phi(y)[i]^2 +(\mu_\Phi(y)[i] - \mu_z[i])^2}{2\sigma_z[i]^2}
++ \ln\frac{\sigma_z[i]}{\sigma_\Phi(y)[i]} - \frac{1}{2}
+\\
+KL_{\Phi'} & = & \sum_i \;\frac{\sigma_{\Phi'}(y)[i]^2 +\mu_{\Phi'}(y)[i]^2}{2} + \ln\frac{1}{\sigma_{\Phi'}(y)[i]} - \frac{1}{2}
+\end{eqnarray*}
+
+Setting $\Phi'$ so that
+\begin{eqnarray*}
+\mu_{\Phi'}(y)[i] & = & (\mu_\Phi(y)[i] - \mu_z[i])/\sigma_z[i] \\
+\sigma_{\Phi'}(y)[i] & = & \sigma_\Phi(y)[i]/\sigma_z[i]
+\end{eqnarray*}
+
+\vfill
+gives {\color{red} $KL(p_{\Phi}(z|y),\hat{p}_\Phi(z)) = KL(p_{\Phi'}(z|y),{\cal N}(0,I))$}.
 
 \slide{END}
 

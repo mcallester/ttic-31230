@@ -16,34 +16,22 @@
 
 \slide{Differential Entropy and Cross-Entropy}
 
-For a probability density function $p(y)$ on continuous $y$ it is standard practice to define differential entropy and cross-entropy:
+Cross entropy is a challenging objective for continuous structured values $y$ such as images and sounds.
 
 \vfill
 \begin{eqnarray*}
-H(p) & = & E_{y \sim p(y)}\;\;-\ln p(y) \\
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y) \\
 \\
-& = & \int - \ln p(x)\;\; p(x) dx \\
-\\
-\\
-\Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)
-\end{eqnarray*}
-
-\slide{Difficulties with Differential Cross-Entropy}
-
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)
+\Phi^* & = & \argmin_\Phi \;E_{\tuple{x,y} \sim \popd}\;-\ln p_\Phi(y|x)
 \end{eqnarray*}
 
 \vfill
-Differential cross-entropy naturally occurs in modeling sounds and images.
+GANs replace the cross-entropy loss with an adversarial discrimination loss.
 
 \vfill
-But differential cross-entropy is problematic, especially for structured continuous values (images and sounds).
+Rate-Distortion Auto-Encoders (RDAs) and Variational Auto-Encoders (VAEs) use the cross-entropy objective more directly.
 
-\vfill
-Note that GANs avoid differential cross-entropy by defining $p_\Phi(y)$ as the distribution of $y_\Phi(z)$ for random noise $z$.
-
-\slide{Perils of Differential Entropy}
+\slide{Differential Cross-Entropy can Diverge to $-\infty$}
 
 For a uniform distribution over an interval on the real line of width $\Delta$ we have
 
@@ -53,21 +41,15 @@ H & = & E_{x \sim p} -\ln p(x) \\
 & = & \ln \Delta
 \end{eqnarray*}
 
-As $\delta \rightarrow 0$ we have $H \rightarrow -\infty$.
-
-Similarly, for a Gaussian ${\cal N}(0,\sigma))$ we have that as $\sigma \rightarrow 0$ we get$H({\cal N}(0,\sigma)) \rightarrow -\infty$.
-
-\slide{Sensitivity to the Choice of Units}
-
-$$H(N(0,\sigma)) = C + \ln \sigma$$
+\vfill
+As $\Delta \rightarrow 0$ we have $H \rightarrow -\infty$.
 
 \vfill
-Differential entropy depends on the choice of units --- a distributions on lengths will have a different entropy
-when measuring in inches than when measuring in feet.
+This also happens for a Gaussian ${\cal N}(0,\sigma)$ as $\sigma \rightarrow 0$.
 
 \slide{Differential Cross-Entropy can Diverge to $-\infty$}
 
-Consider the unsupervised training object.
+Consider the unsupervised training objective.
 
 $$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{train}}\;-\ln p_\Phi(y)$$
 
@@ -79,6 +61,15 @@ For each $y$ the density $p_\Phi(y)$ can go to infinity.
 
 \vfill
 This will drive the cross-entropy training loss to $-\infty$.
+
+\slide{Sensitivity to the Choice of Units}
+
+$$H(N(0,\sigma)) = C + \ln \sigma$$
+
+\vfill
+Differential entropy depends on the choice of units --- a distributions on lengths will have a different entropy
+when measuring in inches than when measuring in feet.
+
 
 \slide{Differential Entropy is Actually Infinite}
 
@@ -101,20 +92,17 @@ A meaningful convention is that $H(p) = +\infty$ for any continuous density $p$.
 $$KL(p,q) = \int \left( \ln \frac{p(x)}{q(x)}\right) p(x) dx$$
 
 \vfill
-This integral can be computed by dividing the real numbers into bins and computing the $KL$ divergence between the distributions on bins.
+Unlike differential entropy, differential KL divergence is always non-negative (but can be infinite).
 
 \vfill
-The KL divergence between the bin distribution typically approaches a finite limit as the bin size goes to zero.
-
-\vfill
-Unlike entropy, differential KL divergence is always non-negative.  But as in the discrete case, it can be infinite.
+Note that $KL(p,p) = 0$ independent of $H(p)$.
 
 \slide{Mutual Information}
 
 For two random variables $x$ and $y$ there is a distribution on pairs $(x,y)$ determined by the population distribution.
 
 \vfill
-Mutual information is a KL divergence and hence differential mutual information is meaningful.
+Mutual information is a KL divergence and hence differential mutual information is always non-negative.
 
 \vfill
 \begin{eqnarray*}

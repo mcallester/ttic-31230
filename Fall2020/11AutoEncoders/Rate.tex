@@ -33,8 +33,8 @@ Rate-Distortion Auto-Encoders (RDAs) and Variational Auto-Encoders (VAEs) use th
 
 \slide{Rate-Distortion Autoencoders (RDAs)}
 
-A rate-distortion autoencoder (RDA) replaces differential cross-entropy with a bi-objective --- a compression rate and
-the reconstruction distortion.
+A rate-distortion autoencoder (RDA) replaces differential cross-entropy loss with a compression rate and
+a reconstruction loss (distortion).
 
 \vfill
 The primary example is lossy compression of images and audio.
@@ -44,7 +44,7 @@ We take the compressed object to be discrete --- a file with a well defined leng
 
 \slide{Rate-Distortion Autoencoders (RDAs)}
 
-We compress a continuous signal $y$ to a bit string $\tilde{z}_\Phi(y)$.
+We compress a continuous signal $y$ to a bit string (or other discrete object) $\tilde{z}_\Phi(y)$.
 
 \vfill
 We decompress $\tilde{z}_\Phi(y)$ to $y_\Phi(\tilde{z}_\Phi(y))$.
@@ -52,14 +52,14 @@ We decompress $\tilde{z}_\Phi(y)$ to $y_\Phi(\tilde{z}_\Phi(y))$.
 \vfill
 We can then define a rate-distortion loss.
 
-{\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$}
+{\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;-\ln P_\Phi(\tilde{z}_\Phi(y)) + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$}
 
 \vfill
-where $|\tilde{z}|$ is the number of bits in the bit string $\tilde{z}$.
+Here the rate is defined as a discrete cross-entropy.
 
 \slide{$L_2$ Distortion}
 
-$$\Phi^* = \argmin_\Phi\;E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
+$${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;-\ln P_\Phi(\tilde{z}_\Phi(y)) + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
 
 \vfill
 It is common to take
@@ -71,16 +71,16 @@ It is common to take
 \end{eqnarray*}
 
 \vfill
-We will ignore the log probability interpretation and just call this distortion.
+We will ignore the log density interpretation and just call this distortion.
 
 \slide{$L_1$ Distortion}
 
-$$\Phi^* = \argmin_\Phi\;E_{y \sim \mathrm{Pop}}\;|\tilde{z}_\Phi(y)| + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
+$${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;-\ln P_\Phi(\tilde{z}_\Phi(y)) + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
 
 Alternatively we have
 
 \begin{eqnarray*}
-\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||_1 \hspace{4em}(L_2) \\
+\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||_1 \hspace{4em}(L_1) \\
 \\
 & = & -\ln p(y|\hat{y}) + C \;\;\mbox{for a Laplace density}
 \end{eqnarray*}
@@ -111,18 +111,19 @@ $$\tilde{z}_\Phi(y)[x,y,i] = \lfloor z_\Phi(y)[x,y,i] + 1/2 \rfloor$$
 
 \slide{Rate-Distortion Autoencoders (RDAs)}
 
-Since rounding is not differentiable we train by replace rounding by additive noise.
+Since rounding is not differentiable, at training time we replace rounding by additive noise.
 
 \vfill
-{\color{red} $${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;E_{\epsilon \sim [-1/2,1/2]^d} \;\left\{\begin{array}{ll} &- \ln p_\Phi(z_\Phi(y) + \epsilon) \\
+{\huge \color{red} $$\Phi^* = \argmin_\Phi\; E_{y \sim \mathrm{\train}}\;E_{\epsilon \sim [-1/2,1/2]^d} \;\left\{\begin{array}{ll} &- \ln p_\Phi(z_\Phi(y) + \epsilon) \\
+\\
 + & \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y) + \epsilon)) \end{array}\right.$$}
 
-The continuous density is constrained to be sufficiently smooth so that
+The continuous density $p_\Phi(z)$ is parameterized in a way that guarantees
 
 {\color{red} $$p_\Phi(z) \approx P_\Phi(\tilde{z})$$}
 
 \vfill
-At test time (for actual compression) we use rounding.
+At test time we use rounding.
 
 \slide{Rate: Differential Entropy vs. Discrete Entropy}
 

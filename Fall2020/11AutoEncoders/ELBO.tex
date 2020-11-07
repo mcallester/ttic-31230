@@ -1,6 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
-
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -10,108 +9,179 @@
   \bigskip
   \centerline{David McAllester, Winter 2020}
   \vfill
-  \vfil
-  \centerline{\bf The Evidence Lower Bound (ELBO)}
   \vfill
-  \centerline{\bf and Variational Auto Encoders (VAEs)}
+  \centerline{\bf Variational Auto Encoders (VAEs)}
   \vfill
   \vfill
 
-\slide{Modeling $y$}
+\slidetwo{Meaningful Latent Variables:}
+{Learning Phonemes and Words}
 
-We would like to use the fundamental equation
-
-$$\Phi^* = \argmin_\Phi\;E_{y \sim \pop}\;- \ln P_\Phi(y)$$
-
-\bigskip
-\bigskip
-But even when $P_\Phi(z)$ and $P_\Phi(y|z)$ are samplable and computable we cannot typically compute $P_\Phi(y)$.
+A child exposed to speech sounds learns to distinguish phonemes and then words.
 
 \vfill
-Specifically, for $P_\Phi(y)$ defined by a generator we cannot compute $P_\Phi(y)$ for a test image $y$.
+The phonemes and words are ``latent variables'' learned from listening to sounds.
 
-\slide{Interpretable Latent Variables}
+\vfill
+We will use $y$ for the raw input (sound waves) and $z$ for the latent variables (phonemes).
+
+\slide{Other Examples}
+
+$z$ might be a parse tree, or some other semantic representation, for an observable sentence (word string) $y$.
+
+\vfill
+$z$ might be a segmentation of an image $y$.
+
+\vfill
+$z$ might be a depth map (or 3D representation) of an image $y$.
+
+\vfill
+$z$ might be a class label for an image $y$.
+
+\vfill
+Here we are interested in the case where $z$ is {\bf latent} in the sense that we do not have training labels for $z$.
+
+\vfill
+{\bf We want reconstructions of $z$ from $y$ to emerge from observations of $y$ alone.}
+
+\slide{Latent Variables}
+
+Here we often think of $z$ as the causal source of $y$.
+
+\vfill
+$z$ might be a physical scene causing image $y$.
+
+\vfill
+$z$ might be a word sequence causing speech sound $y$.
+
+\vfill
+To initially simplify the discussion, we consider models $P_\Phi(z)P_\Phi(y|z)$ where all variables are discrete.
+
+\vfill
+For example, $z$ might be a parse tree and $y$ the resulting word sequence.
+
+\slide{Latent Variables}
 
 {\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z) = E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)$$}
 
 \vfill
-$P_\Phi(z)$ is called the prior.
+$P_\Phi(z)$ is the prior.
 
 \vfill
-Given an observation of $y$ (the evidence) $P_\Phi(z|y)$ is called the posterior.
+$P_\Phi(z|y)$ is the posterior where $y$ is the ``evidence''.
+
+\slide{Assumptions}
+
+
+We assume models $P_\Phi(z)$ and $P_\Phi(y|z)$ are both samplable and computable.
 
 \vfill
-Variational Bayesian inference involves approximating the posterior.
+In other words, we can sample from these distributions and for any given $z$ and $y$ we can compute $P_\Phi(z)$ and $P_\Phi(y|z)$.
+
+\vfill
+These assumptions hold for auto-regressive models (language).
+
+\vfill
+However, they fail for loopy graphical models where approximations must be used.
+
+\slide{Modeling $y$}
+
+\vfill
+We would like to use cross-entropy.
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln P_\Phi(y) \\
+\\
+P_\Phi(y) & = & E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)
+\end{eqnarray*}
+
+\vfill
+But even when $P_\Phi(z)$ and $P_\Phi(y|z)$ are samplable and computable we cannot typically compute $P_\Phi(y)$ or $P_\Phi(z|y)$.
+
+\slide{Modeling $y$}
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln P_\Phi(y) \\
+\\
+P_\Phi(y) & = & E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)
+\end{eqnarray*}
+
+\vfill
+VAEs side-step the intractability problem by introducing another model component --- a model $\hat{P}_\Phi(z|y)$ to approximate the intractible $P_\Phi(z|y)$.
 
 \slide{The Evidence Lower Bound (The ELBO)}
 
-To model $y$ (the evidence about $z$) we introduce a samplable and computable model $\hat{P}_\Phi(z|y)$ to approximate $P_\Phi(z|y)$.
-
 {\huge
 \begin{eqnarray*}
- {\color{red} \ln P_\Phi(y)} & = & E_{z \sim \hat{P}_\Phi(z|y)} \ln \frac{P_\Phi(y)P_\Phi(z|y)}{P_\Phi(z|y)} \\
+ {\color{red} \ln P_\Phi(y)} & = & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{P_\Phi(y)P_\Phi(z|y)}{P_\Phi(z|y)} \\
         \\
- & = & E_{z \sim \hat{P}_\Phi(z|y)} \left(\ln \frac{P_\Phi(z,y)}{\hat{P}_\Phi(z|y)} + \ln \frac{\hat{P}_\Phi(z|y)}{P_\Phi(z|y)}\right) \\
+        \\
+ & = & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \left(\ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Phi(z|y)}} + \ln \frac{{\color{red} \hat{P}_\Phi(z|y)}}{P_\Phi(z|y)}\right) \\
  \\
-  & = & \left(E_{z \sim \hat{P}_\Phi(z|y)} \ln \frac{P_\Phi(z,y)}{\hat{P}_\Phi(z|y)}\right) + KL(\hat{P}_\Phi(z|y),P_\Phi(z|y)) \\
+ \\
+  & = & \left(E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Phi(z|y)}}\right) + KL({\color{red} \hat{P}_\Phi(z|y)},P_\Phi(z|y)) \\
   \\
-  & {\color{red} \geq} & {\color{red} E_{z \sim \hat{P}_\Phi(z|y)} \ln \frac{P_\Phi(z,y)}{\hat{P}_\Phi(z|y)}}\;\;\mbox{The ELBO}
+  \\
+  &  \geq & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Phi(z|y)}} \;\;\;\;\;\mbox{The ELBO}
 \end{eqnarray*}
 }
-
-
-\slide{The Variational Auto-Encoder (VAE)}
-
-$$\Phi^* = \argmin_\Phi\; E_{y \sim \pop,\;z \sim \hat{P}_\Phi(z|y)}\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{\hat{P}_\Phi(z|y)}$$
 
 \slide{EM is Alternating Optimization of the ELBO}
 
 Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_\Phi(z|y)$ is samplable and computable.
-EM alternates exact optimization of $\hat{P}_\Phi$ and $P_\Phi$.
+EM alternates exact optimization of $\Psi$ and $\Phi$ in:
+$$\mbox{VAE:}\;\;\;\;\;\;\; {\color{red} \Phi^*} = \argmin_{\color{red} \Phi} \min_{\color{red} \Psi} E_{y,\;z \sim \hat{P}_{\color{red} \Psi}(z|y)}\;\;- \ln \frac{P_{\color{red} \Phi}(z,y)}{\hat{P}_{\color{red} \Psi}(z|y)}$$
 
 \vfill
-VAE: $\Phi^* = \argmin_\Phi E_{y\sim \mathrm{Train},\;z \sim \hat{P}_\Phi(z|y)}\;\;- \ln \frac{P_\Phi(z,y)}{\hat{P}_\Phi(z|y)}$
+$$\mbox{EM:}\;\;\;\;\;\; {\color{red} \Phi^{t+1}} =  \argmin_{\color{red} \Phi}\;\;\;\;E_{y,\;z \sim P_{\color{red} \Phi^t}(z|y)}\; - \ln P_{\color{red} \Phi}(z,y)$$
 
 \vfill
-EM: $\Phi^{\color{red} t+1} =  \argmin_\Phi\;E_{y \sim \mathrm{Train}}\;E_{z \sim P_{\Phi^{\color{red} t}}(z|y)}\; - \ln P_\Phi(z,y)$ \\
-\\
-\centerline{\hspace{1em} Update \hspace{6em} Inference \hspace{2.5em}~}
-\centerline{(M Step) \hspace{5em} (E Step) \hspace{1.5em}~}
-\centerline{Hold $\hat{P}$ fixed \hspace{2.5em} $\hat{P}(z|y) = P_{\Phi^{\color{red} t}}(z|y)$ \hspace{0em}~}
+\centerline{\hspace{1em} Inference \hspace{6em} Update \hspace{2.5em}~}
+\centerline{(E Step) \hspace{6em} (M Step) ~}
+\centerline{ $\hat{P}_\Psi(z|y) = P_{\Phi^{\color{red} t}}(z|y)$ \hspace{2.5em} Hold $\hat{P}_\Psi(z|y)$ fixed \hspace{0em}~}
 
-\anaslide{RDAs vs. VAEs}
+\slide{Variational Autoencoders}
 
-\bigskip
-Noisy Channel RDA:
-$$\Phi^* = \argmin_\Phi E_{y,z \sim P_\Phi(z|y)}\;-\ln \frac{\hat{P}_\Phi(z)}{P_\Phi(z|y)} + \lambda \mathrm{Dist}(y,y_\Phi(z))$$
-
-\bigskip
-VAE:
-$$\Phi^* = \argmin_\Phi E_{y,z \sim \hat{P}_\Phi(z|y)}\;- \ln \frac{P_\Phi(z)}{\hat{P}_\Phi(z|y)} \;-\;\ln P_\Phi(y|z)$$
-
-\bigskip
-The RDA is a bi-criterion (rate and distortion) while the VAE has a single objective.
-
-\bigskip
-But otherwise they are extremely similar.
-
-\slide{$-\ln p_\Phi(y|z)$ as Distortion}
-
-For $p_{\Phi,\sigma}(y|z) \propto \exp(-||y - y_\Phi(z)||^2/(2\sigma^2))$ we get
-
+{\huge
 \begin{eqnarray*}
-\Phi^*,\sigma^* & = & \argmin_{\Phi,\sigma} E_{y,\epsilon}\;-\ln \frac{p_\Phi(z)}{q_\Phi(z|y)} - \ln p_{\Phi,\sigma}(y|z) \\
-\\
-\Phi^*       & = & \argmin_{\Phi} E_{y,\epsilon}\;-\ln \frac{p_\Phi(z)}{q_\Phi(z|y)} +\left(\frac{1}{2{\sigma^*}^2}\right)||y - y_\Phi(z)||^2 + d\ln \sigma^*
+\mbox{ELBO:}\;\;\;\;\;\ln P_\Phi(y)   &  \geq & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Phi(z|y)}} \\
+  \\
+  \\
+  & = & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{P_\Phi(z)P_\Phi(y|z)}{{\color{red} \hat{P}_\Phi(z|y)}}\\
+  \\
+  \\
+\mbox{VAE:}\;\;\;- \ln P_\Phi(y)  & \leq & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{{\color{red} \hat{P}_\Phi(z|y)}}{P_\Phi(z)}  - \ln P_\Phi(y|z)
 \end{eqnarray*}
+}
 
 \vfill
-where
+Here $\hat{P}_\Phi(z|y)$ is the encoder and $P_\Phi(y|z)$ is the decoder and the ``rate term'' $ E_{z|y}\;\ln \hat{P}_\Phi(z|y)/P_\Phi(z)$ is a KL-divergence.
 
-\centerline{$d$ is the dimension of $y$ and $\sigma^*  =  \sqrt{\frac{1}{d}\;E_{y,\epsilon}\; ||y - y_\Phi(z)||^2}$}
+
+\slide{VAE = RDA}
+{\huge
+\begin{eqnarray*}
+\mbox{\color{red} VAE:}\;\;\;\Phi^*  & = & \argmin_\Phi E_{y \sim \pop,\;z \sim {\color{red} \hat{P}_\Phi(z|y)}}\;\; \ln \frac{{\color{red} \hat{P}_\Phi(z|y)}}{P_\Phi(z)}  - \ln P_\Phi(y|z)
+\end{eqnarray*}
+}
 
 \vfill
-Here we have $L_2$ distortion but no rate-distortion bi-criterion.
+$P_\Phi(z)$, $P_\Phi(y|z)$ and $\hat{P}_\Phi(z|y)$ are model components and we can switch the notation to $\hat{P}_\Phi(z)$ $\hat{P}_\Phi(y|z)$ and $P_\Phi(z|y)$
+with no change in the model.
+
+\vfill
+{\huge
+\begin{eqnarray*}
+\mbox{\color{red} RDA:}\;\;\;\Phi^*  & = & \argmin_\Phi\; E_{y \sim \pop,\;z \sim P_\Phi(z|y)} \;\;\ln \frac{P_\Phi(z|y)}{\color{red} \hat{P}_\Phi(z)}  - \ln {\color{red} \hat{P}_\Phi(y|z)}
+\end{eqnarray*}
+}
+
+\vfill
+In an RDA we take $P_\Phi(y,z)$ to be $\pop(y)P_\Phi(z|y)$ so that the rate term is an upper bound on $I_\Phi(y,z)$.
+
+\slide{VAE = RDA}
+
+to be continued ...
 
 \slide{END}
 
