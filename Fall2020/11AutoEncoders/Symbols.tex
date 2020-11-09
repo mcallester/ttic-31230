@@ -1,0 +1,78 @@
+\input ../../SlidePreamble
+\input ../../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Autumn 2020}
+  \vfill
+  \vfil
+  \centerline{The Case for Symbols}
+  \vfill
+  \vfill
+  
+\slide{Vector Quantization (Emergent Symbols)}
+
+Vector quantization represents a distribution (or density) on vectors with a discrete set of embedded symbols.
+
+\vfill
+Vector quantization optimizes a rate-distortion tradeoff for vector compression.
+
+\vfill
+The VQ-VAE uses vector quantization to construct a discrete representation of images and hence a measurable image compression rate-distortion trade-off.
+
+\slide{Symbols: A Better Learning Bias}
+
+Do the objects of reality fall into categories?
+
+\vfill
+If so, shouldn't a learning architecture be designed to categorize?
+
+\vfill
+Whole image symbols would yield emergent whole image classification.
+
+\slide{Symbols: Improved Interpretability}
+
+Vector quantization shifts interpretation from linear threshold units to the emergent symbols.
+
+\vfill
+This seems related to the use of t-SNE as a tool in interpretation.
+
+
+\slide{Symbols: Unifying Vision and Language}
+
+Modern language models use word vectors.
+
+\vfill
+Word vectors are embedded symbols.
+
+\vfill
+Vector quantization also results in models based on embedded symbols.
+
+\slide{Symbols: Addressing the ``Forgetting'' Problem}
+When we learn to ski we do not forget how to ride a bicycle.
+
+\vfill
+However, when a model is trained on a first task, retraining on a second tasks degrades performance on the first (the model ``forgets'').
+
+\vfill
+But embedded symbols can be task specific.
+
+\vfill
+The embedding of a task-specific symbol will not change when training on a different task.
+
+
+\slide{Symbols: Improved Transfer Learning.}
+
+Embedded symbols can be domain specific.
+
+\vfill
+Separating domain-general parameters from domain-specific parameters may improve transfer between domains.
+
+\slide{END}
+
+\end{document}
