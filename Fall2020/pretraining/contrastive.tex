@@ -25,16 +25,21 @@ $$\Phi^* = \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta (H_{\pop,\Phi}(z_x) 
 
 \slide{Maximizing Mutual Information}
 
-$$\Phi^* = \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta (H_{\pop,\Phi}(z_x) + H_{\pop,\Phi}(z_y))$$
+\begin{eqnarray*}
+\Phi^* & = & \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta ({\color{red} H}_{\pop,\Phi}(z_x) + {\color{red} H}_{\pop,\Phi}(z_y)) \\
+\\
+& \geq & \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta ({\color{red} \hat{H}}_{\pop,\Phi}(z_x) + {\color{red} \hat{H}}_{\pop,\Phi}(z_y))
+\end{eqnarray*}
 
 \vfill
-We would like to maximize a lower bound on this objective.
+\begin{eqnarray*}
+{\color{red} H}_{\pop,\Phi}(z_x) & = & E_{\pop,\Phi}\;-\ln P_{\color{red} \pop,\Phi}(z_x) \\
+\\
+{\color{red} \hat{H}}_{\pop,\Phi}(z_x) & = & E_{\pop,\Phi}\;-\ln P_{\color{red} \Phi}(z_x) \\
+\\
+{\color{red} H}_{\pop,\Phi}(z_x) & \leq & {\color{red} \hat{H}}_{\pop,\Phi}(z_x)
+\end{eqnarray*}
 
-\vfill
-We can replace the unconditional entropies with cross-entropy upper bounds.
-
-\vfill
-$$\Phi^* = \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta (\hat{H}_\Phi(z_x) + \hat{H}_\Phi(z_y))$$
 
 
 \slide{Maximizing Mutual Information}

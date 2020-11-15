@@ -34,9 +34,9 @@ We can then try to automatically find correspondences between parts of the sound
 \centerline{Harwath}
 
 
-\slide{Information Theoretic Co-Training}
+\slide{Mutual Information Co-Training}
 
-Here I will formulate information-theoretic co-training.
+Here I will formulate mutual information co-training.
 
 \vfill
 This gives an abstract objective for multi-modal learning of latent variables.
@@ -44,7 +44,7 @@ This gives an abstract objective for multi-modal learning of latent variables.
 \vfill
 This objective was not followed (explicitly) in Harwath et al.
 
-\slide{Information Theoretic Co-Training}
+\slide{Mutual Information Co-Training}
 
 Consider a population distribution on pairs $\tuple{x,y}$.
 
@@ -58,7 +58,7 @@ We are interested in extracting latent variables $z_x$ and $z_y$ from $x$ and $y
 For example $z_x$ might be a bag of words extracted from the image and $z_y$ a bag of words extracted from the sound wave.
 
 
-\slide{Information Theoretic Co-Training}
+\slide{Mutual Information Co-Training}
 
 For a population on $\tuple{x,y}$ we introduce two discrete latent variables $z_x$ and $z_y$ defined by
 models {\color{red} $P_\Phi(z_x|x)$} and {\color{red} $P_\Phi(z_y|y)$}.
@@ -72,7 +72,17 @@ Here we are asking to maximize the mutual information while (intuitively) limiti
 \vfill
 In the bag of words example we are asking to maximize the mutual information between the two probability distributions on bags of words while limiting the information in the bags.
 
-\slide{Information Theoretic Co-Training}
+\slide{Mutual Information Co-Training}
+
+$$\Phi^* = \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta (H_{\pop,\Phi}(z_x) + H_{\pop,\Phi}(z_y))$$
+
+\vfill
+Limiting the information in $z_x$ and $z_y$ prevents the trivial solution of $z_x = x$ and $z_y = y$.
+
+\vfill
+{\bf Here we only model distributions on $z_x$ and $z_y$.  Unlike GANs and VAEs, there is no attempt to model distributions on the observables $x$ and $y$.}
+
+\slide{Mutual Information Co-Training}
 
 \begin{eqnarray*}
 \Phi^* & = & \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta (H_{\pop,\Phi}(z_x) + H_{\pop,\Phi}(z_y)) \\
@@ -86,18 +96,7 @@ In the bag of words example we are asking to maximize the mutual information bet
  & = & \argmax_{\Phi} \; \left\{\begin{array}{l}(1-2\beta)(H_{\pop,\Phi}(z_x)+ H_{\pop,\Phi}(z_y)) \\ -\; H_{\pop,\Phi}(z_x|z_y) - H_{\pop,\Phi}(z_y|z_x) \end{array}\right.
 \end{eqnarray*}
 
-\slide{Information Theoretic Co-Training}
-
-\begin{eqnarray*}
-\Phi^* & = & \argmax_{\Phi} \; \left\{\begin{array}{l}(1-2\beta)(H_{\pop,\Phi}(z_x)+ H_{\pop,\Phi}(z_y)) \\
-\\
--\; H_{\pop,\Phi}(z_x|z_y) - H_{\pop,\Phi}(z_y|z_x) \end{array}\right.
-\end{eqnarray*}
-
-\vfill
-Here we only model distributions on $z$.  Unlike GANs and VAEs, there is no attempt to model distributions on the observables $x$ and $y$.
-
-\slide{Information Theoretic Co-Training}
+\slide{Mutual Information Co-Training}
 
 \begin{eqnarray*}
 \Phi^* & = & \argmax_{\Phi} \; \left\{\begin{array}{l}(1-2\beta)(H_{\pop,\Phi}(z_x)+ H_{\pop,\Phi}(z_y)) \\
@@ -111,7 +110,7 @@ The above entropies and conditional entropies are defined in terms of the popula
 \vfill
 Since the population distribution is unknown, we cannot optimize this directly.
 
-\slide{Information Theoretic Co-Training}
+\slide{Mutual Information Co-Training}
 
 {\huge
 \begin{eqnarray*}
@@ -139,7 +138,7 @@ Entropies are upper bounded by cross entropies.
 }
 
 
-\slide{Information Theoretic Co-Training}
+\slide{Mutual Information Co-Training}
 
 To do the optimization we can replace all entropies with cross-entropies.
 
@@ -156,7 +155,7 @@ To do the optimization we can replace all entropies with cross-entropies.
 While this is no longer a lower bound on the desired mutual information objective, it might still be useful in practice.
 
 \vfill
-This is called a difference of entropies objective.
+This is called a {\bf difference of entropies} objective.
 
 \slide{END}
 
