@@ -65,13 +65,41 @@ and then constructing the tuple $(i,z_1,\ldots,z_N,w)$ where $i$ is drawn unifor
 \\
 & = & \argmin_\Phi\;{\cal L}(\Phi) \\
 \\
-P_\Phi(i|x_1,\ldots x_n,w) & = & \softmax_i\;s_\Phi(x_i,w) \;\;\;\mbox{(required)} \\
+P_\Phi(i|z_1,\ldots z_n,w) & = & \softmax_i\;s_\Phi(z_i,w) \;\;\;\mbox{(required)} \\
 \\
 I(z,w) & \geq & \ln N - {\cal L}(\Phi)
 \end{eqnarray*}
 }
 
 See Chen et al., On Variational Bounds of Mutual Information, May 2019.
+
+\slide{Forcing $z_x$ and $z_y$ to be Useful}
+
+In the objective
+
+$$\Phi^* = \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta ({\color{red} H_{\pop,\Phi}(z_x)} + {\color{red} H_{\pop,\Phi}(z_y)})$$
+
+
+the limitation on the entropy of $z_x$ and $z_y$ block the trivial solution of $z_x = x$ and $z_y = y$.
+
+
+\vfill
+CPC applications have used an alternative.
+
+\slide{Forcing $z_x$ and $z_y$ to be Useful}
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \;E_{(i,z_x^1\ldots,z_x^n,z_y) \sim c_{z_x,z_y}}\;-\ln P_\Phi(i|z_x^1,\ldots,z_x^n,z_y)
+\end{eqnarray*}
+
+\begin{eqnarray*}
+P_\Phi(i|z_x^1,\ldots,z_x^n,z_y) & = & \softmax_i\;{\color{red} z_y^\top z_x^i}
+\end{eqnarray*}
+
+
+\vfill
+Requiring that the score be a simple inner product blocks $z_x = x$ and $z_y = y$ and forces
+$z_x$ and $z_y$ to carry the information in a linearly extractible way.
 
 \slide{Contrastive Predictive Coding for Speech}
 
