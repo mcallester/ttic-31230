@@ -1,0 +1,125 @@
+\input ../../SlidePreamble
+\input ../../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Autumn 2020}
+\vfill
+  \centerline{\bf Deep Reinforcement Learning}
+  \vfill
+  \centerline{\bf $Q$-Learning}
+  \vfill
+\vfill
+
+\slide{The $Q$ Function}
+
+For discounted reward:
+
+\begin{eqnarray*}
+  Q^\pi(s,a) & = & E_\pi\;\sum_t \;\gamma^tr_t \;\;|\; \pi, \; s_0 = s,\;a_0 = a \\
+  \\
+  Q^*(s,a) & = & \sup_\pi \;Q^\pi(s,a) \\
+  \\
+  \pi^*(a|s) & = & \argmax_a\;Q^*(s,a) \\
+  \\
+  Q^*(s,a) & = & R(s,a) + \gamma \expectsub{s' \sim P_T(\cdot|s,a)}{\max_{a'}\; Q^*(s',a')}
+\end{eqnarray*}
+
+\slide{$Q$ Function Iteration}
+
+It is possible to define $Q$-iteration by analogy with value iteration, but this is generally not discussed.
+
+\vfill
+Value iteration is typically done for finite state spaces.  Let $S$ be the number of states and $A$ be the number of actions.
+
+\vfill
+One update of a $Q$ table takes $O(S^2A^2)$ time while one update of value iteration is $O(S^2A)$.
+
+\slide{$Q$-Learning}
+
+When learning by updating the $Q$ function we typically assume a parameterized $Q$ function $Q_\Phi(s,a)$.
+\vfill
+{\bf Bellman Error:}
+{\huge $$\mathrm{Bell}_\Phi(s,a) \doteq \left(Q_\Phi(s,a) - \left(R(s,a) + \gamma\;\expectsub{s' \sim P_T(s'|s,a)}{\max_{a'}\;Q_\Phi(s',a')}\right)\right)^2$$}
+
+{\bf Theorem}: If $\mathrm{Bell}_\Phi(s,a) = 0$ for all $(s,a)$ then the induced policy is optimal.
+
+\vfill
+{\bf Algorithm}: Generate pairs $(s,a)$ from the policy $\argmax_a\;Q_\Phi(s_t,a)$ and repeat
+$$\Phi \;\minuseq\; \eta \nabla_\Phi \;\; \mathrm{Bell}_\Phi(s,a)$$
+
+
+\slide{Issues with $Q$-Learning}
+
+Problem 1: Nearby states in the same run are highly correlated.  This increases the variance of the cumulative gradient updates.
+
+\vfill
+Problem 2: SGD on Bellman error tends to be unstable. Failure of $Q_\Phi$ to model unused actions leads to policy change (exploration).
+But this causes $Q_\Phi$ to stop modeling the previous actions
+which causes the policy to change back ...
+
+\vfill
+To address these problems we can use a {\bf replay buffer}.
+
+\slide{Using a Replay Buffer}
+
+We use a replay buffer of tuples $(s_t,a_t,r_t,s_{t+1})$.
+
+\vfill
+Repeat:
+
+\vfill
+\begin{enumerate}
+
+\item Run the policy $\argmax_a Q_\Phi(s,a)$ to add tuples to the replay buffer.  Remove oldest tuples to maintain a maximum buffer size.
+
+\item {\color{red} $\Psi = \Phi$}
+  
+\item for $N$ times select a random element of the replay buffer and do
+$$\Phi \;\minuseq \; \eta \nabla_\Phi\;(Q_\Phi(s_t,a_t) - (r_t + \gamma \max_{a} Q_{\color{red} \Psi}(s_{t+1},a))^2$$
+\end{enumerate}
+
+\slide{Replay is Off-Policy}
+
+Note that the replay buffer is from a {\bf mixture of policies} and is {\bf off-policy} for $\argmax_a\;Q_\Phi(s,a)$.  This seems to be important for stability.
+
+\vfill
+This seems related to the issue of stochastic vs. deterministic policies.  More on this later.
+
+\slide{Multi-Step $Q$-learning}
+
+$$\Phi \;\minuseq \;\sum_t \nabla_\Phi \left(Q_\Phi(s_t,a_t) - \sum_{\delta = 0}^{D} \gamma^\delta r_{(t+\delta)}\right)^2$$
+
+\slidetwo{Human-level control through deep RL (DQN)}{Mnih et al., Nature, 2015. (Deep Mind)}
+\vfill
+We consider a CNN $Q_\Phi(s,a)$.
+
+\vfill
+\centerline{\includegraphics[width=6in]{\images/DQN}}
+
+\slide{Watch The Video}
+
+https://www.youtube.com/watch?v=V1eYniJ0Rnk
+
+\slide{Asynchronous $Q$-Learning (Simplified)}
+No replay buffer.
+Many asynchronous threads each repeating:
+\vfill
+
+  \begin{quotation}
+  \noindent $\tilde{\Phi} = \Phi$ (retrieve $\Phi$)\newline \newline
+  \noindent using policy $\argmax_a Q_{\tilde{\Phi}}(s,a)$ compute $$s_t,a_t,r_t,\ldots,s_{t+K},a_{t+K},r_{t+K}$$
+  \newline
+  \noindent {\huge $\Phi \;\minuseq\; \eta \sum_{i=t}^{t+K-D} \nabla_{\tilde{\Phi}}\;\left(Q_{\tilde{\Phi}}(s_i,a_i) - \sum_{\delta = 0}^D \gamma^\delta r_{i+\delta}\right)^2$} (update $\Phi$)
+  \end{quotation}
+
+\slide{END}
+
+}
+\end{document}
+
+
