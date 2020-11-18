@@ -9,7 +9,7 @@
   \bigskip
   \centerline{David McAllester, Autumn 2020}
   \vfill
-  \centerline{\bf Actor-Critic Algorithms and AC3}
+  \centerline{\bf Actor-Critic Algorithms and A3C}
   \vfill
   \vfill  
 
@@ -28,10 +28,11 @@ REINFORCE typically suffers from high variance of the gradient samples requiring
 \end{eqnarray*}
 
 \vfill
-We have to consider
+We will consider
 \begin{itemize}
-\item {\color{red} the variation over $r_{t'}$ given $s_t$, $a_t$}
-\item {\color{red} the variation over the choice of $s_t$, $a_t$}
+\item reducing variance due to $r_{t'}$ with Actor-Critic methods.
+\item reducing variance due to  $s_t$ with Advantage Actor-Critic methods.
+\item finally Asynchronous Advantge Actor-Critic Methods (A3C).
 \end{itemize}
 
 \slidetwo{Reducing the Variance over $r_{t'}$}{The Policy Gradient Theorem}

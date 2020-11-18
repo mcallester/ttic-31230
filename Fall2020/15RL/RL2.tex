@@ -9,13 +9,31 @@
   \bigskip
   \centerline{David McAllester, Autumn 2020}
 \vfill
-  \centerline{\bf Deep Reinforcement Learning}
+  \centerline{\bf Reinforcement Learning}
   \vfill
-  \centerline{\bf $Q$-Learning}
+  \centerline{\bf Q-Learning}
   \vfill
 \vfill
 
-\slide{The $Q$ Function}
+\slide{Review}
+
+\begin{itemize}
+\item {\bf A Policy} $\pi$ is a stochastic way of selection an action at a state.
+
+\vfill
+\item {\bf Imitation Learning} (cross entropy imitation of action given state).
+
+\vfill
+\item Imitation Learning is {\bf off-policy}.
+
+\vfill
+\item The {\bf value function} $V^\pi(s)$.
+
+\vfill
+\item {\bf Value Iteration} $V_{i+1}(s) = \argmax_a\;R(s,a) + \gamma E_{s'}\;\gamma V_i(s')$
+\end{itemize}
+
+\slide{The Q Function}
 
 For discounted reward:
 
@@ -94,17 +112,6 @@ This seems related to the issue of stochastic vs. deterministic policies.  More 
 
 $$\Phi \;\minuseq \;\sum_t \nabla_\Phi \left(Q_\Phi(s_t,a_t) - \sum_{\delta = 0}^{D} \gamma^\delta r_{(t+\delta)}\right)^2$$
 
-\slidetwo{Human-level control through deep RL (DQN)}{Mnih et al., Nature, 2015. (Deep Mind)}
-\vfill
-We consider a CNN $Q_\Phi(s,a)$.
-
-\vfill
-\centerline{\includegraphics[width=6in]{\images/DQN}}
-
-\slide{Watch The Video}
-
-https://www.youtube.com/watch?v=V1eYniJ0Rnk
-
 \slide{Asynchronous $Q$-Learning (Simplified)}
 No replay buffer.
 Many asynchronous threads each repeating:
@@ -116,6 +123,17 @@ Many asynchronous threads each repeating:
   \newline
   \noindent {\huge $\Phi \;\minuseq\; \eta \sum_{i=t}^{t+K-D} \nabla_{\tilde{\Phi}}\;\left(Q_{\tilde{\Phi}}(s_i,a_i) - \sum_{\delta = 0}^D \gamma^\delta r_{i+\delta}\right)^2$} (update $\Phi$)
   \end{quotation}
+
+\slidetwo{Human-level control through deep RL (DQN)}{Mnih et al., Nature, 2015. (Deep Mind)}
+\vfill
+We consider a CNN $Q_\Phi(s,a)$.
+
+\vfill
+\centerline{\includegraphics[width=6in]{\images/DQN}}
+
+\slide{Watch The Video}
+
+https://www.youtube.com/watch?v=V1eYniJ0Rnk
 
 \slide{END}
 

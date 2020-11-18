@@ -9,7 +9,7 @@
   \bigskip
   \centerline{David McAllester, Autumn 2020}
 \vfill
-  \centerline{\bf Deep Reinforcement Learning}
+  \centerline{\bf Reinforcement Learning}
   \vfill
   \centerline{\bf Value Iteration}
   \vfill
@@ -134,7 +134,7 @@ For discounted reward:
   \\
   \pi^*(a|s) & = & \argmax_a\;R(s,a) + \gamma \expectsub{s' \sim P_T(s'|s,a)}{V^*(s')} \\
   \\
-  V^*(s) & = & \max_a\; R(s,a) + \gamma \expectsub{s' \sim P_T(\cdot|s,a)}{V^*(s')}
+  V^*(s) & = & \max_a\; R(s,a) + \gamma \expectsub{s' \sim P_T(s'|s,a)}{V^*(s')}
 \end{eqnarray*}
 
 \slide{Value Iteration}
