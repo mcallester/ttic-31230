@@ -73,9 +73,9 @@ the posterior (encoder) $P_\Psi(z|y)$ collapses}.
 \begin{eqnarray*}
 P_\Psi(y,z) & = & \pop(y)P_\Psi(z|y)\;\;\;\;\mbox{The sampling distribution on $y$, $z$} \\
 \\
-\mbox{VAE:}\;\;\;\Psi^*,\Phi^*  & = & \argmin_{\Psi,\Phi}\; \parens{E_{y,z} \;\;{\ln \frac{P_\Psi(z|y)}{\hat{P}_\Phi(z)}}}  + \parens{E_{y,z}\;-\ln {\hat{P}_\Phi(y|z)}} \\
+\mbox{VAE:}\;\;\;\Psi^*,\Phi^*  & = & \argmin_{\Psi,\Phi}\; \hat{I}_{\Psi,\Phi}(y,z) \;+\; \hat{H}_{\Psi,\Phi}(y|z) \\
 \\
-& = & \argmin_{\Psi,\Phi}\; {\color{red} \beta}\; \hat{I}_{\Psi,\Phi}(y,z) \;+\; \hat{H}_{\Psi,\Phi}(y|z) \\
+\mbox{$\beta$-VAE:}\;\;\; \Psi^*,\Phi^* & = & \argmin_{\Psi,\Phi}\; {\color{red} \beta}\; \hat{I}_{\Psi,\Phi}(y,z) \;+\; \hat{H}_{\Psi,\Phi}(y|z) \\
 \\
 \mbox{RDA:}\;\;\;\Psi^*,\Phi^*  & = &  \argmin_{\Psi,\Phi}\;  \hat{I}_{\Psi,\Phi}(y,z) \;+\; {\color{red} \lambda}\;\mathrm{Dist}_\Phi(y|z)
 \end{eqnarray*}
