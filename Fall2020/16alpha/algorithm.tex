@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -7,52 +7,54 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
 
   \vfill
-  \centerline{\bf The AlphaZero Training Algorithm}
+  \centerline{\bf AlphaZero}
   \vfill
   \vfill
 
-\slide{The AlphaZero Algorithm}
-
-The AlphaZero algorithm is an RL learning method for the case where state transitions are determined by actions.
-
-\vfill
-In principle, the AlphaZero algorithm could be applied to the problem of direct optimization of the BLEU score in machine translation.
-
-\slide{Top Level Algorithm}
-
-To play a game (against yourself) select a move at each position as the game progresses.
-
-\vfill
-To select a move in a game evaluate the options by growing a search tree data structure.
-
-\vfill
-To grow a tree data structure we start with a tree consisting of just the current position.
-We then perform a series of ``simulations''. Each simulation adds one new leaf.
-
-\vfill
-To perform a simulation recursively descend into the tree data structure by selecting a move at each node until a new node (leaf) is generated.
 
 \slide{The Value and Policy Networks}
 
-Simulations select moves based on value and policy networks.
+The major innovation of AlphaGo and AlphaZero is to use CNNs as evaluation functions.
 
-\centerline{\includegraphics[height=3.0in]{../images/alphagoArchitecture2}}
+\vfill
+We have a policy network computing $\pi_\Phi(a|s)$ and a value network computing $V_\Phi(s)$.
+
+\slide{The Value and Policy Networks}
+
+\centerline{$\pi_\Phi(a|s)$ \hspace{.5in} $V_\Phi(s)$}
+\centerline{\includegraphics[height=3.0in]{\images/alphagoArchitecture2}}
 
 \vfill
 In AlphaZero the networks are either 20 block or 40 block ResNets and either separate networks or one dual-headed network.
 
-\slide{Simulations}
+\slide{Top Level Algorithm}
 
-Each simulation starts from the root node (the current positiion) and selects a move at each node until a new leaf is generated.
+To play a game (against yourself) select a move at each position.
 
 \vfill
+Each move selection involves growing a tree of possible future positions.
+
+\vfill
+The tree is ``sparse'' in the sense that the children of a node are a (possibly empty) subset of the possible next positions.
+
+\vfill
+The tree is grown by a series of ``simulations''.
+
+\vfill
+Each simulation starts at the root and recursively selects a move at each node until the selected move adds a new node to the tree.
+
+\slide{Simulations}
+
 During a simulation moves are selected by maximizing an upper value as in the UCT algorithm.
 
 \vfill
-Each simulation returns the value $V_\Phi(s)$ (from the value network) for the newly generated state (position) $s$.
+Each simulation adds one new node to the tree.
+
+\vfill
+Each simulation returns the value $V_\Phi(s)$ (from the value network) for the newly generated node.
 
 \slide{The Data Structures}
 
@@ -62,9 +64,9 @@ by running the value and policy networks on state $s$.
 
 \begin{itemize}
 \item $V_\Phi(s)$ --- the value network value for the position $s$.
-\item The policy probabilities $\pi_\Phi(s,a)$ for each legal action $a$.
+\item The policy probabilities $\pi_\Phi(a|s)$ for each legal action $a$.
 \item The number $N(s,a)$ of simulations that have tried move $a$ from $s$. This is initially zero.
-\item For $N(s,a) > 0$, the average $\hat{\mu}(s,a)$ of the values of the simulations that have
+\item The average $\hat{\mu}(s,a)$ of $V_\Phi(s)$ and the values of the simulations that have
   tried move $a$ from position $s$.
 \end{itemize}
 
@@ -73,16 +75,13 @@ by running the value and policy networks on state $s$.
 In descending into the tree, a simulation selects the move $\argmax_a U(s,a)$ where we have
 
 \vfill
-$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \;\pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\  \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.$$
-
-\slide{Upper Confidence Bounds}
-$$U(s,a) =  \left\{\begin{array}{ll}\lambda_u \; \pi_\Phi(s,a) &\mbox{if $N(s,a) = 0$} \\ \\ \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(s,a)/N(s,a) & \mbox{otherwise} \end{array}\right.$$
+$$U(s,a) =   \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(a|s)/(1+N(s,a))$$
 
 \vfill
-The hyperparameter $\lambda_u$ should be selected so that $U(s,a)$ will typically {\bf decrease} as $N(s,a)$ increases.
+We have that $U(s,a)$ will typically decrease as $N(s,a)$ increases.
 
 \vfill
-In this regime for $\lambda_u$, we can think of $U(s,a)$ as an upper confidence bound in the UCT algorithm.
+We can think of $U(s,a)$ as an upper confidence bound in the UCT algorithm.
 
 \slide{Root Action Selection}
 
@@ -121,6 +120,13 @@ $$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\
 
 \vfill
 The replay buffer is periodically updated with new self-play games.
+
+\slide{The AlphaZero Algorithm}
+
+The AlphaZero algorithm is a general RL learning method.  It can be applied to any problem of sequential decision making.
+
+\vfill
+In principle, the AlphaZero algorithm could be applied to the problem of direct optimization of the BLEU score in machine translation.
 
 \slide{END}
 
