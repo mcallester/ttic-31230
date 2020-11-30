@@ -1,5 +1,6 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
+\def\entity#1{\vfill {[#1] =~}}
 
 \begin{document}
 
@@ -7,24 +8,53 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
 
 \vfill
-\centerline{\bf Representing Choices and Knowledge}
-\vfill
-\centerline{\bf with Natural Language}
+\centerline{\bf AGI: Natural Language}
   \vfill
   \vfill
 
-\slide{Natural Langauge as a General Learning Architecture}
+\slide{Natural Language for Knowledge Representation}
 
-Is natural langauage a reflection of a general learning or knowledge representation architecture?
+{\huge
+President Donald Trump on Tuesday insisted he was serious when he % 11
+revealed that he had directed his administration to slow coronavirus % 10
+testing in the United States, shattering the defenses of senior White % 11
+House aides who argued Trump’s remarks were made in jest. %10
+
+\entity{the order} [Trump] directed his administration to reduce [{\large COVID} testing].
+
+\entity{the revelation} [Trump] revealed [the order].
+
+\entity{the claim} [the order] was in jest.
+
+\entity{the assertion} [the aides] made [the claim].
+}
+
+\slide{Natural Language for Knowledge Representation}
+
+{\huge
+President Donald Trump on Tuesday insisted he was serious when he % 11
+revealed that he had directed his administration to slow coronavirus % 10
+testing in the United States, shattering the defenses of senior White % 11
+House aides who argued Trump’s remarks were made in jest. %10
+
+\entity{the aides} Senior White House aides
+
+\entity{the defense} [the assertion] defended [Trump].
+
+\entity{the insistence} on Tuesday [Trump] insisted [the order] was serious.
+
+\entity{the shattering} [the insistence] shattered [the defense].
+}
+
+\slide{Natural Language for Knowledge Representation}
+
+Is natural language a reflection of a general learning or knowledge representation architecture?
 
 \vfill
-Will some NLP-motivated memory-based Transformer-like architecture prove to be general --- domain independent.
-
-\vfill
-Is there ultimately an important relationship between language and logic?
+Will some NLP-motivated memory-based Transformer-like architecture ultimately underly general intelligence?
 
 \slide{Natural Language Semantics}
 
