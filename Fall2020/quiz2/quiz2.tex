@@ -1,0 +1,116 @@
+\documentclass{article}
+
+%\input ../../preamble
+
+\usepackage{amsmath,amssymb,amsthm,graphicx,color}
+\newcommand{\pop}{\mathrm{Pop}}
+\newcommand{\train}{\mathrm{Train}}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand{\tuple}[1]{{\mbox{$\langle#1\rangle$}}}
+
+\parindent = 0em
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution:} #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+\centerline{\bf Quiz 2}
+
+\bigskip
+{\bf Problem 1: Running Averages.}  Consider a sequence of vectors $x_0$, $x_1$, $\ldots$ and two running averages $y_t$ and $z_t$ defined by
+as follows for $0 < \beta < 1$ and $\gamma > 0$.
+\begin{eqnarray*}
+  y_0 & = & 0 \\
+  y_{t+1} & = & \beta y_t + (1-\beta) x_t
+  \\
+  \\
+  z_0 & = & 0 \\
+  z_{t+1} & = & \beta z_t + \gamma x_t
+\end{eqnarray*}
+
+(a) Suppose that the values $x_t$ are drawn IID from a distribution with mean vector $\overline{x} = E\;x_t$.  Give values for
+$$\overline{y} = \lim_{t \rightarrow \infty} E \;y_t$$
+and
+$$\overline{z} = \lim_{t \rightarrow \infty} E \;z_t$$
+as functions of $\beta$, $\gamma$ and $\overline{x}$
+
+Hint: Solve for $E\;y_{t+1}$ as a function of $E\;y_t$ and assume that a limiting expectation exists.
+
+\solution{
+  \begin{eqnarray*}
+   E\; y_{t+1} & = & \beta \;E\;y_t + (1-\beta) \; E\;x_t \\
+   \overline{y} & = & \beta \;\overline{y} + (1-\beta)\; \overline{x} \\
+   (1-\beta)\;\overline{y} & = & (1-\beta)\;\overline{x} \\
+   \overline{y} & = & \overline{x}
+  \end{eqnarray*}
+
+  \begin{eqnarray*}
+   E\; z_{t+1} & = & \beta \;E\;z_t + \gamma\; E\;x_t \\
+   \overline{z} & = & \beta \;\overline{z} + \gamma\; \overline{x} \\
+   (1-\beta)\;\overline{z} & = & \gamma\;\overline{x} \\
+   \overline{z} & = & \frac{\gamma}{1-\beta}\;\overline{x}
+  \end{eqnarray*}
+
+}
+
+
+(b) Express $z_t$ as a function of $y_t$, $\beta$ and $\gamma$.
+
+\solution{
+  \begin{eqnarray*}
+    z_{t+1} & = & \beta \;z_t + \gamma\;x_t \\
+    & = & \sum_{t'= 0}^t \gamma \beta^{t-t'} x_{t'} \\
+    & = & \frac{\gamma}{1-\beta}\;\sum_{t'=0}^t (1-\beta)\beta^{t-t'} x_t \\
+    & = & \frac{\gamma}{1-\beta}\;y_{t+1}
+  \end{eqnarray*}
+}
+
+
+\bigskip
+
+{\bf Problem 2. Adaptive SGD.}  This problem considers the question of whether the convergence theorem hold for adaptive methods ---
+in the limit as the learning rate goes to zero do adaptive methods converge to a local minimum of the loss.
+
+Consider a generalization of RMSProp where we allow an arbitrary adaptation with with different learning rates for
+ifferent parameter values.  More specifically consider the SGD update equation
+
+$$(1)\;\;\;\;\Phi_{t+1} = \Phi_t - \eta\left(A(\Phi_t,x_t,y_t)\odot \nabla_\Phi {\cal L}(\Phi_t,x_t,y_t)\right)$$
+
+where $\tuple{x_t,y_t}$ is the $t$th training pair, $A(\Phi_t,x_t,y_t)$ is an adaptation vector, and $\odot$ is the Haddamard product $(x \odot y)[i] = x[i]\;y[i]$.
+
+Consider the special case given by
+\begin{eqnarray*}
+  A(\Phi,x,y)[i] & = & \frac{1}{\sqrt{s(\Phi,x,y)} + \epsilon} \\
+  \\
+  s(\Phi,x,y) & = & \frac{1}{d} ||\nabla_\Phi\;{\cal L}(\Phi,x,y)||^2 \\
+\end{eqnarray*}
+where $d$ is the dimension of $\Phi$.
+\medskip
+
+(a) For the given interpretation of $A(\Phi,x,y)$, let $\Phi^*$ be a parameter setting that is a stationary point of the update equation (1)
+in the sense that expected update over a random draw from the population is zero.  Write this stationary condition
+on $\Phi^*$ explicitly as an expectation equaling zero under the given interpretation of $A(\Phi,x,y)$.
+
+\solution{
+$$E_{\tuple{x,y} \sim \pop}\;\frac{1}{\sqrt{s(\Phi^*,x,y)+ \epsilon}}\;\nabla_\Phi\;{\cal L}(\Phi,x,y) = 0$$
+}
+
+\medskip
+(b) Is $\Phi^*$ as defined in part (b) a stationary point of the original loss --- a point where the expected gradient of ${\cal L}(\Phi^*,x,y)$ equal to zero?
+
+\solution{
+  No, the average a weighted sum is different from the average of an unweighted sum
+  and hence the fact that the weighted average is zero does not imply that the average is zero.
+  }
+  
+\medskip
+(c) Do these observations have implications for the adaptive methods described in this class.  Explain your answer.
+
+\solution{Yes, the example considered here is just a special case of RMSProp or Adam which are in fact not guaranteed to converge to a stationary point (or local optimum) of the loss function.}
+    
+
+\end{document}

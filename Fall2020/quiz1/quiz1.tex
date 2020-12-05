@@ -1,0 +1,88 @@
+\documentclass{article}
+
+%\input ../../preamble
+
+\usepackage{amsmath,amssymb,amsthm,graphicx,color}
+\newcommand{\pop}{\mathrm{Pop}}
+\newcommand{\train}{\mathrm{Train}}
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\newcommand{\tuple}[1]{{\mbox{$\langle#1\rangle$}}}
+
+\parindent = 0em
+
+\newcommand{\solution}[1]{}
+%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+\centerline{\bf Quiz 1}
+
+\vfill
+\vfill
+    {\bf Problem 1: Optimizing Cross Entropy.} For this problem we consider a population distribution $\pop$ on the non-negative natural numbers $k \geq 0$.
+    We will work with the population mean $\mu = E_{k \sim \pop} \;k$.
+We consider model distributions defined by the single parameter $\lambda$ with $0 \leq \lambda < 1$ and defined by the distribution
+\begin{eqnarray*}
+  Q_\lambda(k) & = & (1-\lambda)\lambda^k
+\end{eqnarray*}
+
+\medskip
+(a) Given an expression for the cross-entropy $H(\pop,Q_\lambda)$ in terms of $\mu$ and $\lambda$.
+
+\medskip
+(b) Solve for the optimal value $\lambda^*$ minimizing $H(\pop,Q_\lambda)$ as a function of $\mu$.
+
+\medskip
+(c) Solve for mean value of the distribution $Q_{\lambda^*}$ in terms of $\mu$.
+
+\bigskip
+{\bf Problem 2. Maximum Mutual Information Training.} Consider a population distribution $\pop$ on pairs $\tuple{x,y}$ and a model distribution $Q_\Phi(\hat{y}|x)$.
+Consider a distribution $P_\Phi$ on triples ${x,y,\hat{y}}$ where $\tuple{x,y}$ is drawn from $\pop$ and $\hat{y}$ is drawn from $Q_\Phi(\hat{y}|x)$.
+Under the distribution $P_\Phi$ the mutual information between $y$ and $\hat{y}$ is defined by
+\begin{eqnarray*}
+  I_\Phi(y,\hat{y})& = & KL(P_\Phi(y,\hat{y}),\;\;\pop(y)P_\Phi(\hat{y})) \\
+  \\
+  P_\Phi(y,\hat{y}) & = & \sum_x\;\pop(x)\;\pop(y|x)\;Q_\Phi(\hat{y}|x) \\
+  & = & E_{x \sim \pop}\;\pop(y|x)Q_\Phi(\hat{y}|x) \\
+  \pop(y) & = & E_{x \sim \pop}\;\pop(y|x) \\
+  P_\Phi(\hat{y}) & = & E_{x \sim \pop}\;Q_\Phi(y|x)
+\end{eqnarray*}
+
+Here we are interested in comparing the fundamental cross entropy objective to the objective of maximizing the mutual information $P_\Phi(y,\hat{y})$.
+\begin{eqnarray*}
+  \Phi^*_1 & = & \argmin_\Phi E_{\tuple{x,y}\sim \pop}\;-\ln Q_\Phi(y|x)\; \\
+  \\
+  \Phi^*_2 & = & \argmax_\Phi I_\Phi(y,\hat{y})
+\end{eqnarray*}
+
+\medskip
+
+(a) Suppose that there exists a perfect predictor -- a parameter setting $\Phi^*$ such that $P_\Phi(\hat{y}|x) = 1$ for $\hat{y} = y$ and zero otherwise.
+Show using an explicit calculation and standard information theoretic inequalities that a perfect predictor
+is an optimum of both the cross-entropy objective and the maximum mutual information objective.  
+
+(b) Consider binary classification where we have $y,\hat{y} \in \{-1,1\}$.  Show using an explicit calculation and standard information-theoretic inequalities
+that a perfect anti-predictor with $P_\Phi(hay{y}|x) = 1$ for $\hat{y}= -y$
+is also optimal for the maximum mutual information objective.
+
+\bigskip
+
+{\bf Problem 3.  Backpropagation for Layer Normalization.} Layer normalization is an alternative to batch normalization and is used in the transformer to handle ``covariate shift''. In the transformer each a layer has positions in the text that I will index by $t$ and neurons at each position that I will index by $i$.
+We can think of this as a sequence of vectors $L[t,I]$.
+Layer normalization is defined by the following equations where the vectors $A_{\ell+1}[I]$ and $B_{\ell+1}[I]$ are trained parameters and $\sigma$ is an
+arbitrary activation function, typically ReLU.
+\begin{eqnarray*}
+  \mu_\ell & = & \frac{1}{TI} \sum_{t,i} \;L_\ell[t,i] \\
+  \\
+  \sigma_{\ell} & = & \sqrt{\frac{1}{TI} \sum_{t,i}\;(L_\ell[t,i] - \mu_\ell)^2} \\
+  \\
+  \tilde{L}_{\ell+1}[t,i] & = & \sigma\left(\frac{A_{\ell+1}[i]}{\sigma_\ell}(L_\ell[t,i] -\mu_\ell) + B_{\ell+1}[i]\right)
+\end{eqnarray*}
+
+Write backpropagation equations for these three assignments.
+
+
+\end{document}
