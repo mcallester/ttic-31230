@@ -48,7 +48,7 @@ H(y) = H(z) - H(z|y) + H(y|z)
 (a) Rewrite (\ref{eq:info}) in terms of expectations over $y \sim \pop$ and $z \sim P_\Psi(z|y)$ of quantities defined on $\pop(y)$, $P_{\pop,\Psi}(z)$, $P_{\pop,\Psi}(z|y)$ and $P_{\pop,\Psi}(y|z)$.
 
 \solution{
-  $$E_{y \sim \pop} \; -\ln\;\pop(y) = E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\;\; - \ln P_{\Psi}(z) - \ln P_{\pop,\Psi}(z|y) - \ln P_{\pop,\Psi}(y|z)$$
+  $$E_{y \sim \pop} \; -\ln\;\pop(y) = E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\;\; - \ln P_{\Psi}(z) + \ln P_{\pop,\Psi}(z|y) - \ln P_{\pop,\Psi}(y|z)$$
 }
 
 \medskip
@@ -65,7 +65,7 @@ Using the fact that cross-entropies upper bound entropies give an upper bound on
 Express your upper bound as an expectation over sampling.
 
 \solution{
-  $$H(y) \leq  E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\;\; - \ln P_\Phi(z) - \ln P_{\Psi}(z|y) - \ln P_{\Theta}(y|z)$$}
+  $$H(y) \leq  E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\;\; - \ln P_\Phi(z)\; \;+ \ln P_{\Psi}(z|y)\; - \ln P_{\Theta}(y|z)$$}
 
 
 \medskip
