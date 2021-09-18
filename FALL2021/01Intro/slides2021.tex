@@ -15,24 +15,29 @@
 
 \slide{Wav2vec 2.0, June 2020, Facebook}
 
-Wav2vec pre-trains on audio-only data to get a (discrete) represewntation of speech sounds.
+\vfill
+Trained on 53k hours of unlabeled audio (no text) they convert speech to a sequence of discrete quantized vectors they call ``pseudo-text units''.
 
 \vfill
-Trained on 53k hours of unlabeled audio, and one hour of transcribed audio, Wav2vec outperforms the previous state of the art for 100 hours of transcribed text.
+By training on only one hour of human-transcribed audio, and using the Wav2vec transcription into pseudo-text, the outperform the previous state of the
+in word error rate for 100 hours of human-transcribed text.
 
 
 \slide{GLSM, February 2021, Facebook}
 
-This is a speech analogue of a VQ-VAE.
+Generative Spoken Language Model (GLSM)
+
+
 
 \vfill
-Training on audio-only (no text) they convert speech to a sequence of discrete quantized vectors they call pseudo-text units.
+They then train a generative model of the sequences of pseudo-text units learned from unlabeled audio.
+
 
 \vfill
-They then train a generative model of the sequences of pseudo-text units.
+This model can continue speech from a speech prompt in much the same way that GPT-3 continues text from a text prompt.
 
 \vfill
-Semantic and grammatical structure in a ``language model'' is recovered
+Semantic and grammatical structure in a ``unit language model'' is recovered
 from speech alone.
 
 
@@ -83,13 +88,24 @@ This is a language model trained on code, including comments, from public reposi
 Starting from an English prompt Codex continues with code --- a form of automatic programming.
 
 \vfill
-There is a published version (58 authors) and a production version that powers GitHub Copilot.
+There is a published version (58 authors) and a production version that powers {\bf GitHub Copilot}.
 
 \vfill
-Demos indicate a major advance in programmer productivity.
+Copilot may supplant Stack Overflow for finding out how to do x in language y.
 
 \vfill
-This is perhaps a first example of AI being used to bootstrap AI programming.
+It also seems possible that some version Codex will replace, or at least augment, speech assistants such as Siri.
+
+\slideplain{Application Advancements vs. Architecture Advancements}
+
+Advancements in the general principles of learning are having applications over very diverse applications.
+
+\vfill
+When considering Moore's law of AI it seems worth distinguishing architectural advancements (new general learning methods)
+from new applications of established architectures.
+
+\vfill
+This course will focus on general, architectural, ideas and how they have advanced in recent years.
 
 \slideplain{END}
 
