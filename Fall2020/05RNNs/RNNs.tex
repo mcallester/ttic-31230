@@ -26,7 +26,7 @@ The matrix $e$ can be viewed as a dictionary assigning each word $w$ the vector 
 \vfill
 A typical neural language model has the form
 
-$$P_\Phi(w_t\;|\;w_1,\cdots,w_{t-1}) = \softmax_{w_t} e[w_t,I]h[t-1,I]$$
+$$P_\Phi(w_t\;|\;w_0,\cdots,w_{t-1}) = \softmax_{w_t} e[w_t,I]h[t-1,I]$$
 
 \slide{Vanilla RNNs}
 
