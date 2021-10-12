@@ -276,10 +276,10 @@ L_{\color{red} \ell+3} & = & \tilde{L}_{\color{red} \ell} + L_{\color{red} \ell+
 We reduce the number of neurons at each position in an intermediate ``bottleneck'' layer.
 
 \begin{eqnarray*}
-L_{\color{red} \ell+1} & = & \mathrm{Conv}(W_{\color{red} \ell+1},B_{\color{red} \ell+1},L_{\color{red} \ell})) \\
+L_{\color{red} \ell+1} & = & \mathrm{Conv}(W_{\color{red} \ell+1},B_{\color{red} \ell+1},L_{\color{red} \ell}) \\
 L_{\color{red} \ell+2} & = & \mathrm{Conv}(W_{\color{red} \ell+2},B_{\color{red} \ell+2},L_{\color{red} \ell+1}) \\
 L_{\color{red} \ell+3} & = & \mathrm{Conv}(W_{\color{red} \ell+3},B_{\color{red} \ell+3},L_{\color{red} \ell+2}) \\
-L_{\color{red} \ell+3} & = & \tilde{L}_{\color{red} \ell} + L_{\color{red} \ell+3}
+L_{\color{red} \ell+3} & = & L_{\color{red} \ell} + L_{\color{red} \ell+3}
 \end{eqnarray*}
 
 \vfill
