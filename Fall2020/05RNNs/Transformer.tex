@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input /Users/davidmcallester/Icloude/tex/SlidePreamble
+\input /Users/davidmcallester/Icloude/tex/preamble
 
 
 \begin{document}
@@ -38,7 +38,7 @@ When processing sentences, $T$ is the sentence length.
 
 \slide{Parallel Layer Computation}
 
-However, in the Transformer we can compute the layer $L_{\ell+1}[T,J]$ from $L_\ell[T,J]$ in $O(\ln(TI))$ time (in parallel).
+However, in the Transformer we can compute the layer $L_{\ell+1}[T,J]$ from $L_\ell[T,J]$ in $O(\ln T)$ time (in parallel).
 
 \vfill
 The log comes from the time to compute a large sum in parallel using a tree of additions.
