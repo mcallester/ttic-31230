@@ -25,6 +25,7 @@ The Transformer has now essentially replaced RNNs in natural language applicatio
 The recent progress on the natural language understanding evaluation (GLUE) is based on general language modeling using Transformers.
 
 \slide{Vector Sequences}
+\centerline{\includegraphics[height=3in]{\images/transformer}}
 
 \vfill
 Each layer in the Transformer has shape $L[T,J]$ where $t$ ranges over the position in the input sequence and $j$ ranges over neurons at that position
@@ -33,12 +34,9 @@ Each layer in the Transformer has shape $L[T,J]$ where $t$ ranges over the posit
 \vfill
 This is the same shape as layers in an RNN --- a sequence of vectors $L[t,J]$.
 
-\vfill
-When processing sentences, $T$ is the sentence length.
-
 \slide{Parallel Layer Computation}
 
-However, in the Transformer we can compute the layer $L_{\ell+1}[T,J]$ from $L_\ell[T,J]$ in $O(\ln T)$ time (in parallel).
+However, in the transformer we can compute the layer $L_{\ell+1}[T,J]$ from $L_\ell[T,J]$ in $O(\ln T)$ time (in parallel).
 
 \vfill
 The log comes from the time to compute a large sum in parallel using a tree of additions.
@@ -47,11 +45,11 @@ The log comes from the time to compute a large sum in parallel using a tree of a
 This is an important difference from RNNs which compute sequentially over time.
 
 \vfill
-In this respect the Transformer is more similar to a CNN than to an RNN.
+In this respect the transformer is more similar to a CNN than to an RNN.
 
 \slide{Self-Attention}
 
-The fundamental innovation of the Transformer is the self-attention layer.
+The fundamental innovation of the transformer is the self-attention layer.
 
 \vfill
 For each position $t$ in the sequence we compute an attention over the other positions in the sequence.
@@ -68,7 +66,7 @@ There is an intuitive analogy between this soft graph and a dependency parse tre
 In a dependency parse edges are typically labeled with grammatical roles such as ``subject-of'' or ``object-of''.
 
 \vfill
-The self attention layers of the Transformer we have ``heads'' which can be viewed as labels for dependency edges.
+The self attention layers of the transformer we have ``heads'' which can be viewed as labels for dependency edges.
 
 \vfill
 Self attention constructs a tensor $\alpha[k,t_1,t_2]$ --- the strength of the attention weight (edge weight)
@@ -103,7 +101,7 @@ Here semicolon denotes vector concatenation.
 
 \slide{The Transformer Layer}
 
-Each ``Transformer layer'' consists of six ``sublayers'' the first of which is the self-attention.
+Each ``transformer layer'' consists of six ``sublayers'' the first of which is the self-attention layer.
 
 
 \centerline{\includegraphics[height=3.5in]{\images/transformer}}
