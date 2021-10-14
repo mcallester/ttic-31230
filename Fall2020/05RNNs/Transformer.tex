@@ -93,9 +93,9 @@ For each head $k$ and position $t$ we compute a key vector and a query vector wi
 \\
 h^1_{\ell+1}[k,t,i] & = & \alpha[k,t,T]\mathrm{Value}[k,T,i] \\
 \\
-h^2_{\ell+1}[t,C] & = & \tilde{h}_{\ell+1}[0,t,I];\cdots;\tilde{h}_{\ell+1}[K-1,t,I] \\
+h^2_{\ell+1}[t,C] & = & h^1_{\ell+1}[0,t,I];\cdots;h^1_{\ell+1}[K-1,t,I] \\
 \\
-L_{\ell+1}[t,j] & = & W^0[j,C]h^2[t,C]
+L_{\ell+1}[t,j] & = & W^0_{\ell+1}[j,C]h^2[t,C]
 \end{eqnarray*}
 
 \vfill
@@ -103,27 +103,16 @@ Here semicolon denotes vector concatenation.
 
 \slide{The Transformer Layer}
 
-Each ``Transformer layer'' consists of six ``sublayers''.
+Each ``Transformer layer'' consists of six ``sublayers'' the first of which is the self-attention.
 
-$$\begin{array}{rrcl}
-\mbox{Self Attention:} &L_{\ell+1}[T,J] & = & \mathrm{Self}(L_\ell[T,J]) \\
-\mbox{Residual:} & L_{\ell+2}[T,J] & = & L_{\ell+1}[T,J] + L_\ell[T,J] \\
-\mbox{Normalization:} & L_{\ell+3}[T,J] & = & \mathrm{Norm}(L_{\ell+2}[T,J]) \\
-\mbox{Feed Forward:} & L_{\ell+4}[T,J] & = &\mathrm{FF}(L_{\ell+3}[T,J]) \\
-\mbox{Residual:} & L_{\ell+5}[T,J] & = & L_{\ell+4}[T,J] + L_{\ell+3}[T,J] \\
-\mbox{Normaliztion:} & L_{\ell+6}[T,J] & = & \mathrm{Norm}(L_{\ell+5}[T,J])
-\end{array}$$
 
-\vfill
-The normalization layers use ``layer normalization'' --- an alternative to batch normalization described in the next unit.
-
-\slide{Transformer Layers}
-
-\centerline{\includegraphics[height=4in]{\images/transformer}}
+\centerline{\includegraphics[height=3.5in]{\images/transformer}}
 
 {\Large
 \centerline{Jay Alammar's blog}
 }
+
+The other layers are discussed in the next unit.
 
 \slide{END}
 

@@ -1,6 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
-
+\input /Users/davidmcallester/Icloude/tex/SlidePreamble
+\input /Users/davidmcallester/Icloude/tex/preamble
 
 \begin{document}
 
@@ -13,22 +12,9 @@
   \vfill
   \vfill
 
-\slide{The Transformer Layer}
-
-Each ``Transformer layer'' consists of six ``sublayers''.
-
-$$\begin{array}{rrcl}
-\mbox{Self Attention:} &L_{\ell+1}[T,J] & = & \mathrm{Self}(L_\ell[T,J]) \\
-\mbox{Residual:} & L_{\ell+2}[T,J] & = & L_{\ell+1}[T,J] + L_\ell[T,J] \\
-\mbox{Normalization:} & L_{\ell+3}[T,J] & = & \mathrm{Norm}(L_{\ell+2}[T,J]) \\
-\mbox{Feed Forward:} & L_{\ell+4}[T,J] & = &\mathrm{FF}(L_{\ell+3}[T,J]) \\
-\mbox{Residual:} & L_{\ell+5}[T,J] & = & L_{\ell+4}[T,J] + L_{\ell+3}[T,J] \\
-\mbox{Normaliztion:} & L_{\ell+6}[T,J] & = & \mathrm{Norm}(L_{\ell+5}[T,J])
-\end{array}$$
-
 \slide{Transformer Layers}
 
-\centerline{\includegraphics[height=4in]{\images/transformer}}
+\centerline{\includegraphics[height=5in]{\images/transformer}}
 
 {\Large
 \centerline{Jay Alammar's blog}
@@ -82,7 +68,7 @@ These days both word embedding and position embeddings are trained as model para
 
 \slide{Language Modeling}
 
-To do language modeling we fix $\alpha[k,t_1,t_2] = 0$ for $t_2 > t_1$.
+To do language modeling we do {\bf causal masking} --- we fix $\alpha[k,t_1,t_2] = 0$ for $t_2 > t_1$.
 
 \vfill
 We can then predict the word $w_t$ as without looking into the future with
@@ -98,7 +84,11 @@ where $L_\mathrm{top}$ is the top level hidden vector of the Transformer.
 Translation is just a conditional language model.
 
 \vfill
-We take the input English sentence followed by a special token and then generate the output from the Transformer  language model.
+This can be done with separate models for the encoder and decoder (an encoder model and a decoder model)
+
+\vfill
+Or it can be done with a {\bf decoder-only} model in which We take the input English sentence followed by a special token and then generate the output from the Transformer  language model.
+In this case causal masking is done on the input sentence as well as the generation of the translation.
 
 \slide{Continuing from a Prompt}
 
@@ -128,9 +118,7 @@ While examining these bizarre creatures the scientists discovered that the creat
 Dr. Pérez believes that the unicorns may have originated in Argentina ... some believe that perhaps the creatures were created when a human and a unicorn met each other in a time before human civilization. ... However, Pérez also pointed out that it is likely that the only way of knowing for sure if unicorns are indeed the descendants of a lost alien race is through DNA. ...
 
 
-\slide{Continuing from a Prompt}
-
-GPT-3 from Open AI (175 billion parameters, July 2020, ArXiv 2005.14165)
+\slide{GPT-3 from Open AI (175 billion parameters, July 2020}
 
 \vfill
 {\color{red} Continue from: Feeling unproductive? Maybe you should stop overthinking.}
@@ -165,16 +153,6 @@ The translaion is not close to state of the art but still startling.
 
 \vfill
 Various other tasks can be done with few-shot examples in this way.  For example question answering, unscrambling words and three digit arithmetic.
-
-\slide{Few Shot Learners}
-
-A very recent paper (Sept. 15, 2020, ArXiv 2009.07118) has shown that the few-shot learning accomplishments of GPT-3 can be done with far fewer parameters.
-
-\vfill
-GPT-3 has 175 billion parameters.  The same few-shot performance can be achieved with 223 million parameters --- three orders of magnitude fewer.
-
-\vfill
-The new paper uses a method they call PET (Pattern Exploiting Training) involving ``distillation'' (student-teacher network-to-network training).
 
 \slide{END}
 
