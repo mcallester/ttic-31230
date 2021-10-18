@@ -78,7 +78,7 @@ where $B$ is initialized to zero and $f$ is an activation function such as a sig
 The vector $x$ is a random variable determined by a random draw of a training example.
 Assume that the components of $x$ are independent and that each component has zero mean and unit variance.
 Suppose that we initialize each weight in $W$ from a distribution with
-zero mean and variance $\sigma$ and that is symmetric about zero --- (the probability that $w[i] = z$ equals the probability that $w[i] = -z$).
+zero mean and variance $\sigma^2$ and that the distribution is symmetric about zero --- (the probability that $w[i] = z$ equals the probability that $w[i] = -z$).
 For example, $x[i]$ might be distributed as a zero-mean unit-variance Gaussian.
 Consider $y = \sum_i\;W[i]x[i]$ as a random variable defined by the distribution on $x$ and the independent random distribution on $W$.
 Recall that the variance $\sigma^2$ of
@@ -86,8 +86,7 @@ a sum of independent random variables is the sum of the variances and the varian
 random variables is the product of the variances.
 
 \medskip
-(a) What value of the initialization variance
-$\sigma$ for $W[i]$ gives zero mean and unit variance for $y$ if the vectors $w[I]$ and $x[I]$ have dimension $d$?  Show your derivation.
+(a) What value of $\sigma$ for $W[i]$ gives zero mean and unit variance for $y$ if the vectors $w[I]$ and $x[I]$ have dimension $d$?  Show your derivation.
 
 \solution{Let $\sigma^2$ be the variance of $x[i]$.  We then have that the variance of $\sum_i W[i]x[i]$ is $\sum_i \sigma^2 = d \sigma^2$.
   Setting $d\sigma^2$ equal to 1 gives
