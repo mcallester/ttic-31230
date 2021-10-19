@@ -1,0 +1,268 @@
+ <title>TTIC 31230: Fundamentals of Deep Learning</title>
+
+<header>TTIC 31230: Fundamentals of Deep Learning</header>
+
+<p> David McAllester</p>
+
+<p> Revised from winter 2020</p>
+
+<!-- <p style="color:red"> Last Lecture Canceled.  Prof. McAllester appears to have some mild illness and it seems best to err on the side of the safety of the students.</p> -->
+
+<p>Lectures Slides and Problems:</p>
+
+<ol>
+
+  <li> Introduction</li>
+
+  <ol type = "A">
+    <li><a href = 01intro/history.pdf> The History of Deep Learning and Moore's Law of AI</a></li>
+
+    <li><a href = 01intro/fundamentals.pdf> The Fundamental Equations of Deep Learning</a></li>
+
+    <li><a href = 01intro/problems.pdf>Problems</a></li>
+
+  </ol>
+
+  <li> Frameworks and Back-Propagation</li>
+
+  <ol type = "A">
+
+    <li><a href = 02MLP/frameworks.pdf> Deep Learning Frameworks</a></li>
+
+    <li><a href = 02MLP/Backprop.pdf> Backpropagation for Scalar Source Code</a></li>
+
+    <li><a href = 02MLP/backprop2.pdf> Backpropagation for Tensor Source Code</a></li>
+
+    <li><a href = 02MLP/minibatching.pdf>  Minibatching: The Batch Index</a></li>
+
+    <li><a href = 02MLP/EDFslides.pdf>  The Educational Framework (EDF)</a></li>
+        
+    <li><a href = 02MLP/problems.pdf> Problems</a></li>
+
+    <li><a href = 02MLP/edf.py> EDF source code</a> 150 lines of Python/NumPy</li>
+    
+    <li><a href = 02MLP/PS1.zip> MNIST in EDF problem set</a></li>
+
+    <li><a href = https://pytorch.org/tutorials/ > PyTorch tutorial</a></li>
+
+  </ol>
+
+  <li>Vision: Convolutional Neural Networks (CNNs)</li>
+
+  <ol type = "A">
+    <li><a href = 03CNNs/Einstein.pdf> Einstein Notation</li>
+    <li><a href = 03CNNs/CNNs.pdf> CNNs</li>
+    <li><a href = 03CNNs/trainability.pdf> Trainability: Relu, Initialization, Batch Normalization and Residual Connections (ResNet)</li>
+    <li><a href = 03CNNs/CNNb.html> Invariant Theory (optional)</li>
+    <li><a href = 03CNNs/problems.pdf> Problems</a></li>
+    <li><a href = https://pytorch.org/docs/stable/nn.functional.html?highlight=convolution>Pytorch Convolution Functions</a></li>
+  </ol>
+
+  <li> Natural Language Processing</li>
+
+  <ol type = 'A'>
+
+    <li><a href = 05Rnns/LangModels.pdf> Language Modeling</a></li>
+    <li><a href = 05RNNs/RNNs.pdf> Recurrent Neural Networks (RNNs)</a></li>
+    <li><a href = 05RNNs/Translation.pdf> Machine Translation and Attention</a></li>
+    <li><a href = 05RNNs/Transformer.pdf> The Transformer</a></li>
+    <li><a href = 05RNNs/Phrases.pdf> Statistical Machine Translation (optional)</a></li>
+
+    <li><a href = 05RNNs/problems.pdf>Problems</a></li>
+
+    <!--
+    <li>References</li>
+
+    <ol type = "i">
+      <li><a href = https://arxiv.org/abs/1409.3215> Original sequence to sequence paper </a></li>
+
+      <li><a href = https://arxiv.org/abs/1409.0473> Original attention paper </a></li>
+
+      <li><a href = https://arxiv.org/abs/1611.04558> Google's Revolution in Machine Translation </a></li>
+    
+      <li><a href = https://arxiv.org/abs/1706.03762> Attention is all you need</a></li>
+      </ol>
+    -->
+    
+  </ol>
+
+  <li>Stochastic Gradient Descent</li>
+
+  <ol type = "A">
+    
+    <li><a href = 06SGD/Classical.pdf> The Classical Convergence Theorem</a></li>
+
+    <li><a href = 06SGD/Decoupling1.pdf> Decoupling the Learning Rate from the Batch Size</a></li>
+
+    <li><a href = 06SGD/Momentum.pdf> Momentum as a Running Average and Decoupled Momentum</a></li>
+
+    <li><a href = 06SGD/RMS.pdf> RMSProp, and Adam and Decoupled Versions</a></li>
+    
+    <li><a href = 06SGD/flow.pdf> Gradient Flow</a></li>
+
+    <li><a href = 06SGD/Heat.pdf> Heat Capacity with Loss as Energy and Learning Rate as Temperature</a></li>
+
+    <li><a href = 06SGD/Langevin.pdf> Continuous Time Noise and Stationary Parameter Densities</a></li>
+
+    <li><a href = 06SGD/SGDproblems.pdf> Problems</a></li>
+
+    <!-- <li><a href = 06SGD/safe.pdf> Slides on a Quenching Algorithm</a></li> -->
+
+    <!--
+    <li> References: </li>
+    <ol type = "i">
+      <li><a href = http://ruder.io/optimizing-gradient-descent/ > Blog post on SGD variants</a></li>
+
+      <li><a href = https://arxiv.org/abs/1706.02677> Training Resnt-50 on Imagenet in one hour</a></li>
+    
+      <li><a href = https://openreview.net/pdf?id=B1Yy1BxCZ > Paper on batch size scaling of the learning rate and momentum parameter</a></li>
+
+      <li><a href = https://arxiv.org/abs/1511.06807> Adding Gradient Noise</a></li>
+    
+      <li><a href = https://arxiv.org/abs/1704.00109> Temperature Cycling in SGD </a></li>
+      
+      <li><a href = https://arxiv.org/abs/1206.1901> MCMC with momentum</a></li>
+    </ol> -->
+  </ol>
+  
+  <li>Generalization and Regularization</li>
+
+  <ol type= 'A'>
+    <li><a href = 07regularization/Early.pdf>Early Stopping, Shrinkage and Decoupled Shrinkage</a></li>
+    <li><a href = 07regularization/PCABayes.pdf>PAC-Bayes Generalization Theory</a></li>
+    <li><a href = 07regularization/Implicit.pdf>Implicit Regularization</a></li>
+    <li><a href = 07regularization/Double.pdf>Double Descent</a></li>
+    <li><a href = 07regularization/REGproblems.pdf> Problems</a></li>
+    <li><a href = https://arxiv.org/abs/1307.2118> PAC-Bayes Tutorial </a></li>
+  </ol>
+  
+  <li>Deep Graphical Models</li>
+
+  <ol type = 'A'>
+    <li><a href = 09GraphicalModels/DGMs1.pdf> Exponential Softmax</a></li>
+    
+    <li><a href = 09GraphicalModels/CTC.pdf> Speech Recognition: Connectionist Temporal Classification (CTC)</a></li>
+
+    <li><a href = 09GraphicalModels/DGMs2.pdf> Backprogation for Exponential Softmax: The Model Marginals</a></li>
+
+    <li><a href = 09GraphicalModels/MCMC.pdf> Monte-Carlo Markov Chain (MCMC) Sampling</a></li>
+
+    <li><a href = 09GraphicalModels/MCMC.pdf> Pseudo-Likelihood and Contrastive Divergence</a></li>
+    
+    <li><a href = 09GraphicalModels/Loopy.pdf> Loopy Belief Propagation (Loopy BP)</a></li>
+
+    <li><a href = 09GraphicalModels/Contrastive.pdf> Noise Contrastive Estimation</a></li>
+
+    <li><a href = 09GraphicalModels/DGMproblems.pdf> Problems</a></li>
+
+  </ol>
+
+  <li>Generative Adversarial Networks (GANs)</li>
+
+  <ol>
+    <li><a href = 08InfoTheory/information.pdf>Perils of Differential Entropy</a></li>
+
+    <li><a href = 14Gans/Gans.pdf> Overview and Timeline of GAN Development</a></li>
+
+    <li><a href = 14Gans/Patch.pdf>Replacing the Loss Gradient with the Margin Gradient.</a></li>
+
+    <li><a href = 14Gans/Jensen.pdf>Optimal Discrimination and Jensen-Shannon Divergence</a></li>
+
+    <li><a href = 14Gans/Contrastive.pdf>Contrastive GANs</a></li>
+
+    <li><a href = 14GANs/GANproblems.pdf> Problems</a></li>
+
+  </ol>
+
+  <li>Autoencoders</li>
+  
+  <ol>
+
+    <!-- <li><a href = 08InfoTheory/info2problems.pdf> Problems /a></li> -->
+
+    <li><a href = 11AutoEncoders/Rate.pdf> Rate-Distortion Autoencoders (RDAs) </a></li>
+
+    <li><a href = 11AutoEncoders/Noisy.pdf> Noisy Channel RDAs </a></li>
+
+    <li><a href = 11AutoEncoders/GaussianRDAs.pdf> Gaussian Noisy Channel RDAs </a></li>
+
+    <li><a href = 11AutoEncoders/Latent.pdf> Interpretability of Latent Variables</a></li>
+
+    <li><a href = 11AutoEncoders/ELBO.pdf> The Evidence Lower Bound (ELBO) and Variational Autoencoders (VAEs)</a></li>
+
+    <li><a href = 11AutoEncoders/GaussianVAEs.pdf> Gaussian VAEs </a></li>
+
+    <li><a href = 11AutoEncoders/Collapse.pdf> Posterior Collapse, VAE Non-Identifiability, and beta-VAEs </a></li>
+
+    <li><a href = 11AutoEncoders/VQVAE.pdf> Vector Quantized VAEs </a></li>
+
+    <li><a href = 11AutoEncoders/Rateproblems.pdf> Problems</a></li>
+  </ol>
+
+  <li>Pretraining</li>
+
+  <ol>
+    <li><a href = pretraining/NLPpretraining.pdf> Pretraining for NLP</a></li>
+
+    <li><a href = pretraining/supervised.pdf> Supervised ImageNet Pertraining</a></li>
+
+    <li><a href = pretraining/self.pdf>Self-Supervised Pretraining for Vision</a></li>
+
+    <li><a href = pretraining/CPC.pdf>Contrastive Predictive Coding</a></li>
+
+    <li><a href = pretraining/MI.pdf>Mutual Information Coding</a></li>
+
+    <li><a href = pretraining/PREproblems.pdf> Problems</a></li>
+  </ol>
+  
+
+  <li> Reinforcement Learning (RL)</li>
+
+  <ol>
+
+    <li><a href = 15RL/RL.pdf> Basic Definitions, Q-learning, Deep Q Networks (DQN) for Atari</a></li>
+    <li><a href = 15RL/REINFORCE.pdf> The REINFORCE algorithm, Actor-Critic algorithms, A3C for Atari </a></li>
+    <li><a href = 15RL/RLproblems.pdf> Problems</a></li>
+    
+  </ol>
+
+  <li> AlphaZero and AlphaStar</li>
+
+  <ol>
+    
+    <li><a href = 16alpha/alphago.pdf> Background Algorithms</a></li>
+    <li><a href = 16alpha/algorithm.pdf> The AlphaZero Training Algorithm</a></li>
+    <li><a href = 16alpha/results.pdf> Some Quantitative Empirical Results</a></li>
+    <li><a href = 16alpha/analysis.pdf> The Policy as a Q-Function</a></li>
+    <li><a href = 16alpha/alphabeta.pdf> What Happened to alpha-beta?</a></li>
+    <li><a href = 16alpha/alphastar.pdf> AlphaStar</a></li>
+
+    <li><a href = 16alpha/alphaproblems.pdf> Problems</a></li>
+    
+  </ol>
+
+
+  <!-- <li><a href = 13SGD2/SGD2.html> Gradients as Dual Vectors, Hessian-Vector Products, and Information Geometry </a></li> -->
+  
+
+  <!-- <li><a href = 17Interpretation/Interp.html> The Black Box Problem</a></li> -->
+
+  <li>The Quest for Artificial General Intelligence (AGI)</li>
+
+  <ol>
+    <li><a href = 18AGI/arch.pdf> The Free Lunch Theorem and The Intelligence Explosion</a></li>
+    <li><a href = 18AGI/classical.pdf> Representing Functions with Shallow Circuits: The Classical Universality Theorems </a></li>
+    <li><a href = 18AGI/circuits.pdf> Representing Functions with Deep Circuits: Circuit Complexity Theory </a></li>
+    <li><a href = 18AGI/programs.pdf> Representing Functions with Programs: Python, Assembler and the Turing Tarpit </a></li>
+    <li><a href = 18AGI/logic.pdf> Representing Functions and Knowledge with Logic </a></li>
+    <li><a href = 18AGI/NLP.pdf> Representing Choices and Knowledge with Natural Language </a></li>
+  </ol>
+</ol>
+
+
+  
+
+
+  
+
+

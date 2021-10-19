@@ -19,7 +19,7 @@ The recent progress on NLP benchmarks is due to pretraining on language modeling
 Langauge modeling is based on unconditional cross-entropy minimiztion.
 
 \vfill
-$$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;-\ln P_\Phi(y)$$
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;\left[-\ln P_\Phi(y)\right]$$
 
 \vfill
 In language modeling $y$ is a sentence (or fixed length block of text).
@@ -35,7 +35,7 @@ Let $\mathrm{Pop}$ be a population distribution over $W^*$ (sentences).
 We want to train a model $P_\Phi(y)$ for sentences $y$
 
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \; E_{y \sim \mathrm{Pop}}\;-\ln P_\Phi(y)
+\Phi^* & = & \argmin_\Phi \; E_{y \sim \mathrm{Pop}}\;\left[-\ln P_\Phi(y)\right]
 \end{eqnarray*}
 
 \slide{Autoregressive Models}
@@ -46,7 +46,7 @@ A structured object, such as a sentence or an image, has an exponentially small 
 An autoregressive model computes conditional probability for each part given ``earlier'' parts.
 
 \vfill
-$$P_\Phi(w_0, w_1, \cdots, w_T) = \prod_{t=0}^T\;P_\Phi(w_t\;|\;w_1,\ldots,w_{t-1})$$
+$$P_\Phi(w_0, w_1, \cdots, w_T) = \prod_{t=0}^T\;P_\Phi(w_t\;|\;w_0,\ldots,w_{t-1})$$
 
 
 \slide{The End of Sequence Token {\tt <EOS>}}
