@@ -32,7 +32,7 @@ Here $v$ is velocity, $0 \leq \mu < 1$ represents friction drag and $\eta \hat{g
 The theory of momentum is generally given in terms of second order structure and total gradients (GD rather than SGD).
 
 \vfill
-But second order analyses of are controversial for SDG in very large dimension.
+But second order analyses are controversial for SDG in very large dimension.
 
 \vfill
 Still, momentum is widely used in practice.
@@ -63,7 +63,7 @@ Emprical evidence for this setting of $\eta$ is given in
 \vfill
 {\bf Don't Decay the Learning Rate, Increase the Batch Size}, Smith et al., 2018
 
-\slide{Momentum as a Running Average}
+\slide{Momentum as an Exponential Moving Average (EMA)}
 Consider a sequence $x_1$, $x_2$, $x_3$, $\ldots$.
 \vfill
 For $t \geq N$, consider the average of the $N$ most recent values.
@@ -77,9 +77,9 @@ This can be approximated efficiently with
 \tilde{x}_t & = & \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t
 \end{eqnarray*}
 
-\slide{Deep Learning Convention for Running Averages}
+\slide{Deep Learning Convention for EMAs}
 
-In deep learning a running average
+In deep learning an exponential moving average
 
 $$\tilde{x}_t = \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t$$
 
@@ -98,7 +98,7 @@ Typical values for $\beta$ are .9, .99 or .999 corresponding to $N$ being 10, 10
 \vfill
 It will be convenient here to use $N$ rather than $\beta$.
 
-\slide{Momentum as a Running Average}
+\slide{Momentum as an EMA}
 
 \begin{eqnarray*}
 v_t & = & \mu v_{t-1} + {\color{red} \eta \hat{g}_t} \\
@@ -107,23 +107,23 @@ v_t & = & \mu v_{t-1} + {\color{red} \eta \hat{g}_t} \\
 \end{eqnarray*}
 
 \vfill
-We see that $v_t$ is a running average of $N \eta \hat{g}$.
+We see that $v_t$ is an EMA of $N \eta \hat{g}$.
 
-\slide{Momentum as a Running Average}
+\slide{Momentum as an EMA}
 
-\centerline{\color{red} $v_t$ is a running average of $N \eta \hat{g}$.}
+\centerline{\color{red} $v_t$ is an EMA of $N \eta \hat{g}$.}
 
 \vfill
-Alternatively, we can consider a direct running average of the gradient.
+Alternatively, we can consider an EMA of the gradient.
 {\color{red} $$\tilde{g}_t = \left(1-\frac{1}{N}\right)\tilde{g}_{t-1} + \left(\frac{1}{N}\right) \hat{g}_t$$}
 
 \vfill
-The running average of $N\eta\hat{g}$ is the same as $N\eta$ times the running average of $\hat{g}$.  Hence
+The moving average of $N\eta\hat{g}$ is the same as $N\eta$ times the moving average of $\hat{g}$.  Hence
 
 \vfill
 {\color{red} $$v_t = N \eta \tilde{g}_t$$}
 
-\slide{Momentum as a Running Average}
+\slide{Momentum as an EMA}
 
 We have now shown that the standard formulation of momentum can be written as
 
