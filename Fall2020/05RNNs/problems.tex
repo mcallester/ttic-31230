@@ -1,5 +1,5 @@
 \documentclass{article}
-\input ../preamble
+\input /users/davidmcallester/Icloude/tex/preamble
 \parindent = 0em
 
 %\newcommand{\solution}[1]{}
@@ -61,7 +61,7 @@ h[b,t,j] & = & G[b,t,j]h[b,t\!-\!1,j] + (1-G[b,t,j])R[b,t,j]
 
 Modify the above equations so that they correspond to the following diagram for a Gated Recurent Unit (GRU).
 
-\centerline{\includegraphics[width=2.0in]{../images/GRU}}
+\centerline{\includegraphics[width=2.0in]{\images/GRU}}
 \centerline{{\small [Christopher Olah]}}
 
 \solution{
@@ -73,7 +73,7 @@ Modify the above equations so that they correspond to the following diagram for 
     \\
     G_2[b,t,j] & = & \sigma\left(W^{h,G_2}[j,I] h[b,t\!-\!1,I] +  W^{x,G_2}[j,K] x[b,t,K] - B^{G_2}[j]\right) \\
     \\
-    R[b,t,j] & = & \mathrm{tanh}\left(W^{h,R}[j,I] h'[b,t\!-\!1,I] + W^{x,R}[j,K] x[b,t,K] - B^R[j]\right) \\
+    R[b,t,j] & = & \mathrm{tanh}\left(W^{h,R}[j,I] h'[b,t,I] + W^{x,R}[j,K] x[b,t,K] - B^R[j]\right) \\
     \\
     h[b,t,j] & = & (1-G_2[b,t,j])h[b,t\!-\!1,j] + G_2[b,t,j]R[b,t,j]
   \end{eqnarray*}
