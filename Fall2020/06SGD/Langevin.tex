@@ -75,42 +75,85 @@ The random variables in the last term have zero mean.
 By the law of large numbers a sum (not the average) of $N$ random vectors will approximate a Gaussian distribution where the standard deviation
 grows like $\sqrt{N}$.
 
-\slide{Applying the Law of Large Numbers}
+\slide{Modeling Noise}
 
-For $\epsilon \sim {\cal N}(0,\Sigma)$
-where $\Sigma$ is the covariance matrix of the random variable $\hat{g}$ we have
+The mean of $\hat{g}$ is the true gradient $g(\Phi)$.  
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i) \\
+\Delta t & = & \eta N \\
+\Phi(t + \Delta t) &  = & \Phi(t) - \sum_{j=1}^N \eta\hat{g}_i \\
 \\
-& \approx & \Phi(t) -g(\Phi)\Delta t + \eta \epsilon \sqrt{N} \\
-\\
-& = & \Phi(t) -g(\Phi)\Delta t + \eta \epsilon \sqrt{\frac{\Delta t}{\eta}}
+ &  = & \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i)
 \end{eqnarray*}
+
+\slide{Modeling Noise}
+
+\begin{eqnarray*}
+\Delta t & = &  \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i)
+\end{eqnarray*}
+
+
+\vfill
+By the law of large numbers $\sum_{j=1}^N (g(\Phi) - \hat{g}_i)$ is approximately Gaussian.
+
+\slide{In One Dimensional}
+
+We first consider the case of one parameter (a one dimensional optimization problem) so that $\hat{g}$ is a scalar.
+
+\vfill
+To model the noise as Gaussian we take $\epsilon \sim {\cal N}(0,\sigma)$ where $\sigma$ is the standard deviation of $\hat{g}$.
+
+\begin{eqnarray*}
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \eta \epsilon \sqrt{N} \\
+\end{eqnarray*}
+
+\slide{In One Dimensional}
+
+
+Letting $\epsilon'$ denote $\sqrt{\eta}\epsilon$ we have
+
+\vfill
+\begin{eqnarray*}
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t +  \eta \epsilon \sqrt{N} \\
+\\
+& = & \Phi(t) -g(\Phi)\Delta t +  \eta \epsilon \sqrt{\frac{\Delta t}{\eta}} \\
+\\
+& = & \Phi(t) -g(\Phi)\Delta t +  \sqrt{\eta} \epsilon \sqrt{\Delta t} \\
+\\
+& = & \Phi(t) -g(\Phi)\Delta t +  \epsilon' \sqrt{\Delta t} \\
+\end{eqnarray*}
+
+\vfill
+With $\epsilon' \sim {\cal N}(0,\sqrt{\eta}\sigma)$.
 
 
 \slide{The Stochastic Differential Equation (SDE)}
 
+
 \begin{eqnarray*}
-\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \epsilon \sqrt{{\color{red} \eta}\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\Sigma) \\
-\\
-& = & \Phi(t) -g(\Phi)\Delta t + \epsilon \sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,{\color{red} \eta}\Sigma)
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t +  \epsilon \sqrt{\Delta t} \\
+\epsilon & \sim & {\cal N}(0,\sqrt{\eta}\sigma)
 \end{eqnarray*}
 
 \vfill
 We can take this last equation to hold in the limit of arbitrarily small $\Delta t$ in which case we get a continuous time stochastic process.  This process can be written as
 
+{\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\sqrt{\eta}\sigma)$$}
+
+\slide{Higher Dimension}
+
+In the higher dimensional case we get
+
 {\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\Sigma)$$}
 
-\slide{The Stochastic Differential Equation}
+\vfill
+Where $\Sigma$ is the covariance matrix of $\hat{g}$.
 
-{\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\Sigma)$$}
+\vfill
+In one dimension $\Sigma$ is $\sigma^2$.
 
 \vfill
 For $g(\Phi) = 0$ and $\Sigma = I$ we get Brownian motion.
-
-\vfill
-For a general loss function and $\Sigma = I$ we get Langevin Dynamics and a Gibbs stationary distribution.
 
 \vfill
 But in general we do not have $\Sigma = I$.
