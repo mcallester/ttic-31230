@@ -50,11 +50,12 @@ What is the cross-entropy $H(\pop,P)$ and KL-divergence $KL(\pop,P)$?  What is t
 \solution{
   \begin{eqnarray*}
     H(\pop,P) & = & E_{i\sim \pop}\left[ - \ln P(i)\right] \\
-      & = & -\ln P(k) \\
-      & = & (1-e^{-\beta})e^{-\beta k} \\
+    & = & -\ln P(k) \\
+    & = & -\ln (\;(1-e^{-\beta})e^{-\beta k}\;) \\
+    & = & \beta k - \ln(1-e^{-\beta}) \\
       \\
       KL(\pop,P) & = & H(\pop,P) - H(\pop) \\
-      & = & (1-e^{-\beta})e^{-\beta k} - 0 \\
+      & =& \beta k - \ln (1-e^{-\beta}) - 0 \\
       \\
       H(P,\pop) & = & KL(P,\pop) = \infty
   \end{eqnarray*}
