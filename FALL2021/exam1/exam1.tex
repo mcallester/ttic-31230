@@ -81,7 +81,7 @@ Each term $(y-\hat{y}_\ell)^2$ is called a ``loss head'' and defines a loss on e
 Note, however, that there is only one scalar loss minimized by SGD which is the sum of the losses of each loss head.
 
 \medskip
-{\bf (a)} Explain why these multiple loss terms might improve the ability of SGD to find a useful $L$-layer MLP regrssion $\hat{y}_L$ when $L$ is large.
+{\bf (a) 7 pts} Explain why these multiple loss terms might improve the ability of SGD to find a useful $L$-layer MLP regrssion $\hat{y}_L$ when $L$ is large.
 
 \solution{
   SGD on deep networks with the loss term only occuring at the final layer is not generally effective because the lower layers
@@ -90,7 +90,7 @@ Note, however, that there is only one scalar loss minimized by SGD which is the 
 }
 
 \medskip
-{\bf (b)} As a function of $L$ (ignoring the dimension size $I$) what is the order of run time for the backpropagation procedure.
+{\bf (b) 7 pts} As a function of $L$ (ignoring the dimension size $I$) what is the order of run time for the backpropagation procedure.
 Explain your answer.
 
 \solution{It is $O(L)$ --- linear in $L$.  Backpropagation loops over the assignments of the program and takes time proportional to the size of the program.
@@ -99,7 +99,7 @@ Explain your answer.
 }
 
 \medskip
-{\bf (c)} Rewrite the above MLP equations to use residual connections rather than multiple heads.  There are multiple correct solutions differing in minor details.  Pick one that seems
+{\bf (c) 11 pts} Rewrite the above MLP equations to use residual connections rather than multiple heads.  There are multiple correct solutions differing in minor details.  Pick one that seems
 good to you.
 
 \solution{
@@ -167,7 +167,7 @@ This gated RNN is similar to, but different from, a GRU which also has two gates
 Notice that here the shape of $W^Q$ and $W^K$ are both $[K,I,J]$.  We typically have $I < J$ which makes the inner product in the last line an inner product of lower dimensional vectors.
 
 \medskip
-{\bf(a)} Give an equation computing a tensor $\tilde{W}^Q[K,J,J]$ computed from $W^Q$ and $W^K$ such that the attention $\alpha(k,t_1,t_2)$ can be written as
+{\bf(a) 20 pts} Give an equation computing a tensor $\tilde{W}^Q[K,J,J]$ computed from $W^Q$ and $W^K$ such that the attention $\alpha(k,t_1,t_2)$ can be written as
 $$\alpha_{\ell+1}(k,t_1,t_2) = \softmax_{t_2}\;\left[L_\ell[t_1,J_1]\tilde{W}^Q[k,J_1,J_2]L_\ell[t_2,J_2]\right]$$
 For a fixed $k$ we have that $W^Q[k,I,J]$ and $W^K[k,I,J]$ are matrices.  We want a matrix $\tilde{W}^Q[k,J,J]$ such that the attention can be written in matrix notation as
 $h_1^\top \tilde{W}^Q h_2$ where $h_1$ and $h_2$ are vectors and $\tilde{W}^Q$ is a matrix.
@@ -187,7 +187,7 @@ You need write this matrix $\tilde{W}^Q$ in terms of the matrices for $W^Q$ and 
 }
 
 \medskip
-(b) Part (a) shows that we can replace the key and query matrix with a single query matrix without any loss of expressive power.  If we eliminate the key matrix in this way
+{\bf (b) 5pts} Part (a) shows that we can replace the key and query matrix with a single query matrix without any loss of expressive power.  If we eliminate the key matrix in this way
 what is the resulting number of query matrix parameters for a given layer and how does this compare to the number of key-query matrix parameters for a given layer in the original transformer version.
 
 \solution{

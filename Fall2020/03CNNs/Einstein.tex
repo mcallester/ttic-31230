@@ -83,8 +83,14 @@ CNNs provide a good example of the advantage of Einstein Notation.
 \centerline{$W[\Delta x,\Delta y,i,j]$\hspace{6ex}$L_{{\ell}}[b,x,y,i]$\hspace{6ex}$L_{{\ell+1}}[b,x,y,j]$}
 \centerline{\large River Trail Documentation}
 
-$$L_{{\ell+1}}[b,x,y,j] = \sigma\left(W[\Delta X, \Delta Y, I,j]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, I] - B[j]\right)$$
-
+{\huge
+\begin{eqnarray*}
+L_{{\ell+1}}[b,x,y,j] & = & \sigma\left(\sum_{\Delta x,\Delta y,i}\;W[\Delta x, \Delta y, i,j]\; L_{{\ell}}[b,x + \Delta x, y + \Delta y, i] - B[j]\right) \\
+\\
+\\
+& = & \sigma\left(W[\Delta X, \Delta Y, I,j]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, I] - B[j]\right)
+\end{eqnarray*}
+}
 \slide{Types and Einstein Notation}
 
 The indeces of tensors generally have types such as a ``time index'', ``x coordinate'', ``y coordinate'', ``batch index'', or ``neuron index''.

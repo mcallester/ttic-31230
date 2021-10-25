@@ -36,7 +36,7 @@ Each array (matrix) {\color{red} $W$} is represented by an object with attribute
 \slide{Source Code Loops}
 
 \begin{eqnarray*}
-   s & = & \sigma\left(Wh - B \right)
+   s & = & \sigma\left(W^1h - B^1 \right)
 \end{eqnarray*}
 
 \vfill
@@ -46,9 +46,9 @@ Can be written as
 $$\begin{array}{lrcl}
 \mathrm{for}\;j &  \tilde{s}[j] & = & 0 \\
 \\
-\mathrm{for}\;j,i &  \tilde{s}[j] & \pluseq &  W[j,i]h[i] \\
+\mathrm{for}\;j,i &  \tilde{s}[j] & \pluseq &  W^1[j,i]h[i] \\
 \\
-\mathrm{for}\; j & s[j] & = & \sigma(\tilde{s}[j] - B[j])
+\mathrm{for}\; j & s[j] & = & \sigma(\tilde{s}[j] - B^1[j])
 \end{array}$$
 
 \slide{Backpropagation on Loops}

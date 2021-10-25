@@ -25,10 +25,10 @@ Information theory arises in many places and many forms in deep learning.
 The entropy of a distribution $P$ is defined by
 
 \vfill
-$${\color{red} H(P) = E_{y \sim \pop} \;- \ln P(y)}\;\;\mbox{in units of ``nats''}$$
+$${\color{red} H(P) = E_{y \sim P} \left[ \;- \ln P(y)\right]}\;\;\mbox{in units of ``nats''}$$
 
 \vfill
-$${\color{red} H_2(P) = E_{y \sim \pop} \;- \log_2 P(y)}\; \mbox{in units of bits}$$
+$${\color{red} H_2(P) = E_{y \sim P}\left[ \;- \log_2 P(y)\right]}\; \mbox{in units of bits}$$
 
 \slide{Why Bits?}
 
@@ -38,7 +38,7 @@ Why is $-\log_2\;P(y)$ a number of bits?
 Example: Let $P$ be a uniform distribution on 256 values.
 
 \vfill
-$$E_{y \sim P}\;-\log_2 P(y) = - \log_2 \frac{1}{256} = \log_2 256 = 8\;\mathrm{bits} = 1\;\mathrm{byte}$$
+$$E_{y \sim P}\;\left[\;-\log_2 P(y)\right] = - \log_2 \frac{1}{256} = \log_2 256 = 8\;\mathrm{bits} = 1\;\mathrm{byte}$$
 
 \vfill
 \centerline{\color{red} 1 nat = $\frac{1}{\ln 2}$ bits $\approx$ 1.44 bits}
@@ -51,10 +51,10 @@ Why is $-\log_2\;P(y)$ a number of bits?
 A prefix-free code for ${\cal Y}$ assigns a bit string $c(y)$ to each $y \in {\cal Y}$ such that no code string is prefix of any other code string.
 
 \vfill
-For a probability distribution $P$ on ${\cal Y}$ we consider the average code length $E_{y \sim P} \;|c(y)|$.
+For a probability distribution $P$ on ${\cal Y}$ we consider the average code length $E_{y \sim P}\;\left[ \;|c(y)|\right]$.
 
 \vfill
-Theorem: For any $c$ we have {\color{red} $E_{y \sim P}\;|c(y)| \geq H_2(P)$}.
+Theorem: For any $c$ we have {\color{red} $E_{y \sim P}\;|c(y)|  \geq H_2(P)$}.
 
 \vfill
 Theorem: There exists $c$ with {\color{red} $E_{y \sim P} \;|c(y)| \leq H_2(P) +1$}.
@@ -76,7 +76,7 @@ $$E_y |c(y)| \geq H_2(y)$$
 
 Let $P$ and $Q$ be two distribution on the same set.
 
-{\color{red} $$H(P,Q) = E_{y \sim P} \;-\ln \;Q(y)$$}
+{\color{red} $$H(P,Q) = E_{y \sim P}\;\left[ \;-\ln \;Q(y)\right]$$}
 
 {\color{red} $$\Phi^* = \argmin_\Phi \;H(\pop,P_\Phi)$$}
 
@@ -93,9 +93,9 @@ Let $P$ and $Q$ be two distribution on the same set.
 \vfill
 \centerline{
   $\begin{array}{lrcl}
-\mathrm{Entropy}: & {\color{red} H(P)} & = & {\color{red} E_{y \sim P}\;-\ln\;P(y)} \\
+\mathrm{Entropy}: & {\color{red} H(P)} & = & {\color{red} E_{y \sim P}\;\left[-\ln\;P(y)\right]} \\
 \\
-\mathrm{Cross Entropy:} & {\color{red} H(P,Q)} & = & {\color{red} E_{y \sim P}\;-\ln\;Q(y)} \\
+\mathrm{Cross Entropy:} & {\color{red} H(P,Q)} & = & {\color{red} E_{y \sim P}\;\left[-\ln\;Q(y)\right]} \\
 \\
 \mathrm{KL\; Divergence:} & {\color{red} KL(P,Q)} & = & {\color{red} H(P,Q) - H(P)} \\
 \\
@@ -166,9 +166,9 @@ $$E[f(x)] \geq f(E[x])$$
 \slide{Proving $KL(P,Q) \geq 0$}
 
 \begin{eqnarray*}
-  KL(P,Q) & = & \expectsub{y \sim P}{- \ln \frac{Q(y)}{P(y)}} \\
+  KL(P,Q) & = & \expectsub{y \sim P}{\left[- \ln \frac{Q(y)}{P(y)}\right]} \\
   \\
-  & \geq & - \ln \expectsub{y\sim P}{\frac{Q(y)}{P(y)}} \\
+  & \geq & - \ln \expectsub{y\sim P}{\frac{Q(y)}{P(y)} \\
   \\
   & = & - \ln \sum_y\; P(y) \frac{Q(y)}{P(y)}  \\
   \\
@@ -186,7 +186,7 @@ Anything that can be done conditionally $P_\Phi(y|x)$ can also be done unconditi
 We have unconditional cross-entropy training.
 
 \begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi \;\;E_{y \sim \mathrm{Pop}}  -\ln P_\Phi(y)
+  \Phi^* & = & \argmin_\Phi \;\;E_{y \sim \mathrm{Pop}}\;\left[  -\ln P_\Phi(y)\right]
 \end{eqnarray*}
 
 \vfill
@@ -237,11 +237,11 @@ Colorization is unsupervised structured labeling.
 \slide{Appendix: The Rearrangement Trick}
 
 \begin{eqnarray*}
-KL(P,Q) & = & E_{x \sim P} \ln \;\frac{P(x)}{Q(x)} \\
+KL(P,Q) & = & E_{x \sim P}\;\left[ \ln \;\frac{P(x)}{Q(x)} \right] \\
 \\
 & = & E_{x \sim P} \left[(- \ln Q(x)) - (- \ln P(x))\right] \\
 \\
-& = & (E_{x\sim P} \;-\ln Q(x)) - (E_{x \sim P}\;-\ln P(x)) \\
+& = & (E_{x\sim P} \;\left[-\ln Q(x)\right]) - (E_{x \sim P}\;\left[-\ln P(x)\right]) \\
 \\
 & = & H(P,Q) - H(P)
 \end{eqnarray*}
@@ -260,9 +260,9 @@ In general $E_{x \sim P} \;\ln \left(\prod_i A_i\right) = E_{x \sim P} \;\sum_i 
 \vfill
 \centerline{
   $\begin{array}{lrcl}
-\mathrm{Entropy}: & {\color{red} H(P)} & = & {\color{red} E_{y \sim P}\;-\ln\;P(y)} \\
+\mathrm{Entropy}: & {\color{red} H(P)} & = & {\color{red} E_{y \sim P}\;\left[-\ln\;P(y)\right]} \\
 \\
-\mathrm{Cross Entropy:} & {\color{red} H(P,Q)} & = & {\color{red} E_{y \sim P}\;-\ln\;Q(y)} \\
+\mathrm{Cross Entropy:} & {\color{red} H(P,Q)} & = & {\color{red} E_{y \sim P}\;\left[-\ln\;Q(y)\right]} \\
 \\
 \mathrm{KL\; Divergence:} & {\color{red} KL(P,Q)} & = & {\color{red} H(P,Q) - H(P)} \\
 \\
