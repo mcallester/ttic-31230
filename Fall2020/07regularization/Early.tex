@@ -19,7 +19,7 @@
 \slide{Expectation Notation}
 
 \begin{eqnarray*}
-E_{z \sim P}\left[f(z)\right] & = & \frac{1}{N} \sum_z P(z) f(z) \\
+E_{z \sim P}\left[f(z)\right] & = & \sum_z P(z) f(z) \\
 \\
 \\
 E_{(x,y) \sim \pop}\left[{\cal L}(x,y)\right] &  = & \frac{1}{|\mathrm{support}|}\sum_{(x,y) \in \mathrm{suppot}} \;\pop(x,y) \;{\cal L}(x,y)
@@ -179,7 +179,7 @@ We now take a Gaussian prior {\color{red} $$p(\Phi) \propto \exp\left(-\frac{||\
 \end{eqnarray*}
 
 \vfill
-$$\Phi_{i+1} = \Phi_i - \eta\hat{g}_i  - \frac{\eta}{N\sigma^2}\Phi$$
+$$\Phi_{i+1} = \Phi_i - \eta\hat{g}_i  - \frac{\eta}{N\sigma^2}\Phi_i$$
 
 \vfill
 The last term in the update equation is called ``shrinkage''.
