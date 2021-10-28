@@ -14,7 +14,7 @@
 
 \bigskip
 \bigskip
-~{\bf Problem 1. Variance of running averages.}  For two independent random variables $x$ and $y$ and a weighted sum $s = ax + by$ we have
+~{\bf Problem 1. Variance of an exponential moving average.}  For two independent random variables $x$ and $y$ and a weighted sum $s = ax + by$ we have
 $$\sigma_s^2 = a^2\sigma_x^2 + b^2\sigma_y^2$$
 Now consider a runing average for computing $\hat{\mu}_1,\ldots,\hat{\mu}_t$ from $x_1,\ldots,x_t$
 $$\hat{\mu}_0 = 0$$
@@ -51,7 +51,7 @@ $$\hat{\mu} = \frac{1}{N}\;\sum_{t=1}^N x_t$$
 
 \bigskip
 \bigskip
-~{\bf Problem 2. Reformulating Momentum as a Running Average.} Consider the following running update equation.
+~{\bf Problem 2. Reformulating Momentum as a Exponential Moving Average.} Consider the following update equation.
 
 \begin{eqnarray*}
   y_0  & = & 0 \\
@@ -70,12 +70,12 @@ If the input sequence is constant with $x_t = c$ for all $t \geq 1$, what is $\l
 }
 
 \medskip
-(b) $y_t$ is a running average of what quantity?
+(b) $y_t$ is an exponential moving average of what quantity?
 
 \solution{
   The update can be rewritten as
   $$y_t = \left(1 - \frac{1}{N}\right)y_{t-1} + \frac{1}{N}(Nx_t)$$
-  so $y_t$ is the running average of $Nx_t$.
+  so $y_t$ is an exponential moving average of $Nx_t$.
 }
 
 \medskip
@@ -87,7 +87,7 @@ If the input sequence is constant with $x_t = c$ for all $t \geq 1$, what is $\l
 \end{eqnarray*}
 
 \solution{
-  $y_t$ is the running average of $Nx_t$ which equals $N$ times the running average of $x_t$ so we have
+  $y_t$ is an exponential moving average of $Nx_t$ which equals $N$ times the moving average of $x_t$ so we have
   $$y_t = N \mu_t$$
 }
 
@@ -138,7 +138,7 @@ Is it possible to compute $W.\grad2[j,i]$ from $W.\grad[j,i]$? Explain your answ
 (d) Explain how your answer to (c) is related to batch size scaling of RMSProp and Adam.
 
 \solution{
-Adam and RMSProp both compute a running average of $\hat{g}[i]^2$ defined by
+Adam and RMSProp both compute a moving average of $\hat{g}[i]^2$ defined by
 $$s_{t+1}[i] = \left(1-\frac{1}{N_s}\right)s_t + \frac{1}{N_s}\hat{g}[i]^2$$
 At batch sized greater than 1 this fails to take into account the variance of the
 gradiants within the batch.  This implies that $s_t[i]$ will be reduced as the batch size increases
@@ -156,7 +156,7 @@ where $\hat{g}^B$ is the average of $B$ sampled gradients.  Let $g$ be the avera
 \medskip The covariance matrix at batch size $B$ is
 $$\Sigma^B[i,j] = E\;(\hat{g}^B[i] - g[i])(\hat{g}^B[j] - g[j]).$$
 
-\medskip Langevin dynamics is
+\medskip The stochastic differential equation model of SGD is
 $$\Phi(t + \Delta t) = \Phi(t) - g\Delta t + \epsilon \sqrt{\Delta t}\;\;\;\epsilon \sim {\cal N}(0,\eta\Sigma^B)$$
 Show that for $\eta = B\eta_0$ the stationary distribution is determined by $\eta_0$ independent of $B$.
 
