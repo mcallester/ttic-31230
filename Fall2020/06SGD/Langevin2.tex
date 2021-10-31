@@ -147,14 +147,14 @@ for the probability that $\Psi$ holds under a random draw of $\epsilon$.
 We move stochastically from $x$ to $x + \epsilon \sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,\eta\sigma^2)$
 
 \vfill
-This is the same as moving stochastically from $x$ to $x + \epsilon\sqrt{\eta}\sigma\sqrt{t}$ with $\epsilon \sim {\cal N}(0,1)$.
+This is the same as moving stochastically from $x$ to $x + \epsilon\sqrt{\eta}\sigma\sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,1)$.
 
 \vfill
 The quantity of mass transfer in the time interval $\Delta t$ from values above $x$ to values below $x$ is
 
 
 \begin{eqnarray*}
-& & \int_{z = 0}^\infty  \rho(x + z)\;p_\epsilon(\epsilon\sqrt{\eta}\sigma\sqrt{t} \leq -z) dz  \\
+& & \int_{z = 0}^\infty  \rho(x + z)\;p_\epsilon(\epsilon\sqrt{\eta}\sigma\sqrt{\Delta t} \leq -z) dz  \\
 \\
 & = & \int_{z = 0}^\infty  \rho(x + z)\;p_\epsilon\left(\epsilon \leq \frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz  \\
 \\
@@ -175,17 +175,17 @@ The quantity of mass transfer in the time interval $\Delta t$ from values above 
 &  & \int_{z = 0}^\infty \rho(x+z)\;\Phi\left(\frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz
 \end{eqnarray*}
 
-By a change of variables $u = z/(\sqrt{\eta}\sigma\sqrt{t})$ we get
+By a change of variables $u = z/(\sqrt{\eta}\sigma\sqrt{\Delta t})$ we get
 
 \begin{eqnarray*}
-&  & \int_{u = 0}^\infty \rho(x+\sqrt{\eta}\sigma\sqrt{t}\;u)\;\Phi(-u) \sqrt{\eta}\sigma\sqrt{t}\;du
+&  & \int_{u = 0}^\infty \rho(x+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u)\;\Phi(-u) \sqrt{\eta}\sigma\sqrt{\Delta t}\;du
 \end{eqnarray*}
 
 \vfill
 As $\Delta t \rightarrow 0$ we can use the first order Taylor expansion of the density.
 
 \begin{eqnarray*}
-&  & \sqrt{\eta}\sigma\sqrt{t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du
+&  & \sqrt{\eta}\sigma\sqrt{\Delta t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du
 \end{eqnarray*}
 }
 
@@ -193,15 +193,15 @@ As $\Delta t \rightarrow 0$ we can use the first order Taylor expansion of the d
 {\Large
 
 \begin{eqnarray*}
-&  & \sqrt{\eta}\sigma\sqrt{t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du \\
+&  & \sqrt{\eta}\sigma\sqrt{\Delta t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du \\
 \\
-& = & \sqrt{\eta}\sigma\sqrt{t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) +  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+& = & \sqrt{\eta}\sigma\sqrt{\Delta t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) +  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
 \end{eqnarray*}
 
 A similar alanysis shows that the mass transfer from lower values to higher values is
 
 \begin{eqnarray*}
-& = & \sqrt{\eta}\sigma\sqrt{t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) -  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+& = & \sqrt{\eta}\sigma\sqrt{\Delta t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) -  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
 \end{eqnarray*}
 
 \vfill
