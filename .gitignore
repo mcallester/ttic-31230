@@ -8,4 +8,4 @@
 *.fls
 *.fdb_latexmk
 .DS_store
-
+*.xlsx
