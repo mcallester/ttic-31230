@@ -33,7 +33,7 @@ We assume a ``population'' probability distribution $\mathrm{Pop}$ on pairs $(x,
 
 \vfill
 \begin{eqnarray*}
-{\color{red} \Phi^*} & {\color{red}  =} & {\color{red} \argmin_\Phi \;E_{(x,y) \sim \mathrm{Pop}}\; -\ln \;P_\Phi(y|x)}
+{\color{red} \Phi^*} & {\color{red}  =} & {\color{red} \argmin_\Phi \;E_{(x,y) \sim \mathrm{Pop}}\; \left[-\ln \;P_\Phi(y|x)\right]}
 \end{eqnarray*}
 
 \vfill
@@ -135,7 +135,7 @@ $$P_\Phi(y|x) = \softmax_y\;s_\Phi(y|x)$$
 \begin{eqnarray*}
   \Phi^* & = & \argmin_\Phi\;E_{(x,y) \sim \mathrm{Pop}}\;{\cal L}(x,y,\Phi) \\
   \\
-  & = & {\color{red} \argmin_\Phi\;E_{(x,y) \sim \mathrm{Pop}}\;- \ln P_\Phi(y|x)}
+  & = & {\color{red} \argmin_\Phi\;E_{(x,y) \sim \mathrm{Pop}}\;\left[- \ln P_\Phi(y|x)\right]}
 \end{eqnarray*}
 
 \slide{Machine Translation (Structured Labeling)}
@@ -153,17 +153,17 @@ $V_x$ and $V_y$ are source and target vocabularies respectively.
 \vfill
 \begin{eqnarray*}
   \Phi^* & = & \argmin_\Phi \;E_{(x,y) \sim \mathrm{Pop}} \;{\cal L}(x,y,\Phi) \\
-  & = & {\color{red} \argmin_\Phi \;E_{(x,y) \sim \mathrm{Pop}} \;-\ln \;P_\Phi(y|x)}
+  & = & {\color{red} \argmin_\Phi \;E_{(x,y) \sim \mathrm{Pop}} \;\left[-\ln \;P_\Phi(y|x)\right]}
 \end{eqnarray*}
 
 \slide{Fundamental Equation: Unconditional Form}
 
-{\color{red} $$\Phi^* = \argmin_\Phi E_{y \sim \pop}\;- \ln P_\Phi(y)$$}
+{\color{red} $$\Phi^* = \argmin_\Phi E_{y \sim \pop}\;\left[- \ln P_\Phi(y)\right]$$}
 
 \slide{Summary}
 
 \begin{eqnarray*}
-\Phi^* & = &  \argmin_\Phi \;E_{(x,y) \sim \mathrm{Pop}}\; -\ln \;P_\Phi(y|x)
+\Phi^* & = &  \argmin_\Phi \;E_{(x,y) \sim \mathrm{Pop}}\;\left[ -\ln \;P_\Phi(y|x) \right]
 \end{eqnarray*}
 
 \vfill

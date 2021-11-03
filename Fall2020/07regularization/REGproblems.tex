@@ -1,5 +1,5 @@
 \documentclass{article}
-\input ../preamble
+\input /users/davidmcallester/ICloude/tex/preamble
 \parindent = 0em
 
 %\newcommand{\solution}[1]{}
@@ -27,7 +27,7 @@ $$g = E_{\tuple{x,y}\sim \mathrm{Train}} \nabla \Phi {\cal L}(\Phi,x,y).$$
     \\
     & = & g + \frac{1}{N_{\mathrm{train}}\sigma^2}\Phi \;\;= 0 \\
     \\
-    \Phi & = & N_{\mathrm{train}}\sigma^2g
+    \Phi & = & - N_{\mathrm{train}}\sigma^2g
   \end{eqnarray*}
 
   \medskip
@@ -117,7 +117,7 @@ Note that (1) holds independent of any ``truth'' of the ``prior'' $P$.
 Express the bound (1) in terms of the dimension $d$ assuming all parameter vectors are equally likely.
 
 \solution{
-  $${\cal L}(h) \leq \frac{10}{9}\parens{\hat{\cal L}(h) + \frac{5 L_\mathrm{max}}{N}\parens{16d\ln 2 + \ln\frac{1}{\delta}}}$$
+  $${\cal L}(\Phi) \leq \frac{10}{9}\parens{\hat{\cal L}(\Phi) + \frac{5 L_\mathrm{max}}{N}\parens{16d\ln 2 + \ln\frac{1}{\delta}}}$$
 }
 
 \medskip
@@ -134,12 +134,13 @@ $$P(\Phi[i]) = 2^{-|\Phi[i]|}$$.
 }
 
 \medskip
-(c) Repeat part (a) but for a model with $d$ parameters represented by
-$\Phi_i = z[J[i]]$ where $J[i]$ is an integer index with $0 \leq J[i] < k$ and where $z[j]$ is a $b$ bit floating point number and where all parameter vectors are equally likely.
+(c) Repeat part (a) but for a model with $I$ parameters represented by
+$\Phi[i] = \Psi[k[i]]$ where $k[i]$ is an integer index with $0 \leq k[i] \leq K-1$ and where $\Psi[k]$ is a $b$-bit floating point number.  We define a prior probability on models
+by selecting each $k[i]$ uniformily from the integers from $0$ to $K-1$ and selecting $\Psi[k]$ uniformly from all $b$-fit floating point numbers.
 
 \solution{
-  $${\cal L}(h) \leq \frac{10}{9}\parens{\hat{\cal L}(h) + \frac{5 L_\mathrm{max}}{N}\parens{kb\ln 2 + d\ln k + \ln\frac{1}{\delta}}}$$
-  Since $d$ is large this is typically much tighter bound than using floating point or even integer representationfs of parameters.  It is a much more compact representaiton
+  $${\cal L}(h) \leq \frac{10}{9}\parens{\hat{\cal L}(h) + \frac{5 L_\mathrm{max}}{N}\parens{Kb\ln 2 + I\ln k + \ln\frac{1}{\delta}}}$$
+  For $I >> K$ this is a much tighter bound than using floating point or even integer representations of parameters.  It is a much more compact representaiton
   of the parameters.
 }
 

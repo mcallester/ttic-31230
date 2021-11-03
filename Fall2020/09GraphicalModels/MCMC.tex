@@ -17,96 +17,140 @@
 
 \slide{Sampling From the Model}
 
-For backpropagation through $P_s(\hat{\cal Y}) = \frac{1}{Z} e^{s(\hat{\cal Y})}$ we have
+For back-propagation of $- \ln P_s({\cal Y})$ through the exponential softmax defined by $P_s({\cal Y}) = \frac{1}{Z} e^{s({\cal Y})}$ we have
 
 \vfill
 \begin{eqnarray*}
-    s^N.\mathrm{grad}[n,y] & = &   P_{\hat{\cal Y} \sim P_s}(\;\;{\color{red} \hat{\cal Y}}[n] = y\;\;) \\
-    & & \;\;\;\;\;- \bbone[\;\;{\color{red} {\cal Y}}[n] = y\;\;] \\
+    s^N.\mathrm{grad}[n,y] & = &   P_{{\cal Y}' \sim P_s}(\;\;{\color{red} {\cal Y}'}[n] = y\;\;) \\
+    & & - \bbone[\;\;{\color{red} {\cal Y}}[n] = y\;\;] \\
     \\
-    s^E.\mathrm{grad}[\tuple{n,m},y,y'] & = &  P_{\hat{\cal Y} \sim P_s}(\;\;{\color{red} \hat{\cal Y}}[n] = y \; \wedge \; {\color{red} \hat{\cal Y}}[m] = y'\;\;) \\
-    & & \;\;\;\;\;- \bbone[\;\;{\color{red} {\cal Y}}[n] = y\; \wedge \; {\color{red} {\cal Y}}[m] = y'\;\;]
+    s^E.\mathrm{grad}[\tuple{n,m},y,y'] & = &  P_{{\cal Y}' \sim P_s}(\;\;{\color{red} {\cal Y}'}[n] = y \; \wedge \; {\color{red} {\cal Y}'}[m] = y'\;\;) \\
+    & & - \bbone[\;\;{\color{red} {\cal Y}}[n] = y\; \wedge \; {\color{red} {\cal Y}}[m] = y'\;\;]
 \end{eqnarray*}
 
 \slide{MCMC Sampling}
 The model marginals, such as the node marginals
- ${\color{red} P_s(\hat{\cal Y}[n]=y)}$, can be estimated by sampling $\hat{\cal Y}$ from $P_s(\hat{\cal Y})$.
+ ${\color{red} P_s({\cal Y}[n]=y)}$, can be estimated by sampling ${\cal Y}$ from $P_s({\cal Y})$.
 
 \vfill
-There are various ways to design a Markov process whose states are node labelings $\hat{\cal Y}$ and whose stationary distribution is $P_s$.
+There are various ways to design a Markov process whose states are node labelings ${\cal Y}$ and whose stationary distribution is $P_s$.
 
 \vfill
-Given such a process we can sample $\hat{\cal Y}$ from $P_s$ by running the process past its mixing time.
+Given such a process we can sample ${\cal Y}$ from $P_s$ by running the process past its mixing time.
 
 \vfill
 We will consider Metropolis MCMC and the Gibbs MCMC.  But there are more (like Hamiltonian MCMC).
 
 \slide{Metroplis MCMC}
 
-We assume a neighor relation on node assignments and let $N(\hat{\cal Y})$ be the set of neighbors of assignment $\hat{\cal Y}$.
+We assume a neighor relation on node assignments and let $N({\cal Y})$ be the set of neighbors of assignment ${\cal Y}$.
 
 \vfill
-For example, $N(\hat{\cal Y})$ can be taken to be the set of assignments $\hat{\cal Y}'$ that differ form $\hat{\cal Y}$ on exactly one node.
+For example, $N({\cal Y})$ can be taken to be the set of assignments ${\cal Y}'$ that differ form ${\cal Y}$ on exactly one node.
 
 \vfill
 For the correctness of Metropolis MCMC we need that all states have the same number of neighbors and that the neighbor relation is symmetric ---
-$\hat{\cal Y}' \in N(\hat{\cal Y})$ if and only if $\hat{\cal Y} \in N(\hat{\cal Y}')$.
+${\cal Y}' \in N({\cal Y})$ if and only if ${\cal Y} \in N({\cal Y}')$.
 
 \slide{Metropolis MCMC}
 
-Pick an initial state $\hat{\cal Y}_0$ and for $t \geq 0$ do
+Pick an initial state ${\cal Y}_0$ and for $t \geq 0$ do
 
 \vfill
 \begin{quotation}
 
     \noindent \begin{enumerate}
-    \item Pick a neighbor $\hat{\cal Y}' \in N(\hat{\cal Y}_t)$ uniformly at random.
+    \item Pick a neighbor ${\cal Y}' \in N({\cal Y}_t)$ uniformly at random.
 
     \vfill      
-    \item If $s(\hat{\cal Y}') > s(\hat{\cal Y}_t)$ then {\color{red} $\hat{\cal Y}_{t+1} = \hat{\cal Y}'$}
+    \item If $s({\cal Y}') > s({\cal Y}_t)$ then {\color{red} ${\cal Y}_{t+1} = {\cal Y}'$}
 
     \vfill      
-    \item If $s(\hat{\cal Y}') \leq s(\hat{\cal Y})$ then with probability $e^{-\Delta s} = e^{-(s(\hat{\cal Y}) - s(\hat{\cal Y}'))}$
-   do  {\color{red} $\hat{\cal Y}_{t+1} = \hat{\cal Y}'$} and otherwise {\color{red} $\hat{\cal Y}_{t+1} = \hat{\cal Y}_t$} 
+    \item If $s({\cal Y}') \leq s({\cal Y})$ then with probability $e^{-\Delta s} = e^{-(s({\cal Y}) - s({\cal Y}'))}$
+   do  {\color{red} ${\cal Y}_{t+1} = {\cal Y}'$} and otherwise {\color{red} ${\cal Y}_{t+1} = {\cal Y}_t$} 
   \end{enumerate}  
 \end{quotation}
 
 \slide{The Metropolis Markov Chain}
-We need to show that $P_s(\hat{\cal Y}) = \frac{1}{Z}e^{s(\hat{\cal Y})}$ is a stationary distribution of this process.
+We need to show that $P_s({\cal Y}) = \frac{1}{Z}e^{s({\cal Y})}$ is a stationary distribution of this process.
 
 \vfill
-Let $Q(\hat{\cal Y})$ be the distribution on states defined by drawing a state from $P_s$ and applying one stochastic transition of the Metropolis process.
+Let $Q({\cal Y})$ be the distribution on states defined by drawing a state from $P_s$ and applying one stochastic transition of the Metropolis process.
 
 \vfill
-We must show that $Q(\hat{\cal Y}) = P_s(\hat{\cal Y})$.
+We must show that $Q({\cal Y}) = P_s({\cal Y})$.
 
-\slide{Stationarity Condition}
+\slide{The Stationary Distribution}
+Let $P_{\mathrm{Trans}}({\cal Y} \rightarrow {\cal Y}')$ denote the probability of transitioning from ${\cal Y}$ to ${\cal Y}'$, or more formally,
 
+\vfill
+$$P_{\mathrm{Trans}}({\cal Y} \rightarrow {\cal Y}') = P({\cal Y}_{t+1} = {\cal Y}'\;|\; {\cal Y}_y = {\cal Y})$$
+
+\vfill
+We can then write $Q({\cal Y}')$ as
+\vfill
+$$Q({\cal Y}') =  \sum_{{\cal Y}}\;P_s({\cal Y})P_\mathrm{Trans}({\cal Y} \rightarrow {\cal Y}')$$
+
+\slide{The Stationary Distribution}
+
+{\huge
 \begin{eqnarray*}
-Q(\hat{\cal Y}) & = & P_s(\hat{\cal Y}) + \mbox{flow-in} - \mbox{flow-out} \\
+Q({\cal Y}')& = &  \sum_{{\cal Y}}\;P_s({\cal Y})P_\mathrm{Trans}({\cal Y} \rightarrow {\cal Y}') \\
 \\
-& = & \left\{\;\begin{array}{l} P_s(\hat{\cal Y}) \\
 \\
-+ \sum_{\hat{\cal Y}' \in N(\hat{\cal Y})} P_s(\hat{\cal Y}'){P_{\mathrm{Trans}}(\hat{\cal Y}' \rightarrow \hat{\cal Y})} \\
+& = & P_s({\cal Y'})P_\mathrm{Trans}({\cal Y}' \rightarrow {\cal Y}') + \sum_{{\cal Y} \in N({\cal Y}')} P_s({\cal Y}){P_{\mathrm{Trans}}({\cal Y} \rightarrow {\cal Y}')} \\
 \\
-- \sum_{\hat{\cal Y}' \in N(\hat{\cal Y})} P_s(\hat{\cal Y}){P_{\mathrm{Trans}}(\hat{\cal Y} \rightarrow \hat{\cal Y}')} \end{array} \right.
+\\
+& = & \left\{\begin{array}{l}P_s({\cal Y}')\left(1-\sum_{{\cal Y} \in N({\cal Y'})} P_\mathrm{Trans}({\cal Y}'\rightarrow {\cal Y})\right) \\
+\\
+  + \; \sum_{{\cal Y} \in N({\cal Y}')} P_s({\cal Y}){P_{\mathrm{Trans}}({\cal Y} \rightarrow {\cal Y}')}\end{array}\right.
 \end{eqnarray*}
+}
 
+\slide{The Stationary Distribution}
+
+{\huge
+\begin{eqnarray*}
+Q({\cal Y}')& = &  \left\{\begin{array}{l}P_s({\cal Y}')\left(1-\sum_{{\cal Y} \in N({\cal Y'})} P_\mathrm{Trans}({\cal Y}'\rightarrow {\cal Y})\right) \\
+\\
+  + \; \sum_{{\cal Y} \in N({\cal Y}')} P_s({\cal Y}){P_{\mathrm{Trans}}({\cal Y} \rightarrow {\cal Y}')}\end{array}\right. \\
+  \\
+  \\
+  & = &  \left\{\begin{array}{l}P_s({\cal Y}') \\
+  \\
+  -\sum_{{\cal Y} \in N({\cal Y'})} P_s({\cal Y}')P_\mathrm{Trans}({\cal Y}'\rightarrow {\cal Y}) \\
+\\
+  + \; \sum_{{\cal Y} \in N({\cal Y}')} P_s({\cal Y}){P_{\mathrm{Trans}}({\cal Y} \rightarrow {\cal Y}')}\end{array}\right. \\
+  \\
+  \\
+  &= & P_s({\cal Y}')\; - \;\mbox{flow out}\; +\;\mbox{flow in}
+\end{eqnarray*}
+}
 
 \slide{Detailed Balance}
 
-Detailed balance means that for each pair of neighboring assignments $\hat{\cal Y}$, $\hat{\cal Y}'$ we have equal flows in both directions.
+Detailed balance means that for each pair of neighboring assignments ${\cal Y}$, ${\cal Y}'$ we have equal flows in both directions.
 
 \vfill
-$$P_s(\hat{\cal Y}')P_{\mathrm{Trans}}(\hat{\cal Y}' \rightarrow \hat{\cal Y}) = P_s(\hat{\cal Y})P_{\mathrm{Trans}}(\hat{\cal Y} \rightarrow \hat{\cal Y}')$$
+$$P_s({\cal Y}')P_{\mathrm{Trans}}({\cal Y}' \rightarrow {\cal Y}) = P_s({\cal Y})P_{\mathrm{Trans}}({\cal Y} \rightarrow {\cal Y}')$$
 
 \vfill
-Without loss generality assume $s(\hat{\cal Y}') \geq s(\hat{\cal Y})$.
+If we can show detailed balance we have that the flow out equals the flow in and we get $Q({\cal Y'}) = P_s({\cal Y}')$ and hence $P_s$ is the stationary distribution.
+
+\slide{Detailed Balance}
+
+To show detailed balance we can assume without loss generality that $s({\cal Y}') \geq s({\cal Y})$.
 
 \vfill
-Metropolis is defined by
-{\huge $$P_{\mathrm{Trans}}(\hat{\cal Y}' \rightarrow \hat{\cal Y}) \;\; = \;\; \frac{1}{N}\;e^{-\Delta s}
-\;\;= \;\;\frac{P_s(\hat{\cal Y})}{P_s(\hat{\cal Y}')}\;P_{\mathrm{Trans}}(\hat{\cal Y} \rightarrow \hat{\cal Y}')$$}
+We then have
+
+\begin{eqnarray*}
+P_s({\cal Y}')P_{\mathrm{Trans}}({\cal Y}' \rightarrow {\cal Y}) & = & \frac{1}{Z}e^{s({\cal Y}')}\;\;\left(\frac{1}{N}\;e^{-\Delta s}\right) \\
+\\
+& = & \frac{1}{Z}e^{s({\cal Y})}\;\;\frac{1}{N} \\
+\\
+ &= &P_s({\cal Y})P_{\mathrm{Trans}}({\cal Y} \rightarrow {\cal Y}')
+\end{eqnarray*}
 
 \slide{Gibbs Sampling}
 
@@ -119,24 +163,24 @@ Gibbs sampling avoids this move rejection.
 In Gibbs sampling we select a node $n$ at random and change that node by drawing a new node value conditioned on the current values of the other nodes.
 
 \vfill
-We let {\color{red} $\hat{\cal Y} \backslash n$} be the assignment of labels given by $\hat{\cal Y}$ except that no label is assigned to node $n$.
+We let {\color{red} ${\cal Y} \backslash n$} be the assignment of labels given by ${\cal Y}$ except that no label is assigned to node $n$.
 
 \vfill
-We let {\color{red} $\hat{\cal Y}[N(n)]$} be the assignment that $\hat{\cal Y}$ gives to the nodes (pixels) that are the neighbors of node $n$ (connected to $n$ by an edge.)
+We let {\color{red} ${\cal Y}[N(n)]$} be the assignment that ${\cal Y}$ gives to the nodes (pixels) that are the neighbors of node $n$ (connected to $n$ by an edge.)
 
 \slide{Gibbs Sampling}
 
 Markov Blanket Property:
-{\color{red} $$P_s(\hat{\cal Y}[n] \;|\;\hat{\cal Y} \backslash n) = P_s(\hat{\cal Y}[n] \;|\; \hat{\cal Y}[N(n)])$$}
+{\color{red} $$P_s({\cal Y}[n] \;|\;{\cal Y} \backslash n) = P_s({\cal Y}[n] \;|\; {\cal Y}[N(n)])$$}
 \vfill
 Gibbs Sampling, Repeat:
 
 \begin{itemize}
 \item   Select $n$ at random
 
-\item {\color{red} draw $y$ from $P_s(\hat{\cal Y}[n]\;|\;\hat{\cal Y} \backslash n) = P_s(\hat{\cal Y}[n] \;|\;\hat{\cal Y}[N(n)])$}
+\item {\color{red} draw $y$ from $P_s({\cal Y}[n]\;|\;{\cal Y} \backslash n) = P_s({\cal Y}[n] \;|\;{\cal Y}[N(n)])$}
 
-\item $\hat{\cal Y}[n] = y$
+\item ${\cal Y}[n] = y$
 \end{itemize}
 
 \vfill

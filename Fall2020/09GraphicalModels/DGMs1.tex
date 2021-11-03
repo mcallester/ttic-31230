@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input /users/davidmcallester/ICloude/tex/SlidePreamble
+\input /users/davidmcallester/ICloude/tex/preamble
 
 \begin{document}
 
@@ -28,6 +28,29 @@ $$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Pop}}\;-\ln \;P(y)$$
 }
 
 {\color{red} The structured case:} $y \in {\cal Y}$ where ${\cal Y}$ is discrete but {\color{red} iteration over $\hat{y} \in {\cal Y}$ is infeasible}.
+
+\slide{Parsing and CKY}
+
+Consider the case where $x$ is a sentence and $y$ is a parse tree for $x$.  There are exponentially many possible parse trees for a given sentence.
+
+\vfill
+The Cocke–Kasami–Younger (CKY) algorithm is a dynamic programming algorithm for finding the most probably parse under a certain family of energy based models.
+
+\vfill
+CKY is still the most accurate way to parse sentences where the energy based model is computed by a deep network.
+
+\slide{Speech Recognition and CTC}
+
+Consider the case where $x$ is the sound wave from a microphone and $y$ is the transcription into written language.  There are clearly exponentially many
+possible transcriptions.
+
+\vfill
+Connectionist Temporal classification (CTC) is a dynamic programming algorithm for finding the most likely output under a certain family of energy based models.
+
+\vfill
+CTC is still the most accurate way to do speech recognition where the energy based model is computed by a deep network.
+
+
 \slide{Semantic Segmentation}
 \centerline{\includegraphics[height = 2.5in]{\images/SemSeg}}
 
@@ -37,12 +60,22 @@ We want to assign each pixel to one of $Y$ semantic classes.
 \vfill
 For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
 
+\slide{Semantic Segmentation}
+
+\centerline{\includegraphics[height = 2.5in]{\images/SemSeg}}
+
+\vfill
+Although semantic segmentation is not currently done with energy based models, perhaps it should be.
+
+\vfill
+Semantic segmentation is simpler than parsing or speech recognition and will be used as a simple example of energy based models.
+
 \slide{Constructing a Graph}
 
 We construct a graph whose nodes are the pixels and where there is an edges between each pixel and its four nearest neighboring pixels.
 
 \vfill
-\centerline{\includegraphics[height= 4in]{\images/grid}}
+%\centerline{\includegraphics[height= 4in]{\images/grid}}
 
 \slide{Labeling the Nodes of a Graph}
 \centerline{\includegraphics[height= 1.5in]{\images/Graph}}     

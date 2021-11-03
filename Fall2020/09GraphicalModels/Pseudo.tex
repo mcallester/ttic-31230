@@ -15,13 +15,6 @@
 \vfill
 \vfill
 
-\slide{Some Pseudo-Likelihood Notation}
-
-We let {\color{red} $\hat{\cal Y} \backslash n$} be the assignment of colors given by $\hat{\cal Y}$ except that no color is assigned to node $n$.
-
-\vfill
-We let {\color{red} $\hat{\cal Y}[N(n)]$} be the assignment that $\hat{\cal Y}$ gives to the nodes (pixels) that are the neighbors of node $n$ (connected to $n$ by an edge.)
-
 \slide{Psuedo-Likelihood}
 
 For any distribution $P(\hat{\cal Y})$ on colorings $\hat{\cal Y}$,
@@ -46,20 +39,21 @@ $$ E_{{\cal Y} \sim \pop}\;-\ln \widetilde{\pop}({\cal Y}) \leq \;E_{{\cal Y} \s
 
 \slide{Proof II}
 
-We will prove the case of two nodes.
-
-\vfill
+{\huge
 \begin{eqnarray*}
-  & & \min_Q \;E_{y\sim \pop}{-\ln Q({\cal Y}[1]|{\cal Y}[2])\;Q({\cal Y}[2]|{\cal Y}[1])} \\
+  & & \min_Q \;E_{Y\sim \pop} -\ln \tilde{Q}(Y) \\
   \\
-  & \geq & \min_{P_1,P_2} E_{{\cal Y} \sim \pop}{-\ln P_1({\cal Y}[1]|{\cal Y}[2])\;P_2({\cal Y}[2]|{\cal Y}[1])} \\
+  & = & \min_Q \;E_{{\cal Y}\sim \pop} \;\sum_n\;-\ln Q({\cal Y}[n]|{\cal Y}[N(n)]) \\
   \\
-  & = & \min_{P_1} E_{{\cal Y} \sim \pop}{-\ln P_1({\cal Y}[1]|{\cal Y}[2])} + \min_{P_2} E_{{\cal Y} \sim \pop}{-\ln P_2({\cal Y}[2]|{\cal Y}[1])} \\
+  & \geq & \min_{P_1,\ldots,P_N} \;E_{{\cal Y}\sim \pop} \;\sum_n\;-\ln P_n({\cal Y}[n]|{\cal Y}[N(n)]) \\
   \\
-  & = & E_{{\cal Y} \sim \pop}{-\ln \pop({\cal Y}[1]|{\cal Y}[2])} + E_{{\cal Y} \sim \pop}{-\ln \pop({\cal Y}[2]|{\cal Y}[1])} \\
+  & = & \min_{P_1,\ldots,P_N} \;\sum_n \;E_{{\cal Y} \sim \pop}\;\; -\ln P_n({\cal Y}[n]|{\cal Y}[N(n)]) \\
+  \\          
+  & = & \sum_n \;\min_{P_n}\;E_{{\cal Y} \sim \pop}\;\; -\ln P_n({\cal Y}[n]|{\cal Y}[N(n)]) \\
   \\
-  & = & E_{{\cal Y} \sim \pop}{-\ln \widetilde{\pop}({\cal Y})}
+    & = & \sum_n E_{{\cal Y} \sim \pop}\;\; -\ln \pop({\cal Y}[n]|{\cal Y}[N(n)]) =  E_{{\cal Y} \sim \pop}{-\ln \widetilde{\pop}({\cal Y})}
 \end{eqnarray*}
+}
 
 \slideplain{Contrastive Divergence (CDk)}
 
@@ -93,7 +87,7 @@ Gibbs CD1 is equivalent in expectation to pseudolikelihood.
 
 {\huge
 \begin{eqnarray*}
-{\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \; - \ln P_s({\cal Y}[n]=y\;|\;{\cal Y}\backslash n) \\
+{\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \; - \ln P_s({\cal Y}[n]=y\;|\;{\cal Y}[N(n)]) \\
 \\
  & = & E_{{\cal Y} \sim \pop}\;\sum_n -\ln \frac{e^{s({\cal Y})}}{Z_n}\;\;\;\;\;{Z_n = \sum_{y'} e^{s({\cal Y}[n=y'])}} \\
 \\
@@ -101,7 +95,7 @@ Gibbs CD1 is equivalent in expectation to pseudolikelihood.
 \\
 \nabla_\Phi {\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\frac{1}{Z_n} \sum_{y'} e^{s({\cal Y}[n=y'])} \; \nabla_\Phi\;s({\cal Y}[n]=y')\right) - \nabla_\Phi s({\cal Y}) \\
 \\
-& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P({\cal Y}[n=y'\;|\;{\cal Y}\backslash n]) \; \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y})
+& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P({\cal Y}[n=y'\;|\;{\cal Y}[N(n)]]) \; \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y})
 \end{eqnarray*}
 }
 
@@ -109,13 +103,13 @@ Gibbs CD1 is equivalent in expectation to pseudolikelihood.
 
 {\huge
 \begin{eqnarray*}
-\nabla_\Phi\;{\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P({\cal Y}[n=y'\;|\;{\cal Y}\backslash n]) \nabla_\Phi\;s({\cal Y}[n]=y')\right) - \nabla_\Phi s({\cal Y}) \\
+\nabla_\Phi\;{\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P({\cal Y}[n=y'\;|\;{\cal Y}[N(n)]]) \nabla_\Phi\;s({\cal Y}[n]=y')\right) - \nabla_\Phi s({\cal Y}) \\
 \\
-& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(E_{y' \sim P({\cal Y}[n=y'\;|\;{\cal Y}\backslash n])} \nabla_\Phi\;s({\cal Y}[n]=y')\right) - \nabla_\Phi s({\cal Y}) \\
+& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(E_{y' \sim P({\cal Y}[n=y'\;|\;{\cal Y}[N(n)]])} \nabla_\Phi\;s({\cal Y}[n]=y')\right) - \nabla_\Phi s({\cal Y}) \\
 \\
-& \propto & E_{{\cal Y} \sim \pop}\;E_n\; E_{y' \sim P({\cal Y}[n=y'\;|\;{\cal Y}\backslash n])}\;\; (\nabla_\Phi\;s({\cal Y}[n]=y') - \nabla_\Phi s({\cal Y})) \\
+& \propto & E_{{\cal Y} \sim \pop}\;E_n\; E_{y' \sim P({\cal Y}[n=y'\;|\;{\cal Y}[N(n)]])}\;\; (\nabla_\Phi\;s({\cal Y}[n]=y') - \nabla_\Phi s({\cal Y})) \\
 \\
-& = & E_{{\cal Y} \sim \pop}\;E_n\; E_{y' \sim P({\cal Y}[n=y'\;|\;{\cal Y}\backslash n])}\;\; \nabla_\Phi\;{\cal L}_{\mbox{Gibbs CD(1)}}
+& = & E_{{\cal Y} \sim \pop}\;E_n\; E_{y' \sim P({\cal Y}[n=y'\;|\;{\cal Y}[N(n)]])}\;\; \nabla_\Phi\;{\cal L}_{\mbox{Gibbs CD(1)}}
 \end{eqnarray*}
 }
 

@@ -43,13 +43,13 @@ It can be shown that when the training vectors are linearly independent any zero
 
 \slide{Implicit Regularization of SGD}
 
-In a labeling problem a model with parameters $\Phi$ defines a model propbability $P_\Phi(y|x)$.
+In a labeling problem a model with parameters $\Phi$ defines a model propbability $P(y|\Phi,x)$.
 
 \vfill
-This defines a log loss $-\ln P_\Phi(y|x)$ on which we do gradient descent.
+This defines a log loss $-\ln P(y|\Phi,x)$ on which we do gradient descent.
 
 \vfill
-Let {\color{red} $\mathrm{SGD}\!\brackets{P_\Phi,\Phi_{\mathrm{Init}},\train}$} be the vector that results from running SGD on model $P_\Phi$ with initial parameters $\Phi_{\mathrm{Init}}$
+Let {\color{red} $\mathrm{SGD}\!\brackets{P,\Phi_{\mathrm{Init}},\train}$} be the vector that results from running SGD on model $P$ with initial parameters $\Phi_{\mathrm{Init}}$
 using training data $\train$ (and a fixed set of hyperparameters, learning rate schedule, and fixed order in which training instances are considered,
 and fixed number of iterations).
 
@@ -58,30 +58,30 @@ and fixed number of iterations).
 
 To get a generalization bound when learning a continuous parameter vector we add Gaussian noise to simulate limited precision of the real numbers.
 
-$$\Phi' = \mathrm{SGD}\!\brackets{P_\Phi,\Phi_{\mathrm{Init}},\mathrm{Train}} + \epsilon$$
+$$\Phi = \mathrm{SGD}\!\brackets{P,\Phi_{\mathrm{Init}},\mathrm{Train}} + \epsilon$$
 
 \vfill
 The algorithm defines an {\bf implicit prior:}
-$$p\!\parens{\Phi'\;|\;P_\Phi,\Phi_{\mathrm{Init}},\pop} = E_{\parens{\mathrm{Train} \sim \pop^N}}\;\;p\!\parens{\Phi'\;|\;P_\Phi,\Phi_{\mathrm{Init}},\train}$$
+$$p\!\parens{\Phi\;|\;P,\Phi_{\mathrm{Init}},\pop} = E_{\parens{\mathrm{Train} \sim \pop^N}}\;\;p\!\parens{\Phi\;|\;P,\Phi_{\mathrm{Init}},\train}$$
 
 \vfill
-The implicit prior $p\!\parens{\Phi'\;|\;P_\Phi,\Phi_{\mathrm{Init}},\pop}$ is a valid prior!  It does not depend on training data!
+The implicit prior $p\!\parens{\Phi\;|\;P,\Phi_{\mathrm{Init}},\pop}$ is a valid prior!  It does not depend on training data!
 
 \slide{Implict Priors: the General Case}
 
-Let $A$ be any algorithm mapping a training set $\train$ to a probability density $q_{A,\train}(\Phi')$ over model parameters $\Phi'$.
+Let $A$ be any algorithm mapping a training set $\train$ to a probability density $q_{A,\train}(\Phi)$ over model parameters $\Phi$.
 
 \vfill
 The implicit prior defined by algorithm $A$ and the given population distribution is
 
-$$p_{A,\pop}(\Phi') = E_{\parens{\mathrm{Train} \sim \pop^{N}}} \;\;q_{A,\train}(\Phi')$$
+$$p_{A,\pop}(\Phi) = E_{\parens{\mathrm{Train} \sim \pop^{N}}} \;\;q_{A,\train}(\Phi)$$
 
 \slide{A PAC-Bayes Analysis of Implicit Regularization}
 
 \begin{eqnarray*}
-{\cal L}(q_{A,\train}) & = & E_{\tuple{x,y} \sim {\color{red}  \pop}, \;\;\Phi' \sim q_{A,\train}}\;{\cal L}(\Phi',x,y) \\
+{\cal L}(q_{A,\train}) & = & E_{\tuple{x,y} \sim {\color{red}  \pop}, \;\;\Phi \sim q_{A,\train}}\;{\cal L}(\Phi,x,y) \\
 \\
-\hat{\cal L}(q_{A,\train}) & = & E_{\tuple{x,y} \sim {\color{red} \train}, \;\;\Phi' \sim q_{A,\train}}\;{\cal L}(\Phi',x,y)
+\hat{\cal L}(q_{A,\train}) & = & E_{\tuple{x,y} \sim {\color{red} \train}, \;\;\Phi \sim q_{A,\train}}\;{\cal L}(\Phi,x,y)
 \end{eqnarray*}
 
 \slide{A PAC-Bayes Analysis of Implicit Regularization}
