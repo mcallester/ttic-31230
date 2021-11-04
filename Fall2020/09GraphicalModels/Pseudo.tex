@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input /Users/davidmcallester/ICloude/tex/SlidePreamble
+\input /Users/davidmcallester/ICloude/tex/preamble
 
 \begin{document}
 
@@ -15,16 +15,51 @@
 \vfill
 \vfill
 
-\slide{Psuedo-Likelihood}
+\slide{Notation}
 
-For any distribution $P(\hat{\cal Y})$ on colorings $\hat{\cal Y}$,
-we define the {\color{red} pseudo-likelihood}  $\tilde{P}(\hat{\cal Y})$ as follows
-
-{\color{red} $$\tilde{P}(\hat{\cal Y}) = \prod_n\;P(\hat{\cal Y}[n]\;|\; \hat{\cal Y}/n) = \prod_n\;P(\hat{\cal Y}[n]\;|\; \hat{\cal Y}[N(n)])$$}
+$x$ is an input (e.g. an image).
 
 \vfill
-While computing $P_{\Phi,x}({\cal Y})$ is intractable, computing $\tilde{P}_{\Phi,x}({\cal Y})$ is tractable.  We then use
+${\cal Y} [N]$ is a structured label for $x$ --- a vector ${\cal Y}[0],\ldots,{\cal Y}[N-1]$. (e.g., $n$ ranges over pixels where ${\cal Y}[n]$ is a semantic label of pixel $n$.)
 
+\vfill
+${\cal Y}/n$ is the set of labels assigned by ${\cal Y}$ at indeces (pixels) other than $n$.
+
+\vfill
+${\cal Y}[n=y]$ is the structured label identical to ${\cal Y}$ except that it assigns label $y$ to index (pixel) $n$.
+
+\slide{Intractable Exponential Softmax}
+
+\vfill
+We consider a softmax distribution
+
+\vfill
+\begin{eqnarray*}
+P_s({\cal Y}) & = & \frac{1}{Z}e^{s({\cal Y})} \\
+\\
+Z & = & \sum_{\cal Y} e^{s({\cal Y})}
+\end{eqnarray*}
+
+\vfill
+Computing $Z$ is intractable.
+
+\slide{Psuedo-Likelihood}
+
+For any distribution $P({\cal Y})$ on structured labels ${\cal Y}$,
+we define the {\color{red} pseudo-likelihood}  $\tilde{P}({\cal Y})$ as follows
+
+{\color{red} $$\tilde{P}({\cal Y}) = \prod_n\;P({\cal Y}\;|\; {\cal Y}/n)$$}
+
+\vfill
+$$P_s({\cal Y}\;|\;{\cal Y}/n) = \frac{1}{Z_n}e^{s({\cal Y})}\;\;\;\;\;Z_n = \sum_{y} e^{s({\cal Y}[n=y])}$$
+
+\vfill
+While computing $P_s({\cal Y})$ is intractable, computing $\tilde{P}_s({\cal Y})$ involves only local partition functions and is tractable.
+
+\slide{Pseudo Cross-entropy Loss}
+
+We can then do SGD on pseudo cross-entropy loss.
+\vfill
 {\color{red} $$\Phi^* = \argmin_\Phi E_{\tuple{x,{\cal Y}} \sim \pop}\;\;-\ln \tilde{P}_{\Phi,x}({\cal Y})$$}
 
 \slide{Pseudolikelihood Theorem}
@@ -43,15 +78,15 @@ $$ E_{{\cal Y} \sim \pop}\;-\ln \widetilde{\pop}({\cal Y}) \leq \;E_{{\cal Y} \s
 \begin{eqnarray*}
   & & \min_Q \;E_{Y\sim \pop} -\ln \tilde{Q}(Y) \\
   \\
-  & = & \min_Q \;E_{{\cal Y}\sim \pop} \;\sum_n\;-\ln Q({\cal Y}[n]|{\cal Y}[N(n)]) \\
+  & = & \min_Q \;E_{{\cal Y}\sim \pop} \;\sum_n\;-\ln Q({\cal Y}[n]\;|\;{\cal Y}/n) \\
   \\
-  & \geq & \min_{P_1,\ldots,P_N} \;E_{{\cal Y}\sim \pop} \;\sum_n\;-\ln P_n({\cal Y}[n]|{\cal Y}[N(n)]) \\
+  & \geq & \min_{P_1,\ldots,P_N} \;E_{{\cal Y}\sim \pop} \;\sum_n\;-\ln P_n({\cal Y}[n]\;|\;{\cal Y}/n) \\
   \\
-  & = & \min_{P_1,\ldots,P_N} \;\sum_n \;E_{{\cal Y} \sim \pop}\;\; -\ln P_n({\cal Y}[n]|{\cal Y}[N(n)]) \\
+  & = & \min_{P_1,\ldots,P_N} \;\sum_n \;E_{{\cal Y} \sim \pop}\;\; -\ln P_n({\cal Y}[n]\;|\;{\cal Y}/n) \\
   \\          
-  & = & \sum_n \;\min_{P_n}\;E_{{\cal Y} \sim \pop}\;\; -\ln P_n({\cal Y}[n]|{\cal Y}[N(n)]) \\
+  & = & \sum_n \;\min_{P_n}\;E_{{\cal Y} \sim \pop}\;\; -\ln P_n({\cal Y}[n]\;|\;{\cal Y}/n) \\
   \\
-    & = & \sum_n E_{{\cal Y} \sim \pop}\;\; -\ln \pop({\cal Y}[n]|{\cal Y}[N(n)]) =  E_{{\cal Y} \sim \pop}{-\ln \widetilde{\pop}({\cal Y})}
+    & = & \sum_n E_{{\cal Y} \sim \pop}\;\; -\ln \pop({\cal Y}[n]\;|\;{\cal Y}/n) =  E_{{\cal Y} \sim \pop}{-\ln \widetilde{\pop}({\cal Y})}
 \end{eqnarray*}
 }
 
@@ -62,12 +97,12 @@ Metropolis or Gibbs or something else.
 
 \vfill
 {\bf Algorithm CDk}: Given a gold segmentation ${\cal Y}$, start the MCMC process from initial state ${\cal Y}$ and run the process for $k$ steps
-to get ${\color{red} \hat{\cal Y}'}$.  Then take the loss to be
+to get ${\color{red} {\cal Y}'}$.  Then take the loss to be
 
 \vfill
-{\color{red} $${\cal L}_{\mathrm{CD}}  = s(\hat{\cal Y}') - s({\cal Y})$$}
+{\color{red} $${\cal L}_{\mathrm{CD}}  = s({\cal Y}') - s({\cal Y})$$}
 
-If $P_s = \pop$ then the the distribution on $\hat{\cal Y}'$ is the same as the distribution on ${\cal Y}$ and the
+If $P_s = \pop$ then the the distribution on ${\cal Y}'$ is the same as the distribution on ${\cal Y}$ and the
 expected loss gradient is zero.
 
 \slideplain{Gibbs CD1}
@@ -75,7 +110,7 @@ expected loss gradient is zero.
 CD1 for the Gibbs MCMC process is a particularly interesting special case.
 
 \vfill
-{\bf Algorithm (Gibbs CD1)}: Given ${\cal Y}$, select a node $n$ at random and draw {\color{red} $y \sim P({\cal Y}[n]\;| \;{\cal Y}[N(n)])$}. Define {\color{red} ${\cal Y}[n=y]$}
+{\bf Algorithm (Gibbs CD1)}: Given ${\cal Y}$, select a node $n$ at random and draw {\color{red} $y \sim P({\cal Y}[n]=y\;| \;{\cal Y}/n)$}. Define {\color{red} ${\cal Y}[n=y]$}
 to be the assignment (segmentation) which is the same as ${\cal Y}$ except that node $n$ is assigned label $y$.  Take the loss to be
 
 \vfill
@@ -87,15 +122,15 @@ Gibbs CD1 is equivalent in expectation to pseudolikelihood.
 
 {\huge
 \begin{eqnarray*}
-{\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \; - \ln P_s({\cal Y}[n]=y\;|\;{\cal Y}[N(n)]) \\
+{\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \; - \ln P_s({\cal Y}\;|\;{\cal Y}/n) \\
 \\
  & = & E_{{\cal Y} \sim \pop}\;\sum_n -\ln \frac{e^{s({\cal Y})}}{Z_n}\;\;\;\;\;{Z_n = \sum_{y'} e^{s({\cal Y}[n=y'])}} \\
 \\
 & = & E_{{\cal Y} \sim \pop}\;\sum_n\; \left(\ln Z_n - s({\cal Y})\right) \\
 \\
-\nabla_\Phi {\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\frac{1}{Z_n} \sum_{y'} e^{s({\cal Y}[n=y'])} \; \nabla_\Phi\;s({\cal Y}[n]=y')\right) - \nabla_\Phi s({\cal Y}) \\
+\nabla_\Phi {\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\frac{1}{Z_n} \sum_{y'} e^{s({\cal Y}[n=y'])} \; \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y}) \\
 \\
-& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P({\cal Y}[n=y'\;|\;{\cal Y}[N(n)]]) \; \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y})
+& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P_s({\cal Y}[n]=y'\;|\;{\cal Y}[N(n)]) \; \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y})
 \end{eqnarray*}
 }
 
@@ -103,13 +138,13 @@ Gibbs CD1 is equivalent in expectation to pseudolikelihood.
 
 {\huge
 \begin{eqnarray*}
-\nabla_\Phi\;{\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P({\cal Y}[n=y'\;|\;{\cal Y}[N(n)]]) \nabla_\Phi\;s({\cal Y}[n]=y')\right) - \nabla_\Phi s({\cal Y}) \\
+\nabla_\Phi\;{\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P_s({\cal Y}[n]=y'\;|\;{\cal Y}[N(n)])\; \nabla_\Phi\;s({\cal Y}[n]=y')\right) - \nabla_\Phi s({\cal Y}) \\
 \\
-& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(E_{y' \sim P({\cal Y}[n=y'\;|\;{\cal Y}[N(n)]])} \nabla_\Phi\;s({\cal Y}[n]=y')\right) - \nabla_\Phi s({\cal Y}) \\
+& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(E_{y' \sim P_s({\cal Y}[n]=y'\;|\;{\cal Y}[N(n)])} \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y}) \\
 \\
-& \propto & E_{{\cal Y} \sim \pop}\;E_n\; E_{y' \sim P({\cal Y}[n=y'\;|\;{\cal Y}[N(n)]])}\;\; (\nabla_\Phi\;s({\cal Y}[n]=y') - \nabla_\Phi s({\cal Y})) \\
+& \propto & E_{{\cal Y} \sim \pop}\;E_n\;  E_{y' \sim P_s({\cal Y}[n]=y'\;|\;{\cal Y}[N(n)])}\;\; (\nabla_\Phi\;s({\cal Y}[n=y']) - \nabla_\Phi s({\cal Y})) \\
 \\
-& = & E_{{\cal Y} \sim \pop}\;E_n\; E_{y' \sim P({\cal Y}[n=y'\;|\;{\cal Y}[N(n)]])}\;\; \nabla_\Phi\;{\cal L}_{\mbox{Gibbs CD(1)}}
+& = & E_{{\cal Y} \sim \pop}\;E_n\; E_{y' \sim P_s({\cal Y}[n]=y'\;|\;{\cal Y}[N(n)])}\;\; \nabla_\Phi\;{\cal L}_{\mbox{Gibbs CD(1)}}
 \end{eqnarray*}
 }
 
