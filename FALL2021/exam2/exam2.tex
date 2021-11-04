@@ -1,0 +1,199 @@
+\documentclass{article}
+
+\input /users/davidmcallester/Icloude/tex/preamble.tex
+
+\usepackage{amsmath,amssymb,amsthm,graphicx,color}
+
+\parindent = 0em
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning, Autumn 2021}
+\bigskip
+\centerline{\bf Exam 2}
+
+\bigskip
+{\bf Problem 1: 25 pts.}  This problem is on interaction of learning rate and scaling of the loss function.
+
+    \medskip
+
+{\bf (a)} Consider vanilla SGD on cross entropy loss for classification with batch size 1 and no moment in which case we have
+$$\Phi_{t+1} = \Phi_t - \eta \nabla_\Phi \ln P_\Phi(y|x)$$
+Now suppose someone uses log base 2 (to get loss in bits) and uses the update
+$$\Phi_{t+1} = \Phi_t - \eta' \nabla_\Phi \log_2 P_\Phi(y|x)$$
+Suppose that we find that leatning rate $\eta$ works well for the natural log version (with loss in nats).
+What value of $\eta'$ should be used in the second version with loss measured in bits?
+You can use the relation that $\log_b z = \ln z/\ln b$.
+
+\solution{We have
+  \begin{eqnarray*}
+    - \Delta \Phi & = & \eta'\nabla_\Phi \log_2 P(\Phi) \\
+    & = & \eta' \nabla_\Phi \ln P(\Phi)/\ln 2 \\
+    & = & \frac{\eta'}{\ln 2} \nabla_\Phi \ln P(\Phi)
+  \end{eqnarray*}
+  To make the two updates the same we set $\eta' = \eta \ln 2$
+  }
+
+\medskip
+    
+{\bf (b)} Now consider the following simplified version of RMSprop where for each parameter $\Phi[i]$ we have
+$$\Phi_{t+1}[i] = \Phi_t[i] - \frac{\eta}{\sigma_i} \nabla_\Phi {\cal L}_\Phi(x_t,y_t)$$
+where $\sigma_i$ is exactly the standard deviation of $i$th component of the gradient as defined by
+\begin{eqnarray*}
+  \mu_i & = & E_{x,y}\left[\nabla_{\Phi[i]} \;{\cal L}_\Phi(x,y) \right] \\
+  \sigma_i & = & \sqrt{E_{x,y}\left[\left(\nabla_{\Phi[i]} \;{\cal L}_\Phi(x,y) - \mu_i\right)^2\right]}
+\end{eqnarray*}
+
+If we replace ${\cal L}$ by $2{\cal L}$ what learning rate $\eta'$ should we use with loss $2{\cal L}$ to get the same temperature?
+
+\solution{If we double the loss function we also double $\sigma_i$ and we have $\eta' = \eta$.  For RMSprop we get that the learning rate is (approximately) invariant
+to scaling the loss function.  It is not clear whether this has any significance.}
+
+\bigskip
+{\bf Problem 2. 25 pts}  This problem is on a non-standard form of adaptive learning rates.  In general when we consider the significance of a change $\Delta x$ to a number $x$ it is reasonable to consider
+the change as a percentage of $x$.  For example, a baseline annual raise in salary is often a percentage raise when different employees have significantly different salaries.  So we might consider the following
+``multiplicative update SGD'' which we will write here for batch size 1.
+
+\begin{equation}
+  \Phi^{t+1}[i] = \Phi^t[i] - \eta \;\max(\epsilon,|\Phi^t[i]|)\;\;\hat{g}(\Phi,x_t,y_t)[i]
+  \label{mult}
+\end{equation}
+
+where $\hat{g}(\Phi,x,y)$ abbreviates the gradient $\nabla_\Phi{\cal L}(\Phi,x,y)$ where ${\cal L}(\Phi,x,y)$ is the loss for the training point $(x,y)$ at parameter setting $\Phi$, and where
+and $\hat{g}(\Phi,x,y)[i]$ is the $i$th component of the gradient.  For $|\Phi^t[i]| >> \epsilon$ this is a multiplicative update.
+Multiplicative updates have a long history and rich theory for mixtures of experts prior to the deep revolution.  However, I do not know of a citation for
+the above multiplicative variant of SGD (let me know if you find one later).  The parameter $\epsilon$ allows a weight to flip sign --- to pass through zero more easily.
+
+Recall that a stationary point is a parameter setting where the total gradient is zero.
+
+\begin{equation}
+  \sum_{(x,y) \sim \train}\; \nabla_\Phi\;{\cal L}(x,y) = 0
+  \label{stationary}
+\end{equation}
+
+\medskip
+    {\bf (a)} At a stationary point of the loss function, is the expected update of equation (\ref{mult}) over a random draw of $(x_t,y_t)$ always equal to zero.  In other words, is a stationary point of the loss function
+    also a stationary point of the update equation?
+
+\solution{Yes, a stationary point of the loss function is also a stationary point of the update equation.
+  \begin{eqnarray*}
+    & & E_{(x,y) \sim \train} \;\;\eta\;\min(\epsilon,|\Phi^t[i]|)\;\left(\nabla_\Phi \;{\cal L}(\Phi,x,y)\right)[i]  \\
+    \\
+    & = & \eta\;\min(\epsilon,|\Phi[i]|)\;E_{(x,y)\sim\train} \left(\nabla_\Phi {\cal L}(\Phi,x,y)\right)[i] \\
+    \\
+    & = & 0
+  \end{eqnarray*}
+  }
+
+\medskip
+{\bf (b)} Consider an adaptive algorithm which makes the update proportional to the loss. i.e.,
+\begin{equation}
+  \Phi^{t+1}= \Phi^t - \eta\;{\cal L}(\Phi,x_t,y_t)\;\hat{g}^t
+  \label{loss}
+\end{equation}
+Is a stationary point of the loss function always a stationary point of the update defined by (\ref{loss})?  Justify your answer.
+
+\medskip
+You can assume that there exists a training set of two points $(x_1,y_1)$ and $(x_2,y_2)$ and a stationary point of the loss
+function $\Phi$ with ${\cal L}(\Phi,x_1,y_1) \not =  {\cal L}(\Phi,x_2,y_2)$ and $\nabla_\Phi(\Phi,x_1,y_1) \not = \nabla_\Phi(\Phi,x_2,y_2)$.
+
+\solution{No, the expected update can be non-zero at a stationary point of the loss function.  Weighing the updates by something that depends on the draw of $(x,y)$ effectively changes the weighting on the training points
+  which changes the stationarity condition.  Writing this in English counts as a correct solution. A formal counter example can be given using the assumed conditions:
+\begin{eqnarray*}
+  & & E_{(x,y) \sim \train} \;\;\eta\;{\cal L}(\Phi,x,y)\;\;\nabla_\Phi \;{\cal L}(\Phi,x,y)  \\
+  \\
+  & = & \eta \; \frac{1}{2}\left({\cal L}(\Phi,x_1,y_1)\;\left(\nabla_\Phi \;{\cal L}(\Phi,x_1,y_1)\right) + {\cal L}(\Phi,x_2,y_2)\;\left(\nabla_\Phi \;{\cal L}(\Phi,x_2,y_2)\right)\right) \\
+  \\
+  & = & \eta \; \frac{1}{2}\left({\cal L}_1\;\left(\nabla_\Phi \;{\cal L}(\Phi,x_2,y_2)\right) + {\cal L}_2\;\left(\nabla_\Phi \;{\cal L}(\Phi,x_2,y_2)\right)\right) \\
+  \\
+  & = & \eta ({\cal L}_1 + {\cal L}_2) \; \frac{1}{2}\left(\frac{{\cal L}_1}{{\cal L}_1 + {\cal L}_2}\;\left(\nabla_\Phi \;{\cal L}(\Phi,x_2,y_2)\right) + \frac{{\cal L}_2}{{\cal L}_1 + {\cal L}_2}\;\left(\nabla_\Phi \;{\cal L}(\Phi,x_2,y_2)\right)\right) \\
+    \\
+    & \not = & \eta \;({\cal L}_1 + {\cal L}_2) \frac{1}{2}\left(\;\nabla_\Phi \;{\cal L}(\Phi,x_1,y_1) + \nabla_\Phi \;{\cal L}(\Phi,x_2,y_2)\right) \\
+    \\
+    & = & 0
+  \end{eqnarray*}
+
+In Adam and RMSProp we have a weighting that depends on a moving average of the second moment of the gradients.  This is essentially a weighting that depends on a random draw over the training data.
+It has been shown that stationary points of Adam and RMSProp updates do not necessarily correspond to stationary points of the loss function.
+}
+    
+\bigskip
+{\bf Problem 3. (25 pts)} This problem is on robust loss functions.  With a robust loss one identifies ``outliers'' in the data and ``gives up'' on modeling the outliers.
+In particular we can consider the following bounded version of cross-entropy loss
+\begin{eqnarray*}
+  {\cal L}(\Phi,x,y) & = & \lmax \;\tanh \left(\frac{- \ln P_\Phi(y|x)}{\lmax}\right) \\
+  \\
+  \tanh(z) & = & \frac{2}{1+e^{-2z}} - 1.
+\end{eqnarray*}
+For $z \geq 0$ we have $\tanh(z) \geq 0$ and we have that the above robust loss is non-negative and can never be larger than $\lmax$.
+
+\medskip
+{\bf (a)}  Consider the function $\lmax \;\tanh(\frac{z}{\lmax})$. Use a first order Taylor expansion of the $\tanh$ function about zero to show that for $|z| << \lmax$ we have
+$$\lmax\; \tanh\left(\frac{z}{\lmax}\right) \approx z$$
+This implies that the robust cross entropy loss is essentially equal to the cross entropy loss when the cross entropy loss is small compared to $\lmax$.
+
+\solution{
+  The first order Taylor expansion of the $\tanh$ function about zero is
+  $$\tanh(u) \approx u$$ yielding the desired result.
+}
+
+\medskip
+{\bf (b)} Consider the case where the cross-entropy loss is large compared to $\lmax$.  For $z >> 1$ we have that the derivative $\tanh'(z)$ is essentially zero.
+What parameter update is made on a training point whose cross entropy loss is large compared to $\lmax$ if we model $\tanh'(z) = 0$ in such cases.
+
+\solution{
+  The update on a data point $(x,y)$ is
+  $$\Phi^{t+1} = \Phi^t - \eta \nabla_\Phi {\cal L}(\Phi,x,y)$$
+  At a point where the derivative of the sigmoid is essentially zero this update will be essentially zero.  So ``outliers'' do not effect the model parameters.
+}
+
+\medskip
+{\bf (c)} Look up the PAC-Bayesian generalization guarantee that is stated in terms of the $L_2$ norm of the weight vector.
+Explain why the robust loss function comes with a better PAC-Bayesian generalization guarantee.  Intuitively, the improvement in generalization
+is due to insensitivity to ``outliers'' (or things the model cannot understand).
+
+\solution{
+  The $L_2$ PAC-Bayeisan guarantee in the notes is
+  $${\cal L}_\sigma(\Phi) \leq \frac{10}{9}\left(\hat{\cal L}_\sigma(\Phi) + \frac{5\lmax}{N}\left(\frac{||\Phi -\Phi_{\mathrm{init}}||^2}{2\sigma^2} + \ln \frac{1}{\delta}\right)\right)$$
+  Reducing $\lmax$ both reduces $\hat{L}_\sigma(\Phi)$ and reduces the penalty for the model complexity (the norm squared of the distance from the initialization).
+}
+
+\medskip
+{\bf (d)} Curriculum learning is the idea that one first learns how to solve easy problems and then gradually learns ever harder problems. At a high informal level describe a learning algorithm based on the above robust loss function
+which can be intuitively motivated as curriculum learning.
+
+
+\solution{
+  Easier problems should correspond to cases where the cross entropy loss can be made small.  So setting $\lmax$ to be smallish will focus the model on the easy problems while ignoring the hard problems.
+  Gradually increasing $\lmax$ will gradually pay more attention to the harder problems.
+
+  \medskip
+  Another possible answer is that holding $\lmax$ fixed will focus first on the easy problems ignoring the hard problems but as the understanding of easy problems improves the harder problems become easy problems and
+  we automatically gradually pay attention to harder and harder problems even with a fixed value of $\lmax$.
+}
+
+\bigskip
+{\bf Problem 4. (25 pts)} This problem is on PAC-Bayes bounds for classifiers built on CLIP using {\bf prompt engineering}.  CLIP is a joint probability model on images
+and English descriptions (image captions).  Clip is trained on a large corpus of captioned images drawn from the web and defines a probability distribution over captions $c$ given an image $x$.
+We can use CLIP for image classification (as in ImageNet) using ``prompt engineering''.  A ``prompt'' is caption specific to an image label.  For example the caption ``this is an image of a cat'' for the label ``cat'' or ``this is an image of a dog''
+for the label ``dog''. For each image class $y$ we have a prompt (hypothetical caption) $c(y)$.
+We can then label an image $x$ with class $\hat{y}$ using the rule
+$$\hat{y}(x) = \argmax_y \;P_{\mathrm{CLIP}}(c(y)|x)$$
+Suppose that we search (somehow) over the captions $c(y_1),\ldots,c(y_n)$ assigned to the $n$
+image classes $y_1,\ldots,y_n$ to find a set of captions minimizing the error rate (0-1 loss) on a set of $N$ labeled training images.  Let $\hat{\cal L}$ be the error rate on the training data.
+Also suppose that CLIP assigns a prior probability $P_{\mathrm{CLIP}}(c)$ to any caption $c$ independent of any image.  Consider the PAC-Bayes bound on generalization loss for predictive rule $h$
+where the bound is guaranteed to hold for all $h$ with probability at least $1-\delta$.
+$${\cal L}(h) \leq \frac{10}{9}\left(\hat{{\cal L}}(h) + \frac{5\lmax}{N_\mathrm{Train}}\left(- \ln P(h) +\ln\frac{1}{\delta}\right)\right)$$
+Apply this rule to the CLIP image classifier using CLIP's ``prior probability'' on the caption space.
+
+\solution{
+  $${\cal L}(h) \leq \frac{10}{9}\left(\hat{{\cal L}}(h) + \frac{5}{N}\left(\left(\sum_y - \ln P_{\mathrm{CLIP}}(c(y))\right) +\ln\frac{1}{\delta}\right)\right)$$
+
+  I am not proposing that searching over all captions is a good idea.  Some narrower prior is called for.
+}
+
+\end{document}
