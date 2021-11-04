@@ -130,7 +130,7 @@ Gibbs CD1 is equivalent in expectation to pseudolikelihood.
 \\
 \nabla_\Phi {\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\frac{1}{Z_n} \sum_{y'} e^{s({\cal Y}[n=y'])} \; \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y}) \\
 \\
-& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P_s({\cal Y}[n]=y'\;|\;{\cal Y}[N(n)]) \; \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y})
+& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P_s({\cal Y}[n]=y'\;|\;{\cal Y}/n) \; \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y})
 \end{eqnarray*}
 }
 
@@ -138,13 +138,13 @@ Gibbs CD1 is equivalent in expectation to pseudolikelihood.
 
 {\huge
 \begin{eqnarray*}
-\nabla_\Phi\;{\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P_s({\cal Y}[n]=y'\;|\;{\cal Y}[N(n)])\; \nabla_\Phi\;s({\cal Y}[n]=y')\right) - \nabla_\Phi s({\cal Y}) \\
+\nabla_\Phi\;{\cal L}_{\mathrm{PL}} & = & E_{{\cal Y} \sim \pop}\;\sum_n \left(\sum_{y'} P_s({\cal Y}[n]=y'\;|\;{\cal Y}/n)\; \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y}) \\
 \\
-& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(E_{y' \sim P_s({\cal Y}[n]=y'\;|\;{\cal Y}[N(n)])} \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y}) \\
+& = & E_{{\cal Y} \sim \pop}\;\sum_n \left(E_{y' \sim P_s({\cal Y}[n]=y'\;|\;{\cal Y}/n)} \nabla_\Phi\;s({\cal Y}[n=y'])\right) - \nabla_\Phi s({\cal Y}) \\
 \\
-& \propto & E_{{\cal Y} \sim \pop}\;E_n\;  E_{y' \sim P_s({\cal Y}[n]=y'\;|\;{\cal Y}[N(n)])}\;\; (\nabla_\Phi\;s({\cal Y}[n=y']) - \nabla_\Phi s({\cal Y})) \\
+& \propto & E_{{\cal Y} \sim \pop}\;E_n\;  E_{y' \sim P_s({\cal Y}[n]=y'\;|\;{\cal Y}/n)}\;\; (\nabla_\Phi\;s({\cal Y}[n=y']) - \nabla_\Phi s({\cal Y})) \\
 \\
-& = & E_{{\cal Y} \sim \pop}\;E_n\; E_{y' \sim P_s({\cal Y}[n]=y'\;|\;{\cal Y}[N(n)])}\;\; \nabla_\Phi\;{\cal L}_{\mbox{Gibbs CD(1)}}
+& = & E_{{\cal Y} \sim \pop}\;E_n\; E_{y' \sim P_s({\cal Y}[n]=y'\;|\;{\cal Y}/n)}\;\; \nabla_\Phi\;{\cal L}_{\mbox{Gibbs CD(1)}}
 \end{eqnarray*}
 }
 
