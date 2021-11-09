@@ -7,45 +7,68 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Winter 2021}
   \vfill
-  \centerline{\bf Perils of Differential Entropy}
+  \centerline{\bf Parels of Differential Entropy}
   \vfill
 \vfill
 \vfill
 
-\slide{Differential Entropy and Cross-Entropy}
+\slide{Differential Entropy}
 
-Cross entropy is a challenging objective for continuous structured values $y$ such as images and sounds.
+In the case of a continuous density (as opposed to a discrete probability) we have the notion of differential entropy.
+
+\vfill
+For a density $p(x)$ on a real value $x$ we have
 
 \vfill
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y) \\
+H(p) & = & E_{x \sim p}\;\left[-\ln p(x)\right] \\
 \\
-\Phi^* & = & \argmin_\Phi \;E_{\tuple{x,y} \sim \popd}\;-\ln p_\Phi(y|x)
+& = &\int_{-\infty}^\infty p(x) \;(-\ln p(x)) dx
 \end{eqnarray*}
 
-\vfill
-GANs replace the cross-entropy loss with an adversarial discrimination loss.
-
-\vfill
-Rate-Distortion Auto-Encoders (RDAs) and Variational Auto-Encoders (VAEs) use the cross-entropy objective more directly.
-
-\slide{Differential Cross-Entropy can Diverge to $-\infty$}
+\slide{Differential Entropy can Diverge to $-\infty$}
 
 For a uniform distribution over an interval on the real line of width $\Delta$ we have
 
 \begin{eqnarray*}
-H & = & E_{x \sim p} -\ln p(x) \\
+H & = & E_{x \sim p} \left[-\ln p(x)\right] \\
+\\
+& = & E_{x \sim p} \left[-\ln \frac{1}{\Delta}\right] \\
 \\
 & = & \ln \Delta
 \end{eqnarray*}
 
 \vfill
-As $\Delta \rightarrow 0$ we have $H \rightarrow -\infty$.
+\centerline{As $\Delta \rightarrow 0$ we have $H \rightarrow -\infty$}
+
+\slide{Differential Entropy can Diverge to $-\infty$}
+
+\hfill
+
+{\huge
+\begin{eqnarray*}
+H({\cal N}(0,\sigma^2)) & = & E_{x \sim {\cal N}(0,\sigma^2)} \left[ -\ln \left(\frac{1}{\sqrt{\pi}\sigma} \exp{\frac{-x^2}{2\sigma^2}}\right)\right] \\
+\\
+& =& E_{x \sim {\cal N}(0,\sigma^2)} \left[ \ln (\sqrt{\pi}\sigma) + \frac{-x^2}{2\sigma^2}\right] \\
+\\
+& = & (\ln\sigma) + \ln(\sqrt{\pi}) + E_x \left[\frac{x^2}{2\sigma^2}\right] \\
+\\
+& = & (\ln\sigma) + \ln(\sqrt{\pi}) + \frac{1}{2} \\
+\end{eqnarray*}
+}
 
 \vfill
-This also happens for a Gaussian ${\cal N}(0,\sigma)$ as $\sigma \rightarrow 0$.
+\centerline{As $\sigma \rightarrow 0$ we have $H \rightarrow -\infty$}
+
+\slide{Sensitivity to the Choice of Units}
+
+$$H(N(0,\sigma)) = C + \ln \sigma$$
+
+\vfill
+Differential entropy depends on the choice of units --- a distributions on lengths will have a different entropy
+when measuring in inches than when measuring in feet.
 
 \slide{Differential Cross-Entropy can Diverge to $-\infty$}
 
@@ -62,16 +85,8 @@ For each $y$ the density $p_\Phi(y)$ can go to infinity.
 \vfill
 This will drive the cross-entropy training loss to $-\infty$.
 
-\slide{Sensitivity to the Choice of Units}
 
-$$H(N(0,\sigma)) = C + \ln \sigma$$
-
-\vfill
-Differential entropy depends on the choice of units --- a distributions on lengths will have a different entropy
-when measuring in inches than when measuring in feet.
-
-
-\slide{Differential Entropy is Actually Infinite}
+\slide{Differential Entropy Can Be Considered Infinite}
 
 An actual real number carries an infinite number of bits.
 

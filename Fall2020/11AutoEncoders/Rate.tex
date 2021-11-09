@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input /Users/davidmcallester/ICloude/tex/SlidePreamble
+\input /Users/davidmcallester/ICloude/tex/preamble
 
 
 \begin{document}
@@ -26,10 +26,10 @@ Cross entropy is a challenging objective for continuous structured values $y$ su
 \end{eqnarray*}
 
 \vfill
-GANs replace the cross-entropy loss with an adversarial discrimination loss.
+GANs replace the differential cross-entropy loss with an adversarial discrimination loss.
 
 \vfill
-Rate-Distortion Auto-Encoders (RDAs) and Variational Auto-Encoders (VAEs) use the cross-entropy objective more directly.
+Rate-Distortion Auto-Encoders (RDAs) and Variational Auto-Encoders (VAEs) use the differential cross-entropy loss more directly.
 
 \slide{Rate-Distortion Autoencoders (RDAs)}
 
@@ -57,36 +57,6 @@ We can then define a rate-distortion loss.
 \vfill
 Here the rate is defined as a discrete cross-entropy.
 
-\slide{$L_2$ Distortion}
-
-$${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;-\ln P_\Phi(\tilde{z}_\Phi(y)) + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
-
-\vfill
-It is common to take
-
-\begin{eqnarray*}
-\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||^2 \\
-\\
-& = & -\ln p(y|\hat{y}) + C \;\;\;\;\;\mbox{for a Gaussian density}
-\end{eqnarray*}
-
-\vfill
-We will ignore the log density interpretation and just call this distortion.
-
-\slide{$L_1$ Distortion}
-
-$${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;-\ln P_\Phi(\tilde{z}_\Phi(y)) + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
-
-Alternatively we have
-
-\begin{eqnarray*}
-\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||_1 \hspace{4em}(L_1) \\
-\\
-& = & -\ln p(y|\hat{y}) + C \;\;\mbox{for a Laplace density}
-\end{eqnarray*}
-
-\vfill
-Again, we will ignore the log probability interpretation and just call this distortion.
 \slide{CNN-based Image Compression}
 
 These slides are loosely based on

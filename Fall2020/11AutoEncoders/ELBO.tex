@@ -7,7 +7,7 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Winter 2021}
   \vfill
   \vfill
   \centerline{\bf Variational Auto Encoders (VAEs)}
@@ -54,18 +54,12 @@ $z$ might be a physical scene causing image $y$.
 \vfill
 $z$ might be a word sequence causing speech sound $y$.
 
-\vfill
-To initially simplify the discussion, we consider models $P_\Phi(z)P_\Phi(y|z)$ where all variables are discrete.
-
-\vfill
-For example, $z$ might be a parse tree and $y$ the resulting word sequence.
-
 \slide{Latent Variables}
 
 {\color{red} $$P_\Phi(y) = \sum_z\;P_\Phi(z)P_\Phi(y|z) = E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)$$}
 
 \vfill
-$P_\Phi(z)$ is the prior.
+$P_\Phi(z)$ is typically called the prior.
 
 \vfill
 $P_\Phi(z|y)$ is the posterior where $y$ is the ``evidence''.
@@ -79,10 +73,7 @@ We assume models $P_\Phi(z)$ and $P_\Phi(y|z)$ are both samplable and computable
 In other words, we can sample from these distributions and for any given $z$ and $y$ we can compute $P_\Phi(z)$ and $P_\Phi(y|z)$.
 
 \vfill
-These assumptions hold for auto-regressive models (language).
-
-\vfill
-However, they fail for loopy graphical models where approximations must be used.
+These assumptions hold for auto-regressive models (language) and for Gaussian densities.
 
 \slide{Modeling $y$}
 
@@ -107,24 +98,58 @@ P_\Phi(y) & = & E_{z \sim P_\Phi(z)}\;P_\Phi(y|z)
 \end{eqnarray*}
 
 \vfill
-VAEs side-step the intractability problem by introducing another model component --- a model $\hat{P}_\Phi(z|y)$ to approximate the intractible $P_\Phi(z|y)$.
+VAEs side-step the intractability problem by introducing another model component --- a model $\hat{P}_\Psi(z|y)$ to approximate the intractible $P_\Phi(z|y)$.
 
 \slide{The Evidence Lower Bound (The ELBO)}
 
 {\huge
 \begin{eqnarray*}
- {\color{red} \ln P_\Phi(y)} & = & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{P_\Phi(y)P_\Phi(z|y)}{P_\Phi(z|y)} \\
+ {\color{red} \ln P_\Phi(y)} & = & E_{z \sim {\color{red} \hat{P}_\Psi(z|y)}} \ln \frac{P_\Phi(y)P_\Phi(z|y)}{P_\Phi(z|y)} \\
         \\
         \\
- & = & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \left(\ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Phi(z|y)}} + \ln \frac{{\color{red} \hat{P}_\Phi(z|y)}}{P_\Phi(z|y)}\right) \\
+ & = & E_{z \sim {\color{red} \hat{P}_\Psi(z|y)}} \left(\ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Psi(z|y)}} + \ln \frac{{\color{red} \hat{P}_\Psi(z|y)}}{P_\Phi(z|y)}\right) \\
  \\
  \\
-  & = & \left(E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Phi(z|y)}}\right) + KL({\color{red} \hat{P}_\Phi(z|y)},P_\Phi(z|y)) \\
+  & = & \left(E_{z \sim {\color{red} \hat{P}_\Psi(z|y)}} \ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Psi(z|y)}}\right) + KL({\color{red} \hat{P}_\Psi(z|y)},P_\Phi(z|y)) \\
   \\
   \\
-  &  \geq & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Phi(z|y)}} \;\;\;\;\;\mbox{The ELBO}
+  &  \geq & E_{z \sim {\color{red} \hat{P}_\Psi(z|y)}} \ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Psi(z|y)}} \;\;\;\;\;\mbox{The ELBO}
 \end{eqnarray*}
 }
+
+\slide{Variational Autoencoders}
+
+{\huge
+\begin{eqnarray*}
+\mbox{ELBO:}\;\;\;\;\;\ln P_\Phi(y)   &  \geq & E_{z \sim {\color{red} \hat{P}_\Psi(z|y)}} \ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Psi(z|y)}} \\
+  \\
+  \\
+  & = & E_{z \sim {\color{red} \hat{P}_\Psi(z|y)}} \ln \frac{P_\Phi(z)P_\Phi(y|z)}{{\color{red} \hat{P}_\Psi(z|y)}}\\
+  \\
+  \\
+\mbox{VAE:}\;\;\;- \ln P_\Phi(y)  & \leq & E_{z \sim {\color{red} \hat{P}_\Psi(z|y)}} \ln \frac{{\color{red} \hat{P}_\Psi(z|y)}}{P_\Phi(z)}  - \ln P_\Phi(y|z)
+\end{eqnarray*}
+}
+
+\vfill
+Here $\hat{P}_\Psi(z|y)$ is the encoder and $P_\Phi(y|z)$ is the decoder and the ``rate term'' $ E_{z|y}\;\ln \hat{P}_\Psi(z|y)/P_\Phi(z)$ is a KL-divergence.
+
+
+\slide{The Re-Parameterization Trick}
+
+We cannot do gradient descent into $\Psi$ to handle the dependence of the loss on the sampling compute $z \sim \hat{P}_\Psi(z|y)$.
+
+\vfill
+To handle this we sample noise $\epsilon$ from a fixed noise distribution and replace $\hat{P}_\Psi(z|y)$ with $\hat{P}_\Psi(z|y,\epsilon)$.
+
+\vfill
+The VAE training equation can then be written as
+
+\vfill
+\begin{eqnarray*}
+\Phi^*,\Psi^* & =  & \argmin_{\Phi,\Psi}\;E_{y,\epsilon}  \;\ln \frac{\hat{P}_\Psi(z|y,\epsilon)}{P_\Phi(z)}  - \ln P_\Phi(y|z)
+\end{eqnarray*}
+
 
 \slide{EM is Alternating Optimization of the ELBO}
 
@@ -140,48 +165,129 @@ $$\mbox{EM:}\;\;\;\;\;\; {\color{red} \Phi^{t+1}} =  \argmin_{\color{red} \Phi}\
 \centerline{(E Step) \hspace{6em} (M Step) ~}
 \centerline{ $\hat{P}_\Psi(z|y) = P_{\Phi^{\color{red} t}}(z|y)$ \hspace{2.5em} Hold $\hat{P}_\Psi(z|y)$ fixed \hspace{0em}~}
 
-\slide{Variational Autoencoders}
+
+\slide{Posterior (Encoder) Collapse}
+
+$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{y,z}  \;\ln \frac{\hat{P}_\Psi(z|y)}{P_\Phi(z)}  - \ln P_\Phi(y|z)$$
+
+\vfill
+Consider a trivial encoder with $P_\Psi(z^*|y) =1$ and $\hat{P}_\Phi(z^*) = 1$ for a fixed value $z^*$ independent of $y$ and the first term is zero.
+
+\vfill
+Under universal expressiveness we have $\hat{P}_{\Phi^*}(y|z) = \pop(y)$ yielding {\color{red} $\hat{H}_{\Psi,\Phi}(y|z) = H(y)$}.
+
+\vfill
+Therefore, under universal expressiveness {\bf there exists an optimal solution where
+the posterior (encoder) $P_\Psi(z|y)$ collapses}.
+
+\slide{The $\beta$-VAE}
 
 {\huge
 \begin{eqnarray*}
-\mbox{ELBO:}\;\;\;\;\;\ln P_\Phi(y)   &  \geq & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{P_\Phi(z,y)}{{\color{red} \hat{P}_\Phi(z|y)}} \\
-  \\
-  \\
-  & = & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{P_\Phi(z)P_\Phi(y|z)}{{\color{red} \hat{P}_\Phi(z|y)}}\\
-  \\
-  \\
-\mbox{VAE:}\;\;\;- \ln P_\Phi(y)  & \leq & E_{z \sim {\color{red} \hat{P}_\Phi(z|y)}} \ln \frac{{\color{red} \hat{P}_\Phi(z|y)}}{P_\Phi(z)}  - \ln P_\Phi(y|z)
+P_\Psi(y,z) & = & \pop(y)P_\Psi(z|y)\;\;\;\;\mbox{The sampling distribution on $y$, $z$} \\
+\\
+\mbox{VAE:}\;\;\;\Phi^*,\Psi^* &  = & \argmin_{\Phi,\Psi}\;E_{y,z}  \;\ln \frac{\hat{P}_\Psi(z|y)}{P_\Phi(z)}  - \ln P_\Phi(y|z) \\
+\\
+\mbox{$\beta$-  VAE:}\;\;\;\Phi^*,\Psi^* &  = & \argmin_{\Phi,\Psi}\;E_{y,z} \;\; \beta\left(\;\ln \frac{\hat{P}_\Psi(z|y)}{P_\Phi(z)}\right)  - \ln P_\Phi(y|z)
 \end{eqnarray*}
 }
 
 \vfill
-Here $\hat{P}_\Phi(z|y)$ is the encoder and $P_\Phi(y|z)$ is the decoder and the ``rate term'' $ E_{z|y}\;\ln \hat{P}_\Phi(z|y)/P_\Phi(z)$ is a KL-divergence.
+$\beta < 1$ may avoid posterior collapse.  $\beta > 1$ may improve interpretability.
 
+\slide{Autonomous Encoder VAE (AE-VAE)}
 
-\slide{VAE = RDA}
+In the autonomous encoder VAE we add an arbitrary loss function on the encoder $\Psi$.
+
 {\huge
 \begin{eqnarray*}
-\mbox{\color{red} VAE:}\;\;\;\Phi^*  & = & \argmin_\Phi E_{y \sim \pop,\;z \sim {\color{red} \hat{P}_\Phi(z|y)}}\;\; \ln \frac{{\color{red} \hat{P}_\Phi(z|y)}}{P_\Phi(z)}  - \ln P_\Phi(y|z)
+\mbox{$\beta$-VAE:}\;\;\;\Phi^*,\Psi^* &  = & \argmin_{\Phi,\Psi}\;E_{y,z} \;\; \beta\left(\;\ln \frac{\hat{P}_\Psi(z|y)}{P_\Phi(z)}\right)  - \ln P_\Phi(y|z) \\
+\\
+\\
+\mbox{AE-VAE:}\;\;\;\Phi^*,\Psi^* &  = & \argmin_{\Phi,\Psi}\;E_{y,z} \;\; \beta\left(\;\ln \frac{\hat{P}_\Psi(z|y)}{P_\Phi(z)}\right)  - \ln P_\Phi(y|z) + {\cal L}(\Psi)
 \end{eqnarray*}
 }
 
-\vfill
-$P_\Phi(z)$, $P_\Phi(y|z)$ and $\hat{P}_\Phi(z|y)$ are model components and we can switch the notation to $\hat{P}_\Phi(z)$ $\hat{P}_\Phi(y|z)$ and $P_\Phi(z|y)$
-with no change in the model.
+\slide{Autonomous Encoder VAE}
 
-\vfill
 {\huge
 \begin{eqnarray*}
-\mbox{\color{red} RDA:}\;\;\;\Phi^*  & = & \argmin_\Phi\; E_{y \sim \pop,\;z \sim P_\Phi(z|y)} \;\;\ln \frac{P_\Phi(z|y)}{\color{red} \hat{P}_\Phi(z)}  - \ln {\color{red} \hat{P}_\Phi(y|z)}
+\mbox{AE-VAE:}\;\;\;\Phi^*,\Psi^* &  = & \argmin_{\Phi,\Psi}\;E_{y,z} \;\; \beta\left(\;\ln \frac{\hat{P}_\Psi(z|y)}{P_\Phi(z)}\right)  - \ln P_\Phi(y|z) + {\cal L}(\Psi)
+\end{eqnarray*}
+
+\vfill
+We can hold the encoder $\hat{P}_\Psi(z|y)$ fixed and optimize $P_\Phi(z)$ and $P_\Phi(y|z)$ independently.
+
+\vfill
+Assuming universality it can be shown that the optimum for $P_\Phi(z)$ is the true marginal on $z$ under the distribution defined by the fixed encoder.
+
+\vfill
+Assuming universality the optimum for $P_\Phi(y|z)$ is the true conditional probability under the distribution defined by the fixed encoder.
+
+\vfill
+We then get that $P_{\Phi^*}(y)$ is the population distribution.
+
+
+\slide{Gaussian VAEs}
+
+\vfill
+\begin{eqnarray*}
+\mbox{VAE:}\;\;\;\Phi^*,\Psi^* &  = & \argmin_{\Phi,\Psi}\;E_{y,z}  \;\ln \frac{\hat{p}_\Psi(z|y)}{p_\Phi(z)}  - \ln p_\Phi(y|z) \\
+\end{eqnarray*}
+
+\vfill
+All models are Gaussian densities.
+
+\vfill
+{\huge 
+\begin{eqnarray*}
+p_\Phi(z[i]) & \propto & \exp((z[i]-\mu_\Phi[i])^2/2\sigma^2_\Phi[i])\\
+\\
+p_\Psi(z[i]|y) & \propto & \exp((z[i]-\hat{z}_\Psi(y)[i])^2/2\sigma^2_\Psi(y)[i])\\
+\\
+p_\Psi(y[i]|z) & \propto & \exp((y[i]-\hat{y}_\Phi(z)[i])^2/2\sigma^2(z)[i])\\
 \end{eqnarray*}
 }
 
+\slide{WLOG $\hat{p}_\Phi(z) = {\cal N}(0,I)$}
+
+The prior $p_\Phi(z)$ only appears in a KL term $KL(p_\Psi(z|y),p_\Phi(z))$.
+
 \vfill
-In an RDA we take $P_\Phi(y,z)$ to be $\pop(y)P_\Phi(z|y)$ so that the rate term is an upper bound on $I_\Phi(y,z)$.
+We can reparameterize $\hat{z}_\Psi(y)$ to $\hat{z}_{\Psi'}(y)$ such that
 
-\slide{VAE = RDA}
+\vfill
 
-to be continued ...
+$$KL(p_\Psi(z|y),p_{\Phi}(z)) = KL(p_{\Psi'}(z|y),{\cal N}(0,I)))$$
+
+\ignore{
+\vfill
+{\huge
+\begin{eqnarray*}
+KL_\Phi & = & \sum_i \;\frac{ \sigma_\Phi(y)[i]^2 +(\mu_\Phi(y)[i] - \mu_z[i])^2}{2\sigma_z[i]^2}
++ \ln\frac{\sigma_z[i]}{\sigma_\Phi(y)[i]} - \frac{1}{2}
+\\
+KL_{\Phi'} & = & \sum_i \;\frac{\sigma_{\Phi'}(y)[i]^2 +\mu_{\Phi'}(y)[i]^2}{2} + \ln\frac{1}{\sigma_{\Phi'}(y)[i]} - \frac{1}{2}
+\end{eqnarray*}
+
+Setting $\Phi'$ so that
+\begin{eqnarray*}
+\mu_{\Phi'}(y)[i] & = & (\mu_\Phi(y)[i] - \mu_z[i])/\sigma_z[i] \\
+\sigma_{\Phi'}(y)[i] & = & \sigma_\Phi(y)[i]/\sigma_z[i]
+\end{eqnarray*}
+
+\vfill
+gives {\color{red} $KL(p_{\Phi}(z|y),\hat{p}_\Phi(z)) = KL(p_{\Phi'}(z|y),{\cal N}(0,I))$}.
+}
+}
+\slide{Gaussian VAEs for Faces 2014}
+
+We can sample faces from the VAE by sampling noise $z$ from $p_\Phi(z)$ and then sampling an image $y$ from $p_\Phi(y|z)$.
+
+\vfill
+\centerline{\includegraphics[width = 3in]{\images/VariationalFaces}}
+\centerline{[Alec Radford]}
+
 
 \slide{END}
 

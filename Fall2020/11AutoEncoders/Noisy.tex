@@ -1,6 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
-
+\input /Users/davidmcallester/ICloude/tex/SlidePreamble
+\input /Users/davidmcallester/ICloude/tex/preamble
 
 \begin{document}
 
@@ -8,75 +7,55 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Autumn 2020}
+  \centerline{David McAllester, Autumn 2021}
   \vfill
   \centerline{Noisy Channel RDAs}
   \vfill
   \vfill
 
 
-\slide{Review of Rate-Distortion Autoencoders (RDAs)}
-
-We compress a continuous signal $y$ to a discrete value $\tilde{z}_\Phi(y)$.
-
-\vfill
-We decompress $\tilde{z}_\Phi(y)$ to $y_\Phi(\tilde{z}_\Phi(y))$.
-
-\vfill
-$$\Phi^* = \argmin_\Phi\; E_{y \sim \mathrm{Pop}}\;\;\;\;{\color{red} -\ln\;P_\Phi(\tilde{z}_\Phi(y))}\; +\; \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
-
-\vfill
-The loss is ``legitimate'' in that , unlike differential cross entropy, the loss terms are guaranteed to be non-negative.
-
-\vfill
-But the discrete cross entropy term is not differentiable.
-
-\vfill
-{\color{red} Noisy channel RDAs use a legitimate yet differentiable loss.}
-
-\slide{Rate as Channel Capacity}
+\slide{The KL term as Channel Capacity}
 
 \begin{eqnarray*}
-z & = & z_\Phi(y,\epsilon) \;\;\mbox{$\epsilon$ is fixed (parameter independent) noise} \\
+\Phi^* & = & \argmin_\Phi\; E_{y,z} \;\; \ln \frac{p_\psi(z\; |\; y)}{p_\Phi(z)}\; - \ln p_\Phi(y|z) \\
 \\
-p_{\Phi}(z) & = & \int \popd(y)p_\Phi(z|y)dy \;=\;  E_{y}\;\;p_\Phi(z|y) \\
 \\
-\Phi^* & = & \argmin_\Phi\; E_{y,\epsilon} \;\; {\color{red} \ln \frac{p_\Phi(z\; |\; y)}{p_\Phi(z)}}\; +\;\lambda\mathrm{Dist}(y,y_\Phi(z)) \\
-\\
- & = & \argmin_\Phi \;{\color{red} I_\Phi(y,z)} + \lambda E_{y,\epsilon}\; \mathrm{Dist}(y,y_\Phi(z))
+ & = & \argmin_\Phi \;{\color{red} I_{\Psi,\Phi}(y,z)} + E_{y,z}\; - \ln p_\Phi(y|z)
 \end{eqnarray*}
 
 \vfill
-The mutual information {\color{red} $I_\Phi(y,z)$} is the channel capacity giving the {\bf rate} of information transfer from $y$ to $z$.
+The mutual information {\color{red} $I_{\Psi,\Phi}(y,z)$} is the channel capacity giving the {\bf rate} of information transfer from $y$ to $z$.
 
-\slide{Mutual Information as a Channel Rate}
+\slide{$L_2$ Distortion}
 
-Typically we have $\epsilon \sim {\cal N}(0,I)$ and
+$${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;-\ln P_\Phi(\tilde{z}_\Phi(y)) + \lambda\mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
 
 \vfill
+It is common to take
+
 \begin{eqnarray*}
-z_\Phi(y,\epsilon) & = & \mu_\Phi(y) +\sigma_\Phi(y)\odot \epsilon
+\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||^2 \;\;\;\;\;(L_2) \\
+\\
+& = & -\frac{1}{\lambda}\ln p(y|\hat{y}) + C \;\;\;\;\;\mbox{for}\;p(y|\hat{y}) \propto \exp(-\lambda||y-\hat{y}||^2)
 \end{eqnarray*}
 
 \vfill
-\vfill
-Here $p_\Phi(z|y)$ is a Gaussian with mean $\mu_\Phi(y)$ and a diagonal covariance matrix with diagonal entries $\sigma_\Phi(y)$.
+We will ignore the log density interpretation and just call this $L_2$ distortion.
 
-\slide{A Variational Bound on Mutual Information}
+\slide{$L_1$ Distortion}
 
-$$\Phi^* = \argmin_\Phi\; E_{y,\epsilon} \;\; {\color{red} \ln \frac{p_\Phi(z\; |\; y)}{p_\Phi(z)}}\; +\;\lambda\mathrm{Dist}(y,y_\Phi(z))$$
+$${\cal L}(\Phi) = E_{y \sim \mathrm{Pop}}\;-\ln P_\Phi(\tilde{z}_\Phi(y)) + \lambda \mathrm{Dist}(y,y_\Phi(\tilde{z}_\Phi(y)))$$
 
-\vfill
-Here $p_\Phi(z)$ is the marginal of $z$ under the distribution defined by $y$ and $\epsilon$.
+Alternatively we have
 
-\vfill
-$$p_{\Phi}(z) \; = \; \int \popd(y)p_\Phi(z|y)dy \;=\;  E_{y}\;\;p_\Phi(z|y)$$
-
-\vfill
-We cannot compute $p_{\Phi}(z)$.
+\begin{eqnarray*}
+\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||_1 \hspace{4em}(L_1) \\
+\\
+& = & -\frac{1}{\lambda}\ln p(y|\hat{y}) + C \;\;\mbox{for}\;p(y|\hat{y}) \propto \exp(-\lambda ||y-\hat{y}||_1)
+\end{eqnarray*}
 
 \vfill
-Instead we will use a model $\hat{p}_\Phi(z)$ to approximate $p_{\Phi}(z)$.
+Again, we will ignore the log density interpretation and just call this $L_1$ distortion.
 
 \slide{A Variational Bound on Mutual Information}
 
@@ -101,6 +80,27 @@ Instead we will use a model $\hat{p}_\Phi(z)$ to approximate $p_{\Phi}(z)$.
 \vfill
 \centerline{$y,\epsilon$\includegraphics[width=4in]{\images/deconvleft} $\;\;z\;\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
 
+
+\slide{VAE = RDA}
+{\huge
+\begin{eqnarray*}
+\mbox{\color{red} VAE:}\;\;\;\Phi^*  & = & \argmin_\Phi E_{y \sim \pop,\;z \sim {\color{red} \hat{P}_\Phi(z|y)}}\;\; \ln \frac{{\color{red} \hat{P}_\Phi(z|y)}}{P_\Phi(z)}  - \ln P_\Phi(y|z)
+\end{eqnarray*}
+}
+
+\vfill
+$P_\Phi(z)$, $P_\Phi(y|z)$ and $\hat{P}_\Phi(z|y)$ are model components and we can switch the notation to $\hat{P}_\Phi(z)$ $\hat{P}_\Phi(y|z)$ and $P_\Phi(z|y)$
+with no change in the model.
+
+\vfill
+{\huge
+\begin{eqnarray*}
+\mbox{\color{red} RDA:}\;\;\;\Phi^*  & = & \argmin_\Phi\; E_{y \sim \pop,\;z \sim P_\Phi(z|y)} \;\;\ln \frac{P_\Phi(z|y)}{\color{red} \hat{P}_\Phi(z)}  - \ln {\color{red} \hat{P}_\Phi(y|z)}
+\end{eqnarray*}
+}
+
+\vfill
+In an RDA we take $P_\Phi(y,z)$ to be $\pop(y)P_\Phi(z|y)$ so that the rate term is an upper bound on $I_\Phi(y,z)$.
 
 \slide{Sampling}
 
