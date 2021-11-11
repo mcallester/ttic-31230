@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input /Users/davidmcallester/ICloude/tex/SlidePreamble
+\input /Users/davidmcallester/ICloude/tex/preamble
 
 
 \begin{document}
@@ -14,13 +14,59 @@
   \centerline{Vector Quantized Variational Autoencoders (VQ-VAEs)}
   \vfill
   \vfill
-  
-\slide{Gaussian VAEs 2013}
-
-\centerline{Sample {\color{red} $z \sim {\cal N}(0,I)$} and compute {\color{red} $y_\Phi(z)$}}
+\slide{Gaussian VAEs}
 
 \vfill
-\centerline{\includegraphics[width = 4in]{\images/VariationalFaces}}
+\begin{eqnarray*}
+\mbox{VAE:}\;\;\;\Phi^*,\Psi^* &  = & \argmin_{\Phi,\Psi}\;E_{y,z}  \;\ln \frac{\hat{p}_\Psi(z|y)}{p_\Phi(z)}  - \ln p_\Phi(y|z) \\
+\end{eqnarray*}
+
+\vfill
+All models are Gaussian densities.
+
+\vfill
+{\huge 
+\begin{eqnarray*}
+p_\Phi(z[i]) & \propto & \exp((z[i]-\mu_\Phi[i])^2/2\sigma^2_\Phi[i])\\
+\\
+p_\Psi(z[i]|y) & \propto & \exp((z[i]-\hat{z}_\Psi(y)[i])^2/2\sigma^2_\Psi(y)[i])\\
+\\
+p_\Phi(y[i]|z) & \propto & \exp((y[i]-\hat{y}_\Phi(z)[i])^2/2\sigma_\Phi^2(z)[i])\\
+\end{eqnarray*}
+}
+
+\slide{WLOG $p_\Phi(z) = {\cal N}(0,I)$}
+
+
+There is a simple reparameterization $\Phi'$ and $\Psi'$ of $\Phi$ and $\Psi$ such that $\Phi'$ and $\Psi'$ give the same value of the ELBO
+but $p_{\Phi'}(z) = {\cal N}(0,I)$.
+
+\ignore{
+\vfill
+{\huge
+\begin{eqnarray*}
+KL_\Phi & = & \sum_i \;\frac{ \sigma_\Phi(y)[i]^2 +(\mu_\Phi(y)[i] - \mu_z[i])^2}{2\sigma_z[i]^2}
++ \ln\frac{\sigma_z[i]}{\sigma_\Phi(y)[i]} - \frac{1}{2}
+\\
+KL_{\Phi'} & = & \sum_i \;\frac{\sigma_{\Phi'}(y)[i]^2 +\mu_{\Phi'}(y)[i]^2}{2} + \ln\frac{1}{\sigma_{\Phi'}(y)[i]} - \frac{1}{2}
+\end{eqnarray*}
+
+Setting $\Phi'$ so that
+\begin{eqnarray*}
+\mu_{\Phi'}(y)[i] & = & (\mu_\Phi(y)[i] - \mu_z[i])/\sigma_z[i] \\
+\sigma_{\Phi'}(y)[i] & = & \sigma_\Phi(y)[i]/\sigma_z[i]
+\end{eqnarray*}
+
+\vfill
+gives {\color{red} $KL(\hat{p}_{\Phi}(z|y),p_\Phi(z)) = KL(\hat{p}_{\Phi'}(z|y),{\cal N}(0,I))$}.
+}
+}
+\slide{Gaussian VAEs for Faces 2014}
+
+We can sample faces from the VAE by sampling noise $z$ from $p_\Phi(z)$ and then sampling an image $y$ from $p_\Phi(y|z)$.
+
+\vfill
+\centerline{\includegraphics[width = 3in]{\images/VariationalFaces}}
 \centerline{[Alec Radford]}
 
 \slide{VQ-VAEs 2019}
@@ -95,9 +141,6 @@ We preserve information about the image $s$ by minimizing the distortion between
 \Phi^* & = & \argmin_\Phi \;E_s\; \beta||L[X,Y,I] - \hat{L}[X,Y,I]||^2 + ||s -\hat{s}||^2
 \end{eqnarray*}
 
-\vfill
-This is a two-level rate-distortion auto-encoder where the rate can be no larger than $XY\ln K$.
-
 \slide{Parameter-Specific Learning Rates}
 
 $$||L[X,Y,I] - \hat{L}[X,Y,I]||^2 = \sum_{x,y}\;||L[x,y,I] - C[z[x,y],I]||^2$$
@@ -127,7 +170,15 @@ At a stationary point we get that $C[k,I]$ is the mean of the set of vectors $L[
 
 \slide{Straight Through Gradients}
 
-The latent variables are discrete so some approximation to SGD must be used.
+
+{\huge
+\begin{eqnarray*}
+z[x,y] & = & \argmin_k \;||L[x,y,I] - C[k,I]|| \\
+\\
+\hat{L}[x,y,I] & = & C[z[x,y],I]
+\end{eqnarray*}
+}
+$z[x,y].\grad = 0$ and back-propagation fails.  This is true for any discrete value in a network.
 
 \vfill
 They use ``straight-through'' gradients.
@@ -170,7 +221,12 @@ We then train an image classifier from the generated pairs and measure its accur
 \vfill
 \centerline{\includegraphics[width=7in]{\images/VQ-VAE23}}
 
-\slide{Direct Rate-Distortion Evaluation.}
+\slide{Image Compression}
+
+\vfill
+\centerline{\includegraphics[width = 10in]{\images/VQgirl}}
+
+\slide{Rate-Distortion Evaluation.}
 
 Rate-distortion metrics for image compression to discrete representations support unambiguous rate-distortion evaluation.
 
@@ -180,11 +236,20 @@ Rate-distortion metrics also allow one to explore the rate-distortion trade-off.
 \vfill
 \centerline{\includegraphics[width = 10in]{\images/VQVAE2Scores}}
 
-\slide{Image Compression}
+\slide{DALL$\cdot$E: A Text-Conditional Image dVAE}
+\vfill
+DALL$\cdot$E is a text-conditional VQ-VAE model of images.
 
 \vfill
-\centerline{\includegraphics[width = 10in]{\images/VQgirl}}
+The Vector quantization is done independent of the text.  However, the model of the probability distribution of the symbolic image $z[x,y]$ is conditioned on text.
 
-\slide{END}
+\vfill
+\centerline{\huge Ramesh et al. 2021}
+
+\slide{DALL$\cdot$E}
+
+\centerline{\includegraphics[height= 5.5in]{\images/DALLE1}}
+
+\slideplain{END}
 
 \end{document}

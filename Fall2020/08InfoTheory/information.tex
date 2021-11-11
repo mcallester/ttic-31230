@@ -126,6 +126,23 @@ Mutual information is a KL divergence and hence differential mutual information 
   & = & E_{x,y} \ln \frac{p(x,y)}{p(x)p(y)}
 \end{eqnarray*}
 
+\slide{Mutual Information}
+
+$I(x,y)$ is the reduction in the number of bits we need to name $y$ as a result of observing $x$ (on average).
+
+{\huge
+\begin{eqnarray*}
+I(x,y) & = & E \;\ln \frac{P(x,y)}{P(x)P(y)} \\
+\\
+\\
+& = & E \;\ln \frac{P(x,y)}{P(x)} - \ln P(y) \\
+\\
+\\
+& = & H(y) - H(y|x) \\
+\end{eqnarray*}
+}
+Intuitively, how much does $x$ know about $y$?
+
 \slide{The Data Processing Inequality}
 
 For continuous $y$ and $z$ with $z = f(y)$ we get that $H(z)$ can be either larger or smaller than $H(y)$ (consider $z = ay$ for $a >1$ vs. $a<1$).
@@ -134,6 +151,40 @@ For continuous $y$ and $z$ with $z = f(y)$ we get that $H(z)$ can be either larg
 However, mutual information is a KL divergence and is more meaningful than entropy and for $z = f(y)$ we do have
 
 $$I(x,z) \leq I(x,y)$$
+
+\slide{Continuous Cross-Entropy as Distortion}
+
+For a Gaussian VAE on images we typically have
+
+{\huge
+\begin{eqnarray*}
+\Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  - \ln p_\Phi(y|z)\\
+\\
+p_\Phi(y|z) & \propto & \exp(||y-\hat{y}_\Phi(z)||^2/2\sigma^2) \\
+\\
+\Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  \;{\color{red} +\; \frac{1}{2\sigma^2}||y-\hat{y}_\Phi(z)||^2}
+\end{eqnarray*}
+}
+
+The KL divergence term is not problematic. The problematic differential cross-entropy term can just be thought of as a weighted $L_2$ distortion.
+
+\slide{Continuous Cross-Entropy as Distortion}
+
+
+{\huge
+\begin{eqnarray*}
+\Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  \;{\color{red} +\; \lambda\;\mathrm{Dist}(y,\hat{y}_\Phi(z))}
+\end{eqnarray*}
+}
+
+\vfill
+Various choices for distortion are possible including $L_2$ and $L_1$ distortion measures.
+
+\begin{eqnarray*}
+\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||^2 \hspace{4em}(L_2) \\
+\\
+\mathrm{or}\;\;\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||_1 = \sum_i \;|y[i] - \hat{y}[i]| \hspace{4em}(L_1)
+\end{eqnarray*}
 
 
 \slide{END}
