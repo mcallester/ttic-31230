@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input /Users/davidmcallester/ICloude/tex/SlidePreamble
+\input /Users/davidmcallester/ICloude/tex/preamble
 
 \begin{document}
 
@@ -54,15 +54,24 @@ $z$ might be a physical scene causing image $y$.
 \vfill
 $z$ might be a word sequence causing speech sound $y$.
 
-\slide{Latent Variables}
+\slide{Latent Variables Models}
 
-{\color{red} $$P_{\Phi,\Theta}(y) = \sum_z\;P_\Phi(z)P_\Theta(y|z) = E_{z \sim P_\Phi(z)}\;P_\Theta(y|z)$$}
+\begin{eqnarray*}
+P_{\Phi,\Theta}(z,y) & = & P_\Phi(z)P_\Theta(y|z) \\
+\\
+P_{\Phi,\Theta}(y) & = & \sum_z\; P_{\Phi,\Theta}(z,y) \\
+\\
+P_{\Phi,\Theta}(z|y) & = & P_{\Phi,\Theta}(z,y)/P_{\Phi,\Theta}(y)
+\end{eqnarray*}
 
 \vfill
-$P_\Phi(z)$ is typically called the prior.
+$P_\Phi(z)$ is the prior.
 
 \vfill
-$P_{\Phi,\Theta}(z|y)$ is the posterior where $y$ is the ``evidence''.
+$P_\Theta(y|z)$ is the ``decoder''
+
+\vfill
+$P_{\Phi,\Theta}(z|y)$ is the posterior where $y$ is the ``evidence'' about $z$.
 
 \slide{Assumptions}
 
@@ -75,30 +84,51 @@ In other words, we can sample from these distributions and for any given $z$ and
 \vfill
 These assumptions hold for auto-regressive models (language) and for Gaussian densities.
 
-\slide{Modeling $y$}
+\slide{Computing $P_{\Phi,\Theta}(y)$}
 
-\vfill
+
 We would like to use cross-entropy from the population to the model probability $P_{\Phi,\Theta}(y)$.
 
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln P_{\Phi,\Theta}(y) \\
-\\
-P_{\Phi,\Theta}(y) & = & E_{z \sim P_\Phi(z)}\;P_\Theta(y|z)
+\Phi^*,\Theta^* & = & \argmin_{\Phi,\Theta} \;E_{y \sim \pop}\;-\ln P_{\Phi,\Theta}(y)
 \end{eqnarray*}
 
-\vfill
-But even when $P_\Phi(z)$ and $P_\Theta(y|z)$ are samplable and computable we cannot typically compute $P_{\Phi,\Theta}(y)$ or $P_{\Phi,\Theta}(z|y)$.
+\slide{Computing $P_{\Phi,\Theta}(y)$}
 
-\slide{Modeling $y$}
+But even when $P_\Phi(z)$ and $P_\Theta(y|z)$ are samplable, if $z$ is a structured value we cannot typically compute $P_{\Phi,\Theta}(y)$.
+
+\vfill
+$$P_{\Phi,\Theta}(y) = \sum_z\;P_\Phi(z)P_\Theta(y|z) = E_{z\sim P_\Phi(z)}\;P_\Theta(y|z)$$
+
+\vfill
+The sum is too large and sampling $z$ from $P_\Phi(z)$ is unlikely to sample the values that dominate the sum.
+
+\slide{Computing $P_{\Phi,\Theta}(y)$}
+
+\vfill
+A much better estimate could be achieved by importance sampling --- sampling $z$ from the posterior $P_{\Phi,\Theta}(z|y)$.
+
+{\huge
+\begin{eqnarray*}
+P_{\Phi,\Theta}(y) & = & \sum_z\;P_\Phi(z) P_\Theta(y|z) \\
+\\
+ & = & \sum_z\;P_{\Phi,\Theta}(z|y)\;\frac{P_\Phi(z)P_\Theta(y|z)}{P_{\Phi,\Theta}(z|y)} \\
+ \\
+ \\
+  & = & E_{z\sim P_{\Phi,\Theta}(z|y)}\;\frac{P_\Phi(z)P_\Theta(y|z)}{P_{\Phi,\Theta}(z|y)}
+\end{eqnarray*}
+}
+
+\slide{Computing $P_{\Phi,\Theta}(y)$}
 
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_{y \sim \popd}\;-\ln P_{\Phi,\Theta}(y) \\
-\\
-P_{\Phi,\Theta}(y) & = & E_{z \sim P_\Phi(z)}\;P_\Theta(y|z)
+P_{\Phi,\Theta}(y) & = & E_{z\sim P_{\Phi,\Theta}(z|y)}\;\frac{P_\Phi(z)P_\Theta(y|z)}{P_{\Phi,\Theta}(z|y)}
 \end{eqnarray*}
 
+Unfortunately the conditional distribution $P_{\Phi,\Theta}(z|y)$ also cannot be computed or sampled from.
+
 \vfill
-VAEs side-step the intractability problem by introducing another model component --- a model $P_\Psi(z|y)$ to approximate the intractible $P_{\Phi,\Theta}(z|y)$.
+Variational Bayes side-steps the intractability problem by introducing another model component --- a model $P_\Psi(z|y)$ to approximate the intractible $P_{\Phi,\Theta}(z|y)$.
 
 \slide{The Evidence Lower Bound (The ELBO)}
 
@@ -120,30 +150,26 @@ VAEs side-step the intractability problem by introducing another model component
 \slide{The ELBO}
 
 {\huge
-\begin{eqnarray}
-\ln P_{\Phi,\Theta}(y)   &  \geq & E_{z \sim {\color{red} P_\Psi(z|y)}} \ln \frac{P_{\Phi,\Theta}(z,y)}{{\color{red} P_\Psi(z|y)}} \label{ELBO1} \\
-  \nonumber  \\
-  \nonumber \\
+\begin{eqnarray*}
+\ln P_{\Phi,\Theta}(y)   &  \geq & E_{z \sim {\color{red} P_\Psi(z|y)}} \ln \frac{P_{\Phi,\Theta}(z,y)}{{\color{red} P_\Psi(z|y)}} \\
+  \\
+  \\
   & = & E_{z \sim {\color{red} P_\Psi(z|y)}} \ln \frac{P_\Phi(z)P_\Theta(y|z)}{{\color{red} P_\Psi(z|y)}} \nonumber \\
-  \nonumber \\
-  \nonumber \\
-  H(y) & \leq & E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\;\ln\frac{P_\Psi(z|y)}{P_\Phi(z)} - \ln P_\Theta(y|z)
-  \label{ELBO2}
-\end{eqnarray}
-
-\vfill
-(\ref{ELBO1}) holds with equality when $P_\Psi(z|y)$ equals $P_{\Phi,\Theta}(z|y)$.
-
-\vfill
-(\ref{ELBO2}) holds with equality when we also have $P_{\Phi,\Theta}(y) = \pop$.
+   \\
+   \\
+- \ln P_{\Phi,\Theta}(y) & \leq & E_{z \sim P_\Psi(z|y)}\;\ln\frac{P_\Psi(z|y)}{P_\Phi(z)} - \ln P_\Theta(y|z)
+\end{eqnarray*}
 }
+\vfill
+The inequalities hold with equality when $P_\Psi(z|y)$ equals $P_{\Phi,\Theta}(z|y)$.
+
 
 \slide{The Variational Auto-Encoder (VAE)}
 
 $$\Phi^*,\Theta^*,\Psi^* = \argmin_{\Phi,\Theta,\Psi}\;E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\;\ln\frac{P_\Psi(z|y)}{P_\Phi(z)} \;-\; \ln P_\Theta(y|z)$$
 
 \vfill
-Here $P_\Psi(z|y)$ is the encoder and $P_\Theta(y|z)$ is the decoder and the ``rate term'' $ E\left[\ln P_\Psi(z|y)/P_\Phi(z)\right]$ is a KL-divergence.
+Here $P_\Phi(z)$ is {\bf the prior}, $P_\Psi(z|y)$ is {\bf  the encoder} and $P_\Theta(y|z)$ is {\bf the decoder} and the ``rate term'' $ E\left[\ln P_\Psi(z|y)/P_\Phi(z)\right]$ is a KL-divergence.
 
 \slide{The Re-Parameterization Trick}
 
@@ -178,72 +204,81 @@ $$\mbox{EM:}\;\;\;\;\;\; {\color{red} \Phi^{t+1},\Theta^{t+1}} =  \argmin_{\colo
 \centerline{(E Step) \hspace{6em} (M Step) ~}
 \centerline{ $P_\Psi(z|y) = P_{\Phi^{\color{red} t},\Theta^{\color{red} t}}(z|y)$ \hspace{2.5em} Hold $P_\Psi(z|y)$ fixed \hspace{0em}~}
 
-\slide{An Alternate Derivation of the VAE}
-
-Consider the following quantities for the distribution defined by $y \sim \pop$ and $z \sim P_\Psi(z|y)$.
-
-{\huge
-\begin{eqnarray*}
-H(z,y) & = & H(y) + H(z|y) \; = \;H(z) + H(y|z) \\
-\\
-H(y) & = & H(z,y) - H(z|y) \\
-\\
-& = & H(z) + H(y|z) - H(z|y) \\
-\\
-& \leq & H(z,P_\Phi) + H(y,P_\Theta\;|\;z) - H(z|y) \;\;\;\mbox{replacing entropies by cross-entropes} \\
-\\
-& = & E_{y \sim \pop, z\sim P_\Psi(z|y)}\;\ln\frac{P_\Psi(z|y)}{P_\Phi(z)} - \ln P_\Theta(y|z)
-\end{eqnarray*}
-}
-
 \slide{Encoder Autonomy}
 
-$$H(y)\;\; \leq \;\;  E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\;\ln\frac{P_\Psi(z|y)}{P_\Phi(z)} - \ln P_\Theta(y|z)$$
+{\huge
+\begin{eqnarray*}
+\mbox{VAE:}\;\;\;\Phi^*,\Theta^*,\Psi^* &  = & \argmin_{\Phi,\Theta,\Psi}\;E_{y\sim \pop,z\sim P_\Psi(z|y)}  \;\ln \frac{P_\Psi(z|y)}{P_\Phi(z)}  - \ln P_\Theta(y|z)
+\end{eqnarray*}
+
+But consider computing $\Phi^*$ and $\Theta^*$ for a fixed $\Psi$:
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi\;E_{y \sim \pop,z \sim P_\Psi(z|y)}\left[ -\ln P_\Phi(z)\right] \\
+\\
+\Theta^* & = & \argmin  _\Theta\; E_{y \sim \pop,z \sim P_\Psi(z|y)}\left[-\ln P_\Theta(y|z)\right]
+\end{eqnarray*}
 
 \vfill
-Replacing an entropy by a cross-entropy will yield an equality when the model equals the source.
+{\color{red} Independent of the encoder $\Psi$} if $P_{\Phi^*}(z) = P_{\pop,\Psi}(z)$ and $P_{\Theta^*}(y|z) = P_{\pop,\Psi}(y|z)$ then the value of the objective function
+is $H(y)$ (the minimum possible) and $\pop(y) = P_{\Phi,\Theta}(y)$.
 
-\vfill
-Thus {\color{red} for any encoder $\Psi$} we get equality when $P_\Phi(z) = P_{\pop,\Psi}(z)$ and $P_\Theta(y|z) = P_{\pop,\Psi}(y|z)$.
+}
 
+\slide{Two-Pass Optimization}
 
-\slide{Encoder Autonomy and Posterior Collapse}
-
-$$H(y)\;\; \leq \;\;  E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\;\ln\frac{P_\Psi(z|y)}{P_\Phi(z)} - \ln P_\Theta(y|z)$$
-
-\vfill
-Equality can be achieved for any $\Psi$.
-
-\vfill
-For example $P_\Psi(z|y)$ can ``collapse'' to put all its weight on a single value.  This is called posterior collapse.
-
-\slide{The $\beta$-VAE}
+Fix the prior $P_\Psi(z)$ at a simple naive distribution and optimize the encoder $P_\Psi(z|y)$ and the decoder $P_\Theta(y|z)$.
 
 {\huge
 \begin{eqnarray*}
-\mbox{VAE:}\;\;\;\Phi^*,\Theta^*,\Psi^* &  = & \argmin_{\Phi,\Theta,\Psi}\;E_{y\sim \pop,z\sim P_\Psi(z|y)}  \;\ln \frac{P_\Psi(z|y)}{P_\Phi(z)}  - \ln P_\Theta(y|z) \\
-\\
-\\
-\\
-\mbox{$\beta$-VAE:}\;\;\;\Phi^*,\Theta^*,\Psi^* &  = & \argmin_{\Phi,\Theta,\Psi}\;E_{y\sim \pop,z\sim P_\Psi(z|y)} \;\; \beta\left(\;\ln \frac{P_\Psi(z|y)}{P_\Phi(z)}\right)  - \ln P_\Theta(y|z)
+\mbox{VAE:}\;\;\;\Theta^*,\Psi^* &  = & \argmin_{\Theta,\Psi}\;E_{y\sim \pop,z\sim P_\Psi(z|y)}  \;\ln \frac{P_\Psi(z|y)}{P_\Phi(z)}  - \ln P_\Theta(y|z)
+\end{eqnarray*}
+}
+
+We can think of this as lossy data compression under a simple fixed prior (coding) on the compressed file $z$.
+
+\vfill
+While the fixed prior $P_\Phi(z)$ can be taken to be very simple, the decoder $P_\Theta(y|z)$ should be optimized aggressively.
+
+\slide{Two-Pass Optimization}
+
+{\huge
+\begin{eqnarray*}
+\mbox{VAE:}\;\;\;\Theta^*,\Psi^* &  = & \argmin_{\Theta,\Psi}\;E_{y\sim \pop,z\sim P_\Psi(z|y)}  \;\ln \frac{P_\Psi(z|y)}{P_\Phi(z)}  - \ln P_\Theta(y|z)
 \end{eqnarray*}
 }
 
 \vfill
-$\beta < 1$ may avoid posterior collapse.  $\beta > 1$ may improve interpretability.  This is widely used but the motivation seems unclear.
-
-\slide{Autonomous Encoder VAE (AE-VAE)}
-
-In the autonomous encoder VAE we add an arbitrary loss function on the encoder $\Psi$.
-
 {\huge
+Only the last term depends on the decoder and so we get an optimal decoder for the encoder $P_{\Psi^*}(z)$.
+
+$$\Theta^* = \argmin_\Theta\;E_{y \sim \pop,z \sim P_{\Psi^*}(z|y)}\left[-\ln P_\Theta(y|z)\right]$$
+
+Then train the prior $P_\Phi(z)$ aggressively holding the encoder and decoder fixed.
+
 \begin{eqnarray*}
-\mbox{AE-VAE:}\;\;\;\Phi^*,\Theta^*,\Psi^* &  = & \argmin_{\Phi,\Theta,\Psi}\;E_{y\sim \pop,z\sim P_\Psi(z|y)} \;\; \;\ln \frac{P_\Psi(z|y)}{P_\Phi(z)}  - \ln P_\Theta(y|z) + {\cal L}(\Psi)
+\Phi^* &  = & \argmin_{\Phi}\;E_{y\sim \pop,z\sim P_{\Psi^*}(z|y)}\left[-\ln P_\Phi(z)\right]
 \end{eqnarray*}
 }
 
-For any regularization on $\Psi$ the first two terms will converge to $H(y)$ if $P_\Phi(z)$ and $P_\Theta(y|z)$ are sufficiently expressive and optimizable.
 
+\slide{Two-Pass Optimization}
+
+{\huge
+
+$$\Theta^* = \argmin_\Theta\;E_{y \sim \pop,z \sim P_{\Psi^*}(z|y)}\left[-\ln P_\Theta(y|z)\right]$$
+
+\begin{eqnarray*}
+\Phi^* &  = & \argmin_{\Phi}\;E_{y\sim \pop,z\sim P_{\Psi^*}(z|y)}\left[-\ln P_\Phi(z)\right]
+\end{eqnarray*}
+
+\vfill
+Under a universality assumption for $\Phi$ and $\Theta$ we have that a perfect model of $y$ can be achieved by optimizing the prior $P_\Phi(z)$ in a final pass for pre-trained $\Psi$ and $\Theta$.
+
+\vfill
+{\bf Joint Training of $\Phi$ with $\Psi$ and $\Theta$ is not required.}
+
+}
 
 \slide{END}
 

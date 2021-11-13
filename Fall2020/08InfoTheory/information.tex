@@ -9,10 +9,33 @@
   \bigskip
   \centerline{David McAllester, Winter 2021}
   \vfill
-  \centerline{\bf Parels of Differential Entropy}
+  \centerline{\bf Gaussian Models}
+  \vfill
+  \centerline{\bf and The Parels of Differential Entropy}
   \vfill
 \vfill
 \vfill
+
+\slide{Gaussian VAEs}
+
+\vfill
+\begin{eqnarray*}
+\mbox{VAE:}\;\;\;\Phi^*,\Psi^* &  = & \argmin_{\Phi,\Psi}\;E_{y,z}  \;\ln \frac{\hat{p}_\Psi(z|y)}{p_\Phi(z)}  - \ln p_\Phi(y|z) \\
+\end{eqnarray*}
+
+\vfill
+All models are Gaussian densities.
+
+\vfill
+{\huge 
+\begin{eqnarray*}
+p_\Phi(z[i]) & \propto & \exp((z[i]-\mu_\Phi[i])^2/2\sigma^2_\Phi[i])\\
+\\
+p_\Psi(z[i]|y) & \propto & \exp((z[i]-\hat{z}_\Psi(y)[i])^2/2\sigma^2_\Psi(y)[i])\\
+\\
+p_\Phi(y[i]|z) & \propto & \exp((y[i]-\hat{y}_\Phi(z)[i])^2/2\sigma_\Phi^2(z)[i])\\
+\end{eqnarray*}
+}
 
 \slide{Differential Entropy}
 

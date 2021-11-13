@@ -14,53 +14,7 @@
   \centerline{Vector Quantized Variational Autoencoders (VQ-VAEs)}
   \vfill
   \vfill
-\slide{Gaussian VAEs}
 
-\vfill
-\begin{eqnarray*}
-\mbox{VAE:}\;\;\;\Phi^*,\Psi^* &  = & \argmin_{\Phi,\Psi}\;E_{y,z}  \;\ln \frac{\hat{p}_\Psi(z|y)}{p_\Phi(z)}  - \ln p_\Phi(y|z) \\
-\end{eqnarray*}
-
-\vfill
-All models are Gaussian densities.
-
-\vfill
-{\huge 
-\begin{eqnarray*}
-p_\Phi(z[i]) & \propto & \exp((z[i]-\mu_\Phi[i])^2/2\sigma^2_\Phi[i])\\
-\\
-p_\Psi(z[i]|y) & \propto & \exp((z[i]-\hat{z}_\Psi(y)[i])^2/2\sigma^2_\Psi(y)[i])\\
-\\
-p_\Phi(y[i]|z) & \propto & \exp((y[i]-\hat{y}_\Phi(z)[i])^2/2\sigma_\Phi^2(z)[i])\\
-\end{eqnarray*}
-}
-
-\slide{WLOG $p_\Phi(z) = {\cal N}(0,I)$}
-
-
-There is a simple reparameterization $\Phi'$ and $\Psi'$ of $\Phi$ and $\Psi$ such that $\Phi'$ and $\Psi'$ give the same value of the ELBO
-but $p_{\Phi'}(z) = {\cal N}(0,I)$.
-
-\ignore{
-\vfill
-{\huge
-\begin{eqnarray*}
-KL_\Phi & = & \sum_i \;\frac{ \sigma_\Phi(y)[i]^2 +(\mu_\Phi(y)[i] - \mu_z[i])^2}{2\sigma_z[i]^2}
-+ \ln\frac{\sigma_z[i]}{\sigma_\Phi(y)[i]} - \frac{1}{2}
-\\
-KL_{\Phi'} & = & \sum_i \;\frac{\sigma_{\Phi'}(y)[i]^2 +\mu_{\Phi'}(y)[i]^2}{2} + \ln\frac{1}{\sigma_{\Phi'}(y)[i]} - \frac{1}{2}
-\end{eqnarray*}
-
-Setting $\Phi'$ so that
-\begin{eqnarray*}
-\mu_{\Phi'}(y)[i] & = & (\mu_\Phi(y)[i] - \mu_z[i])/\sigma_z[i] \\
-\sigma_{\Phi'}(y)[i] & = & \sigma_\Phi(y)[i]/\sigma_z[i]
-\end{eqnarray*}
-
-\vfill
-gives {\color{red} $KL(\hat{p}_{\Phi}(z|y),p_\Phi(z)) = KL(\hat{p}_{\Phi'}(z|y),{\cal N}(0,I))$}.
-}
-}
 \slide{Gaussian VAEs for Faces 2014}
 
 We can sample faces from the VAE by sampling noise $z$ from $p_\Phi(z)$ and then sampling an image $y$ from $p_\Phi(y|z)$.
@@ -83,28 +37,74 @@ VQ-VAE-2, Razavi et al. June, 2019
 \vfill
 VQ-VAE-2, Razavi et al. June, 2019
 
-\slide{Vector Quantized VAEs (VQ-VAE)}
 
-VQ-VAEs effectively perform $k$-means on vectors in the model so as to represent vectors by discrete cluster centers.
+\slide{The VQ Recipe}
 
-\vfill
-We use $x$ and $y$ for spatial image coordinates and use $s$ (for signal) to denote images.
+{\huge
+This is an abstraction of the methodology used in vector quantized VAEs.
 
-\slide{VQ-VAE Encoder-Decoder}
-
-\centerline{\includegraphics[width =5in]{\images/VQCodes}}
+$$\Psi^*,\Theta^* = \argmin_{\Psi,\Theta} E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\left[{\cal L}_{\mathrm{enc}}(\Psi,z,y) \;-\;\ln P_\Theta(y|z)\right]$$
 
 \vfill
-In the one-layer case the latent variable (compressed image) is a ``symbolic image'' $z[X,Y]$ where $z[x,y]$ is a symbol (a cluster index).
+Since the loss ${\cal L}_{\mathrm{enc}}(\Psi,z,y)$ depends only on the encoder we have
+
+$$\Theta^* = \argmin_\Theta\;E_{y \sim \pop,z \sim P_{\Psi^*}(z|y)}\left[-\ln P_\Theta(y|z)\right]$$
+
+Then train $\Phi$ by
+
+\begin{eqnarray*}
+\Phi^* &  = & \argmin_{\Phi}\;E_{y\sim \pop,z\sim P_{\Psi^*}(z|y)}\left[-\ln P_\Phi(z)\right]
+\end{eqnarray*}
+}
+
+
+\slide{The VQ Recipe}
+
+{\huge
+
+$$\Theta^* = \argmin_\Theta\;E_{y \sim \pop,z \sim P_{\Psi^*}(z|y)}\left[-\ln P_\Theta(y|z)\right]$$
+
+\begin{eqnarray*}
+\Phi^* &  = & \argmin_{\Phi}\;E_{y\sim \pop,z\sim P_{\Psi^*}(z|y)}\left[-\ln P_\Phi(z)\right]
+\end{eqnarray*}
 
 \vfill
-Naively $z[X,Y]$ can be represented with $XY \log_2 K$ bits.
+Under a universality assumption for $\Phi$ and $\Theta$ we have that a perfect model of $y$ can be achieved by optimizing the prior $P_\Phi(z)$ in a final pass for pre-trained $\Psi$ and $\Theta$.
 
-\slide{VQ-VAE Image Sampler}
+\vfill
+Joint Training of $\Phi$ with $\Psi$ and $\Theta$ is not required.
 
-\centerline{\includegraphics[height =2in]{\images/VQSampler}}
+}
 
-But they also train an autoregressive probability model (pixel CNN) giving a probability $P_\Phi(z[X,Y])$ for the symbolic image $z[X,Y]$.
+\slide{VQ-VAE-2 Image Model}
+
+
+Here we present a rational reconstruction and simplification of the VQ-VAE-2.
+
+
+\centerline{\includegraphics[height =2in]{\images/VQSampler} \parbox[b]{1.0in}{\Large $z_2$ \\ \\ $z_1$ \\ \\ $y$ \\ \\ ~}}
+
+\vfill
+In the multi-resolution case (similar to progressive GANs) we train a finest resolution VAE first with latent variable $z_1$.
+
+\vfill
+We then model $P(z_1)$ recursively using a coarser resolution latent variable $z_2$ and so on.
+
+\slide{VQ-VAE Image Model}
+
+\centerline{\includegraphics[height =2in]{\images/VQSampler} \parbox[b]{1.0in}{\Large $z_2$ \\ \\ $z_1$ \\ \\ $y$ \\ \\ ~}}
+
+\vfill
+
+At each layer $z_i$ is a ``symbolic image'' --- each pixel is assigned a symbol --- and the $P(z_i)$ is an auto-regressive model
+analogous to a language model.
+
+\slide{VQ-VAE Image Model}
+
+\centerline{\includegraphics[height =2in]{\images/VQSampler} \parbox[b]{1.0in}{\Large $z_2$ \\ \\ $z_1$ \\ \\ $y$ \\ \\ ~}}
+
+\vfill
+Each layer can use the same training recipe except that in the first layer $y$ is continuous.
 
 \vfill
 This gives  $-\log_2 P_\Phi(z[X,Y])$ bits per image (much lower).
@@ -113,62 +113,52 @@ This gives  $-\log_2 P_\Phi(z[X,Y])$ bits per image (much lower).
 To sample an image they sample $z[X,Y]$ from $P_\Phi(z[X,Y])$.
 
 
-\slide{VQ-VAE Encode-Decode Training}
+\slide{VQ-VAE Training}
 
-We train a code book $C[K,I]$ where $C[k,I]$ is the center vector of cluster $k$.
+We wish to model $s$ where $s$ is either the image or a coarser symbolic image of a previous layer.
+
+\vfill
+We have an encoder network, such as a CNN, which produces a layer with a vector at each pixel position.
+
+\begin{eqnarray*}
+L[X,Y,I] & = & \mathrm{Enc}_\Phi(s) \\
+\end{eqnarray*}
+
+Intuitively we cluster the vectors $L(x,y,I)$ using K-means clustering to produce cluster centers where $C[k,I]$
+is the cluster center vector of cluster $k$.
+
+\slide{VQ-VAE Training}
+
+We then replace each vector $L[x,y,I]$ by the nearest cluster center to give $\hat{L}[X,Y,I]$.
 
 {\huge
 \begin{eqnarray*}
-L[X,Y,I] & = & \mathrm{Enc}_\Phi(s) \\
-\\
 z[x,y] & = & \argmin_k \;||L[x,y,I] - C[k,I]|| \\
 \\
 \hat{L}[x,y,I] & = & C[z[x,y],I] \\
-\\
-\hat{s} & = & \mathrm{Dec}_\Phi(\hat{L}[X,Y,I])
+\end{eqnarray*}
+}
+
+The ``symbolic image'' $z[X,Y]$ is the latent variable.
+
+\slide{VQ-VAE Training}
+
+Finally we decode $\hat{L}[X,Y,I]$ with a model $P_\Theta(s|z)$.
+
+\slide{Training the Code Book}
+
+We then apply the first step of the training recipe to the following loss function.
+
+{\huge
+\begin{eqnarray*}
+\Psi^*,\Theta^* & = & \argmin_{\Psi,\Theta} \;E_{s\sim \pop,z\sim P_\Psi(z|s)}\left[ \frac{\beta}{2}||L[X,Y,I] - \hat{L}[X,Y,I]||^2 -\ln P_\Theta(s|z)\right]
 \end{eqnarray*}
 }
 
 \vfill
-The ``symbolic image'' $z[X,Y]$ is the latent variable (compressed image) with naive bit length $XY\log_2 K$.
+Here the first term of the loss depends only on the encoder (no dependence on the decoder).
 
-\slide{Training the Code Book}
-
-We preserve information about the image $s$ by minimizing the distortion between $L[X,Y,I]$ and its reconstruction $\hat{L}[X,Y,I]$.
-
-\vfill
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_s\; \beta||L[X,Y,I] - \hat{L}[X,Y,I]||^2 + ||s -\hat{s}||^2
-\end{eqnarray*}
-
-\slide{Parameter-Specific Learning Rates}
-
-$$||L[X,Y,I] - \hat{L}[X,Y,I]||^2 = \sum_{x,y}\;||L[x,y,I] - C[z[x,y],I]||^2$$
-
-\vfill
-For the gradient of this they use
-
-\begin{eqnarray*}
-\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & 2\beta({L}[x,y,I]- C[z[x,y],I]) \\
-\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & 2(C[z[x,y],I] - L[x,y,I])
-\end{eqnarray*}
-
-\vfill
-This gives a parameter-specific learning rate for $C[K,I]$.
-
-\vfill
-Parameter-specific learning rates do not change the stationary points (the points where the gradients are zero).
-
-\slide{The Relationship to $K$-means}
-
-\begin{eqnarray*}
-\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & 2(C[z[x,y],I] - L[x,y,I])
-\end{eqnarray*}
-
-\vfill
-At a stationary point we get that $C[k,I]$ is the mean of the set of vectors $L[x,y,I]$ with $z[x,y] = k$ (as in $K$-means).
-
-\slide{Straight Through Gradients}
+\slide{Handling Discrete Latents}
 
 
 {\huge
@@ -178,35 +168,17 @@ z[x,y] & = & \argmin_k \;||L[x,y,I] - C[k,I]|| \\
 \hat{L}[x,y,I] & = & C[z[x,y],I]
 \end{eqnarray*}
 }
-$z[x,y].\grad = 0$ and back-propagation fails.  This is true for any discrete value in a network.
 
-\vfill
-They use ``straight-through'' gradients.
+Since $z[x,y]$ is discrete we have $z[x,y].\grad = 0$.
+They use ``straight-through'' gradients and ``k-means'' gradients.
 
+{\huge
 \begin{eqnarray*}
-\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \hat{L}[x,y,I].\grad
+L[x,y,I].\grad & = & \hat{L}[x,y,I].\grad + \beta(L[x,y,I] - C[z[x,y],I]) \\
+\\
+C[k,I].\grad & = & \sum_{z[x,y]=k} \gamma(C[k,I] - L[x,y,I])
 \end{eqnarray*}
-
-\vfill
-This assumes low distortion between $L[X,Y,I]$ and $\hat{L}[X,Y,I]$.
-
-\slide{A Suggested Modification}
-
-The parameter $\beta$ is paying two roles
-
-\vfill
-\begin{itemize}
-\item It controls the relative weight of the two distortion losses.
-
-\vfill
-\item It controls the learning rate adjustment for the codebook.
-\end{itemize}
-
-\vfill
-Shouldn't we have separate parameters for these two roles?
-
-\slide{Multi-Layer Vector Quantized VAEs}
-\centerline{\includegraphics[width =10in]{\images/VQ-VAE24}}
+}
 
 \slide{Quantitative Evaluation}
 
@@ -249,6 +221,23 @@ The Vector quantization is done independent of the text.  However, the model of 
 \slide{DALL$\cdot$E}
 
 \centerline{\includegraphics[height= 5.5in]{\images/DALLE1}}
+
+\slide{Vector Quantized VAEs (VQ-VAE)}
+
+VQ-VAEs effectively perform $k$-means on vectors in the model so as to represent vectors by discrete cluster centers.
+
+\vfill
+We use $x$ and $y$ for spatial image coordinates and use $s$ (for signal) to denote images.
+
+\slide{VQ-VAE Encoder-Decoder}
+
+\centerline{\includegraphics[width =5in]{\images/VQCodes}}
+
+\vfill
+In the one-layer case the latent variable (compressed image) is a ``symbolic image'' $z[X,Y]$ where $z[x,y]$ is a symbol (a cluster index).
+
+\vfill
+Naively $z[X,Y]$ can be represented with $XY \log_2 K$ bits.
 
 \slideplain{END}
 
