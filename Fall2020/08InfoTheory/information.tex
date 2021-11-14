@@ -137,20 +137,6 @@ Note that $KL(p,p) = 0$ independent of $H(p)$.
 
 \slide{Mutual Information}
 
-For two random variables $x$ and $y$ there is a distribution on pairs $(x,y)$ determined by the population distribution.
-
-\vfill
-Mutual information is a KL divergence and hence differential mutual information is always non-negative.
-
-\vfill
-\begin{eqnarray*}
-  I(x,y) & \doteq & KL(p(x,y),p(x)p(y)) \\
-  \\
-  & = & E_{x,y} \ln \frac{p(x,y)}{p(x)p(y)}
-\end{eqnarray*}
-
-\slide{Mutual Information}
-
 $I(x,y)$ is the reduction in the number of bits we need to name $y$ as a result of observing $x$ (on average).
 
 {\huge
@@ -165,6 +151,18 @@ I(x,y) & = & E \;\ln \frac{P(x,y)}{P(x)P(y)} \\
 \end{eqnarray*}
 }
 Intuitively, how much does $x$ know about $y$?
+
+
+\slide{Differential Mutual Information}
+
+\begin{eqnarray*}
+  I(x,y) & = & KL(p(x,y),p(x)p(y)) \\
+  \\
+  & = & E_{x,y} \ln \frac{p(x,y)}{p(x)p(y)}
+\end{eqnarray*}
+
+\vfill
+Mutual information is a KL divergence and hence differential mutual information is always non-negative.
 
 \slide{The Data Processing Inequality}
 
@@ -183,9 +181,9 @@ For a Gaussian VAE on images we typically have
 \begin{eqnarray*}
 \Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  - \ln p_\Phi(y|z)\\
 \\
-p_\Phi(y|z) & \propto & \exp(||y-\hat{y}_\Phi(z)||^2/2\sigma^2) \\
+p_\Phi(y|z) & \propto & \frac{1}{Z}\;\exp(||y-\hat{y}_\Phi(z)||^2/2\sigma^2) \\
 \\
-\Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  \;{\color{red} +\; \frac{1}{2\sigma^2}||y-\hat{y}_\Phi(z)||^2}
+\Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  \;{\color{red} +\; \frac{1}{2\sigma^2}||y-\hat{y}_\Phi(z)||^2 + d\ln \sigma}
 \end{eqnarray*}
 }
 

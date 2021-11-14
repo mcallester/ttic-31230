@@ -38,84 +38,45 @@ VQ-VAE-2, Razavi et al. June, 2019
 VQ-VAE-2, Razavi et al. June, 2019
 
 
-\slide{The VQ Recipe}
+
+\slide{VQ-VAE-2 Model}
+
+
+\centerline{\includegraphics[height =2in]{\images/VQSampler} \parbox[b]{1.0in}{\Large $z_1$ \\ \\ $z_2  $ \\ \\ $y$ \\ \\ ~}}
+
+\vfill
+The probability of an image $y$ is defined by the generator.
+
+\vfill
+The generator is top-down and is similar to that of a progressive GAN.
+
+
+\slide{VQ-VAE-2 Model}
+
+
+\centerline{\includegraphics[height =2in]{\images/VQSampler} \parbox[b]{1.0in}{\Large $z_1$ \\ \\ $z_2  $ \\ \\ $y$ \\ \\ ~}}
 
 {\huge
-This is an abstraction of the methodology used in vector quantized VAEs.
-
-$$\Psi^*,\Theta^* = \argmin_{\Psi,\Theta} E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\left[{\cal L}_{\mathrm{enc}}(\Psi,z,y) \;-\;\ln P_\Theta(y|z)\right]$$
+$$P_{\Phi,\Theta}(y) = \sum_{z_1\ldots,z_n}\; P_\Phi(z_1,\ldots,z_N)P_\Theta(y|z_1,\ldots,z_N).$$
 
 \vfill
-Since the loss ${\cal L}_{\mathrm{enc}}(\Psi,z,y)$ depends only on the encoder we have
-
-$$\Theta^* = \argmin_\Theta\;E_{y \sim \pop,z \sim P_{\Psi^*}(z|y)}\left[-\ln P_\Theta(y|z)\right]$$
-
-Then train $\Phi$ by
-
-\begin{eqnarray*}
-\Phi^* &  = & \argmin_{\Phi}\;E_{y\sim \pop,z\sim P_{\Psi^*}(z|y)}\left[-\ln P_\Phi(z)\right]
-\end{eqnarray*}
-}
-
-
-\slide{The VQ Recipe}
-
-{\huge
-
-$$\Theta^* = \argmin_\Theta\;E_{y \sim \pop,z \sim P_{\Psi^*}(z|y)}\left[-\ln P_\Theta(y|z)\right]$$
-
-\begin{eqnarray*}
-\Phi^* &  = & \argmin_{\Phi}\;E_{y\sim \pop,z\sim P_{\Psi^*}(z|y)}\left[-\ln P_\Phi(z)\right]
-\end{eqnarray*}
+Each $z_i$ is a ``symbolic image'': an assignment of an embedded symbol to each pixel.
 
 \vfill
-Under a universality assumption for $\Phi$ and $\Theta$ we have that a perfect model of $y$ can be achieved by optimizing the prior $P_\Phi(z)$ in a final pass for pre-trained $\Psi$ and $\Theta$.
-
-\vfill
-Joint Training of $\Phi$ with $\Psi$ and $\Theta$ is not required.
+$P_{\Phi_{i+1}}(z_{i+1}\;|\; z_1,\ldots z_i)$ is auto-regressive, as in a language model.
 
 }
 
-\slide{VQ-VAE-2 Image Model}
+\slide{VQ-VAE-2 Model}
 
-
-Here we present a rational reconstruction and simplification of the VQ-VAE-2.
-
-
-\centerline{\includegraphics[height =2in]{\images/VQSampler} \parbox[b]{1.0in}{\Large $z_2$ \\ \\ $z_1$ \\ \\ $y$ \\ \\ ~}}
+We describe the case of just one layer.
 
 \vfill
-In the multi-resolution case (similar to progressive GANs) we train a finest resolution VAE first with latent variable $z_1$.
+Training a multi-layer encoder is somewhat subtle and described in the paper.
 
-\vfill
-We then model $P(z_1)$ recursively using a coarser resolution latent variable $z_2$ and so on.
+\slide{The Single-Layer VQ-VAE}
 
-\slide{VQ-VAE Image Model}
-
-\centerline{\includegraphics[height =2in]{\images/VQSampler} \parbox[b]{1.0in}{\Large $z_2$ \\ \\ $z_1$ \\ \\ $y$ \\ \\ ~}}
-
-\vfill
-
-At each layer $z_i$ is a ``symbolic image'' --- each pixel is assigned a symbol --- and the $P(z_i)$ is an auto-regressive model
-analogous to a language model.
-
-\slide{VQ-VAE Image Model}
-
-\centerline{\includegraphics[height =2in]{\images/VQSampler} \parbox[b]{1.0in}{\Large $z_2$ \\ \\ $z_1$ \\ \\ $y$ \\ \\ ~}}
-
-\vfill
-Each layer can use the same training recipe except that in the first layer $y$ is continuous.
-
-\vfill
-This gives  $-\log_2 P_\Phi(z[X,Y])$ bits per image (much lower).
-
-\vfill
-To sample an image they sample $z[X,Y]$ from $P_\Phi(z[X,Y])$.
-
-
-\slide{VQ-VAE Training}
-
-We wish to model $s$ where $s$ is either the image or a coarser symbolic image of a previous layer.
+Let $s$ denote the image (we are using $y$ for an image coordinate).
 
 \vfill
 We have an encoder network, such as a CNN, which produces a layer with a vector at each pixel position.
@@ -127,7 +88,7 @@ L[X,Y,I] & = & \mathrm{Enc}_\Phi(s) \\
 Intuitively we cluster the vectors $L(x,y,I)$ using K-means clustering to produce cluster centers where $C[k,I]$
 is the cluster center vector of cluster $k$.
 
-\slide{VQ-VAE Training}
+\slide{VQ-VAE Model}
 
 We then replace each vector $L[x,y,I]$ by the nearest cluster center to give $\hat{L}[X,Y,I]$.
 
@@ -141,22 +102,47 @@ z[x,y] & = & \argmin_k \;||L[x,y,I] - C[k,I]|| \\
 
 The ``symbolic image'' $z[X,Y]$ is the latent variable.
 
-\slide{VQ-VAE Training}
+\slide{VQ-VAE Model}
 
-Finally we decode $\hat{L}[X,Y,I]$ with a model $P_\Theta(s|z)$.
+Finally we decode $\hat{L}[X,Y,I]$ to get $\hat{s}_\Theta(z)$.
 
-\slide{Training the Code Book}
-
-We then apply the first step of the training recipe to the following loss function.
+\slide{Two-Phase Optimization}
 
 {\huge
+{\bf Phase 1:} Fix the prior $P_\Phi(z)$ at a simple (perhaps uniform) distribution and optimize the encoder $P_\Psi(z|s)$ and the decoder $P_\Theta(s|z)$.
+
 \begin{eqnarray*}
-\Psi^*,\Theta^* & = & \argmin_{\Psi,\Theta} \;E_{s\sim \pop,z\sim P_\Psi(z|s)}\left[ \frac{\beta}{2}||L[X,Y,I] - \hat{L}[X,Y,I]||^2 -\ln P_\Theta(s|z)\right]
+\mbox{VAE:}\;\;\;\Theta^*,\Psi^* &  = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)}  \;\ln \frac{P_\Psi(z|s)}{P_\Phi(z)}  - \ln P_\Theta(s|z)
 \end{eqnarray*}
-}
+
+$$\Theta^* = \argmin_\Theta\;E_{s \sim \pop,z \sim P_{\Psi^*}(z|s)}\left[-\ln P_\Theta(s|z)\right]$$
 
 \vfill
-Here the first term of the loss depends only on the encoder (no dependence on the decoder).
+{\bf Phase 2:} Train the prior $P_\Phi(z)$ holding the encoder and decoder fixed.
+
+\begin{eqnarray*}
+\Phi^* &  = & \argmin_{\Phi}\;E_{s\sim \pop,z\sim P_{\Psi^*}(z|s)}\left[-\ln P_\Phi(z)\right]
+\end{eqnarray*}
+
+\vfill
+{\bf Joint Training of the prior $P_\Phi(z)$ with the encoder $P_\Psi(z|s)$ and the decoder $P_\Theta(s|z)$ is not required.}
+
+}
+
+
+\slide{VQ-VAE Phase 1 Training}
+
+We fix the prior on $z$ to be uniform.  $P_\Phi(z)$ can then be ignored in phase 1.
+
+\vfill
+The training objective in Phase 1 is then taken to be
+
+\vfill
+{\huge
+\begin{eqnarray*}
+\Psi^*,\Theta^* & = & \argmin_{\Psi,\Theta} \;E_{s\sim \pop,z\sim P_\Psi(z|s)}\left[ \frac{\beta}{2}\;||L[X,Y,I] - \hat{L}[X,Y,I]||^2 + (s-\hat{s}_\Theta(z))^2\right]
+\end{eqnarray*}
+}
 
 \slide{Handling Discrete Latents}
 
@@ -179,6 +165,10 @@ L[x,y,I].\grad & = & \hat{L}[x,y,I].\grad + \beta(L[x,y,I] - C[z[x,y],I]) \\
 C[k,I].\grad & = & \sum_{z[x,y]=k} \gamma(C[k,I] - L[x,y,I])
 \end{eqnarray*}
 }
+
+\slide{VQ-VAE Phase 2 Training}
+
+Finally we hold the encoder fixed and train the prior $P_\Phi(z)$ to be an auto-regressive model of the symbolic image $z[X,Y]$.
 
 \slide{Quantitative Evaluation}
 
@@ -222,12 +212,11 @@ The Vector quantization is done independent of the text.  However, the model of 
 
 \centerline{\includegraphics[height= 5.5in]{\images/DALLE1}}
 
-\slide{Vector Quantized VAEs (VQ-VAE)}
 
-VQ-VAEs effectively perform $k$-means on vectors in the model so as to represent vectors by discrete cluster centers.
+\slideplain{END}
 
-\vfill
-We use $x$ and $y$ for spatial image coordinates and use $s$ (for signal) to denote images.
+\end{document}
+
 
 \slide{VQ-VAE Encoder-Decoder}
 
@@ -238,7 +227,3 @@ In the one-layer case the latent variable (compressed image) is a ``symbolic ima
 
 \vfill
 Naively $z[X,Y]$ can be represented with $XY \log_2 K$ bits.
-
-\slideplain{END}
-
-\end{document}

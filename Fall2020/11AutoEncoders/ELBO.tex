@@ -225,9 +225,9 @@ is $H(y)$ (the minimum possible) and $\pop(y) = P_{\Phi,\Theta}(y)$.
 
 }
 
-\slide{Two-Pass Optimization}
+\slide{Two-Phase Optimization}
 
-Fix the prior $P_\Psi(z)$ at a simple naive distribution and optimize the encoder $P_\Psi(z|y)$ and the decoder $P_\Theta(y|z)$.
+Fix the prior $P_\Phi(z)$ at a simple (perhaps uniform) distribution and optimize the encoder $P_\Psi(z|y)$ and the decoder $P_\Theta(y|z)$.
 
 {\huge
 \begin{eqnarray*}
@@ -240,7 +240,7 @@ We can think of this as lossy data compression under a simple fixed prior (codin
 \vfill
 While the fixed prior $P_\Phi(z)$ can be taken to be very simple, the decoder $P_\Theta(y|z)$ should be optimized aggressively.
 
-\slide{Two-Pass Optimization}
+\slide{Two-Phase Optimization}
 
 {\huge
 \begin{eqnarray*}
@@ -262,7 +262,7 @@ Then train the prior $P_\Phi(z)$ aggressively holding the encoder and decoder fi
 }
 
 
-\slide{Two-Pass Optimization}
+\slide{Two-Phase Optimization}
 
 {\huge
 
@@ -273,7 +273,7 @@ $$\Theta^* = \argmin_\Theta\;E_{y \sim \pop,z \sim P_{\Psi^*}(z|y)}\left[-\ln P_
 \end{eqnarray*}
 
 \vfill
-Under a universality assumption for $\Phi$ and $\Theta$ we have that a perfect model of $y$ can be achieved by optimizing the prior $P_\Phi(z)$ in a final pass for pre-trained $\Psi$ and $\Theta$.
+Under a universality assumption for $\Phi$ and $\Theta$ we have that a perfect model of $y$ can be achieved by optimizing the prior $P_\Phi(z)$ in a final phase for pre-trained $\Psi$ and $\Theta$.
 
 \vfill
 {\bf Joint Training of $\Phi$ with $\Psi$ and $\Theta$ is not required.}
