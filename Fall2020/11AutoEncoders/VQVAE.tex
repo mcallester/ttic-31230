@@ -69,10 +69,10 @@ $P_{\Phi_{i+1}}(z_{i+1}\;|\; z_1,\ldots z_i)$ is auto-regressive, as in a langua
 
 \slide{VQ-VAE-2 Model}
 
-We describe the case of just one layer.
+We first describe the case of just one layer.
 
 \vfill
-Training a multi-layer encoder is somewhat subtle and described in the paper.
+We then describe a very general approach to multi-layer VAEs.
 
 \slide{The Single-Layer VQ-VAE}
 
@@ -112,10 +112,11 @@ Finally we decode $\hat{L}[X,Y,I]$ to get $\hat{s}_\Theta(z)$.
 {\bf Phase 1:} Fix the prior $P_\Phi(z)$ at a simple (perhaps uniform) distribution and optimize the encoder $P_\Psi(z|s)$ and the decoder $P_\Theta(s|z)$.
 
 \begin{eqnarray*}
-\mbox{VAE:}\;\;\;\Theta^*,\Psi^* &  = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)}  \;\ln \frac{P_\Psi(z|s)}{P_\Phi(z)}  - \ln P_\Theta(s|z)
+\mbox{for}\;\;\;\Theta^*,\Psi^* &  = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)}  \;\ln \frac{P_\Psi(z|s)}{P_\Phi(z)}  - \ln P_\Theta(s|z)
+\\
+\\
+\mbox{we get}\;\;\Theta^* & = & \argmin_\Theta\;E_{s \sim \pop,z \sim P_{\Psi^*}(z|s)}\left[-\ln P_\Theta(s|z)\right]
 \end{eqnarray*}
-
-$$\Theta^* = \argmin_\Theta\;E_{s \sim \pop,z \sim P_{\Psi^*}(z|s)}\left[-\ln P_\Theta(s|z)\right]$$
 
 \vfill
 {\bf Phase 2:} Train the prior $P_\Phi(z)$ holding the encoder and decoder fixed.
@@ -130,7 +131,7 @@ $$\Theta^* = \argmin_\Theta\;E_{s \sim \pop,z \sim P_{\Psi^*}(z|s)}\left[-\ln P_
 }
 
 
-\slide{VQ-VAE Phase 1 Training}
+\slide{One Layer VQ-VAE Training Phase 1}
 
 We fix the prior on $z$ to be uniform.  $P_\Phi(z)$ can then be ignored in phase 1.
 
@@ -166,9 +167,47 @@ C[k,I].\grad & = & \sum_{z[x,y]=k} \gamma(C[k,I] - L[x,y,I])
 \end{eqnarray*}
 }
 
-\slide{VQ-VAE Phase 2 Training}
+\slide{One Layer VQ-VAE Training Phase 2}
 
 Finally we hold the encoder fixed and train the prior $P_\Phi(z)$ to be an auto-regressive model of the symbolic image $z[X,Y]$.
+
+\slide{Progressive VAEs}
+
+We now consider a general VAE with a sequence of latent variables $z_1,\dots,z_n$ where we want to model an observable variable $y$.
+
+\vfill
+In the image VQ-VAE each $z_i$ is a symbolic image.
+
+\vfill
+A progressive VAE has the following structure on the prior and decoder.
+$$P_\Phi(z_1,\ldots,z_N) = P_\Phi(z_1)\prod_{i=2}^N\;P_\Phi(z_i\;|\;z_{i-1})$$
+$$P_\Theta(y|z_1,\ldots,z_N) = P_\Theta(y|z_N)$$
+
+\vfill
+This copies the structure of a progressive GAN generator.
+
+\slide{Progressive VAE Training Phase 1}
+
+{\huge
+We train the progressive VAE in two phases where the first phase trains a series of encoders and decoders.
+
+$$P_\Psi(z_N|y),\;P_\Psi(z_{N-1}|z_N), \;\ldots, P_\Psi(z_1|z_2)$$
+$$P_\Theta(y|z_n),\;P_\Theta(z_N|z_{N-1}),\;\ldots,P_\Theta(z_2|z_1)$$
+
+\vfill
+The pair of $P_\Psi(z_N|y)$ and $P_\Theta(y|z_N)$ is trained under a fixed simple prior on $z_N$.
+
+Each pair of $P_\Psi(z_{i-1}|z_i)$ and $P_\Theta(z_i|z_{i-1})$ is trained under a fixed simple prior on $z_{i-1}$.
+
+This defines an encoder $P_\Psi(z_1,\ldots,z_N|y)$ and an appropriately strong decoder $P_\Theta(y|z_N)$.
+}
+
+\slide{Progressive VAE Training Phase 2}
+
+For each $y$ we how have a sequence of latent variables $z_1,\ldots,z_N$.
+
+\vfill
+This allows training of a strong prior $P_\Phi(z_1)$ and $P(z_{i+1}|z_i)$.
 
 \slide{Quantitative Evaluation}
 
