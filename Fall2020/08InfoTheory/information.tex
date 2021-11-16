@@ -181,13 +181,13 @@ For a Gaussian VAE on images we typically have
 \begin{eqnarray*}
 \Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  - \ln p_\Phi(y|z)\\
 \\
-p_\Phi(y|z) & \propto & \frac{1}{Z}\;\exp(||y-\hat{y}_\Phi(z)||^2/2\sigma^2) \\
+p_\Phi(y|z) & \propto & \frac{1}{Z}\;\exp(-||y-\hat{y}_\Phi(z)||^2/2\sigma^2) \\
 \\
 \Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  \;{\color{red} +\; \frac{1}{2\sigma^2}||y-\hat{y}_\Phi(z)||^2 + d\ln \sigma}
 \end{eqnarray*}
 }
 
-The KL divergence term is not problematic. The problematic differential cross-entropy term can just be thought of as a weighted $L_2$ distortion.
+The KL divergence term is not problematic. The problematic differential cross-entropy term can just be thought of as a weighted $L_2$ distortion.  We typically take $\sigma$ to be a hyper-parameter rather than optimize it in SGD.
 
 \slide{Continuous Cross-Entropy as Distortion}
 
