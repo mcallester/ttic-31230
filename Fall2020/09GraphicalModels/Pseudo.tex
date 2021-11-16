@@ -48,10 +48,10 @@ Computing $Z$ is intractable.
 For any distribution $P({\cal Y})$ on structured labels ${\cal Y}$,
 we define the {\color{red} pseudo-likelihood}  $\tilde{P}({\cal Y})$ as follows
 
-{\color{red} $$\tilde{P}({\cal Y}) = \prod_n\;P({\cal Y}\;|\; {\cal Y}/n)$$}
+{\color{red} $$\tilde{P}({\cal Y}) = \prod_n\;P({\cal Y}[n]\;|\; {\cal Y}/n)$$}
 
 \vfill
-$$P_s({\cal Y}\;|\;{\cal Y}/n) = \frac{1}{Z_n}e^{s({\cal Y})}\;\;\;\;\;Z_n = \sum_{y} e^{s({\cal Y}[n=y])}$$
+$$P({\cal Y}[n]\;|\;{\cal Y}/n) = \frac{1}{Z_n}e^{s({\cal Y})}\;\;\;\;\;Z_n = \sum_{y} e^{s({\cal Y}[n=y])}$$
 
 \vfill
 While computing $P_s({\cal Y})$ is intractable, computing $\tilde{P}_s({\cal Y})$ involves only local partition functions and is tractable.
