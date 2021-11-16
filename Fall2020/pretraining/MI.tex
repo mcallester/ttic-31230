@@ -18,154 +18,115 @@
 \centerline{\huge van den ORD et al. 2018}
 
 \vfill
-We want to find codes that maximize the mutual information between the codes for different but related inputs.  In the figure we want the codes to maximize the mutual information between $C_t$ and $z_{t+k}$.
+Consider the problem of learning phonetic representations of speech sounds.  In the figure each $z_t$ is a symbol representing the sound at time $t$.
 
+
+\slideplain{Mutual Information Coding}
+\centerline{\includegraphics[width = 6 in]{\images/CPC}}
+\centerline{\huge van den ORD et al. 2018}
+
+\vfill
+{\bf Unlike VAEs}, mutual information coding is about {\bf predicting latent variables}. There is no attempt to model the input speech sound.
+Intuitively we want to separate signal from noise and avoid modeling noise.
 
 \slide{wav2vec 2.0}
 
-Mutual information coding as pretraining of speech features.
+\vfill
+Trained on 53k hours of {\bf unlabeled} audio they convert speech to a sequence of symbols they call ``pseudo-text units''.
 
 \vfill
-Trained on 53k hours of unlabeled audio (no text) they convert speech to a sequence of discrete quantized vectors they call ``pseudo-text units''.
-
-\vfill
-Using the pre-trained transcription of speech sound into pseud-text they achieve the previous state of the art for training on 100 hours of transcriped text but using only one hour instead of 100 hours.
+Using this pre-trained transcription of speech into pseudo-text they reduce the amount of labeld data needed for a given accuracy in speech recognition by a factor of 100.
 
 \vfill
 \centerline{\huge Baevski et al., 2020}
 
-\slide{SimCLR, BYOL and SwAV}
+\slide{SwAV}
 
 Mutual information coding as pretraining of image features.
 
-\centerline{\includegraphics[width = 4.0in]{\images/BYOL}\hfill\includegraphics[width = 4.0in]{\images/SwAV}}
+\centerline{\includegraphics[width = 4.0in]{\images/SwAV}}
 
-\slide{Mutual Information Coding}
+\centerline{\huge Caron et al. 2021}
 
+
+\slide{Mutual Information Coding: General Formulation}
+
+\centerline{$z_x$~~~~}
+\centerline{\includegraphics[width = 4.5 in]{\images/CPC}\parbox{.2in}{$z_y$ \\ \\ \\ \\ \\~}}
+\vspace{-7ex}
+\centerline{$|$~~~~~~~~$x$~~~~~~~$|$~~~~~~~~~~~~~~$|$~$y$~$|$}
+
+\vfill
 Consider a population distribution on pairs $\tuple{x,y}$.
 
 \vfill
-For example $x$ might be an image and $y$ a sound wave.
+We are interested in extracting latent variables $z_x$ and $z_y$ from $x$ and $y$ respectively that preserve the mutual information between $x$ and $y$.
 
-\vfill
-We are interested in extracting latent variables $z_x$ and $z_y$ from $x$ and $y$ respectively.
+\slide{Mutual Information Coding General Formulation}
 
-\vfill
-For example $z_x$ might be a bag of words extracted from the image and $z_y$ a bag of words extracted from the sound wave.
-
-
-\slide{Mutual Information Coding}
-
-For a population on $\tuple{x,y}$ we introduce two discrete latent variables $z_x$ and $z_y$ defined by
-models {\color{red} $P_\Phi(z_x|x)$} and {\color{red} $P_\Phi(z_y|y)$}.
-
-\vfill
-$$\Phi^* = \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta (H_{\pop,\Phi}(z_x) + H_{\pop,\Phi}(z_y))$$
-
-\vfill
-Here we are asking to maximize the mutual information while (intuitively) limiting the information in $z_x$ and $z_y$.
-
-\vfill
-In the bag of words example we are asking to maximize the mutual information between the two probability distributions on bags of words while limiting the information in the bags.
-
-\slide{Mutual Information Coding}
-
-$$\Phi^* = \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta (H_{\pop,\Phi}(z_x) + H_{\pop,\Phi}(z_y))$$
-
-\vfill
-Limiting the information in $z_x$ and $z_y$ prevents the trivial solution of $z_x = x$ and $z_y = y$.
-
-\vfill
-{\bf Here we only model distributions on $z_x$ and $z_y$.  Unlike GANs and VAEs, there is no attempt to model distributions on the observables $x$ and $y$.}
-
-\slide{Mutual Information Coding}
+For a population on $\tuple{x,y}$ we introduce latent variables $z_x$ and $z_y$ defined by
+mappings $z_x(x)$ and $z_y(y)$ where these mappings are defined by parameters $\Phi_x$ and $\Phi_y$ respectively.
 
 \begin{eqnarray*}
-\Phi^* & = & \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta (H_{\pop,\Phi}(z_x))) \\
-\\
- & = & \argmax_{\Phi} \; (1-\beta)H_{\pop,\Phi}(z_x) -\; H_{\pop,\Phi}(z_x|z_y) \\
- \\
- & = & \argmin_\Phi\;H_{\pop,\Phi}(z_x|z_y) - (1-\beta)H_{\pop,\Phi}(z_x)
+\Phi_x^*,\Phi_y^* & = & \argmax_{\Phi_x,\Phi_y} \; I(z_x,z_y)
 \end{eqnarray*}
 
-\slide{Mutual Information Coding}
+This has a degenerate solution of $z_x(x) = x$ and $z_y(y) = y$ but this can be avoided with various types of restrictions on $z_x$ and $z_y$
+as described below.
 
-We can estimate entropies by cross-entropies
-
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi\;H_{\pop,\Phi}(z_x|z_y) - (1-\beta)H_{\pop,\Phi}(z_x) \\
-\\
-& \leq & \argmin_\Phi\;\hat{H}_{\pop,\Phi,\Psi}(z_x|z_y) - (1-\beta)H_{\pop,\Phi}(z_x) \\
-\\
-& \approx\mathrm{?} & \argmin_\Phi\;\hat{H}_{\pop,\Phi,\Psi}(z_x|z_y) - (1-\beta)\hat{H}_{\pop,\Phi,\Theta}(z_x) \\
-\end{eqnarray*}
-
-Here the cross-entropy models $\Psi$ ans $\Theta$ are adversarial.
-
-\slide{Contrastive Predictive Coding}
-
-$$\Phi^* = \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y)$$
+\slide{Contrastive Predictive Coding (CPC)}
 
 \vfill
-It turns out that we can give a lower bound on the mutual information term using {\bf noise contrastive estimation}.
-
-\slide{A Contrastive Lower Bound}
-
-We now give a contrastive lower bound for general mutual information $I(z,w)$ given only the ability to sample from the joint distribution on $z$ and $w$.
+For $z_x$ and $z_y$ vectors, and for $N \geq 2$, we define a distribution on tuples $(z_x,z_{y}^1,\ldots,z_y^N,i)$
+by drawing pairs $(x_1,y_1), \ldots (x_n,y_n)$ from the population, and $i$ uniformly from $1$ to $N$,
+and constructing
+$$(z_x(x_i),z_y(y_1),\ldots,z_y(y_N),i).$$
 
 \vfill
-For $N \geq 2$ let {\color{red} $c_{z,w}$} be the density defined by drawing pairs $(z_1,w_1), \ldots (z_n,w_n)$ from the population
-and then constructing the tuple $(i,z_1,\ldots,z_N,w_i)$ where $i$ is drawn uniformly from $1$ to $N$.
-
-\slide{A Constrastive Bound}
-We train the codes to so that we can predict $i$ from $(z_1,\ldots,z_n,w)$.
+We then train a model to predict $i$.
+\vfill
 {\huge
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_{(i,z_1\ldots,z_N,w) \sim c_{z,w}}\;-\ln P_\Phi(i|z_1,\ldots,z_n,w) \\
-\\
-& = & \argmin_\Phi\;{\cal L}(\Phi) \\
-\\
-P_\Phi(i|z_1,\ldots z_n,w) & = & \softmax_i\;s_\Phi(z_i,w) \;\;\;\mbox{(required)} \\
-\\
-I(z,w) & \geq & \ln N - {\cal L}(\Phi)
+\Phi^* & = & \argmin_\Phi \;E_{(z_x,z_y^1,\ldots,z_y^N,i)}\left[-\ln P_\Phi(i|(z_x,z_y^1,\ldots,z_y^N)\right]
+\end{eqnarray*}
+
+\begin{eqnarray*}
+P_\Phi(i|z_x,z_y^1,\ldots z_y^N) & = & \softmax_i\; z_x^\top z_y^i
 \end{eqnarray*}
 }
 
-See Chen et al., On Variational Bounds of Mutual Information, May 2019.
+\slide{The CPC Theorem}
 
-\slide{Forcing $z_x$ and $z_y$ to be Useful}
+For any distribution on pairs $(z_x,z_y)$, if CPC probabilities are computed by
 
-In the objective
+{\huge
+\begin{eqnarray*}
+P_\Phi(i|z_x,z_y^1,\ldots z_y^N) & = & \softmax_i\;s(z_x,z_y^i)
+\end{eqnarray*}
+}
 
-$$\Phi^* = \argmax_{\Phi} \; I_{\pop,\Phi}(z_x,z_y) - \beta ({\color{red} H_{\pop,\Phi}(z_x)} + {\color{red} H_{\pop,\Phi}(z_y)})$$
+then
+
+{\huge
+\begin{eqnarray*}
+I(z_x,z_y) & \geq & \ln N - \;\;E_{(z_x,z_y^1,\ldots,z_y^N,i)}\left[-\ln P_\Phi(i|(z_x,z_y^1,\ldots,z_y^N)\right]
+\end{eqnarray*}
+}
+
+Chen et al., On Variational Bounds of Mutual Information, May 2019.
 
 
-the limitation on the entropy of $z_x$ and $z_y$ block the trivial solution of $z_x = x$ and $z_y = y$.
+\slide{The CPC Restriction on $z_x(x)$ and $x_y(y)$}
 
+{\huge
+\begin{eqnarray*}
+P_\Phi(i|z_x,z_y^1,\ldots z_y^N) & = & \softmax_i\; z_x^\top z_y^i
+\end{eqnarray*}
+}
 
 \vfill
-CPC applications have used an alternative.
-
-\slide{Forcing $z_x$ and $z_y$ to be Useful}
-
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_{(i,z_x^1\ldots,z_x^n,z_y) \sim c_{z_x,z_y}}\;-\ln P_\Phi(i|z_x^1,\ldots,z_x^n,z_y)
-\end{eqnarray*}
-
-\begin{eqnarray*}
-P_\Phi(i|z_x^1,\ldots,z_x^n,z_y) & = & \softmax_i\;{\color{red} z_y^\top z_x^i}
-\end{eqnarray*}
-
-
-\vfill
-Requiring that the score be a simple inner product blocks $z_x = x$ and $z_y = y$ and forces
-$z_x$ and $z_y$ to carry the information in a linearly extractible way.
-
-\slide{Contrastive Predictive Coding for Speech}
-
-wav2vec uses contrastive predictive coding (CPC)
-
-\centerline{\includegraphics[width = 5 in]{\images/CPC}}
+By only using $z_x$ and $z_y$ in inner products at the final layer we force the features
+to carry information in a shallow (linear) representation.
 
 \slide{Contrastive Predictive Coding for Images}
 
@@ -184,25 +145,105 @@ A resulting feature map $z_\Phi$ on images is extracted from this training.
 \vfill
 The feature map $z_\Phi$ is tested by using a {\color{red} linear} classifier for ImageNet based on these features.
 
+\vfill
+This is called linear probing.
+
 \slide{SimCLR}
 
-\centerline{\includegraphics[height=4.5 in]{\images/SimCLR}}
+\centerline{\includegraphics[height=3.5 in]{\images/SimCLR}}
+
+\vfill
 \centerline{\huge Chen et al. 2020}
 
-\slide{BYOL and SwAV do not use CPC}
+\slide{A Weakness of CPC}
 
-BYOL and SwAV train only on cross-entropy conditional probability
+{\huge
+\begin{eqnarray*}
+I(z_x,z_y) & \geq & \ln N - \;\;E_{(z_x,z_y^1,\ldots,z_y^N,i)}\left[-\ln P_\Phi(i|(z_x,z_y^1,\ldots,z_y^N)\right]
+\end{eqnarray*}
+}
 
-$${\cal L}(\Psi) = -\ln P_\Psi(z_x|z_y)$$
+The discrimination problem is too easy.
 
-This has a degenerate solution where the code for $z_x$ is constant independent of $x$.  Complex hacks are used to cause this not to happen
-but performance is improved over the contrastive SimCLR.
+\vfill
+The guarantee can never be stronger than $\ln N$ where $N$ is the number of choices in the discrimination task.
 
-\slide{BOYL and SwAV}
+\slide{Direct Mutual Information (MI) Coding}
 
-\centerline{\includegraphics[width = 4.0in]{\images/BYOL}\hfill\includegraphics[width = 4.0in]{\images/SwAV}}
+For a population on $\tuple{x,y}$ we introduce latent variables $z_x$ and $z_y$ defined by
+mappings $z_x(x)$ and $z_y(y)$ where these mappings are defined by parameters $\Phi_x$ and $\Phi_y$ respectively.
 
-\centerline{\huge Grill et al. 2020, Caron et al. 2021}
+\begin{eqnarray*}
+\Phi_x^*,\Phi_y^* & = & \argmax_{\Phi_x,\Phi_y} \; I(z_x,z_y) \\
+\\
+&= & \argmax_{\Phi_x,\Phi_y}\; H(z_y) - H(z_y|z_x) \\
+\\
+&= & \argmin_{\Phi_x,\Phi_y}\; H(z_y|z_x) - H(z_y)
+\end{eqnarray*}
+
+\slide{Direct MI Coding}
+
+\begin{eqnarray*}
+\Phi_x^*,\Phi_y^* & = &  \argmin_{\Phi_x,\Phi_y}\; H(z_y|z_x) - H(z_y)
+\end{eqnarray*}
+
+\vfill
+We can block the solution of $z_x(x) = x$ and $z_y(y) = y$ by requiring that $z_y$ is a symbol from a limited finite vocabulary.
+
+\vfill
+This typically ensures $H(z_y) << H(y)$.
+
+\vfill
+We can then allow $H(z_x)$ to be large, for example $z_x$ might be a vector
+representation of the a symbol sequence $z_1,\ldots,z_t$.
+
+\slide{Direct MI Coding}
+
+\begin{eqnarray*}
+\Phi_x^*,\Phi_y^* & = &  \argmin_{\Phi_x,\Phi_y}\; H(z_y|z_x) - H(z_y)
+\end{eqnarray*}
+
+\vfill
+If $z_y$ is a symbol from a limited vocabulary we can estimate $H(z_y)$ from an empirical histogram over the symbols.
+
+\vfill
+We can use a model $\Psi$ to predict $z_y$ from $z_x$ and train on cross-entropy loss.
+
+\slide{Direct MI Coding}
+
+$$\Phi_x^*,\Phi_y^*,\Psi^* = \argmin_{\Phi_x,\Phi_y,\Psi} \; E_{(x,y)\sim \pop}\left[-\ln P_\Psi(z_y|z_x) + \ln \hat{P}(z_y)\right]$$
+
+\vfill
+where $\hat{P}(z_y)$ is an estimate (perhaps an exponential moving average) of the probability of $z_y$ over the draw of $(x,y) \sim \pop$.
+
+\slide{Direct MI Coding Theorem}
+
+$$\Phi_x^*,\Phi_y^*,\Psi^* = \argmin_{\Phi_x,\Phi_y,\Psi} \; E_{(x,y)\sim \pop}\left[-\ln P_\Psi(z_y|z_x) + \ln P(z_y)\right]$$
+
+\vfill
+\begin{eqnarray*}
+I(z_x,z_y) & \geq & H(z_y) - \hat{H}(z_y|z_x) \\
+\\
+\hat{H}(z_y|z_x) & = & E_{(x,y)\sim \pop}\left[-\ln P_\Psi(z_y(y)|z_x(x)\right]
+\end{eqnarray*}
+
+\slide{Direct MI Coding Theorem}
+
+For $H(z_y) = \ln K$ where $K$ is the number of symbols, and $\hat{H}(z_y|z_x) = 0$ we get
+
+$$I(z_x,z_y) \geq \ln K$$
+
+\vfill
+Which typically improves significantly on the best possible bound $I(z_x,z_y) \geq \ln N$ from CPC.
+
+\slide{ SwAV}
+
+SwAV uses direct MI coding rather than SimCLR's CPC.
+
+
+\centerline{\includegraphics[width = 3.5in]{\images/SwAV}}
+
+\centerline{\huge Caron et al. 2021}
 
 \slide{END}
 
