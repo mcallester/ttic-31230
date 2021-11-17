@@ -17,12 +17,24 @@
 \vfill
 \vfill
 
+\slide{Notation}
+
+$x$ is an input (e.g. an image).
+
+\vfill
+$\hat{\cal Y} [N]$ is any label for $x$ --- a vector $\hat{\cal Y}[0],\ldots,\hat{\cal Y}[N-1]$ with $\hat{\cal Y}[n]$ an integer in $\{1,\ldots,L\}$.
+
+\vfill
+For example $n$ might range over the pixels of an image and $\hat{\cal Y}[n]$ names a semantic label of pixel $n$.
+
+\vfill
+${\cal Y}[N]$ is the gold label for input $x$ --- the structured label assigned to $x$ in the training data.
+
 \slide{Back-Propagation Through Exponential Softmax}
 
-\begin{eqnarray*}
-s^N[N,Y] & = & f^N_\Phi(x) \\
-s^E[E,Y,Y] & = & f^E_\Phi(x)
-\end{eqnarray*}
+We have node and edge score tensors computed by a deep network.
+
+$$s^N[N,L] = f^N_\Phi(x) \;\;\;\;\; s^E[E,L,L]  =  f^E_\Phi(x)$$
 
 \vfill
 \begin{eqnarray*}
@@ -34,18 +46,18 @@ s^E[E,Y,Y] & = & f^E_\Phi(x)
 \end{eqnarray*}
 
 \vfill
-We want the gradient tensors {\color{red} $s^N.\grad[N,Y]$} and {\color{red} $s^E.\grad[E,Y,Y]$}.
+For SGD we want to compute {\color{red} $s^N.\grad[N,L]$} and {\color{red} $s^E.\grad[E,L,L]$}.
 
 
 \slide{Model Marginals Theorem}
 
 Theorem:
 \begin{eqnarray*}
-    s^N.\mathrm{grad}[n,y] & = &  {\color{red} P_{\hat{\cal Y} \sim P_s}(\;\;\hat{\cal Y}[n] = y\;\;)} \\
-    & & \;\;\;\;\;- \bbone[\;\;{\cal Y}[n] = y\;\;] \\
+    s^N.\mathrm{grad}[n,\ell] & = &  {\color{red} P_{\hat{\cal Y} \sim P_s}(\;\;\hat{\cal Y}[n] = \ell\;\;)} \\
+    & & \;\;\;\;\;- \bbone[\;\;{\cal Y}[n] = \ell\;\;] \\
     \\
-    s^E.\mathrm{grad}[\tuple{n,m},y,y'] & = &  {\color{red} P_{\hat{\cal Y} \sim P_s}(\;\;\hat{\cal Y}[n] = y \; \wedge \; \hat{\cal Y}[m] = y'\;\;)} \\
-    & & \;\;\;\;\;- \bbone[\;\;{\cal Y}[n] = y\; \wedge \; {\cal Y}[m] = y'\;\;]
+    s^E.\mathrm{grad}[\tuple{n,m},\ell,\ell'] & = &  {\color{red} P_{\hat{\cal Y} \sim P_s}(\;\;\hat{\cal Y}[n] = \ell \; \wedge \; \hat{\cal Y}[m] = \ell'\;\;)} \\
+    & & \;\;\;\;\;- \bbone[\;\;{\cal Y}[n] = \ell\; \wedge \; {\cal Y}[m] = \ell'\;\;]
 \end{eqnarray*}
 
 \vfill
@@ -57,14 +69,14 @@ We consider the case of node marginals, the case of edge marginals is similar.
 
 {\huge
 \begin{eqnarray*}
-    s^N.\grad[n,y] & = & \partial {\cal L}(\Phi,x,{\cal Y})\;/\;\partial s^N[n,y] \\
+    s^N.\grad[n,\ell] & = & \partial {\cal L}(\Phi,x,{\cal Y})\;/\;\partial s^N[n,\ell] \\
     \\
-    & = & \partial \left(-\ln \frac{1}{Z}\exp(s({\cal Y}))\right)\;/\;\partial s^N[n,y] \\
+    & = & \partial \left(-\ln \frac{1}{Z}\exp(s({\cal Y}))\right)\;/\;\partial s^N[n,\ell] \\
     \\
-    & = & \partial (\ln Z - s({\cal Y}))\;/\;\partial s^N[n,y] \\
+    & = & \partial (\ln Z - s({\cal Y}))\;/\;\partial s^N[n,\ell] \\
     \\
-    & = & \left(\frac{1}{Z} \sum_{\hat{\cal Y}} e^{s(\hat{\cal Y})} \left(\partial s(\hat{\cal Y})/\partial s^N[n,y]\right)\right)
-    - \left(\partial s({\cal Y}) /\partial s^N[n,y]\right) 
+    & = & \left(\frac{1}{Z} \sum_{\hat{\cal Y}} e^{s(\hat{\cal Y})} \left(\partial s(\hat{\cal Y})/\partial s^N[n,\ell]\right)\right)
+    - \left(\partial s({\cal Y}) /\partial s^N[n,\ell]\right) 
 \end{eqnarray*}
 }
 
@@ -72,15 +84,15 @@ We consider the case of node marginals, the case of edge marginals is similar.
 
 {\huge
 \begin{eqnarray*}
-    s^N.\grad[n,y] & = & \left(\frac{1}{Z} \sum_{\hat{\cal Y}} e^{s(\hat{\cal Y})} \left(\partial s(\hat{\cal Y})/\partial s^N[n,y]\right)\right)
-    - \left(\partial s({\cal Y}) /\partial s^N[n,y]\right)  \\
+    s^N.\grad[n,\ell] & = & \left(\frac{1}{Z} \sum_{\hat{\cal Y}} e^{s(\hat{\cal Y})} \left(\partial s(\hat{\cal Y})/\partial s^N[n,\ell]\right)\right)
+    - \left(\partial s({\cal Y}) /\partial s^N[n,\ell]\right)  \\
     \\
-    & = & \left(\sum_{\hat{\cal Y}} P_s(\hat{\cal Y}) \left(\partial s(\hat{\cal Y})/\partial s^N[n,y]\right)\right)
-    - \left(\partial s({\cal Y}) /\partial s^N[n,y]\right)    \\
+    & = & \left(\sum_{\hat{\cal Y}} P_s(\hat{\cal Y}) \left(\partial s(\hat{\cal Y})/\partial s^N[n,\ell]\right)\right)
+    - \left(\partial s({\cal Y}) /\partial s^N[n,\ell]\right)    \\
     \\
     s(\hat{\cal Y}) & = & \sum_n\;s^N[n,\hat{\cal Y}[n]]\; + \sum_{\tuple{n,m} \in \mathrm{Edges}}\;s^E[\tuple{n,m},\hat{\cal Y}[n],\;\hat{\cal Y}[m]] \\
     \\
-    \frac{\partial s(\hat{\cal Y})}{\partial s^N[n,y]} & = & \bbone[\hat{\cal Y}[n] = y]
+    \frac{\partial s(\hat{\cal Y})}{\partial s^N[n,\ell]} & = & \bbone[\hat{\cal Y}[n] = \ell]
 \end{eqnarray*}
 }
 
@@ -88,17 +100,17 @@ We consider the case of node marginals, the case of edge marginals is similar.
 
 \huge{
 \begin{eqnarray*}
-    s^N.\grad[n,y] & = & \left(\frac{1}{Z} \sum_{\hat{\cal Y}} e^{s(\hat{\cal Y})} \left(\partial s(\hat{\cal Y})/\partial s^N[n,y]\right)\right)
-    - \left(\partial s({\cal Y}) /\partial s^N[n,y]\right)  \\
+    s^N.\grad[n,\ell] & = & \left(\frac{1}{Z} \sum_{\hat{\cal Y}} e^{s(\hat{\cal Y})} \left(\partial s(\hat{\cal Y})/\partial s^N[n,\ell]\right)\right)
+    - \left(\partial s({\cal Y}) /\partial s^N[n,\ell]\right)  \\
     \\
-    & & \left(\sum_{\hat{\cal Y}} P_s(\hat{\cal Y}) \left(\partial s(\hat{\cal Y})/\partial s^N[n,y]\right)\right)
-    - \left(\partial s({\cal Y}) /\partial s^N[n,y]\right)    \\
+    & & \left(\sum_{\hat{\cal Y}} P_s(\hat{\cal Y}) \left(\partial s(\hat{\cal Y})/\partial s^N[n,\ell]\right)\right)
+    - \left(\partial s({\cal Y}) /\partial s^N[n,\ell]\right)    \\
     \\
-    & = & E_{\hat{\cal Y} \sim P_s}\bbone[{\color{red} \hat{\cal Y}}[n] = y]
-    - \bbone[{\color{red}{\cal Y}}[n] = y] \\
+    & = & E_{\hat{\cal Y} \sim P_s}\bbone[{\color{red} \hat{\cal Y}}[n] = \ell]
+    - \bbone[{\color{red}{\cal Y}}[n] = \ell] \\
     \\
-    & = & P_{\hat{\cal Y} \sim P_s}({\color{red} \hat{\cal Y}}[n] = y)
-      - \bbone[{\color{red}{\cal Y}}[n] = y]
+    & = & P_{\hat{\cal Y} \sim P_s}({\color{red} \hat{\cal Y}}[n] = \ell)
+      - \bbone[{\color{red}{\cal Y}}[n] = \ell]
 \end{eqnarray*}
 }
 
@@ -106,11 +118,11 @@ We consider the case of node marginals, the case of edge marginals is similar.
 
 Theorem:
 \begin{eqnarray*}
-    s^N.\mathrm{grad}[n,y] & = &   P_{\hat{\cal Y} \sim P_s}(\;\;{\color{red} \hat{\cal Y}}[n] = y\;\;) \\
-    & & \;\;\;\;\;- \bbone[\;\;{\color{red} {\cal Y}}[n] = y\;\;] \\
+    s^N.\mathrm{grad}[n,\ell] & = &   P_{\hat{\cal Y} \sim P_s}(\;\;{\color{red} \hat{\cal Y}}[n] = \ell\;\;) \\
+    & & \;\;\;\;\;- \bbone[\;\;{\color{red} {\cal Y}}[n] = \ell\;\;] \\
     \\
-    s^E.\mathrm{grad}[\tuple{n,m},y,y'] & = &  P_{\hat{\cal Y} \sim P_s}(\;\;{\color{red} \hat{\cal Y}}[n] = y \; \wedge \; {\color{red} \hat{\cal Y}}[m] = y'\;\;) \\
-    & & \;\;\;\;\;- \bbone[\;\;{\color{red} {\cal Y}}[n] = y\; \wedge \; {\color{red} {\cal Y}}[m] = y'\;\;]
+    s^E.\mathrm{grad}[\tuple{n,m},\ell,\ell'] & = &  P_{\hat{\cal Y} \sim P_s}(\;\;{\color{red} \hat{\cal Y}}[n] = \ell \; \wedge \; {\color{red} \hat{\cal Y}}[m] = \ell'\;\;) \\
+    & & \;\;\;\;\;- \bbone[\;\;{\color{red} {\cal Y}}[n] = \ell\; \wedge \; {\color{red} {\cal Y}}[m] = \ell'\;\;]
 \end{eqnarray*}
 
 \slide{END}

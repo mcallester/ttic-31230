@@ -17,17 +17,14 @@
 \vfill
 \vfill
 
-\slide{Distributions on Exponentially Large Sets}
+\slide{Distributions on Exponentially Large Label Sets}
 
-\vfill
 {\color{red}
-$$\Phi^* = \argmin_\Phi E_{(x,y) \sim \mathrm{Pop}}\;-\ln \;P(y|x)$$
-
-\vfill
-$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Pop}}\;-\ln \;P(y)$$
+$$\Phi^* = \argmin_\Phi E_{(x,{\cal Y}) \sim \mathrm{Pop}}\;-\ln \;P({\cal Y}|x)$$
 }
 
-{\color{red} The structured case:} $y \in {\cal Y}$ where ${\cal Y}$ is discrete but {\color{red} iteration over $\hat{y} \in {\cal Y}$ is infeasible}.
+\vfill
+{\color{red} The structured case:} The number of possible labels is exponentially large --- iteration over the possible labels is infeasible.
 
 \slide{Parsing and CKY}
 
@@ -55,7 +52,7 @@ CTC is still the most accurate way to do speech recognition where the energy bas
 \centerline{\includegraphics[height = 2.5in]{\images/SemSeg}}
 
 \vfill
-We want to assign each pixel to one of $Y$ semantic classes.
+We want to assign each pixel to one of $L$ semantic classes.
 
 \vfill
 For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
@@ -70,89 +67,90 @@ Although semantic segmentation is not currently done with energy based models, p
 \vfill
 Semantic segmentation is simpler than parsing or speech recognition and will be used as a simple example of energy based models.
 
-\slide{Constructing a Graph}
+\slide{Distributions on Exponentially Large Sets: Notation}
 
-We construct a graph whose nodes are the pixels and where there is an edges between each pixel and its four nearest neighboring pixels.
-
-\vfill
-%\centerline{\includegraphics[height= 4in]{\images/grid}}
-
-\slide{Labeling the Nodes of a Graph}
-\centerline{\includegraphics[height= 1.5in]{\images/Graph}}     
-\medskip
-
-$\hat{y} $ assigns a semantic class $\hat{y}[n]$ to each node (pixel) $n$.
+$x$ is an input (e.g. an image).
 
 \vfill
-We assign a score to $\hat{y}$ by assigning a score to each node and each edge of the graph.
+$\hat{\cal Y} [N]$ is a potential structured label for $x$ --- a vector $\hat{\cal Y}[0],\ldots,\hat{\cal Y}[N-1]$ with $\hat{\cal Y}[n]$ an integer in $\{1,\ldots,L\}$.
 
-{\color{red} $$s(\hat{y}) = \sum_{n \in \mathrm{Nodes}}\; s^N[n,\hat{y}[n]]\; + \sum_{\tuple{n,m} \in \mathrm{Edges}}\;s^E[\tuple{n,m},\hat{y}[n],\hat{y}[m]]$$}
-\centerline{Node Scores \hspace{6em}Edge Scores \hspace{3em}~}
+\vfill
+For example $n$ might range over the pixels of an image and $\hat{\cal Y}[n]$ names one of $L$ a semantic labels for pixel $n$.
 
-\slide{Using Deep Networks}
+\vfill
+${\cal Y}[N]$ is the gold label for input $x$ --- the structured label assigned to $x$ in the training data.
+
+\slide{Exponential Softmax}
+
+{\huge
+\begin{eqnarray*}
+{\color{red} P_s(\hat{{\cal Y}})} & = & \softmax_{\hat{{\cal Y}}}\;s(\hat{{\cal Y}}) \;\;\;\mbox{\color{red} all possible $\hat{{\cal Y}}$} \\
+\\
+\\
+\\
+\\
+\mbox{cross-entropy loss} & = & - \ln P_s({\cal Y}) \;\;\;{\color{red} \;\;\;\;\mbox{gold label (training label) ${\cal Y}$}}
+\end{eqnarray*}
+}
+
+
+\slidetwo{Compactly Representing Scores}{on Exponentially Many Labels}
+
+We will call $n$ a ``node''.
+
+\vfill
+We will compute a ``node potential'' tensor {\color{red} $s^N[N,L]$} that holds $NL$ scores --- a score each possible assignment of a label $\ell$ to $n$.
+
+\vfill
+We assume a set $E$ of ``edges'' with $E \subseteq N \times N$.
+
+\vfill
+We will compute an ``edge potential'' tensor {\color{red} $s^E[E,L,L]$} that holds $ELL$ scores --- a score for each assignment of class labels $\ell_1$ and $\ell_2$
+to the two nodes in the edge $e$.
+
+
+\slide{Computing Scores}
+
+{\huge
+\begin{eqnarray*}
+{\color{red} s(\hat{{\cal Y}})} & = & \sum_n\;s^N[n,\hat{{\cal Y}}[n]] + \sum_{\tuple{n,m} \in E}\;s^E[\tuple{n,m},\hat{{\cal Y}}[n],\;\hat{{\cal Y}}[m]] \\
+\end{eqnarray*}
+}
+
+\vfill
+The exponential softmax for scores of this form are intractible in general --- the partition function $Z_s$ requires summing over an exponentially large set and
+computing $P_s({\cal Y})$ is $\#P$ hard.
+
+\slide{Computing the Node and Edge Potential Tensors}
 
 For input $x$ we use a network to compute the score tensors.
 
 \vfill
 \begin{eqnarray*}
-s^N[N,Y] & = & f^N_\Phi(x) \\
+s^N[N,L] & = & f^N_\Phi(x) \\
 \\
 \\
-s^E[E,Y,Y] & = & f^E_\Phi(x)
+s^E[E,L,L] & = & f^E_\Phi(x)
 \end{eqnarray*}
-
-\slide{Exponential Softmax}
-
-{\huge
-$$\begin{array}{lrcl}
-\mbox{for}\;\hat{y} & {\color{red} s(\hat{y})} & = & \sum_n\;s^N[n,\hat{y}[n]] + \sum_{\tuple{n,m} \in \mathrm{Edges}}\;s^E[\tuple{n,m},\hat{y}[n],\;\hat{y}[m]] \\
-\\
-\\
-\mbox{for}\;\hat{y} & {\color{red} P_s(\hat{y})} & = & \softmax_{\hat{y}}\;s(\hat{y}) \;\;\;\mbox{\color{red} all possible $\hat{y}$} \\
-\\
- & {\cal L} & = & - \ln P_s(y) \;\;\;{\color{red} \;\;\;\;\;\;\mbox{gold label (training label) $y$}}
-\end{array}$$
-}
-
-\slide{Exponential Softmax is Typically Intractable}
-\centerline{\includegraphics[height= 1.5in]{\images/Graph}}
-\medskip
-$\hat{y} $ assigns a label $\hat{y}[n]$ to each node $n$.
-
-\vfill
-$s(\hat{y})$ is defined by a sum over node and edge tensor scores.
-
-\vfill
-$P_s(\hat{y})$ is defined by an exponential softmax over $s(\hat{y})$.
-
-\vfill
-Computing $Z$ in general is \#P hard (there is an easy direct reduction from SAT).
-
-\slidetwo{Compactly Representing Scores}{on Exponentially Many Labels}
-
-The tensor {\color{red} $s^N[N,Y]$} holds $NY$ scores.
-
-\vfill
-The tensor {\color{red} $s^E[E,Y,Y]$} holds $EY^2$ scores where $e$ ranges over edges $\tuple{n,m} \in \mathrm{Edges}$.
 
 \slide{Back-Propagation Through Exponential Softmax}
 
 \begin{eqnarray*}
-s^N[I,Y] & = & f^N_\Phi(x) \\
-s^E[E,Y,Y] & = & f^E_\Phi(x)
+s^N[I,L] & = & f^N_\Phi(x) \\
+s^E[E,L,L] & = & f^E_\Phi(x)
 \end{eqnarray*}
 
 \vfill
 \begin{eqnarray*}
-{\color{red} s(\hat{y})} & = & \sum_n\;s^N[n,\hat{y}[n]] + \sum_{\tuple{n,m} \in \mathrm{Edges}}\;s^E[\tuple{n,m},\hat{y}[n],\;\hat{y}[m]] \\
+{\color{red} s(\hat{{\cal Y}})} & = & \sum_n\;s^N[n,\hat{{\cal Y}}[n]] + \sum_{\tuple{n,m} \in \mathrm{Edges}}\;s^E[\tuple{n,m},\hat{{\cal Y}}[n],\;\hat{{\cal Y}}[m]] \\
 \\
-{\color{red} P_s(\hat{y})} & = & \softmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
+{\color{red} P_s(\hat{{\cal Y}})} & = & \softmax_{\hat{{\cal Y}}}\;s(\hat{{\cal Y}}) \;\;\mbox{\color{red} all possible $\hat{{\cal Y}}$} \\
 \\
-{\cal L} & = & {\color{red} - \ln P_s(y) \;\;\;\mbox{gold label $y$}}
+{\cal L} & = & {\color{red} - \ln P_s({\cal Y}) \;\;\;\mbox{gold label ${\cal Y}$}}
 \end{eqnarray*}
 
 \vfill
-We want the gradients {\color{red} $s^N.\grad[N,Y]$} and {\color{red} $s^E.\grad[E,Y,Y]$}.
+We want the gradients {\color{red} $s^N.\grad[N,L]$} and {\color{red} $s^E.\grad[E,L,L]$}.
 
 
 \slide{END}
