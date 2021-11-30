@@ -62,7 +62,7 @@ We consider $\Delta t$ large enough so that $\Delta t$ corresponds to many SGD u
 \vfill
 We consider $\Delta t$ small enough so that the gradient estimate distribution does not change over the interval $\Delta t$.
 
-\slide{Applying the Law of Large Numbers}
+\slide{Applying the Central Limit Theorem}
 
 If the mean gradient $g(\Phi)$ is approximately constant over the interval $\Delta t = N \eta$ we have
 
@@ -72,8 +72,8 @@ $$\Phi(t + \Delta t)  \approx \Phi(t) -g(\Phi)\Delta t + \eta \sum_{i=1}^N (g(\P
 The random variables in the last term have zero mean.
 
 \vfill
-By the law of large numbers a sum (not the average) of $N$ random vectors will approximate a Gaussian distribution where the standard deviation
-grows like $\sqrt{N}$.
+By the central limit theorem a sum (not the average) of $N$ random vectors will approximate a Gaussian distribution where the variance
+grows like $N$.
 
 \slide{Modeling Noise}
 
@@ -94,14 +94,14 @@ The mean of $\hat{g}$ is the true gradient $g(\Phi)$.
 
 
 \vfill
-By the law of large numbers $\sum_{j=1}^N (g(\Phi) - \hat{g}_i)$ is approximately Gaussian.
+By the central limit theorem $\sum_{j=1}^N (g(\Phi) - \hat{g}_i)$ is approximately Gaussian.
 
 \slide{In One Dimensional}
 
 We first consider the case of one parameter (a one dimensional optimization problem) so that $\hat{g}$ is a scalar.
 
 \vfill
-To model the noise as Gaussian we take $\epsilon \sim {\cal N}(0,\sigma)$ where $\sigma$ is the standard deviation of $\hat{g}$.
+To model the noise as Gaussian we take $\epsilon \sim {\cal N}(0,\sigma^2)$ where $\sigma^2$ is the variance of $\hat{g}$.
 
 \begin{eqnarray*}
 \Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \eta \epsilon \sqrt{N} \\
@@ -124,7 +124,7 @@ Letting $\epsilon'$ denote $\sqrt{\eta}\epsilon$ we have
 \end{eqnarray*}
 
 \vfill
-With $\epsilon' \sim {\cal N}(0,\sqrt{\eta}\sigma)$.
+With $\epsilon' \sim {\cal N}(0,\eta \sigma^2)$.
 
 
 \slide{The Stochastic Differential Equation (SDE)}
@@ -132,13 +132,13 @@ With $\epsilon' \sim {\cal N}(0,\sqrt{\eta}\sigma)$.
 
 \begin{eqnarray*}
 \Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t +  \epsilon \sqrt{\Delta t} \\
-\epsilon & \sim & {\cal N}(0,\sqrt{\eta}\sigma)
+\epsilon & \sim & {\cal N}(0,\eta\sigma^2)
 \end{eqnarray*}
 
 \vfill
 We can take this last equation to hold in the limit of arbitrarily small $\Delta t$ in which case we get a continuous time stochastic process.  This process can be written as
 
-{\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\sqrt{\eta}\sigma)$$}
+{\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\sigma^2)$$}
 
 \slide{Higher Dimension}
 
