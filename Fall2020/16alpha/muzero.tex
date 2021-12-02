@@ -73,7 +73,7 @@ The rollouts are generated from the actions selected by MCTS and put in a replay
 
 \vfill
 The entries in the replay buffer have the form
-$$s = \left[\;(o_1,a_1,\ldots,o_t,a_t);\;\;a_{t+1},\;r_{t+1},\ldots,a_{t+K},r_{t+K},v_{t+K+1}\;\right]$$
+$$s = \left[\;(o_1,a_1,\ldots,o_t,a_t);\;\;a_{t+1},\;r_{t+1},\ldots,a_{t+K},r_{t+K},\;\;v_{t+K+1}\;\right]$$
 
 \vfill
 where $a_t$ is the action taken at time $t$, $o_t$ is a screen shot at time, $r_t$ is the reward at time $t$ (from the actual game), and
@@ -84,7 +84,7 @@ $v_{t+K+1}$ is the discounted reward encountered from time $t+K+1$.
 {\huge
 $$\Phi^* = \argmin_\Phi E_{s \sim \mathrm{Rollout}}\;{\cal L}^\pi(s) + {\cal L}^V(s) +{\cal L}^R(s) + c||\Phi||^2$$
 
-$$s  = \left[\;(o_1,a_1,\ldots,o_t,a_t);\;\;a_{t+1},\;r_{t+1},\ldots,a_{t+K},r_{t+K},v_{t+K+1}\;\right]$$
+$$s  = \left[\;(o_1,a_1,\ldots,o_t,a_t);\;\;a_{t+1},\;r_{t+1},\ldots,a_{t+K},r_{t+K},\;\;v_{t+K+1}\;\right]$$
   
 \vfill
 ${\cal L}^\pi$ trains the policy network to predict $a_{t+1}$ (a cross-entropy loss).
