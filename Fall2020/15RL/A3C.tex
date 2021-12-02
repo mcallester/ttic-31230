@@ -69,7 +69,7 @@ These two papers both appeared at NeurIPS 2000 and are essentially identical.  T
 \end{eqnarray*}
 
 \vfill
-{\bf The point} is that we can now approximate $Q^{\pi_\Phi}$ with neural network $Q_\Phi$ where the networks $\pi_\Phi$ and $Q_\Phi$ can use different, perhaps overlapping, parts of $\Phi$.
+{\bf The point} is that we can now approximate $Q^{\pi_\Phi}$ with neural network $Q_\Theta$.
 
 \vfill
 We reduced the variance at the cost of approximating the expected future reward.
@@ -77,25 +77,29 @@ We reduced the variance at the cost of approximating the expected future reward.
 
 \slide{The Actor-Critic Algorithm}
 \begin{eqnarray*}
-  \nabla_\Phi \;E_{\pi_\Phi}\;R   & \approx & E_{\pi_\Phi} \; \sum_t\; {\color{red} \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_\Phi(s_t,a_t)}
+   \nabla_\Phi \;E_{\pi_\Phi}\;R   & \approx & E_{\pi_\Phi} \; \sum_t\; {\color{red} \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_\Theta(s_t,a_t)}
 \end{eqnarray*}
 
 \vfill
-\centerline{{\color{red} $\pi_\Phi$} is the ``actor'' and {\color{red} $Q_\Phi$} is the ``critic''}
+\centerline{{\color{red} $\pi_\Phi$} is the ``actor'' and {\color{red} $Q_\Theta$} is the ``critic''}
 
 \slide{The Actor-Critic Algorithm}
-\begin{eqnarray*}
-  \nabla_\Phi \;E_{\pi_\Phi}\;R   & \approx & E_{\pi_\Phi} \; \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_\Phi(s_t,a_t)
-\end{eqnarray*}
 
-We can sample an episode and then do
+To get a theorem for following the loss gradient we need
 
-\begin{eqnarray*}
-  \Phi  &\pluseq & \sum_t \eta_1\left(\nabla_{\Phi}\;\ln \pi_{\Phi}(a_i|s_i)\right)Q_\Phi(s_t,a_t)\\
-  \Phi & \minuseq & \sum_t \eta_2 \;\nabla_{\Phi}\;\left(Q_\Phi(s_t,a_t) - \sum_{t' \geq t} r_{t'}\right)^2
-\end{eqnarray*}
+{\huge
+\begin{eqnarray}
+  \Phi^* & = & \argmin_\Phi\left[R\;|\;\pi_\Phi\right] \label{AC1} \\
+  \nn
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & E\left[ \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_{\Theta^*(\Phi)}(s_t,a_t)\;|\; \pi_\Phi\right] \nn
+  \nn
+  \nn
+  \Theta^*(\Phi) & = & \argmin_\Theta\; E\left[\sum_t\;\left(Q_\Theta(s_t,a_t) - \sum \!_{t' \geq t}\; r_{t'}\right)^2 \;|\;\pi_\Phi\right] \label{AC2}
+\end{eqnarray}
+}
 
-The two updates typically apply to different (but perhaps overlapping) subsets of the parameters $\Phi$.
+A stationary point is now a Nash equilibrium of a two-player game defined by (\ref{AC1}) and (\ref{AC2}).
+
 
 \slide{Reducing the Variance over $s_t$}
 
@@ -121,6 +125,25 @@ We have the following for any function $V(s)$ of states.
  \\
  & = & E_{s_t} \;  V(s_t) \nabla_\Phi \sum_{a_t}\; \pi_\Phi(a_t|s_t) \;=\; 0
 \end{eqnarray*}
+
+
+\slide{The Advantage Actor-Critic Algorithm}
+
+{\huge
+\begin{eqnarray}
+  \Phi^* & = & \argmin_\Phi\left[R\;|\;\pi_\Phi\right] \label{ACA1} \\
+  \nn
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & E\left[ \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;(Q_{\Theta^*(\Phi)}(s_t,a_t) - V_{\Psi^*(\Phi)}(s_t))\;|\; \pi_\Phi\right] \nn
+  \nn
+  \nn
+  \Theta^*(\Phi) & = & \argmin_\Theta\; E\left[\sum_t\;\left(Q_\Theta(s_t,a_t) - \sum \!_{t' \geq t}\; r_{t'}\right)^2 \;|\;\pi_\Phi\right] \label{ACA2} \\
+  \nn
+  \nn
+  \Psi^*(\Phi) & = & \argmin_\Psi\;E\left[\sum_t\;\left(Q_{\Theta^*(\Phi)}(s_t,a_t) - V_\Psi(s_t)\right)^2 \;|\;\pi_\Phi\right] \label{ACA3}
+\end{eqnarray}
+
+We now have a three player game defined by (\ref{ACA1}), (\ref{ACA2}) and (\ref{ACA3}).
+}
 
 \slide{Advantage-Actor-Critic Algorithm}
 \begin{eqnarray*}
@@ -157,6 +180,18 @@ However, a deterministic policy never samples alternative actions.
 
 \vfill
 Typically one forces a random action some small fraction of the time.
+
+
+\slide{Issue: Discounted Reward}
+
+DQN and A3C use discounted reward on episodic or long term problems.
+
+\vfill
+Presumably this is because actions have near term consequences.
+
+\vfill
+This should be properly handled in the mathematics, perhaps in terms of the mixing time of
+the Markov process defined by the policy.
 
 
 \slide{Issue: Discounted Reward}

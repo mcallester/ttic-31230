@@ -14,48 +14,98 @@
   \vfill
   \vfill
 
-  \slide{Playing Blind}
+\slide{Action Planning for Atari}
 
 {\bf Mastering Atari, Go, chess and shogi by planning with a learned model}, Schrittweiser et al., Nature 2020.
 
 \vfill
-In alpha zero we have a state (the board) and procedure for updating the state for each action.
+While the paper describes a new system for board games (Chess, go and shogi) there is no significant improvement over AlphaZero for board games.
 
 \vfill
-A representation of the board is fed to the value and policy networks.
+The real innovation here is the generalization of AlphaZero to Atari games.
 
 \vfill
-In mu zero no state representation is provided.  The system is only given an action set and rewards for acting.
+I will focus on Atari Games.
 
+\slide{Action Planning for Atari}
 
-\slide{The Algorithm}
+AlphaZero uses Monte-Carlo tree search (MCTS) to ``plan'' into the future.
 
-The algorithm is very similar to alpha zero but with the addition of a state transition RNN $g_\Phi$ satisfying
+\vfill
+Planning requires a model of state transitions.
+
+\vfill
+Q-learning and advantage actor-critic do not require the ability to plan ahead (tree search). Previous Deep-Mind systems for Atari did not use MCTS to plan ahead.
+
+\slide{Building a Model}
+
+\vfill
+MuZero for Atari sees the Atari screen and rewards during play but cannot see future screens when it does MCTS to plan for future outcomes.
+
+\vfill
+During MCTS MuZero uses a learned dynamic model --- an RNN $g_\Phi(s,a)$ for predicting reward and the next state.
 
 \vfill
 $$r^k,s^k = g_\Phi(s^{k-1},a^k)$$
 
 \vfill
-Given the state model we can perform Monte Carlo tree search (MCTS) as in alpha zero.
+Given the RNN state model we can perform Monte Carlo tree search (MCTS) as in AlphaZero.
+
+\slide{Training}
+
+As in AlphaZero, we train a policy network and value network.
 
 \vfill
-Alpha zero is modified to allow intermediate reward, to use discounted reward, and to do long roll outs in addition to shallow tree searches.
-
-\slide{The loss function}
-
-$$\Phi^* = \argmin_\Phi \sum_k {\cal L}^\pi + {\cal L}^V +{\cal L}^R + c||\Phi||^2$$
+But in MuZero we also train a model of state transitions and rewards to be used in MCTS.
 
 \vfill
-${\cal L}^\pi$ and ${\cal L}$ are essentially the loss functions for the policy and value respectively of alpha zero.
+At the beginning of the each MCTS the state is initialized from the observed history of screen shots and actions taken.  This initialization network is also trained.
+
+\slide{Training}
+
+{\huge
+The training loss function has the form
+
+$$\Phi^* = \argmin_\Phi E_{s \sim \mathrm{Rollout}}\;{\cal L}^\pi(s) + {\cal L}^V(s) +{\cal L}^R(s) + c||\Phi||^2$$
 
 \vfill
-The loss function function ${\cal L}^R$ trans the model RNN $g_\Phi$ to predict the rewards.  Rewards are still provided to $\mu$ Zero.
+The rollouts are generated from the actions selected by MCTS and put in a replay buffer.
 
+\vfill
+The entries in the replay buffer have the form
+$$s = \left[\;(o_1,a_1,\ldots,o_t,a_t);\;\;a_{t+1},\;r_{t+1},\ldots,a_{t+K},r_{t+K},v_{t+K+1}\;\right]$$
+
+\vfill
+where $a_t$ is the action taken at time $t$, $o_t$ is a screen shot at time, $r_t$ is the reward at time $t$ (from the actual game), and
+$v_{t+K+1}$ is the discounted reward encountered from time $t+K+1$.
+}
+\slide{Training}
+
+{\huge
+$$\Phi^* = \argmin_\Phi E_{s \sim \mathrm{Rollout}}\;{\cal L}^\pi(s) + {\cal L}^V(s) +{\cal L}^R(s) + c||\Phi||^2$$
+
+$$s  = \left[\;(o_1,a_1,\ldots,o_t,a_t);\;\;a_{t+1},\;r_{t+1},\ldots,a_{t+K},r_{t+K},v_{t+K+1}\;\right]$$
+  
+\vfill
+${\cal L}^\pi$ trains the policy network to predict $a_{t+1}$ (a cross-entropy loss).
+
+\vfill
+${\cal L}^V$ trains the value network to predict $v_{t+K+1}$ (square loss).
+
+\vfill
+${\cal L}^R$ trains the reward network to predict each $r_{t+k}$ (square loss).
+
+\vfill
+The state dynamics network is trained implicitly by these loss functions.
+}
+
+\ignore{
 \slide{Results}
 
 \centerline{\includegraphics[height= 4.5in]{\images/muzerochess}}
 
 The orange line is alphazero.
+}
 
 \slide{Results}
 
