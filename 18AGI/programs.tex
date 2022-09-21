@@ -17,6 +17,52 @@
   \vfill
   \vfill
 
+\slide{Chomsky vs. Kolmogorov and Hinton}
+
+\includegraphics[width=1.0 in]{\images/Chomsky} \begin{minipage}[b]{8in} Noam Chomsky: 
+Natural language grammar cannot be learned by a universal learning algorithm.
+This position is supported by the ``no free lunch theorem''.\end{minipage}
+
+\vfill
+\includegraphics[height=1.0 in]{\images/Kolmogorov}
+\includegraphics[height=1.0 in]{\images/Hinton}
+\begin{minipage}[b]{7in}
+Andrey Kolmogorov, Geoff Hinton: Universal learning algorithms exist. This position is supported by the ``free lunch theorem''.
+\end{minipage}
+
+\slide{The No Free Lunch Theorem}
+
+\includegraphics[width=1.0 in]{\images/Chomsky} 
+
+Without prior knowledge, such as universal grammar, it is impossible to make a prediction for an input you have not seen in the training data.
+
+
+\vfill
+{\bf Proof:} Select a predictor $h$ uniformly at random from all functions from ${\cal X}$ to ${\cal Y}$ and then take the data distribution to draw pairs $(x, h(x))$
+where $x$ is drawn uniformly from ${\cal X}$.  No learning algorithm can predict $h(x)$ where $x$ does not occur in the training data.
+
+
+\slide{The Occam Guarantee (Free Lunch Theorem)}
+
+Consider a classifier $f$ written in C++ with an arbitrarily large standard library.
+
+\vfill
+Let $|f|$ be the number of bits needed to represent $f$.
+
+\slide{The Occam Guarantee (Free Lunch Theorem)}
+
+\vfill
+$$0 \leq {\cal L}(h,x,y) \leq \lmax$$
+\begin{eqnarray*}
+{\cal L}(h)  & = &  E_{(x,y)\sim \mathrm{Pop}}\;{\cal L}(h,x,y) \\
+\hat{{\cal L}}(h) & = & E_{(x,y)\sim \mathrm{Train}}\;{\cal L}(h,x,y)
+\end{eqnarray*}
+
+\vfill
+Theorem: With probability at least $1-\delta$ over the draw of the training data the following holds simultaneously for all $f$.
+
+{\color{red} $${\cal L}(f) \leq \frac{10}{9}\left(\hat{{\cal L}}(f) + \frac{5\lmax}{N_\mathrm{Train}}\left((\ln 2)|f| +\ln\frac{1}{\delta}\right)\right)$$}
+
 \slide{Representing Functions with Programs}
 
 Neural Turing Machines

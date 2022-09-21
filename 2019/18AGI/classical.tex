@@ -1,0 +1,102 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+
+  \vfill
+  \centerline{\bf Representing Functions with Shallow Circuits}
+  \vfill
+  \centerline{\bf The Classical Universality Theorems}
+  \vfill
+  \vfill
+
+\slide{Function Representations}
+
+Consider continuous functions $f: [0,1]^N \rightarrow \reals$
+
+\vfill
+\vfill
+\centerline{\includegraphics[width = 2in]{../images/n-cube} 
+\begin{minipage}[b]{2.0in}
+  $\stackrel{f}{\rightarrow} \;\;\;\reals$ \newline
+  \vspace{2ex}
+\end{minipage}}
+
+\vfill
+Given the corner values, the interior can be filled.
+
+$$f(x_1,\ldots,x_N) = E_{y_1,\ldots,y_N \sim \mathrm{Round}(x_1,\ldots,x_N)}\;f(y_1,\ldots,y_n)$$
+
+\vfill
+Hence each of the $2^N$ corners has an independent value.
+
+\slide{The Kolmogorov-Arnold representation theorem (1956)}
+
+For continuous $f: [0,1]^N \rightarrow \reals$ there exists continuous
+``activation functions'' $\sigma_i: \mathbb{R} \rightarrow \mathbb{R}$ and continuous $w_{i,j} : \reals \rightarrow \reals$ such that
+
+
+\vfill
+$$f(x_1,\;\ldots,\;x_N)=\sum _{{i=1}}^{{2N+1}} \sigma_i \left(\sum_{j=1}^N\;w_{i,j}(x_j)\right)$$
+
+
+
+\slide{A Simpler, Similar Theorem}
+
+For (possibly discontinuous) $f: [0,1]^N \rightarrow \reals$ there exists (possibly discontinuous)
+$\sigma, w_i: \reals \rightarrow \reals$.
+
+\vfill
+$$f(x_1,\;\ldots,\;x_N) = \sigma\left(\sum_i w_i(x_i)\right)$$
+
+\vfill
+Proof: Select $w_i$ to spread out the digits of its argument so that $\sum_i w_i(x_i)$ contains all the digits of all the $x_i$.
+
+\slide{Cybenko's Universal Approximation Theorem (1989)}
+
+For continuous $f: [0,1]^N \rightarrow \reals$ and $\varepsilon >0$ there exists
+
+\vfill
+\begin{eqnarray*}
+  F(x) &= & \alpha^\top \sigma(Wx + \beta) \\
+  \\
+  & = & \sum_i \alpha_i \sigma\left(\sum_j W_{i,j} \;x_j + \beta_i\right)
+\end{eqnarray*}
+
+
+\vfill
+such that for all $x$ in $[0,1]^N$ we have $| F( x ) - f ( x ) | < \varepsilon$.
+
+\slide{How Many Hidden Units?}
+
+Consider Boolean functions $f:\;\{0,1\}^N \rightarrow \{0,1\}$.
+
+\vfill
+For Boolean functions we can simply list the inputs $x^0,\;\ldots,\;x^k$ where the function is true.
+
+\begin{eqnarray*}
+  f(x) & = & \sum_k \mathbf{1}[x=x^k] \\
+  \\
+  \mathbf{1}[x = x^k] & \approx & \sigma\left(\sum_i W_{k,i} x_i + b_k\right)
+\end{eqnarray*}
+
+\vfill
+A simpler statement is that any Boolean function can be put in disjunctive normal form.
+
+\slide{Representing Functions as IO Tables}
+
+These universality theorems implicitly treat functions as tables of intput-output pairs.
+
+\vfill
+\centerline{\includegraphics[height = 1in]{../images/Frown}}
+
+\slide{END}
+
+}
+\end{document}

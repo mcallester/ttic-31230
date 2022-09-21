@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 
 \begin{document}
@@ -9,7 +9,7 @@
 
 \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
 \bigskip
-\centerline{David McAllester, Winter 2020}
+\centerline{David McAllester, Autumn 2020}
 
 \vfill
 \centerline{\bf Implicit Regularization}
@@ -41,53 +41,61 @@ Any zero-loss (squared loss) solution can be projected on the span of training v
 \vfill
 It can be shown that when the training vectors are linearly independent any zero loss solution in the span of the training vectors is a least-norm solution.
 
-\slide{A PAC-Bayes Analysis of Implicit Regularization}
+\slide{Implicit Regularization of SGD}
 
-Let $A$ be an algorithm that stochastically maps a training set to a model parameter vector.
-
-\vfill
-In the case of SGD we take the stochasticity to include both the random initialization and the random sequence of training batches.
-
-\slide{A PAC-Bayes Analysis of Implicit Regularization}
+In a labeling problem a model with parameters $\Phi$ defines a model propbability $P(y|\Phi,x)$.
 
 \vfill
-Let $p(\Phi|A,\mathrm{Train})$ be the probability desity on parameter vectors defined by the stochasticity of the algorithm $A$.
+This defines a log loss $-\ln P(y|\Phi,x)$ on which we do gradient descent.
 
 \vfill
-Define
-$$p(\Phi|A) = E_{\parens{\mathrm{Train} \sim \pop^{N_\mathrm{Train}}}} p(\Phi|A,\mathrm{Train})$$
+Let {\color{red} $\mathrm{SGD}\!\brackets{P,\Phi_{\mathrm{Init}},\train}$} be the vector that results from running SGD on model $P$ with initial parameters $\Phi_{\mathrm{Init}}$
+using training data $\train$ (and a fixed set of hyperparameters, learning rate schedule, and fixed order in which training instances are considered,
+and fixed number of iterations).
+
+
+\slide{Implicit Regularization of SGD}
+
+To get a generalization bound when learning a continuous parameter vector we add Gaussian noise to simulate limited precision of the real numbers.
+
+$$\Phi = \mathrm{SGD}\!\brackets{P,\Phi_{\mathrm{Init}},\mathrm{Train}} + \epsilon$$
 
 \vfill
-The density $p(\Phi|A)$ is independent of any choice of training data and can be used as the prior in a BAC-Bayesian bound.
+The algorithm defines an {\bf implicit prior:}
+$$p\!\parens{\Phi\;|\;P,\Phi_{\mathrm{Init}},\pop} = E_{\parens{\mathrm{Train} \sim \pop^N}}\;\;p\!\parens{\Phi\;|\;P,\Phi_{\mathrm{Init}},\train}$$
+
+\vfill
+The implicit prior $p\!\parens{\Phi\;|\;P,\Phi_{\mathrm{Init}},\pop}$ is a valid prior!  It does not depend on training data!
+
+\slide{Implict Priors: the General Case}
+
+Let $A$ be any algorithm mapping a training set $\train$ to a probability density $q_{A,\train}(\Phi)$ over model parameters $\Phi$.
+
+\vfill
+The implicit prior defined by algorithm $A$ and the given population distribution is
+
+$$p_{A,\pop}(\Phi) = E_{\parens{\mathrm{Train} \sim \pop^{N}}} \;\;q_{A,\train}(\Phi)$$
 
 \slide{A PAC-Bayes Analysis of Implicit Regularization}
 
 \begin{eqnarray*}
-{\cal L}(\Phi,\pop) & = & E_{\tuple{x,y} \sim \pop}\;{\cal L}(\Phi,x,y) \\
+{\cal L}(q_{A,\train}) & = & E_{\tuple{x,y} \sim {\color{red}  \pop}, \;\;\Phi \sim q_{A,\train}}\;{\cal L}(\Phi,x,y) \\
 \\
-{\cal L}(\Phi,\mathrm{Train}) & = & E_{\tuple{x,y} \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y) \\
-\\
-{\cal L}(A) & = & E_{\parens{\mathrm{Train} \sim \pop^{N_\mathrm{Train}}}}\;E_{\Phi \sim p(\Phi\;|A,\;\mathrm{Train})}\;{\cal L}(\Phi,\pop) \\
-\\
-\hat{\cal L}(A) & = & E_{\parens{\mathrm{Train} \sim \pop^{N_\mathrm{Train}}}}\;E_{\Phi \sim p(\Phi\;|A,\;\mathrm{Train})}\;{\cal L}(\Phi,\mathrm{Train})
+\hat{\cal L}(q_{A,\train}) & = & E_{\tuple{x,y} \sim {\color{red} \train}, \;\;\Phi \sim q_{A,\train}}\;{\cal L}(\Phi,x,y)
 \end{eqnarray*}
 
 \slide{A PAC-Bayes Analysis of Implicit Regularization}
-\vfill
-$${\cal L}(A) \leq \frac{10}{9}\parens{
-\begin{array}{ll} & \hat{\cal L}(A) \\
-                  + & \frac{5\lmax}{N_\mathrm{Train}}\parens{\begin{array}{ll} & E_{\mathrm{Train} \sim \pop^{N_{\mathrm{Train}}}} \\
-                                                                                \\                                                           
-                                                                              & ~~~~~~KL(p(\Phi|A,\mathrm{Train}),p(\Phi|A)) \\
-                                                                                \\
-                                                                             + & \ln\frac{1}{\delta}\end{array}}
- \end{array}}$$
 
+With probability at least $1-\delta$ over the draw of $\train$ we have
+\vfill
+{\huge
+$${\cal L}(q_{A,\train}) \leq \frac{10}{9}\parens{ \hat{\cal L}(q_{A,\train}) + \frac{5\lmax}{N_\mathrm{Train}}\parens{KL(q_{A,\train},p_{A,\pop})+ \ln\frac{1}{\delta}}}$$
+}
 \vfill
 There is no obvious way to calculate this guarantee.
 
 \vfill
-However, it can be shown that $p(\Phi|A)$ is the optimal PAC-Bayeisan prior for algorithm $A$ making this the best possible PAC-Bayesian bound for $A$.
+However, it can be shown that $p_{A,\pop}$ is the optimal PAC-Bayeisan prior for algorithm $A$ run on data drawn from $\pop$.
 
 \slide{END}
 

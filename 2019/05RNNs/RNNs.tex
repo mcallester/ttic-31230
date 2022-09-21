@@ -1,0 +1,222 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Recurrent Nerual Networks (RNNs)}
+
+\slide{Word Embeddings}
+
+Each word $w$ is associated with a vector $e[w,I]$ called the embedding of word $w$.
+
+\vfill
+The matrix $e$ can be viewed as a dictionary assigning each word $w$ the vector $e[w,I]$.
+
+\slide{Recurrent Neural Network (RNN) Language Modeling}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+\vfill
+A typical neural language model has the form
+
+$$P_\Phi(w_t\;|\;w_1,\cdots,w_{t-1}) = \softmax_{w_t} e[w_t,I]h[t-1,I]$$
+
+\slide{Vanilla RNNs}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+A Vanilla RNN uses two-input linear threshold units.
+
+{\huge
+\begin{eqnarray*}
+{\color{red} h[b,t,j]}
+& = & \sigma\left(W^{h,h}[j,I]{\color{red} h[b,t-1,I]} + W^{x,h}[j,K]{\color{red} x[b,t,K]} - B[j]\right) \\
+\end{eqnarray*}
+}
+
+\slideplain{Exploding and Vanishing Gradients}
+
+\vfill
+If we avoid saturation of the activation functions then we get exponentially growing or shrinking eigenvectors of the weight matrix.
+
+\vfill
+Note that if the forward values are bounded by sigmoids or tanh then they cannot explode.
+
+\vfill
+However the gradients can still explode.
+
+\slide{Exploding Gradients: Gradient Clipping}
+
+\vfill
+We can dampen the effect of exploding gradients by clipping them before applying SGD.
+
+\vfill
+$$W.\mathrm{grad'} = \left\{\begin{array}{l} W.\mathrm{grad} \;\;\;\mbox{if $||W.\mathrm{grad}|| \leq n_{\mathrm{max}}$} \\
+                                                      \\ \\
+                                                      n_{\mathrm{max}} \; W.\mathrm{grad} / ||W.\mathrm{grad}|| \;\; \mbox{otherwise}
+\end{array} \right.$$
+
+\vfill
+See {\tt torch.nn.utils.clip\_grad\_norm}
+
+\slide{Time as Depth}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+\vfill
+We would like the RNN to {\color{red} remember and use} information from much earlier inputs.
+
+
+\vfill
+All the issues with depth now occur through time.
+
+\vfill
+However, for RNNs {\color{red} at each time step we use the same model parameters.}
+
+\vfill
+In CNNs {\color{red} at each layer uses its own model parameters.}
+
+\slide{``Residual Connections'' Through Time}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+\vfill
+We would like to have residual connections through time.
+
+\vfill
+However, we have to handle the fact that the same model parameters are used at every time step.
+
+
+\slideplain{Gated RNNs}
+
+\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{{\large [Christopher Olah]}}
+
+$$h[b,t,j] =  {\color{red} G_t[b,t,j]}h[b,t\!-\!1,j] + {\color{red} (1-G[b,t,j])}R[b,t,j]$$
+
+\vfill
+This is analogous to a residual connection.
+
+\vfill
+Rather than add the ``next layer'' $R[b,t,j]$ to the input $h[b,t\!-\!1,j]$ as in a residual connection, we take a convex combination determined by a computed ``gate'' $G[b,t,j] \in [0,1]$.
+
+\slideplain{Update Gate RNN (UGRNN)}
+
+{\huge
+\begin{eqnarray*}
+R[b,t,j] & = & \mathrm{tanh}\left(W^{h,R}[j,I]{\color{red} h[b,t\!-\!1,I]} + W^{x,R}[j,K]{\color{red} x[b,t,K]} - B^R[j]\right) \\
+\\
+G[b,t,j] & = & \sigma\left(W^{h,G}[j,I]{\color{red} h[b,t\!-\!1,I]} + W^{x,G}[j,K]{\color{red} x[b,t,K]} - B^R[j]\right) \\
+\\
+h[b,t,j] & = & {\color{red} G[b,t,j]}h[b,t\!-\!1,j] + {\color{red} (1-G[b,t,j])}R[b,t,j] \\
+\\
+{\color{red} \Phi} & {\color{red} =} & {\color{red} (W^{h,R},W^{x,R},B^R,W^{h,G},W^{x,G},B^G)}
+\end{eqnarray*}
+}
+$$\mathrm{tanh}(x) \in (-1,1)\;\;\;\;\;\sigma(x) \in (0,1)$$
+
+\slide{Hadamard product}
+
+$$h[b,t,j] =  {\color{red} G[b,t,j]}h[b,t\!-\!1,j] + {\color{red} (1-G[b,t,j])}R[b,t,j]$$
+
+\vfill
+is sometimes written as
+
+$$h[b,t,J] =  G[b,t,J]{\color{red} \odot} h[b,t\!-\!1,J] + (1-G[b,t,J]){\color{red} \odot} R[b,t,J]$$
+
+\vfill
+$\odot$ is the Hadamard product (componentwise product) on vectors.
+
+\slide{Gated Recurrent Unity (GRU) by Cho et al. 2014}
+
+\centerline{\includegraphics[width=4.0in]{../images/GRU}}
+\centerline{{\huge [Christopher Olah]}}
+
+\vfill
+The right half is a UGRNN.
+
+\vfill
+The GRU adds a gating on $h_{t-1}$ before the tanh.
+
+\slide{Long Short Term Memory (LSTM)}
+\centerline{\includegraphics[width=3.5in]{../images/LSTM}}
+\centerline{{\large [figure: Christopher Olah]}}
+
+\centerline{\Large [LSTM: Hochreiter\&Shmidhuber, 1997]}
+
+\slide{UGRNN vs. GRUs vs. LSTMs}
+
+\vfill
+In class projects from previous years, GRUs consistently outperformed LSTMs.
+
+\vfill
+A systematic study [Collins, Dickstein and Sussulo 2016] states:
+
+\begin{quotation}
+  Our results point to the GRU as being the most learnable of gated RNNs for shallow architectures, followed by the UGRNN.
+\end{quotation}
+
+\slide{RNN for a generic CELL Procedure}
+As usual, we use capital letter indeces to denote whole tensors or slices and lower case letters to denote particular index values.
+\vfill
+Procedure $\mathrm{RNN}_\Phi(x(T,I))$
+
+\begin{eqnarray*}
+h[0,J] &  = &  \mathrm{CELL}_{\Phi.\mathrm{cell}}(\Phi.\mathrm{init}[J],\;x[0,I]) \\
+\mathrm{for}\;t>0\;\;h[t,J] &  =  & \mathrm{CELL}_{\Phi.\mathrm{cell}}(h[t-1,J],\;x[t,I])
+\end{eqnarray*}
+
+\vfill
+Return $h[T,J]$
+
+
+
+\slide{bidirectional RNNS}
+
+\centerline{\includegraphics[width = 3in]{../images/biRNN}}
+
+\begin{eqnarray*}
+\vec{h}[T,J] & = & \vec{\mathrm{RNN}}_{\Phi.LR}(x[T,I]) \\
+\\
+\cev{h}[T,J] & = & \cev{\mathrm{RNN}}_{\Phi.RL}(x[T,I]) \\
+\\
+h[t,2J] & = & \vec{h}[t,J];\cev{h}[t,J]
+\end{eqnarray*}
+
+\slide{Multi-Layer RNNs}
+
+\centerline{\includegraphics[width = 1.75in]{../images/RNNstack}}
+
+We let $\ell$ indicate the layer of a multi-layer RNN.
+\begin{eqnarray*}
+h[0,T,J] & = & \mathrm{RNN}_{\Phi[0]}(x[T,I]) \\
+\mbox{for} \;\ell > 0\;\;h[\ell,T,J] & = & \mathrm{RNN}_{\Phi[\ell]}(h[\ell-1,T,J])
+\end{eqnarray*}
+
+\vfill
+Each layer can be bidirectional.
+
+\slide{Residual Multi-Layer RNNs}
+
+But layers are now typically stacked using residual connections.
+
+\vfill
+\begin{eqnarray*}
+h[0,T,J] & = & \mathrm{RNN}_{\Phi[0]}(x[T,I]) \\
+\\
+\mbox{for} \;\ell > 0\;\;h[\ell,T,J] & = & h[\ell-1,T,J] + \mathrm{RNN}_{\Phi[\ell]}(h[\ell-1,T,J])
+\end{eqnarray*}
+
+\slide{END}
+}
+\end{document}

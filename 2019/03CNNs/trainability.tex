@@ -1,0 +1,305 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+
+    \vfill
+  \centerline{\bf Trainability:}
+  \vfill
+  \centerline{\bf Relu, Batch Normalization, Initialization,}
+  \vfill
+  \centerline{\bf and Residual Connections (ResNet)}
+  \vfill
+  \vfill
+
+
+
+
+\slide{Universality Assumption}
+
+We often assume DNNs are universally expressive (can model any function) and trainable (the desired function can be found by SGD).
+
+\vfill
+Universal trainability is clearly false but can still usefully guide architecture design.
+
+\slide{Universality Assumption: Expressiveness}
+
+DNNs generalize digital circuits.
+
+\vfill
+Consider Boolean Values $P,Q$ --- numbers that are either close to 0 or close to 1.
+\begin{eqnarray*}
+P \wedge Q & \approx & \sigma(100*P + 100* Q -150) \\
+\\
+P \vee Q & \approx & \sigma(100*P + 100* Q -50) \\
+\\
+\neg P & \approx & \sigma(100*(1-P) - 50)
+\end{eqnarray*}
+
+\slide{Universality Assumption: Trainability}
+
+The main issue in making deep neural networks trainable is maintaining meaningful gradients.
+
+\vfill
+There are various difficulties.
+
+\slide{Activation Function Saturation}
+
+Consider the sigmoid activation function $1/(1+ e^{-x})$.
+
+\vfill
+\centerline{\includegraphics[width= 4.0in]{../images/sigmoid2}}
+
+
+\vfill
+The gradient of this function is quite small for $|x| > 4$.
+
+\vfill
+In deep networks backpropagation can go through many sigmoids and
+the gradient can ``vanish''
+
+\slide{The Rectified Linear Unit Activation Function (Relu)}
+
+$\mathrm{Relu}(x) = \max(x,0)$
+
+\vfill
+\centerline{\includegraphics[width= 4.0in]{../images/relu}}
+
+\vfill
+The activation function $\mathrm{Relu}(x)$ does not saturate for $x > 0$.
+
+\slide{Repeated Multiplication by Network Weights}
+
+Consider a deep CNN.
+
+$$L_{i+1} = \mathrm{Relu}(\mathrm{Conv}(\Phi_i,L_i))$$
+
+\vfill
+For $i$ large, $L_i$ has been multiplied by many weights.
+
+\vfill
+If the weights are small then the neuron values, and hence the weight gradients, decrease exponentially with depth. {\bf Vanishing Gradients.}
+
+\vfill
+If the weights are large, and the activation functions do not saturate, then the neuron values, and hence the weight gradients,
+increase exponentially with depth. {\bf Exploding Gradients.}
+
+\slide{Repeated Multiplication by Network Weights}
+
+The problem of repeated multiplication by network weights can be addressed with careful initialization.
+
+\vfill
+We want an initialization for which the values stay in the active regions of the activation functions --- zero mean and unit variance.
+
+\slide{Initialization}
+
+
+Consider a linear threshold unit
+
+\vfill
+$$y[j] = \sigma(W[j,I]x[I] - B[j])$$
+
+\vfill
+We want the scalar $y[j]$ to have zero mean and unit variance.
+
+\vfill
+Xavier initialization initializes $B[j]$ to zero and randomly draws $W[j,i]$ from a uniform distribution on $\left(-\sqrt{3/I},\;\sqrt{3/I}\right)$.
+
+\vfill
+Assuming $x[i]$ has zero mean and unit variance, this gives zero mean and unit variance for $W[j,I]x[I]$.
+
+\slide{Batch Normalization}
+
+We can also enforce zero mean, unit variance, values dynamically with normalization layers.
+
+\vfill
+In vision networks this is most commonly done with Batch Normalization.
+
+\slide{Batch Normalization}
+Given a tensor $x[b,j]$ we define $\tilde{x}[b,j]$ as follows.
+
+\begin{eqnarray*}
+  \hat{\mu}[j] & = & \frac{1}{B} \sum_b\;x[b,j] \\
+  \\
+  \\
+  \hat{\sigma}[j] & = & \sqrt{\frac{1}{B-1} \sum_b (x[b,j]-\hat{\mu}[j])^2} \\
+  \\
+  \\
+  \tilde{x}[b,j]& = & \frac{x[b,j] - \hat{\mu}[j]}{\hat{\sigma}[j]}
+\end{eqnarray*}
+
+
+\vfill
+At test time a single fixed estimate of $\mu[j]$ and $\sigma[j]$ is used.
+
+\slide{Spatial Batch Normalization}
+
+For CNNs we convert a tensor $x[b,x,y,j]$ to $\tilde{x}[b,x,y,j]$ as follows.
+
+\begin{eqnarray*}
+  \hat{\mu}[j] & = & \frac{1}{BXY} \sum_{b,x,y}\;x[b,x,y,j] \\
+  \\
+  \\
+  \hat{\sigma}[j] & = & \sqrt{\frac{1}{BXY-1} \sum_{b,x,y} (x[b,x,y,j]-\hat{\mu}[j])^2} \\
+  \\
+  \\
+  \tilde{x}[b,x,y,j]& = & \frac{x[b,x,y,j] - \hat{\mu}[j]}{\hat{\sigma}[j]}
+\end{eqnarray*}
+
+\slide{Adding an Affine Transformation}
+
+$$\breve{x}[b,x,y,j] = \gamma[j] \tilde{x}[b,x,y,j] + \beta[j]$$
+
+\vfill
+Here $\gamma[j]$ and $\beta[j]$ are parameters of the batch normalization.
+
+\vfill
+This allows the batch normlization to learn an arbitrary affine transformation (offset and scaling).
+
+\vfill
+It can even undo the normaliztion.
+
+\slide{Batch Normalization}
+
+Batch Normalization appears to be generally useful in CNNs but is not always used.
+
+\vfill
+Not so successful in RNNs.
+
+\vfill
+It is typically used just prior to a nonlinear activation function.
+
+\vfill
+It is intuitively justified in terms of ``internal covariate shift'':
+as the inputs to a layer change the zero mean unit variance property underlying Xavier initialization are maintained.
+
+\slide{Residual Connections (ResNet)}
+
+\vfill
+\includegraphics[width= 2.5in]{../images/resnet}
+\hfill \begin{minipage}[b]{4in}
+  A residual connection produces the sum of the previous layer and the new layer.
+
+  \bigskip
+  The residual connection connects input to output directly and hence preserves gradients.
+
+  \bigskip
+  ResNets were introduced in late 2015 (Kaiming He et al.) and revolutionized computer vision.
+\end{minipage}
+
+
+\slide{ResNet32}
+
+\centerline{\includegraphics[height= 5.5in]{../images/ResNetStack} {\large [Kaiming He]}}
+
+\anaslideplain{Simple Residual Skip Connections in CNNs (stride 1)}
+
+\medskip
+\begin{eqnarray*}
+R_{\color{red} \ell+1}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+1}[X,Y,J,J],B_{\color{red} \ell+1}[J],L_{\color{red} \ell}[B,X,Y,J]) \\
+\\
+\mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\\
+L_{\color{red} \ell+1}[b,x,y,j] & = & L_{\color{red}\ell}[b,x,y,j] + R_{\color{red} \ell+1}[b,x,y,j]
+\end{eqnarray*}
+
+\vfill (Recall that we use capital letter indices to denote entire tensors and lower case letters for particular indeces.)
+
+\anaslide{Simple Residual Skip Connections in CNNs (stride 1)}
+
+\medskip
+\begin{eqnarray*}
+R_{\color{red} \ell+1}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+1}[X,Y,J,J],B_{\color{red} \ell+1}[J],L_{\color{red} \ell}[B,X,Y,J]) \\
+\\
+\mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\\
+L_{\color{red} \ell+1}[b,x,y,j] & = & L_{\color{red}\ell}[b,x,y,j] + R_{\color{red} \ell+1}[b,x,y,j]
+\end{eqnarray*}
+
+\vfill Note that in the above equations $L_{\color{red} \ell}[B,X,Y,J]$ and $R_{\color{red} \ell+1}[B,X,Y,J]$ are the same shape.
+\vfill
+In the actual ResNet $R_{\color{red} \ell+1}$ is computed by two or three convolution layers.
+
+\slideplain{Handling Spacial Reduction}
+
+Consider $L_{\color{red} \ell}[B,X_{\color{red} \ell},Y_{\color{red} \ell},J_{\color{red} \ell}]$ and $R_{\color{red} \ell+1}[B,X_{\color{red} \ell+1},Y_{\color{red} \ell+1},J_{\color{red} \ell+1}]$
+\begin{eqnarray*}
+X_{\color{red} \ell+1} & = & X_{\color{red} \ell}/s \\
+Y_{\color{red} \ell+1} & = & Y_{\color{red} \ell}/s \\
+J_{\color{red} \ell+1} & \geq &  J_{\color{red} \ell}
+\end{eqnarray*}
+
+
+\vfill
+In this case we construct $\tilde{L}_{\color{red} \ell}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}]$
+
+\begin{eqnarray*}
+\mathrm{for}\;b,x,y,j\;\;\tilde{L}_{\color{red} \ell}[b,x,y,j] & = & \left\{\begin{array}{ll} L_{\color{red} \ell}[b,s*x,s*y,j] & \mbox{for $j < J_{\color{red} \ell}$} \\ 0 & \mbox{otherwise} \end{array}\right.\\
+\\
+L_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] & = & \tilde{L}_{\color{red} \ell}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] \\
+& & + R_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}]
+\end{eqnarray*}
+
+
+\slideplain{Deeper Versions use Bottleneck Residual Paths}
+We reduce the number of features to ${\color{red} K < J}$ before doing the convolution.
+
+{\huge
+\begin{eqnarray*}
+U[B,X,Y,{\color{red} K}] & = & \mathrm{Conv}'(\Phi^A_{\ell+1}{ [1,1,{\color{red} J},{\color{red} K}]},L_\ell[B,X,Y,{\color{red} J}]) \\
+\\
+V[B,X,Y,{\color{red} K}] & = & \mathrm{Conv}'(\Phi^B_{\ell+1}{[3,3,{\color{red} K},{\color{red} K}]},U[B,X,Y,{\color{red} K}]) \\
+\\
+R[B,X,Y,{\color{red} J}] & = & \mathrm{Conv}'(\Phi^R_{\ell+1}{ [1,1,{\color{red} K},{\color{red} J}]},V[B,X,Y,{\color{red} K}]) \\
+\\
+L_{ \ell+1} & = & L_\ell + R
+\end{eqnarray*}
+}
+
+\vfill
+Here $\mathrm{CONV}'$ may include batch normalization and/or an activation function.
+
+\slide{A General Residual Connection}
+
+$${\color{red} y = \tilde{x} + R(x)}$$
+
+\vfill
+Where $\tilde{x}$ is either $x$ or a version of $x$ adjusted to match the shape of $R(x)$.
+
+\ignore{
+\slide{DenseNet}
+
+We compute a residual $R[b,x,y,J_R]$ and then simply concatenate the residual onto the previous layer.
+
+\vfill
+$$\mbox{for}\;b,x,y\;\;L_{\color{red} \ell + 1}[b,x,y,J_{\color{red} \ell} + J_{\color{red} R}] = L_\ell[b,x,y,J_{\color{red} \ell}];R[b,x,y,J_{\color{red} R}]$$
+
+\vfill
+The number $J_R$ of new features can be can be relatively small.
+}
+
+\slideplain{ResNet Simplicity}
+
+\centerline{\includegraphics[height= 4.0 in]{../images/ResNetStack} {\large [Kaiming He]} \includegraphics[width = 5.0in]{../images/inception1}}
+
+\slide{ResNet Power}
+
+ResNet gives powerful image classification.
+
+\vfill
+ResNet is used in folding proteins.
+
+\vfill
+ResNet is the netwwork used in AlphaZero for Go, Chess and Shogi.
+
+\vfill
+Residual connections are now universal in all forms of deep models such as RNNs and Transformers in language processing.
+
+\slide{END}
+
+}
+\end{document}

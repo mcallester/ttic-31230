@@ -1,0 +1,230 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+  
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \vfill
+  \centerline{\bf Backpropagation for Scalar Source Code}
+  \vfill
+  \vfill
+
+\slide{\bf Backpropagation (backprop)}
+
+Backpropagation is the method frameworks use to compute $\nabla_\Phi\;{\cal L}_\Phi(z)$
+for source code ${\cal L}_\Phi(z)$.
+
+\slide{Some Simple Source Code}
+
+The expression
+
+\vfill
+{\color{red} $${\cal L} = \sqrt{x^2 + y^2}$$}
+
+\vfill
+can be transformed to the assignment sequence
+
+{\color{red}
+\vfill
+\begin{eqnarray*}
+  u & = & x^2  \\
+  v & = & y^2 \\
+  r & =& u + v \\
+  {\cal L} & = & \sqrt{r}
+\end{eqnarray*}
+}
+
+\anaslide{Source Code}
+\vspace{-1ex}
+{\color{red}
+$$\begin{array}{lcl}
+ 1.\;u & = & x^2  \\
+ 2.\;w & = & y^2 \\
+ 3.\;r & =& u + w \\
+  4.\;{\cal L} & = & \sqrt{r}
+\end{array}$$
+}
+
+\vfill
+For each variable $z$, the derivative $\partial {\cal L}/\partial z$ will get computed in reverse order.
+
+\vfill
+{\color{red}
+$$\begin{array}{lcl}
+(4)\; \partial{\cal L}/\partial r & = & \frac{1}{2\sqrt{r}} \\
+(3)\; \partial{\cal L}/\partial u & = & \partial {\cal L}/\partial r \\
+(3)\; \partial{\cal L}/\partial w & = & \partial {\cal L}/\partial r\\
+(2)\; \partial{\cal L}/\partial y & = &  (2y) * (\partial {\cal L}/\partial w) \\
+(1)\; \partial{\cal L}/\partial x & = & (2x) * (\partial {\cal L}/\partial u)
+\end{array}$$
+}
+
+\anaslideplain{A More Abstract Example (Still Scalar Values)}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  u & = & h(z) \\
+  {\cal L} & = & u
+\end{eqnarray*}
+
+\medskip
+For now assume all values are scalars (single numbers rather than arrays).
+
+\medskip
+We will ``backpopagate'' the assignments the reverse order.
+
+\anaslide{Backpropagation (Scalar Values)}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  u & = & h(z) \\
+  {\cal L} &  = & {\color{red} u}
+\end{eqnarray*}
+
+\medskip
+{\color{red} ${\partial {\cal L}}/{\partial u} = 1$}
+
+\anaslide{Backpropagation (Scalar Values)}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  u & = & h({\color{red} z}) \\
+  {\cal L} &  = &  u
+\end{eqnarray*}
+
+\medskip
+${\partial {\cal L}}/{\partial u} = 1$
+
+\medskip
+{\color{red} ${\partial {\cal L}}/{\partial z} = ({\partial {\cal L}}/{\partial u}) ({\partial u}/{\partial z})\;$} (this uses the value of $z$)
+
+\anaslide{Backpropagation (Scalar Values)}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g({\color{red} y},x) \\
+  u & = & h(z) \\
+  {\cal L} &  = &  u
+\end{eqnarray*}
+
+\medskip
+${\partial {\cal L}}/{\partial u} = 1$
+
+\medskip
+{\color{red} ${\partial {\cal L}}/{\partial z} = ({\partial {\cal L}}/{\partial u}) ({\partial u}/{\partial z})\;$} (this uses the value of $z$)
+
+\medskip
+{\color{red} ${\partial {\cal L}}/{\partial y} = ({\partial {\cal L}}/{\partial z}) ({\partial z}/{\partial y})$} (this uses the value of $y$ and $x$)
+
+\anaslide{Backpropagation (Scalar Values)}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f({\color{red} x}) \\
+  z & = & g(y,{\color{red} x}) \\
+  u & = & h(z) \\
+  {\cal L} &  = &  u
+\end{eqnarray*}
+
+\medskip
+${\partial {\cal L}}/{\partial u} = 1$
+
+\medskip
+{\color{red} ${\partial {\cal L}}/{\partial z} = ({\partial {\cal L}}/{\partial u}) ({\partial u}/{\partial z})\;$} (this uses the value of $z$)
+
+\medskip
+{\color{red} ${\partial {\cal L}}/{\partial y} = ({\partial {\cal L}}/{\partial z}) ({\partial z}/{\partial y})$} (this uses the value of $y$ and $x$)
+
+\medskip
+{\color{red} ${\partial {\cal L}}/{\partial x} =$ ???} Oops, we need to add up multiple occurrences.
+
+\anaslide{Backpropagation (Scalar Values)}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f({\color{red} x}) \\
+  z & = & g(y,{\color{red} x}) \\
+  u & = & h(z) \\
+  {\cal L} &  = &  u
+\end{eqnarray*}
+
+\medskip
+Each framework program variable denotes an {\color{red} object} (in the sense of C++ or Python).
+
+\medskip
+{\color{red} $x.\mathrm{value}$} and {\color{red} $x.\grad$} are attributes of the {\color{red} object $x$}.
+
+\bigskip
+Values are computed ``forward'' while gradients are computed ``backward''.
+
+
+\anaslide{Backpropagation (Scalar Values)}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  u & = & h(z) \\
+  {\color{red} {\cal L}} &  {\color{red} =} & {\color{red}  u} \\
+  {\color{red} z.\grad} & {\color{red} =} & {\color{red} y.\grad = x.\grad = 0} \\
+  {\color{red} u.\grad} & {\color{red} =} & {\color{red} 1} \\
+\end{eqnarray*}
+
+\vfill
+{\bf Invariant}: The gradients are correct for the red program.
+
+\anaslide{Backpropagation (Scalar Values)}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  z & = & g(y,x) \\
+  {\color{red} u} & {\color{red} =} & {\color{red} h(z)} \\
+  {\color{red} {\cal L}} &  {\color{red} =} & {\color{red}  u} \\
+  {\color{red} z.\grad} & {\color{red} =} & {\color{red} y.\grad = x.\grad = 0} \\
+  {\color{red} u.\grad} & {\color{red} =} & {\color{red} 1} \\
+  {\color{red} z.\grad} & {\color{red} \pluseq} & {\color{red} u.\grad * ({\partial u}/{\partial z})}
+\end{eqnarray*}
+
+\vfill
+{\bf Invariant}: The gradients are correct for the red program.
+
+\anaslide{Backpropagation (Scalar Values)}
+\vspace{-3ex}
+\begin{eqnarray*}
+  y & = & f(x) \\
+  {\color{red} z} & {\color{red} =} & {\color{red} g(y,x)} \\ 
+  {\color{red} u} & {\color{red} =} & {\color{red} h(z)} \\
+  {\color{red} {\cal L}} &  {\color{red} =} & {\color{red}  u} \\
+  {\color{red} z.\grad} & {\color{red} =} & {\color{red} y.\grad = x.\grad = 0} \\
+  {\color{red} u.\grad} & {\color{red} =} & {\color{red} 1} \\
+  {\color{red} z.\grad} & {\color{red} \pluseq} & {\color{red} u.\grad * ({\partial u}/{\partial z})} \\
+  {\color{red} y.\grad} & {\color{red} \pluseq} & {\color{red} z.\grad * ({\partial z}/{\partial y})} \\
+  {\color{red} x.\grad} & {\color{red} \pluseq} & {\color{red} z.\grad * ({\partial z}/{\partial x})}
+\end{eqnarray*}
+
+
+\anaslide{Backpropagation (Scalar Values)}
+\vspace{-3ex}
+\begin{eqnarray*}
+  {\color{red} y} & {\color{red} =} & {\color{red} f(x)} \\
+  {\color{red} z} & {\color{red} =} & {\color{red} g(y,x)} \\ 
+  {\color{red} u} & {\color{red} =} & {\color{red} h(z)} \\
+  {\color{red} {\cal L}} &  {\color{red} =} & {\color{red}  u} \\
+  {\color{red} z.\grad} & {\color{red} =} & {\color{red} y.\grad = x.\grad = 0} \\
+  {\color{red} u.\grad} & {\color{red} =} & {\color{red} 1} \\
+  {\color{red} z.\grad} & {\color{red} \pluseq} & {\color{red} u.\grad * ({\partial u}/{\partial z})} \\
+  {\color{red} y.\grad} & {\color{red} \pluseq} & {\color{red} z.\grad * ({\partial z}/{\partial y})} \\
+  {\color{red} x.\grad} & {\color{red} \pluseq} & {\color{red} z.\grad * ({\partial z}/{\partial x})} \\
+  {\color{red} x.\grad} & {\color{red} \pluseq} & {\color{red} y.\grad * ({\partial y}/{\partial x})}
+\end{eqnarray*}
+
+\slide{END}
+}
+
+\end{document}
+                

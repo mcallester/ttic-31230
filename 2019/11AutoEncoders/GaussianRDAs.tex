@@ -1,0 +1,152 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{Gaussian Noisy Channel RDAs}
+  \vfill
+  \vfill
+
+\anaslide{A General Autoencoder}
+
+\bigskip
+\centerline{$y$\includegraphics[width=4in]{\images/deconvleft} $\;\;z\;\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
+
+\bigskip
+\bigskip
+In generall we have either $P_\Phi(z)$ for $z$ discrete or $\hat{p}_\Phi(z)$ for $z$ continuous.
+
+\anaslide{A General Autoencoder}
+
+\bigskip
+\centerline{$y$\includegraphics[width=4in]{\images/deconvleft} $\;\;z\;\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
+
+\bigskip
+\bigskip
+Here we will show that for the continuous case with $p_\Phi(z|y)$ and $\hat{p}_\Phi(z)$ both Gaussian, we can assume without loss
+of generality that
+\bigskip
+$$\hat{p}_\Phi(z) = {\cal N}(0,I)$$
+
+\slide{Gaussian Noisy-Channel RDA} 
+$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z_\Phi(y,\epsilon)|y)}{\hat{p}_\Phi(z_\Phi(y,\epsilon))} + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))$$
+
+{\color{red}
+\begin{eqnarray*}
+z_\Phi(y,\epsilon) & = & \mu_\Phi(y) + \sigma_\Phi(y) \odot \epsilon\;\;\;\epsilon \sim {\cal N}(0,I) \\
+\\
+p_\Phi(z[i]|y) & = & {\cal N}(\mu_\Phi(y)[i],\sigma_\Phi(y)[i])) \\
+\\
+\hat{p}_\Phi(z[i]) & = & {\cal N}(\hat{\mu}_z[i],\hat{\sigma}_z[i]) \\
+\\
+\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||^2
+\end{eqnarray*}
+}
+
+\slide{Gaussian Noisy-Channel RDA}
+
+$$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z_\Phi(y,\epsilon)|y)}{\hat{p}_\Phi(z_\Phi(y,\epsilon))} + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))$$
+
+\vfill
+We will show that we can fix $\hat{p}_\Phi(z)$ to ${\cal N}(0,I)$.
+
+{\color{red}
+\begin{eqnarray*}
+p_\Phi(z[i]|y) & = & {\cal N}(\mu_\Phi(y)[i],\sigma_\Phi(y)[i]) \\
+\\
+\hat{p}_\Phi(z[i]) & = & {\cal N}(0,1) \\
+\\
+\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||^2
+\end{eqnarray*}
+}
+
+
+\slide{Gaussian Noisy-Channel RDA}
+
+\begin{eqnarray*}
+\Phi^* &  = & \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z_\Phi(y,\epsilon)|y)}{\hat{p}_\Phi(z_\Phi(y,\epsilon))} + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon))) \\
+\\
+\\
+& = & \argmin_{\Phi}\;E_{y\sim \pop} \left(\begin{array}{l}\;\;\;\;KL(p_\Phi(z|y),\hat{p}_\Phi(z)) \\
+\\
++ \lambda \; E_\epsilon\;\mathrm{Dist}(y,\;y_\Phi(z_\Phi(y,\epsilon)))\end{array}\right)
+\end{eqnarray*}
+
+\slide{Closed Form KL-Divergence}
+
+\begin{eqnarray*}
+& & KL(p_\Phi(z|y),\hat{p}_\Phi(z)) \\
+\\
+\\
+& = & \sum_i \;\frac{\sigma_\Phi(y)[i]^2 + (\mu_\Phi(y)[i]-\mu_z[i])^2}{2 \sigma_z[i]^2}
++ \ln\frac{\sigma_z[i]}{\sigma_\Phi(y)[i]} - \frac{1}{2}
+\end{eqnarray*}
+
+
+\slide{Standardizing $\hat{p}_\Phi(z)$}
+
+\begin{eqnarray*}
+ &  & KL(p_\Phi(z|y),p_\Phi(z)) \\
+ \\
+ & = & \sum_i \;\frac{ \sigma_\Phi(y)[i]^2 +(\mu_\Phi(y)[i] - \mu_z[i])^2}{2\sigma_z[i]^2}
++ \ln\frac{\sigma_z[i]}{\sigma_\Phi(y)[i]}
+- \frac{1}{2}
+\\
+\\
+\\
+\\
+ &  & KL(p_{\Phi'}(z|y),{\cal N}(0,I)) \\
+ \\
+ & = & \sum_i \;\frac{\sigma_{\Phi'}(y)[i]^2 +\mu_{\Phi'}(y)[i]^2}{2} + \ln\frac{1}{\sigma_{\Phi'}(y)[i]} - \frac{1}{2}
+\end{eqnarray*}
+
+\slide{Standardizing $\hat{p}_\Phi(z)$}
+
+\begin{eqnarray*}
+KL_\Phi & = & \sum_i \;\frac{ \sigma_\Phi(y)[i]^2 +(\mu_\Phi(y)[i] - \mu_z[i])^2}{2\sigma_z[i]^2}
++ \ln\frac{\sigma_z[i]}{\sigma_\Phi(y)[i]} - \frac{1}{2}
+\\
+KL_{\Phi'} & = & \sum_i \;\frac{\sigma_{\Phi'}(y)[i]^2 +\mu_{\Phi'}(y)[i]^2}{2} + \ln\frac{1}{\sigma_{\Phi'}(y)[i]} - \frac{1}{2}
+\end{eqnarray*}
+
+Setting $\Phi'$ so that
+\begin{eqnarray*}
+\mu_{\Phi'}(y)[i] & = & (\mu_\Phi(y)[i] - \mu_z[i])/\sigma_z[i] \\
+\sigma_{\Phi'}(y)[i] & = & \sigma_\Phi(y)[i]/\sigma_z[i]
+\end{eqnarray*}
+
+\vfill
+gives {\color{red} $KL(p_{\Phi}(z|y),\hat{p}_\Phi(z)) = KL(p_{\Phi'}(z|y),{\cal N}(0,I))$}.
+
+\slide{Sampling}
+
+\centerline{Sample {\color{red} $z \sim {\cal N}(0,I)$} and compute {\color{red} $y_\Phi(z)$}}
+\vfill
+\centerline{\includegraphics[width = 4in]{../images/VariationalFaces}}
+\centerline{[Alec Radford]}
+
+\slide{Summary: Gaussian RDAs}
+
+
+\vfill
+Gaussian RDA: {\color{red} $z_\Phi(y,\epsilon) = \mu_\Phi(y) + \sigma_\Phi(y) \odot \epsilon$,\hspace{2em} $\epsilon \sim {\cal N}(0,I)$}
+
+{\color{red}
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi E_{y \sim \pop}\left(\begin{array}{l}\;\;\; \;KL(p_\Phi(z|y),{\cal N}(0,I)) \\
+\\
++ \;\;\;\lambda E_\epsilon\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon))) \end{array}\right)
+\end{eqnarray*}
+}
+
+\slide{END}
+
+}
+\end{document}

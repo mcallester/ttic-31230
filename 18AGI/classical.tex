@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -7,22 +7,30 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
 
   \vfill
-  \centerline{\bf Representing Functions with Shallow Circuits}
-  \vfill
-  \centerline{\bf The Classical Universality Theorems}
+  \centerline{\bf AGI: Universality}
   \vfill
   \vfill
 
-\slide{Function Representations}
+\slide{Universality}
+
+Various models of computation are ``universal''.
+
+\vfill
+Turing universality underlies most faith in the possibility of artificial general intelligence (AGI).
+
+\vfill
+We will review some theory of universailty for deep networks, boolean circuits and computer programs.
+
+\slide{The Kolmogorov-Arnold representation theorem (1956)}
 
 Consider continuous functions $f: [0,1]^N \rightarrow \reals$
 
 \vfill
 \vfill
-\centerline{\includegraphics[width = 2in]{../images/n-cube} 
+\centerline{\includegraphics[width = 2in]{\images/n-cube} 
 \begin{minipage}[b]{2.0in}
   $\stackrel{f}{\rightarrow} \;\;\;\reals$ \newline
   \vspace{2ex}
@@ -58,6 +66,13 @@ $$f(x_1,\;\ldots,\;x_N) = \sigma\left(\sum_i w_i(x_i)\right)$$
 \vfill
 Proof: Select $w_i$ to spread out the digits of its argument so that $\sum_i w_i(x_i)$ contains all the digits of all the $x_i$.
 
+\slide{Issues with the Arnold-Kolmogorov Theorem}
+
+This theorem relies on ``real number abuse'' --- an inherent use of infinite precision arithmetic.
+
+\vfill
+\centerline{\includegraphics[height = 1in]{\images/Frown}}
+
 \slide{Cybenko's Universal Approximation Theorem (1989)}
 
 For continuous $f: [0,1]^N \rightarrow \reals$ and $\varepsilon >0$ there exists
@@ -91,12 +106,99 @@ A simpler statement is that any Boolean function can be put in disjunctive norma
 
 \slide{Representing Functions as IO Tables}
 
-These universality theorems implicitly treat functions as tables of intput-output pairs.
+The Cybenko theorem implicitly treats functions as tables of a huge number of (at least exponentially many) intput-output pairs.
 
 \vfill
-\centerline{\includegraphics[height = 1in]{../images/Frown}}
+\centerline{\includegraphics[height = 1in]{\images/Frown}}
+
+\slide{Representing Functions by Circuits}
+
+Deep circuits can can represent functions more concisely than shallow circuits.
+
+\vfill
+Building on work of Ajtai, Sipser and others, Hastad proved (1987) that any bounded-depth Boolean circuit computing the parity function must have exponential size. 
+
+\vfill
+Matus Telgarsky recently gave some formal conditions under which shallow networks provably require exponentially more parameters than deeper networks (COLT 2016).
+
+
+\slideplain{Limits of the Theory of Deep Circuits}
+
+Circuit complexity theory seems to be very weak and of essentially no value in the practice of deep architecture design.
+
+\vfill
+\centerline{\includegraphics[height = 1in]{\images/Frown}}
+
+\slide{Representing Functions by Programs}
+
+C programs or Python programs are Turing Universal.
+
+\vfill
+Furthermore we have nice universal generalization guarantees.
+
+\slide{The Occam Guarantee (Free Lunch Theorem)}
+
+Let $|f|$ be length in bits of a compressed program $f$.
+
+\vfill
+$$0 \leq {\cal L}(f,x,y) \leq \lmax$$
+\begin{eqnarray*}
+{\cal L}(f)  & = &  E_{(x,y)\sim \mathrm{Pop}}\;{\cal L}(f,x,y) \\
+\hat{{\cal L}}(f) & = & E_{(x,y)\sim \mathrm{Train}}\;{\cal L}(f,x,y)
+\end{eqnarray*}
+
+\vfill
+Theorem: With probability at least $1-\delta$ over the draw of the training data the following holds simultaneously for all $f$.
+
+{\color{red} $${\cal L}(f) \leq \frac{10}{9}\left(\hat{{\cal L}}(f) + \frac{5\lmax}{N_\mathrm{Train}}\left((\ln 2)|f| +\ln\frac{1}{\delta}\right)\right)$$}
+
+\slide{Gradient Descent on Programs}
+
+We do not know how to effectively search over programs.
+
+\vfill
+\centerline{\includegraphics[height = 1in]{\images/Frown}}
+
+\vfill
+More on this later.
 
 \slide{END}
+
+
+\slideplain{The Kaurnaugh Model of DNNs}
+
+The Karnaugh map, also known as the K-map, is a method to simplify boolean algebra expressions.
+
+\vfil
+\centerline{\includegraphics[width = 1.5in]{\images/Kmap1} \hspace{1.0in} \includegraphics[width=3.0in]{\images/Kmap2}}
+
+\begin{eqnarray*}
+  F(A,B,C,D) & = & AC' + AB' + BCD' + AD' \\
+  & = & (A+B)(A+C)(B' + C' + D')(A+D')
+\end{eqnarray*}
+
+\slideplain{The Kaurnaugh Model of DNNs}
+
+\vfil
+\centerline{\includegraphics[width = 1.5in]{\images/Kmap1} \hspace{1.0in} \includegraphics[width=3.0in]{\images/Kmap2}}
+
+Many very different circuits compute the same function.
+
+\slideplain{A Kaurnaugh Person Detector}
+
+{\color{red}
+  
+\centerline{Wheel or Face}
+
+\vfill
+\centerline{Hand or Flower \hspace{2.5in} Hand or Flower}
+
+\vfill
+\centerline{Leg or Tree  \includegraphics[height=1.5in]{\images/StickFig} Leg or Tree}
+}
+
+\vfill
+The set of locally minimal models (circuits) could be vast (exponential) without damaging performance.
 
 }
 \end{document}

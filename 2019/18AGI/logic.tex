@@ -1,0 +1,145 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+
+\vfill
+  \centerline{\bf Representing Functions and Knowledge with Logic}
+  \vfill
+  \vfill
+
+\slide{The Procedural vs. Declarative Debate}
+
+Any Discussion today of the ``knowledge representation problem'' is likely to entail a debate between proponents of {\bf declarative} and {\bf procedural} representations of knowledge.
+
+\vfill
+\rightline{Terry Winograd, 1974}
+
+\vfill
+Programming Languages (Procedural)
+
+\vfill
+vs. Logic or Natural Language (Declarative)
+
+\slide{Is Human Common Sense Based on Logic?}
+
+Certain facts are obvious.
+
+\vfill
+A king on empty chess board can reach every square (obvious).
+
+\vfill
+A knight on an empty chess board can reach every square (true but not obvious).
+
+\slide{Obviousness}
+
+Consider a graph with colored nodes.
+
+\vfill
+If every edge is between nodes of the same color, then any path connects nodes of the same color.
+
+\vfill
+Consider a swiss chocolate bar of $3 \times 5$ little squares.
+
+\vfill
+How many breaks does it take to reduce this to fifteen unconnected squares?
+
+\vfill
+What inference happens when one observes that each break increases the number of pieces by one?
+
+\slide{Logical Representations of Events}
+
+Let $e$ range over ``events''.
+
+\vfill
+$e:\mathrm{give}(a_1,x,a_2) \Rightarrow \mathrm{had}(a_1,x,\mathrm{before}(e)) \;\wedge\; \mathrm{had}(a_2,x,\mathrm{after}(e))$
+
+\vfill
+This is related to Davidsonian semantics for natural language (1969) and the situation calculus of McCarthy and Hayes (1968).
+
+\slide{Bottom-up Logic Programming}
+
+Bottom-up logic programming is distinguished by its relationship to dynamic programming algorithms.
+
+\vfill
+$$\mathrm{At}(x) \Rightarrow \mathrm{Reachable}(x)$$
+
+\vfill
+$$\mathrm{Reachable}(x) \wedge \mathrm{CanGo}(x,y) \Rightarrow \mathrm{Reachable}(y)$$
+
+\vfill
+This defines a linear time algorithm for reachability.
+
+\slide{Datalog}
+
+A set of inference rules each of which has antecedents and conclusions that are just predicates applied to variables is called a {\bf datalog} program.
+
+\vfill
+It can be shown that datalog ``captures the complexity class $P$'' --- they can express {\bf all and only} polynomial time decidable relations
+(provided the entities are assigned a total order).
+
+\vfill
+General bottom-up logic programs, including expressions (terms), are Turing complete.
+
+$$N(x) \Rightarrow N(s(x))$$
+
+\slide{Type Theoretic Foundations of Mathematics}
+
+  $$
+  \begin{array}{|l|c|c|c|c|}
+  \hline
+    \mbox{variables, pairs} & x & (e_1,e_2) & \pi_i(e) \\ \hline 
+    \mbox{functions} & \lambda \intype{x}{\sigma}\;e[x] & f(e) & \\ \hline 
+    \mbox{atoms} & ~~P(e)~~~ & ~~ e_1 \doteq e_2 ~~~~ & e_1 =_\sigma e_2 \\ \hline
+    \mbox{formulas} & \neg \Phi &  \Phi_1 \vee \Phi_2 & \forall \intype{x}{\sigma}\; \Phi[x] \\ \hline
+    \mbox{types}   & \Sigma_{\intype{x\;}{\;\sigma}}\;\tau[x] & \Pi_{\intype{x\;}{\;\sigma}}\;\tau[x] & S_{\intype{x\;}{\;\sigma}}\;\Phi[x]  \\ \hline
+    \mbox{type constants} & \mathrm{Bool} & \mathrm{Set} & \mathrm{Type} \\ \hline
+  \end{array}
+  $$
+
+
+
+\slide{The Substitution of Isomorphics}
+
+The isomorphism relation $u =_\sigma v$ is challenging to define in complete generality.
+
+\vfill
+But we know we want the following substitution rule.
+
+\vfill
+\centerline{
+\unnamed{
+\ant{\Sigma \vdash \intype{\sigma}{\type}}
+\ant{\Sigma;\;\intype{x}{\tau}\vdash \intype{e[x]}\sigma}
+\ant{\Sigma \vdash a=_\tau \;b}
+}{
+\ant{\Sigma \vdash e[a] =_\sigma e[b]}}
+}
+
+\slide{The Foundations of Mathematics}
+
+Independent of the utility of mathematical foundations in the quest for AGI, mathematical truth seems important.
+
+\vfill
+The philosophy of the mathematics is difficult.
+
+\vfill
+How do we have access to mathematical truth?
+
+\vfill
+Are mathematical theorems really true?
+
+\vfill
+Is our access to mathematical truth based on innate inference principles --- a particular architecture of thought?
+
+
+\slide{END}
+
+}
+\end{document}

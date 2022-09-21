@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -7,23 +7,16 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
 
   \vfill
-  \centerline{\bf AlphaZero Quantitative Results}
+  \centerline{\bf AlphaZero Results}
   \vfill
   \vfill
-
-\slide{The Go-Chess-Shogi Networks}
-
-\centerline{\includegraphics[height=3.0in]{../images/alphagoArchitecture2}}
-
-\vfill
-In AlphaZero the networks are either 20 block or 40 block ResNets and either separate networks or one dual-headed network.
 
 \slide{Training Time}
 
-Single 20 block dual-headed ResNet on Go.
+Single 20 block dual-headed ResNet.
 
 \vfill
 4.9 million Go games of self-play
@@ -39,15 +32,22 @@ About 1000 fold parallelism.
 
 \slide{Elo Learning Curve for Go}
 
-\centerline{\includegraphics[height = 5in]{../images/alphalearning1}}
+\centerline{\includegraphics[height = 5in]{\images/alphalearning1}}
 
 \slide{Learning Curve for Predicting Human Go Moves}
 
-\centerline{\includegraphics[height = 5in]{../images/alphalearning2}}
+\centerline{\includegraphics[height = 5in]{\images/alphalearning2}}
 
-\slide{Ablation Study for Resnet and Dual-Head}
+\slide{Ablation Studies}
 
-\centerline{\includegraphics[height = 5in]{../images/alphaablation}}
+\centerline{\includegraphics[height=3.0in]{\images/alphagoArchitecture2}}
+
+\vfill
+We evaluate 20 layer networks which are either traditional CNNs or resnet and are either two separate networks or one network with dual heads.
+
+\slide{Ablation Studies}
+
+\centerline{\includegraphics[height = 5in]{\images/alphaablation}}
 
 \slide{Increasing Blocks and Training}
 
@@ -61,7 +61,7 @@ Gives a Go Elo rating over 5000.
 
 \slide{Final Go Elo Ratings}
 
-\centerline{\includegraphics[height = 5in]{../images/alpha40}}
+\centerline{\includegraphics[height = 5in]{\images/alpha40}}
 
 \slide{Is Chess a Draw?}
 

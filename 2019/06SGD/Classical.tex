@@ -1,0 +1,107 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\newcommand{\solution}[1]{\bigskip {\bf Solution}: #1}
+
+\begin{document}
+
+{\Huge
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Stochastic Gradient Descent (SGD)}
+  \vfill
+  \centerline{\bf The Classical Convergence Theorem}
+  \vfill
+  \vfill
+
+\slide{Vanilla SGD}
+
+$$\Phi \;\minuseq\; \eta \hat{g}$$
+
+\vfill
+\begin{eqnarray*}
+  \hat{g} & = & E_{(x,y) \sim \mathrm{Batch}}\;\nabla_\Phi\;\mathrm{loss}(\Phi,x,y) \\
+  \\
+  \\
+  g & = & E_{(x,y) \sim \mathrm{Pop}}\;\nabla_\Phi\;\mathrm{loss}(\Phi,x,y) \\
+\end{eqnarray*}
+
+\slide{Issues}
+
+\vfill
+\begin{itemize}
+\item {\bf Gradient Estimation.} The accuracy of $\hat{g}$ as an estimate of $g$.
+
+  \vfill
+\item {\bf Gradient Drift (second order structure).} The fact that $g$ changes as the parameters change.
+
+  \vfill
+\item {\bf Convergence.} To converge to a local optimum the learning rate must be gradually reduced toward zero.
+
+  \vfill
+  \item {\bf Exploration.} Since deep models are non-convex we need to search over the parameter space.  SGD can behave like MCMC.
+\end{itemize}
+
+\slide{A One Dimensional Example}
+
+Suppose that $y$ is a scalar, and consider
+
+\begin{eqnarray*}
+ \mathrm{loss}(\beta,y) & = & \frac{1}{2}(\beta - y)^2 \\
+ \\
+  g & = &  \nabla_\beta\;E_{y \sim \mathrm{Pop}}\;\frac{1}{2}(\beta - y)^2 \\
+  \\
+  & = & \beta - E_{y \sim \mathrm{Pop}} \; y \\
+  \\
+  \hat{g} & = &\beta - E_{y \sim \mathrm{Batch}} \;y
+\end{eqnarray*}
+
+\vfill
+Even if $\beta$ is optimal, for a finite batch we will have $\hat{g} \not = 0$.
+
+\slide{The Classical Convergence Theorem}
+
+$$\Phi \;\minuseq \; \eta_t \nabla_\Phi\;\mathrm{loss}(\Phi,x_t,y_t)$$
+
+\vfill
+For ``sufficiently smooth'' non-negative loss with
+
+\vfill
+$$\eta_t \geq 0\;\;\;\;\;\;\;\;\lim_{t \rightarrow \infty} \;\eta_t = 0\;\;\;\;\;\;\;\;\sum_t \eta_t = \infty \;\;\;\;\;\;\sum_t \;\eta_t^2 < \infty$$
+
+\vfill
+we have that the training loss $E_{(x,y) \sim \mathrm{Train}}\; \mathrm{loss}(\Phi,x,t)$ converges to a limit and any limit point of the sequence $\Phi_t$
+is a stationary point in the sense that {\huge  $\nabla_\Phi \; E_{(x,y) \sim \mathrm{Train}} \;\mathrm{loss}(\Phi,x,t) = 0$}.
+
+\vfill
+{\Large
+\vfill
+{\bf Rigor Police:} One can construct cases where $\Phi$ diverges to infinity, converges to a saddle point, or even converges to a limit cycle.
+
+}
+
+\slide{Physicist's Proof of the Convergence Theorem}
+
+Since $\lim_{t \rightarrow 0} \;\eta_t = 0$ we will eventually get to arbitrarilly small learning rates.
+
+\vfill
+For sufficiently small learning rates any meaningful update of the parameters will be based on an arbitrarily large sample
+of gradients at essentially the same parameter value.
+
+\vfill
+An arbitrarily large sample will become arbitrarily accurate as an estimate of the full gradient.
+
+\vfill
+But since $\sum_t \eta_t = \infty$, no matter how small the learning rate gets, we still can make arbitrarily large motions in parameter space.
+
+\slidetwo{SGD as a form of MCMC}{Learning Rate as a Temperature Parameter}
+
+\centerline{\includegraphics[height= 4in]{../images/AnnealingSGD}}
+\centerline{\Large Gao Huang et. al., ICLR 2017}
+
+\slide{END}
+
+} \end{document}
+

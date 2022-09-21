@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -7,52 +7,83 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Winter 2021}
   \vfill
-  \centerline{\bf Perils of Differential Entropy}
+  \centerline{\bf Gaussian Models}
+  \vfill
+  \centerline{\bf and The Parels of Differential Entropy}
   \vfill
 \vfill
 \vfill
 
-\slide{The Fundamental Equation for Continuous $y$}
-
-If $y$ is continuous then the fundamental equation for estimating the distribution on $y$ (cross entropy) involves continuous probability densities.
+\slide{Gaussian VAEs}
 
 \vfill
-$$\Phi^* = \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)$$
-
-\vfill
-This occurs in unsupervised pretraining for sounds and images.
-
-\vfill
-But differential entropy and differential cross-entropy are conceptually problematic.
-
-
-\slide{Perils of Differential Entropy}
-
-Consider a continuous density $p(x)$.  For example
-
-\vfill
-$$p(x) = \frac{1}{\sqrt{2\pi}\; \sigma}\; e^{\frac{-x^2}{2\sigma^2}}$$
-
-\vfill
-Differential entropy is defined as
-
-\vfill
-$$H(p) \doteq \int \left(\ln \frac{1}{p(x)}\right) p(x) dx = E_{x \sim p}\;-\ln p(x)$$
-
-\slide{Perils of Differential Entropy}
-
 \begin{eqnarray*}
-  H({\cal N}(0,\sigma)) & = &  \int_{-\infty}^\infty \left( \ln(\sqrt{2\pi} \sigma) + \frac{x^2}{2\sigma^2}\right) p(x) dx \\
-  \\
-  & = & \ln(\sigma) + \ln(\sqrt{2\pi}) + \frac{1}{2\sigma^2}E_{x \sim {\cal N}(0,1)} x^2 \\
-  \\
-  & = & \ln \sigma + \ln(\sqrt{2\pi}) + \frac{1}{2}  
+\mbox{VAE:}\;\;\;\Phi^*,\Psi^* &  = & \argmin_{\Phi,\Psi}\;E_{y,z}  \;\ln \frac{\hat{p}_\Psi(z|y)}{p_\Phi(z)}  - \ln p_\Phi(y|z) \\
 \end{eqnarray*}
 
 \vfill
-$$\lim_{\sigma \rightarrow 0} H(N(0,\sigma)) = - \infty$$.
+All models are Gaussian densities.
+
+\vfill
+{\huge 
+\begin{eqnarray*}
+p_\Phi(z[i]) & \propto & \exp((z[i]-\mu_\Phi[i])^2/2\sigma^2_\Phi[i])\\
+\\
+p_\Psi(z[i]|y) & \propto & \exp((z[i]-\hat{z}_\Psi(y)[i])^2/2\sigma^2_\Psi(y)[i])\\
+\\
+p_\Phi(y[i]|z) & \propto & \exp((y[i]-\hat{y}_\Phi(z)[i])^2/2\sigma_\Phi^2(z)[i])\\
+\end{eqnarray*}
+}
+
+\slide{Differential Entropy}
+
+In the case of a continuous density (as opposed to a discrete probability) we have the notion of differential entropy.
+
+\vfill
+For a density $p(x)$ on a real value $x$ we have
+
+\vfill
+\begin{eqnarray*}
+H(p) & = & E_{x \sim p}\;\left[-\ln p(x)\right] \\
+\\
+& = &\int_{-\infty}^\infty p(x) \;(-\ln p(x)) dx
+\end{eqnarray*}
+
+\slide{Differential Entropy can Diverge to $-\infty$}
+
+For a uniform distribution over an interval on the real line of width $\Delta$ we have
+
+\begin{eqnarray*}
+H & = & E_{x \sim p} \left[-\ln p(x)\right] \\
+\\
+& = & E_{x \sim p} \left[-\ln \frac{1}{\Delta}\right] \\
+\\
+& = & \ln \Delta
+\end{eqnarray*}
+
+\vfill
+\centerline{As $\Delta \rightarrow 0$ we have $H \rightarrow -\infty$}
+
+\slide{Differential Entropy can Diverge to $-\infty$}
+
+\hfill
+
+{\huge
+\begin{eqnarray*}
+H({\cal N}(0,\sigma^2)) & = & E_{x \sim {\cal N}(0,\sigma^2)} \left[ -\ln \left(\frac{1}{\sigma\sqrt{2\pi}} \exp{\frac{-x^2}{2\sigma^2}}\right)\right] \\
+\\
+& =& E_{x \sim {\cal N}(0,\sigma^2)} \left[ \ln (\sigma\sqrt{2\pi}) + \frac{-x^2}{2\sigma^2}\right] \\
+\\
+& = & (\ln\sigma) + \ln(\sqrt{2\pi}) + E_x \left[\frac{x^2}{2\sigma^2}\right] \\
+\\
+& = & (\ln\sigma) + \ln(\sqrt{2\pi}) + \frac{1}{2} \\
+\end{eqnarray*}
+}
+
+\vfill
+\centerline{As $\sigma \rightarrow 0$ we have $H \rightarrow -\infty$}
 
 \slide{Sensitivity to the Choice of Units}
 
@@ -62,9 +93,9 @@ $$H(N(0,\sigma)) = C + \ln \sigma$$
 Differential entropy depends on the choice of units --- a distributions on lengths will have a different entropy
 when measuring in inches than when measuring in feet.
 
-\slide{Differential Cross Entropy can Diverge to $-\infty$}
+\slide{Differential Cross-Entropy can Diverge to $-\infty$}
 
-Consider the unsupervised training object.
+Consider the unsupervised training objective.
 
 $$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{train}}\;-\ln p_\Phi(y)$$
 
@@ -75,9 +106,10 @@ The training set is finite (discrete).
 For each $y$ the density $p_\Phi(y)$ can go to infinity.
 
 \vfill
-This will drive the cross entropy training loss to $-\infty$.
+This will drive the cross-entropy training loss to $-\infty$.
 
-\slide{Differential Entropy is Actually Infinite}
+
+\slide{Differential Entropy Can Be Considered Infinite}
 
 An actual real number carries an infinite number of bits.
 
@@ -98,27 +130,39 @@ A meaningful convention is that $H(p) = +\infty$ for any continuous density $p$.
 $$KL(p,q) = \int \left( \ln \frac{p(x)}{q(x)}\right) p(x) dx$$
 
 \vfill
-This integral can be computed by dividing the real numbers into bins and computing the $KL$ divergence between the distributions on bins.
+Unlike differential entropy, differential KL divergence is always non-negative (but can be infinite).
 
 \vfill
-The KL divergence between the bin distribution typically approaches a finite limit as the bin size goes to zero.
-
-\vfill
-Unlike entropy, differential KL divergence is always non-negative.  But as in the discrete case, it can be infinite.
+Note that $KL(p,p) = 0$ independent of $H(p)$.
 
 \slide{Mutual Information}
 
-For two random variables $x$ and $y$ there is a distribution on pairs $(x,y)$ determined by the population distribution.
+$I(x,y)$ is the reduction in the number of bits we need to name $y$ as a result of observing $x$ (on average).
 
-\vfill
-Mutual information is a KL divergence and hence differential mutual information is meaningful.
-
-\vfill
+{\huge
 \begin{eqnarray*}
-  I(x,y) & \doteq & KL(p(x,y),p(x)p(y)) \\
+I(x,y) & = & E \;\ln \frac{P(x,y)}{P(x)P(y)} \\
+\\
+\\
+& = & E \;\ln \frac{P(x,y)}{P(x)} - \ln P(y) \\
+\\
+\\
+& = & H(y) - H(y|x) \\
+\end{eqnarray*}
+}
+Intuitively, how much does $x$ know about $y$?
+
+
+\slide{Differential Mutual Information}
+
+\begin{eqnarray*}
+  I(x,y) & = & KL(p(x,y),p(x)p(y)) \\
   \\
   & = & E_{x,y} \ln \frac{p(x,y)}{p(x)p(y)}
 \end{eqnarray*}
+
+\vfill
+Mutual information is a KL divergence and hence differential mutual information is always non-negative.
 
 \slide{The Data Processing Inequality}
 
@@ -128,6 +172,40 @@ For continuous $y$ and $z$ with $z = f(y)$ we get that $H(z)$ can be either larg
 However, mutual information is a KL divergence and is more meaningful than entropy and for $z = f(y)$ we do have
 
 $$I(x,z) \leq I(x,y)$$
+
+\slide{Continuous Cross-Entropy as Distortion}
+
+For a Gaussian VAE on images we typically have
+
+{\huge
+\begin{eqnarray*}
+\Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  - \ln p_\Phi(y|z)\\
+\\
+p_\Phi(y|z) & \propto & \frac{1}{Z}\;\exp(-||y-\hat{y}_\Phi(z)||^2/2\sigma^2) \\
+\\
+\Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  \;{\color{red} +\; \frac{1}{2\sigma^2}||y-\hat{y}_\Phi(z)||^2 + d\ln \sigma}
+\end{eqnarray*}
+}
+
+The KL divergence term is not problematic. The problematic differential cross-entropy term can just be thought of as a weighted $L_2$ distortion.  We typically take $\sigma$ to be a hyper-parameter rather than optimize it in SGD.
+
+\slide{Continuous Cross-Entropy as Distortion}
+
+
+{\huge
+\begin{eqnarray*}
+\Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  \;{\color{red} +\; \lambda\;\mathrm{Dist}(y,\hat{y}_\Phi(z))}
+\end{eqnarray*}
+}
+
+\vfill
+Various choices for distortion are possible including $L_2$ and $L_1$ distortion measures.
+
+\begin{eqnarray*}
+\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||^2 \hspace{4em}(L_2) \\
+\\
+\mathrm{or}\;\;\mathrm{Dist}(y,\hat{y}) & = & ||y-\hat{y}||_1 = \sum_i \;|y[i] - \hat{y}[i]| \hspace{4em}(L_1)
+\end{eqnarray*}
 
 
 \slide{END}

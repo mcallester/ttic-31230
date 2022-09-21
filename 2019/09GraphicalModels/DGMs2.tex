@@ -1,0 +1,147 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2019}
+  \vfill
+  \vfill
+  \centerline{\bf Exponential Softmax Backpropagation:}
+  \vfill
+  \centerline{\bf The Model Marginals}
+\vfill
+\vfill
+\vfill
+
+\slide{Exponential Softmax}
+
+$$\begin{array}{lrcl}
+\mbox{for}\;\hat{y} & {\color{red} s(\hat{y})} & = & \sum_i\;s_n[i,\hat{y}[i]] + \sum_{\tuple{i,j} \in \mathrm{Edges}}\;s_e[\tuple{i,j},\hat{y}[i],\;\hat{y}[j]] \\
+\\
+\\
+\mbox{for}\;\hat{y} & {\color{red} P_s(\hat{y})} & = & \softmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
+\\
+ & {\cal L} & = & - \ln P_s(y) \;\;\;{\color{red} \mbox{gold label (training label) $y$}}
+\end{array}$$
+
+\slide{Exponential Softmax is Typically Intractable}
+\centerline{\includegraphics[height= 1.5in]{../images/Graph}}
+\medskip
+$\hat{y} $ assigns a label $\hat{y}[i]$ to each node $i$.
+
+\vfill
+$s(\hat{y})$ is defined by a sum over node and edge tensor scores.
+
+\vfill
+$P_s(\hat{y})$ is defined by an exponential softmax over $s(\hat{y})$.
+
+\vfill
+Computing $Z$ in general is \#P hard (there is an easy direct reduction from SAT).
+
+\slidetwo{Compactly Representing Scores}{on Exponentially Many Labels}
+
+The tensor {\color{red} $s_n[I,C]$} holds $IC$ scores.
+
+\vfill
+The tensor {\color{red} $s_e[E,C,C]$} holds $EC^2$ scores where $e$ ranges over edges $\tuple{i,j} \in \mathrm{Edges}$.
+
+\slide{Back-Propagation Through Exponential Softmax}
+
+\begin{eqnarray*}
+s_n[I,C] & = & f^n_\Phi(x) \\
+s_e[E,C,C] & = & f^e_\Phi(x)
+\end{eqnarray*}
+
+\vfill
+\begin{eqnarray*}
+{\color{red} s(\hat{y})} & = & \sum_i\;s_n[i,\hat{y}[i]] + \sum_{\tuple{i,j} \in \mathrm{Edges}}\;s_e[\tuple{i,j},\hat{y}[i],\;\hat{y}[j]] \\
+\\
+{\color{red} P_s(\hat{y})} & = & \softmax_{\hat{y}}\;s(\hat{y}) \;\;\mbox{\color{red} all possible $\hat{y}$} \\
+\\
+{\cal L} & = & {\color{red} - \ln P_s(y) \;\;\;\mbox{gold label $y$}}
+\end{eqnarray*}
+
+\vfill
+We want the gradients {\color{red} $s_n.\grad[I,C]$} and {\color{red} $s_e.\grad[E,C,C]$}.
+
+
+\slide{Model Marginals Theorem}
+
+Theorem:
+\begin{eqnarray*}
+    s_n.\mathrm{grad}[i,c] & = &  {\color{red} P_{\hat{y} \sim P_s}(\;\;\hat{y}[i] = c\;\;)} \\
+    & & \;\;\;\;\;- \bbone[\;\;y[i] = c\;\;] \\
+    \\
+    s_e.\mathrm{grad}[\tuple{i,j},c,c'] & = &  {\color{red} P_{\hat{y} \sim P_s}(\;\;\hat{y}[i] = c \; \wedge \; \hat{y}[j] = c'\;\;)} \\
+    & & \;\;\;\;\;- \bbone[\;\;y[i] = c\; \wedge \; y[j] = c'\;\;]
+\end{eqnarray*}
+
+\vfill
+We need to compute (or approximate) the model marginals.
+
+\slide{Proof of Model Marginals Theorem}
+
+We consider the case of node marginals, The case of edge marginals is similar.
+
+\begin{eqnarray*}
+    s_n.\grad[i,c] & = & \partial {\cal L}(\Phi,x,y)\;/\;\partial s_n[i,c] \\
+    \\
+    & = & \partial \left(-\ln \frac{1}{Z}\exp(s(y))\right)\;/\;\partial s_n[i,c] \\
+    \\
+    & = & \partial (\ln Z - s(y))\;/\;\partial s_n[i,c] \\
+    \\
+    & = & \left(\frac{1}{Z} \sum_{\hat{y}} e^{s(\hat{y})} \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
+    - \left(\partial s(y) /\partial s_b[i,c]\right) 
+\end{eqnarray*}
+
+\slide{Proof of Model Marginals Theorem}
+
+\begin{eqnarray*}
+    s_n.\grad[i,c] & = & \left(\frac{1}{Z} \sum_{\hat{y}} e^{s(\hat{y})} \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
+    - \left(\partial s(y) /\partial s_b[i,c]\right)  \\
+    \\
+    & = & \left(\sum_{\hat{y}} P_s(\hat{y}) \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
+    - \left(\partial s(y) /\partial s_n[i,c]\right)    \\
+    \\
+    s(\hat{y}) & = & \sum_i\;s_n[i,\hat{y}[i]]\; + \sum_{\tuple{i,j} \in \mathrm{Edges}}\;s_e[\tuple{i,j},\hat{y}[i],\;\hat{y}[j]] \\
+    \\
+    \frac{\partial s(\hat{y})}{\partial s_n[i,c]} & = & \bbone[\hat{y}[i] = c]
+\end{eqnarray*}
+
+\slide{Proof of Model Marginals Theorem}
+
+\begin{eqnarray*}
+    s_n.\grad[i,c] & = & \left(\frac{1}{Z} \sum_{\hat{y}} e^{s(\hat{y})} \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
+    - \left(\partial s(y) /\partial s_b[i,c]\right)  \\
+    \\
+    & & \left(\sum_{\hat{y}} P_s(\hat{y}) \left(\partial s(\hat{y})/\partial s_n[i,c]\right)\right)
+    - \left(\partial s(y) /\partial s_n[i,c]\right)    \\
+    \\
+    & = & E_{\hat{y} \sim P_s}\bbone[{\color{red} \hat{y}}[i] = c]
+    - \bbone[{\color{red}y}[i] = c] \\
+    \\
+    & = & P_{\hat{y} \sim P_s}({\color{red} \hat{y}}[i] = c)
+      - \bbone[{\color{red}y}[i] = c]
+\end{eqnarray*}
+
+\slide{Model Marginals Theorem}
+
+Theorem:
+\begin{eqnarray*}
+    s_n.\mathrm{grad}[i,c] & = &   P_{\hat{y} \sim P_s}(\;\;{\color{red} \hat{y}}[i] = c\;\;) \\
+    & & \;\;\;\;\;- \bbone[\;\;{\color{red} y}[i] = c\;\;] \\
+    \\
+    s_e.\mathrm{grad}[\tuple{i,j},c,c'] & = &  P_{\hat{y} \sim P_s}(\;\;{\color{red} \hat{y}}[i] = c \; \wedge \; {\color{red} \hat{y}}[j] = c'\;\;) \\
+    & & \;\;\;\;\;- \bbone[\;\;{\color{red} y}[i] = c\; \wedge \; {\color{red} y}[j] =
+    c'\;\;]
+\end{eqnarray*}
+
+\slide{END}
+
+}
+
+\end{document}

@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 
 \begin{document}
@@ -9,7 +9,7 @@
 
 \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
 \bigskip
-\centerline{David McAllester, Winter 2020}
+\centerline{David McAllester, Automn 2020}
 
 \vfill
 \centerline{\bf Generalization and Regularization}
@@ -18,20 +18,20 @@
 
 \slide{Chomsky vs. Kolmogorov and Hinton}
 
-\includegraphics[width=1.0 in]{../images/Chomsky} \begin{minipage}[b]{8in} Noam Chomsky: 
+\includegraphics[width=1.0 in]{\images/Chomsky} \begin{minipage}[b]{8in} Noam Chomsky: 
 Natural language grammar cannot be learned by a universal learning algorithm.
 This position is supported by the ``no free lunch theorem''.\end{minipage}
 
 \vfill
-\includegraphics[height=1.0 in]{../images/Kolmogorov}
-\includegraphics[height=1.0 in]{../images/Hinton}
+\includegraphics[height=1.0 in]{\images/Kolmogorov}
+\includegraphics[height=1.0 in]{\images/Hinton}
 \begin{minipage}[b]{7in}
 Andrey Kolmogorov, Geoff Hinton: Universal learning algorithms exist. This position is supported by the ``free lunch theorem''.
 \end{minipage}
 
 \slide{The No Free Lunch Theorem}
 
-\includegraphics[width=1.0 in]{../images/Chomsky} 
+\includegraphics[width=1.0 in]{\images/Chomsky} 
 
 Without prior knowledge, such as universal grammar, it is impossible to make a prediction for an input you have not seen in the training data.
 
@@ -81,7 +81,7 @@ But training on loss is generally effective.
 
 \slide{Early Stopping}
 
-\centerline{\includegraphics[height = 1.5in]{../images/Early}}
+\centerline{\includegraphics[height = 1.5in]{\images/Early}}
 
 \centerline{\huge Claudia Perlich}
 
@@ -107,7 +107,7 @@ Kaggle withholds test data until the final contest evaluation.
 
 \slide{Over Confidence}
 
-\centerline{\includegraphics[height = 2in]{../images/Early}}
+\centerline{\includegraphics[height = 2in]{\images/Early}}
 
 \vfill
 Validation error is larger than training error when we stop.
@@ -721,11 +721,11 @@ This is done with K-means clustering.
 \ignore{
 \slide{Initialization of Centroids}
 
-\centerline{\includegraphics[width = 7in]{../images/Compression1}}
+\centerline{\includegraphics[width = 7in]{\images/Compression1}}
 
 \slide{After Running K-means}
 
-\centerline{\includegraphics[width = 7in]{../images/Compression2}}
+\centerline{\includegraphics[width = 7in]{\images/Compression2}}
 }
 
 \slide{Retrain to Adjust Centroids}
@@ -778,32 +778,32 @@ Results in significant performance improvements in a wide variety of models.
 \slide{Step 1}
 
 \vfill
-\centerline{\includegraphics[width = 4in]{../images/DSD1}}
+\centerline{\includegraphics[width = 4in]{\images/DSD1}}
 
 \slide{Step 2}
 
 \vfill
-\centerline{\includegraphics[width = 4in]{../images/DSD2}}
+\centerline{\includegraphics[width = 4in]{\images/DSD2}}
 
 \slide{Step 3}
 
 \vfill
-\centerline{\includegraphics[width = 4in]{../images/DSD3}}
+\centerline{\includegraphics[width = 4in]{\images/DSD3}}
 
 \slide{Step 4}
 
 \vfill
-\centerline{\includegraphics[width = 4in]{../images/DSD4}}
+\centerline{\includegraphics[width = 4in]{\images/DSD4}}
 
 \slide{Step 5}
 
 \vfill
-\centerline{\includegraphics[width = 4in]{../images/DSD5}}
+\centerline{\includegraphics[width = 4in]{\images/DSD5}}
 
 \slide{Results}
 
 \vfill
-\centerline{\includegraphics[width = 9.5in]{../images/DSDtable}}
+\centerline{\includegraphics[width = 9.5in]{\images/DSDtable}}
 
 \ignore{
 \slide{A Dropout Bound}
@@ -883,7 +883,7 @@ Regularization proposals should be evaluated empirically.
 Computing Nonvacuous Generalization Bounds for Deep (Stochastic) Neural Networks with Many More Parameters than Training Data, (Dziugaite and Roy, arXiv, 2017)
 
 \vfill
-\centerline{\includegraphics[width = 8in]{../images/Roy}}
+\centerline{\includegraphics[width = 8in]{\images/Roy}}
 
 \vfill
 {\bf The bounds are based on $L_2$ distance of the weight vector to the initialization.}

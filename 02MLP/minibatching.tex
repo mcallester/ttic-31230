@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -60,9 +60,9 @@ $$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
 \end{eqnarray*}
 
 \begin{eqnarray*}
-\mathrm{for}\;b,i,j\;\;\;  x.\mathrm{grad}[b,i] & \pluseq & W[j,i]\tilde{h}.\mathrm{grad}[b,j] \\
+\mathrm{for}\;b,i,j\;\;\;  x.\grad[b,i] & \pluseq & \tilde{h}.\mathrm{grad}[b,j]\;W[j,i] \\
   \\
-\mathrm{for}\;b,i,j\;\;  W.\mathrm{grad}[j,i] & \pluseq & {\color{red} \frac{1}{B}}\;x[b,i]\tilde{h}.\mathrm{grad}[b,j]
+\mathrm{for}\;b,i,j\;\;  W.\mathrm{grad}[j,i] & \pluseq & {\color{red} \frac{1}{B}}\;\tilde{h}.\mathrm{grad}[b,j]\;x[b,i]
 \end{eqnarray*}
 
 \vfill

@@ -1,0 +1,274 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Perils of Differential Entropy}
+  \vfill
+\vfill
+\vfill
+
+\slide{The Fundamental Equation for Continuous $y$}
+
+If $y$ is continuous then the fundamental equation for estimating the distribution on $y$ (cross entropy) involves continuous probability densities.
+
+\vfill
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)$$
+
+\vfill
+This occurs in unsupervised pretraining for sounds and images.
+
+\vfill
+But differential entropy and differential cross-entropy are conceptually problematic.
+
+
+\slide{Perils of Differential Entropy}
+
+Consider a continuous density $p(x)$.  For example
+
+\vfill
+$$p(x) = \frac{1}{\sqrt{2\pi}\; \sigma}\; e^{\frac{-x^2}{2\sigma^2}}$$
+
+\vfill
+Differential entropy is defined as
+
+\vfill
+$$H(p) \doteq \int \left(\ln \frac{1}{p(x)}\right) p(x) dx = E_{x \sim p}\;-\ln p(x)$$
+
+\slide{Perils of Differential Entropy}
+
+\begin{eqnarray*}
+  H({\cal N}(0,\sigma)) & = &  \int_{-\infty}^\infty \left( \ln(\sqrt{2\pi} \sigma) + \frac{x^2}{2\sigma^2}\right) p(x) dx \\
+  \\
+  & = & \ln(\sigma) + \ln(\sqrt{2\pi}) + \frac{1}{2\sigma^2}E_{x \sim {\cal N}(0,1)} x^2 \\
+  \\
+  & = & \ln \sigma + \ln(\sqrt{2\pi}) + \frac{1}{2}  
+\end{eqnarray*}
+
+\vfill
+$$\lim_{\sigma \rightarrow 0} H(N(0,\sigma)) = - \infty$$.
+
+\slide{Sensitivity to the Choice of Units}
+
+$$H(N(0,\sigma)) = C + \ln \sigma$$
+
+\vfill
+Differential entropy depends on the choice of units --- a distributions on lengths will have a different entropy
+when measuring in inches than when measuring in feet.
+
+\slide{Differential Cross Entropy can Diverge to $-\infty$}
+
+Consider the unsupervised training object.
+
+$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{train}}\;-\ln p_\Phi(y)$$
+
+\vfill
+The training set is finite (discrete).
+
+\vfill
+For each $y$ the density $p_\Phi(y)$ can go to infinity.
+
+\vfill
+This will drive the cross entropy training loss to $-\infty$.
+
+\slide{Differential Entropy is Actually Infinite}
+
+An actual real number carries an infinite number of bits.
+
+\vfill
+Consider quantizing the real numbers into bins.
+
+\vfill
+A continuous probability densisty $p$ assigns a probability $p(B)$ to each bin.
+
+\vfill
+As the bin size decreases toward zero the entropy of the bin distribution increases toward $\infty$.
+
+\vfill
+A meaningful convention is that $H(p) = +\infty$ for any continuous density $p$.
+
+\slide{Differential KL-divergence is Meaningful}
+
+$$KL(p,q) = \int \left( \ln \frac{p(x)}{q(x)}\right) p(x) dx$$
+
+\vfill
+This integral can be computed by dividing the real numbers into bins and computing the $KL$ divergence between the distributions on bins.
+
+\vfill
+The KL divergence between the bin distribution typically approaches a finite limit as the bin size goes to zero.
+
+\vfill
+Unlike entropy, differential KL divergence is always non-negative.  But as in the discrete case, it can be infinite.
+
+\slide{Mutual Information}
+
+For two random variables $x$ and $y$ there is a distribution on pairs $(x,y)$ determined by the population distribution.
+
+\vfill
+Mutual information is a KL divergence and hence differential mutual information is meaningful.
+
+\vfill
+\begin{eqnarray*}
+  I(x,y) & \doteq & KL(p(x,y),p(x)p(y)) \\
+  \\
+  & = & E_{x,y} \ln \frac{p(x,y)}{p(x)p(y)}
+\end{eqnarray*}
+
+\slide{The Data Processing Inequality}
+
+For continuous $y$ and $z$ with $z = f(y)$ we get that $H(z)$ can be either larger or smaller than $H(y)$ (consider $z = ay$ for $a >1$ vs. $a<1$).
+
+\vfill
+However, mutual information is a KL divergence and is more meaningful than entropy and for $z = f(y)$ we do have
+
+$$I(x,z) \leq I(x,y)$$
+
+
+\slide{END}
+
+}
+\end{document}
+
+\slide{Source Coding Theorem}
+
+Consider a probability distribution $\mathrm{Pop}$ on a finite set $S$.
+
+\vfill
+Consider a code $C$ assigning a bit string code word $C(y_1,\ldots,y_B)$ to each possible batch of $B$ elements with $y_i \sim \mathrm{Pop}$.
+
+\vfill
+Source coding theorem: As $B \rightarrow \infty$ the optimal coding uses exactly $H(\mathrm{Pop})$
+bits per batch element.
+
+\slide{Prefix Free Codes}
+
+Let $S$ be a finite set.
+
+\vfill
+Let $C$ be assignment of a bit string $C(y)$ to each $y \in S$.
+
+\vfill
+$C$ is called {\em prefix-free} if for $x \not = y$ we have that $C(x)$ is not a prefix of $C(y)$.
+
+\vfill
+A concatenation of sequence of prefix-free code words can be uniquely segmented (parsed) back into a sequence of code words.
+
+\slide{Prefix-Free Codes as Trees and as Probabilities}
+
+A prefix-free code defines a binary branching tree --- branch on the first code bit, then the second, and so on.
+
+\vfill
+The leaves of this tree are labeled with the elements of $S$.
+
+\vfill
+The code defines a probability distribution on $S$ by randomly selecting branches.
+
+\vfill
+We have $P_C(y) = 2^{-|C(y)|}$.
+
+\slide{The Source Coding Theorem}
+
+(1) There exists a prefix-free code $C$ such that
+$$|C(y)| <= (- \log_2 \mathrm{Pop}(y)) + 1$$
+and hence
+$$E_{y\sim \mathrm{Pop}} |C(y)| \leq H(\mathrm{Pop}) +1$$
+
+\vfill
+(2) For any prefix-free code $C$
+
+$$E_{y \sim \mathrm{Pop}}\;|C(y)| = E_{y \sim \pop} -\ln \;P_C(y) = H(\pop,P_C) \geq H(\mathrm{Pop})$$
+
+\slide{Code Construction}
+
+\vfill
+We construct a code by iterating over $y \in S$ in order of decreasing probability (most likely first).
+
+\vfill
+For each $y$ select a code word $C(y)$ (a tree leaf) with length (depth)
+
+\vfill
+$$|C(y)| = \lceil - \log_2 \mathrm{Pop}(y)\rceil$$
+
+\vfill
+and where $C(y)$ is not an extension of (under) any previously selected code word.
+
+\slide{Code Existence Proof}
+
+At any point before coding all elements of $S$ we have
+$$\sum_{y \in \mathrm{Defined}} 2^{-|C(y)|} \leq \sum_{y \in \mathrm{Defined}} \mathrm{Pop}(y) < 1$$
+
+\vfill
+Therefore there exists an infinite descent into the tree that misses all previous code words.
+
+\vfill
+Hence there exists a code word $C(x)$ not under any previous code word with
+$|C(x)| = \lceil - \log_2 \mathrm{Pop}(y)\rceil$.
+
+\vfill
+Furthermore $C(x)$ is at least as long as all previous code words and hence $C(x)$ is not a prefix of any previously selected code word.
+
+\slidetwo{Huffman Coding Produces an Optimal Code}
+{For Finite Distributions}
+
+Maintain a list of trees $T_1,\;\dots,\;T_N$ where each leaf of each tree is labeled with a population element $y$.
+
+\vfill
+We will write $y \in T_i$ to mean that some leaf of $T_i$ is labeled with $y$ and for $y \in T_i$ write $d(y,T_i)$ for the depth
+of the leaf labeled with $y$ in the tree $T_i$.
+
+\vfill
+Initially each tree is just one root node labeled with a single $y$ value and every $y$ value labels some tree.
+
+\slide{Tree Weight}
+
+\vfill
+We define the weight of a free $T_i$ to be the total probability mass of the the items labeling the leaves.
+
+$$W(T_i) = \sum_{y \in T_i}\;\pop(y)$$
+
+\vfill
+The Huffman coding algorithm repeatedly merges the two trees of lowest weight into a single tree until all trees are merged.
+
+\vfill
+When all trees are merged the weight of the final tree is the expected code length.
+
+\slide{Optimality of Huffman Coding}
+
+{\bf Theorem}: The Huffman code $T$ for $\mathrm{Pop}$ gives an optimal code $C$ --- for any other tree $T'$ defining code $C'$ we have
+
+$$E_{y \sim \pop}\;|C(y)| \leq E_{y \sim \pop} |C'(y)|$$
+
+\vfill
+{\bf Invariant:} The merge operation preserves the invariant that there exists an optimal tree including
+all the subtrees on the list.
+
+\slide{The Merge Operation Preserves the Invariant}
+
+Assume there exists an optimal tree containing the given subtrees.
+
+\vfill
+Consider the two subtrees $T_i$ and $T_j$ of minimal weight.  Without loss of generality we can assume that $T_i$ is at least as deep as $T_j$.
+
+\vfill
+Swapping the sibling of $T_i$ for $T_j$ brings $T_i$ and $T_j$ together.  This can only improve the average depth (next slide).
+
+\slide{Why The Swap Can Only Improve the Tree}
+
+We can swap a heavier deeper tree for a shallower lighter tree.
+
+\vfill
+For a subtree $T_i$ of an optimal tree $T$ let $d(T_i)$ be the depth of $T_i$ in $T$.
+
+Swapping $T_1$ and $T_2$ replaces a cost of $d(T_i)W(T_i) + d(T_2)W(T_2)$ with $d(T_1)W(T_2) + d(T_2)W(T_1)$.
+
+\vfill
+For $d(T_1) \geq d(T_2)$ and $W(T_1) \geq W(T_2)$ we have
+
+\vfill
+$$d(T_1)W(T_1) + d(T_2)W(T_2) \geq d(T_1)W(T_2) + d(T_2)W(T_1)$$

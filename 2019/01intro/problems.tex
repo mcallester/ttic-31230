@@ -1,0 +1,316 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+\centerline{\bf Problems For Fundamental Equations.}
+
+\vfill
+\vfill
+Assume that probability distributions $P(y)$ are discrete with $\sum_y\;P(y) = 1$.
+
+\bigskip
+{\bf Problem 1: Joint Entropy and Conditional Entropy}
+We define conditional entropy $H(y|x)$ as follows
+$$H(y|x) = E_{x,y} \;-\log P(y|x).$$
+Given a distribution $P(x,y)$ show
+$$H(P) = H(x) + H(y|x).$$
+
+\solution{
+\begin{eqnarray*}
+  H(P) & = &  E_{(x,y) \sim P}\;-\ln P(x,y) \\
+  \\
+  & = & E_{(x,y) \sim P}\;-\ln P(x)P(y|x) \\
+  \\
+  & = & E_{(x,y) \sim P}\;\left(-\ln P(x) - \ln P(y|x)\right) \\
+  \\
+  & = & \left(E_{(x,y) \sim P}\;-\ln P(x)\right) + \left(E_{(x,y) \sim P}\;- \ln P(y|x)\right) \\
+  \\
+  & = & H(x) + H(y|x)
+\end{eqnarray*}
+}
+
+\bigskip
+~{\bf Problem 2: Unmeasurability of KL divergence and Population Entropy} The problem
+of population density estimation is defined by the following equation.
+$$\Phi^* = \argmin_\Phi\;H(\mathrm{Pop},Q_\Phi) = E_{y \sim \mathrm{Pop}}\;-\ln\;Q_\Phi(y)$$
+This equation is used for language modeling --- estimating the probability distribution over the population of English sentences that appear, say, in the New York Times.
+
+\medskip
+(a) Show the following.
+$$\Phi^* = \argmin_\Phi\;H(\mathrm{Pop},Q_\Phi) = \argmin_\Phi \;KL(\mathrm{Pop},Q_\Phi)$$
+
+
+
+\solution{
+  $$\argmin_\Phi \;KL(\mathrm{Pop},Q_\Phi) = \argmin_\Phi \;H(\pop,Q_\Phi) - H(\pop)$$
+  Since $H(\pop)$ does not depend on $\Phi$ the minima are the same.
+}
+
+\bigskip
+(b) Explain why we can measure $H(\pop,Q_\Phi)$ but cannot measure $KL(\pop,Q_\Phi)$ for the structured object unconditional case (language modeling) and for the
+the conditional (labeling) case (imagenet).
+
+\solution{
+  We assume that the model is such that $Q_\Phi(y)$ can be computed.  For example, an auto-regressive language model allows us to compute
+  $Q_\Phi(y)$ for a sentence $y$ as a product of next-word probabilities.
+  
+  Assuming $Q_\Phi(y)$ can be computed, we can compute (a good approximation to) $E_{y \sim \pop}\; -\ln Q_\Phi(y)$ by sampling sentences $y_1$, $\ldots$ $y_n$ from $\pop$
+  and computing
+  $$\hat{H}(\pop,Q_\Phi) = \frac{1}{N} \sum_i -\ln Q_\Phi(y_i).$$
+  The confidence interval for this estimate shrinks as $1/\sqrt{N}$.
+
+  \medskip
+  However, in the case of strcutured objects, such as sentences, while we can sample from $\pop$, we cannot compute $\pop(y)$.
+  Therefore we have no way of computing or even approximating, $H(\pop)$.  So we cannot compute
+  $$KL(\pop,Q_\Phi) = H(\pop,Q_\Phi) - H(\pop).$$
+  \bigskip
+  For the conditional case we have
+  \begin{eqnarray*}
+    KL(\pop(y|x),Q_\Phi(y|x)) & = & E_{x,y \sim \pop}\;\ln \frac{\pop(y|x)}{Q_\Phi(y|x)} \\
+    \\
+    H(\pop(y|x),Q_\Phi(y|x)) & = &  E_{x,y \sim \pop}\;- \ln Q_\Phi(y|x)
+  \end{eqnarray*}
+  We assume that $Q_\Phi(y|x)$ can be computed and that allows $H(\pop(y|x),Q_\Phi(y|x))$ to be computed (to a good approximation) by taking the average of a sample.
+  However, we cannot compute $\pop(y|x)$, even for binary classification, because (in most applications) we will never sample the same $x$ twice.
+}
+
+\bigskip
+{\bf Problem 3: Asymmetry of cross entropy and KL-divergene} Consider the objective
+\begin{equation}
+  \label{revH}
+  P^* = \argmin_P\;H(P,Q)
+\end{equation}
+Define $y^*$ by
+$$y^* = \argmax_y\;Q(y)$$
+Let $\delta_y$ be the distribution such that $\delta_y(y) = 1$ and $\delta_y(y') = 0$ for $y' \not = y$.
+Show that $\delta_{y^*}$ minimizes (\ref{revH}).
+
+\solution{
+  Consider an arbitrary distribution $P$.  We must show that $H(P,Q) \geq H(\delta_{y^*},Q)$.
+  \begin{eqnarray*}
+    Q(y) & \leq & Q(y^*) \\
+    -\ln Q(y) & \geq & -\ln Q(y^*) \\
+    E_{y \sim P} - \ln Q(y) & \geq & -\ln Q(y^*) \\
+    H(P,Q) & \geq & -\ln Q(y^*) = H(\delta_{y^*},Q)
+  \end{eqnarray*}
+}
+
+\bigskip
+Next consider
+\begin{equation}
+  \label{revKL}
+  P^* = \argmin_P\;KL(P,Q)
+\end{equation}
+Show that $Q$ is the minimizer of (\ref{revKL}).
+
+\solution{
+  This follows from
+  \begin{eqnarray*}
+    KL(P,P) & = & E_{y \sim P} \ln \frac{P(x)}{P(x)} = 0 \\
+    KL(P,Q) & \geq & 0
+  \end{eqnarray*}
+}
+
+\bigskip
+Next consider a subset $S$ of the possible values and let $Q_S$ be the restriction of $Q$ to the set $S$.
+\begin{eqnarray*}
+  Q_S(y) & = & \frac{1}{Q(S)}\left\{\begin{array}{ll} Q(y) & \mbox{for $y \in S$} \\ 0 & \mbox{otherwise} \end{array}\right.
+\end{eqnarray*}
+
+Show that that $KL(Q_S,Q) = -\ln Q(S)$ , which will be quite small if $S$ covers much of the mass.
+
+\solution{
+  \begin{eqnarray*}
+    KL(Q_S,Q) & = & E_{y \sim Q_S}\;\ln \frac{Q_S(y)}{Q(y)} \\
+    & = & E_{y \sim Q_S} \; \ln \frac{Q(y)/Q(S)}{Q(y)} \\
+    & = & E_{y \sim Q_S} \; - \ln Q(S) \\
+    & = & -\ln Q(S)
+  \end{eqnarray*}
+}
+
+\medskip
+Show that, in contrast, $KL(Q,Q_S)$ is infinite unless $S$ covers all values with non-zero propability.
+
+\solution{
+  If there exists a value $\tilde{y}$ not in $S$ with $P(\tilde{y}) > 0$ then
+  $$E_{y \sim P}\;- \ln P_S(y) \geq P(\tilde{y}) - \ln 0 = \infty$$
+  }
+
+
+When we optimize a model $Q_\Phi$ under the objective $KL(Q_\Phi,Q)$ we can get that $Q_\Phi$ covers only one high probability region (a mode) of $Q$ (a problem called mode collapse)
+while optimizing $Q_\Phi$ under the objective $KL(Q,Q_\Phi)$ we will tend to get that $Q_\Phi$ covers all of $Q$.  The two directions are very different even though both
+are minimized at $P = Q$.
+
+
+\bigskip
+{\bf Problem 4. Data Processing Inequality}
+Prove the data processing inequality that for any function $f$ with $z = f(y)$ we have $H(z) \leq H(y)$.
+
+\medskip
+Warning: This data processing inequality does not apply to contiuous densities.  A function on a continuous density can either expand or shrink the distribution which
+increases or decrease its differential entropy respectively.
+
+\solution{
+  \begin{eqnarray*}
+    H(y,z) & = & H(y) + H(z|y) = H(y) \\
+    & = & H(z) + H(y|z)
+  \end{eqnarray*}
+  The result now follows from the fact that $H(y|z) \geq 0$
+}
+
+\bigskip
+{\bf Problem 5: Mutual Information} Consider a joint distribution $P(x,y)$ on discrete random variables $x$ and $y$.
+We define the marginal distributions $P(x)$ and $P(y)$ as follows.
+\begin{eqnarray*}
+  P(x) & = & \sum_y\;P(x,y) \\
+  \\
+  P(y) & = & \sum_x\;P(x,y)
+\end{eqnarray*}
+Let $Q(x,y)$ be defined to be the product of marginals.
+$$Q(x,y) = P(x)P(y).$$
+We define mutual information by
+$$I(x,y) = KL(P,Q)$$
+which I will write as
+$$I(x,y) = KL(P(x,y),Q(x,y))$$
+We define conditional entropy $H(y|x)$ by
+$$H(y|x) = E_{x,y \sim P(x,y)} \;-\ln P(y|x).$$
+
+(a) Show
+$$I(x,y) = H(y) - H(y|x) = H(x) - H(x|y)$$
+
+\solution{
+  \begin{eqnarray*}
+    I(x,y) & = & E_{x,y \sim P(x,y)}\;\ln \frac{P(x,y)}{P(x)P(y)} \\
+    & = & E_{x,y \sim P(x,y)}\;\ln \frac{P(x)P(y|x)}{P(x)P(y)} \\
+    & = & E_{x,y \sim P(x,y)}\;\ln \frac{P(y|x)}{P(y)} \\
+    & = & \left(E_{y \sim P(y)}\;- \ln P(y) \right) - \left(E_{x,y \sim P(x,y)}\; -\ln P(y|x)\right) \\
+    & = & H(y) - H(y|x)
+  \end{eqnarray*}
+  The other equality is similar.
+}
+
+    
+    
+\bigskip
+(b) Explain why (a) implies $H(x) \geq H(x|y)$.
+
+\solution{
+  This is because the information $I(x,y)$ is a KL divergence which is always non-negative.
+}
+
+\medskip
+(c) By stating (b) conditioned on $z$ we have
+$$H(x|z) \geq H(x|y,z).$$
+
+Use this to show that the data process inequality applies to mutual information,
+i.e., that for $z = f(y)$ we have $I(x,z) \leq I(x,y)$.
+
+\solution{
+  We first note that for discrete distributions where $z$ is a function of $y$ we have $P(x|y,z) = P(x|y)$ which implies that $H(x|y,z) = H(x|y)$.  so the above inequality can be written as
+  $$H(x|z) \geq H(x|y).$$
+  The result then follows from
+  $$I(x,z) = H(x) - H(x|z)$$
+  and
+  $$I(x,y) = H(x) - H(x|y)$$
+}
+
+\bigskip
+{\bf Problem 6: The ELBO}
+We consider a model distribution $Q_\Phi(z,y)$ with marginal distribution
+$$Q_\Phi(y) = \sum_z Q_\Phi(z,y).$$
+We are interested in minimizing the unconditional (or unsupervised) cross-entropy of this model.
+$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{Train}} - \ln Q_\Phi(y)$$
+For many models of interest $Q_\Phi(z,y)$ can be efficiently computed as $Q_\Phi(z)Q_\Phi(y|z)$ but $Q_\Phi(y)$ is intractable to compute.
+In a variational auto-encoder we train a second model $\tilde{Q}_\Psi(z|y)$ and use the following inequality
+\begin{eqnarray*}
+\ln Q_\Phi(y) & \geq & \mathrm{ELBO}\\
+& = & E_{z \sim \tilde{Q}(z|y)} \;\ln \frac{Q_\Phi(z,y)}{\tilde{Q}_\Psi(z|y)}
+\end{eqnarray*}
+Rather than minimize the cross entropy we can maximize the ELBO (the Evidence Lower BOund) which corresponds to minimizing an upper bound on the cross entropy.
+Maximization of the ELBO with respect to model parameters $\Phi$ and $\Psi$ define a variational auto encoder (VAE).
+We will consider this in much more detail later in the class.  For now we just consider the formal equations.
+
+\bigskip
+{\bf a.} The ELBO can be written as
+$$\mathrm{ELBO} = E_{z \sim \tilde{Q}(z|y)} \;\ln \frac{Q_\Phi(y)Q_\Phi(z|y)}{\tilde{Q}_\Psi(z|y)}.$$
+Here we have that the ELBO is the expectation of a log of a product of three terms. Separate all three terms and express
+the terms other than $\ln Q_\Phi(y)$ as entropies or cross entropies.
+
+\solution{
+  \begin{eqnarray*}
+    ELBO & = & E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{Q_\Phi(y)Q_\Phi(z|y)}{\tilde{Q}_\Psi(z|y)} \\
+    \\
+    & = & \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln Q_\Phi(y)\right) +
+    \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln Q_\Phi(z|y)\right)
+    + \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{1}{\tilde{Q}_\Psi(z|y)}\right) \\
+    & = & \ln Q_\Phi(y) - H(\tilde{Q}_\Psi(z|y),Q_\Phi(z|y)) +  H(\tilde{Q}(z|y))
+  \end{eqnarray*}
+}
+
+\bigskip
+{\bf b.}  Now rewrite the ELBO by separating it into one the term for $P_\Phi(y)$ and one term for the other two combined and write the combined term
+as a KL divergence.  Explain why your expression implies that the ELBO is a lower bound on $\ln Q_\Phi(y)$.
+
+\solution{
+  \begin{eqnarray*}
+    ELBO & = & E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{Q_\Phi(y)Q_\Phi(z|y)}{\tilde{Q}_\Psi(z|y)} \\
+    \\
+    & = & \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln Q_\Phi(y)\right) +
+    \left(E_{z \sim \tilde{Q}_\Psi(z|y)}\;\ln \frac{Q_\Phi(z|y)}{\tilde{Q}_\Psi(z|y)}\right) \\
+    & = & \ln Q_\Phi(y) - KL(\tilde{Q}_\Psi(z|y),Q_\Phi(z|y))
+  \end{eqnarray*}
+
+  The lower bound property follows from the fact that KL divergence is non-negative.
+}
+
+\bigskip
+{\bf Problem 7: The Donsker-Varadhan Bound}
+(a) For three distributions $P$, $Q$ and $G$ show the following equality.
+$$KL(P,Q) =  \left(E_{y \sim P} \;\ln \frac{G(y)}{Q(y)}\right) + KL(P,G)$$
+
+\solution{
+  \begin{eqnarray*}
+    KL(P,Q) & = & E_{y \sim P} \;\ln \frac{P(y)}{Q(y)} \\
+    & = & E_{y \sim P} \;\ln \frac{P(y)G(y)}{Q(y)G(y)} \\
+    & = & \left(E_{y \sim P} \;\ln \frac{G(y)}{Q(y)}\right) + \left(E_{y \sim P} \;\ln \frac{P(y)}{G(y)}\right) \\
+    & = & \left(E_{y \sim P} \;\ln \frac{G(y)}{Q(y)}\right) + \left(E_{y \sim P} \;\ln \frac{P(y)}{G(y)}\right) \\
+    & = & \left(E_{y \sim P} \;\ln \frac{G(y)}{Q(y)}\right) + KL(P,G) \\
+  \end{eqnarray*}
+}
+
+(b) Show that this implies
+$$KL(P,Q) =  \sup_G \;E_{y \sim P}\; \ln \frac{G(y)}{Q(y)}$$
+
+  \solution{
+    Part (a) implies that $$KL(P,Q) \leq \;E_{y \sim P}\; \ln \frac{G(y)}{Q(y)}$$
+    and also implies that for $G = Q$ we have equality.
+  }
+  
+(c) Now define
+\begin{eqnarray*}
+  G(y) & = & \frac{1}{Z}\;Q(y)e^{s(y)} \\
+  \\
+  Z & = & \sum_y \;Q(y)e^{s(y)}
+\end{eqnarray*}
+Show that a distribution $G(y)$ that does not assign zero to any point can be represented by a score $s(y)$ and that under this
+change of variables we have
+$$KL(P,Q) =  \sup_s \;E_{y \sim P}\; s(y) - \ln E_{y \sim Q} \;e^{s(y)}$$
+
+\solution{
+  Given any $G$ which does not assign zero probability to any point we can take $s(y) = \ln\frac{G(y)}{Q(y)}$ which gives $Z = 1$ and satisfies
+  the above equation.  Plugging this expression for $G$ into part (b) gives the result.
+}
+
+\medskip
+This is the Donsker-Varadhan variational representation of KL-divergence.
+This can be used in cases where we can sample from $P$ and $Q$ but cannot compute $P(y)$ or $Q(y)$.
+Instead we can use a model score $s_\Phi(y)$ where $s_\Phi(y)$ can be computed.
+
+\end{document}

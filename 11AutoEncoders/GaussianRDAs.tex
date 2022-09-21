@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 
 \begin{document}
@@ -14,6 +14,23 @@
   \vfill
   \vfill
 
+
+\slide{The Noisy Channel RDA}
+
+{\huge
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z_\Phi(y,\epsilon)|y)}{\hat{p}_\Phi(z_\Phi(y,\epsilon))}
++ \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))
+\end{eqnarray*}
+
+\vfill
+\centerline{$y$\includegraphics[width=4in]{\images/deconvleft} $\;\;z\;\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
+
+\bigskip
+\bigskip
+We can require $\hat{p}_\Phi(z)$ be Gaussian.  In that case we can sample $z$ from $\hat{p}_\Phi(z)$ and generate images (as in a GAN).
+
+
 \anaslide{A General Autoencoder}
 
 \bigskip
@@ -21,21 +38,26 @@
 
 \bigskip
 \bigskip
-In generall we have either $P_\Phi(z)$ for $z$ discrete or $\hat{p}_\Phi(z)$ for $z$ continuous.
-
-\anaslide{A General Autoencoder}
-
-\bigskip
-\centerline{$y$\includegraphics[width=4in]{\images/deconvleft} $\;\;z\;\;$ \includegraphics[width=4in]{\images/deconvright}$\hat{y}$}
-
-\bigskip
-\bigskip
-Here we will show that for the continuous case with $p_\Phi(z|y)$ and $\hat{p}_\Phi(z)$ both Gaussian, we can assume without loss
+We show below that for $p_\Phi(z|y)$ and $\hat{p}_\Phi(z)$ both required to be Gaussian we can assume without loss
 of generality that
 \bigskip
 $$\hat{p}_\Phi(z) = {\cal N}(0,I)$$
 
-\slide{Gaussian Noisy-Channel RDA} 
+\slide{Sampling}
+
+\centerline{Sample {\color{red} $z \sim {\cal N}(0,I)$} and compute {\color{red} $y_\Phi(z)$}}
+\vfill
+\centerline{\includegraphics[width = 3in]{\images/VariationalFaces}}
+\centerline{[Alec Radford]}
+
+\vfill
+This is {\bf sampling} --- not compression.  This is ``decompressing'' noise.
+
+\slide{Gaussian Noisy-Channel RDA}
+
+We now show that a reparameterization can always convert $\hat{p}_\Phi(z)$ to a zero-mean identity-covariance Gaussian.
+
+\vfill
 $$\Phi^* = \argmin_\Phi E_{y,\epsilon}\;\ln \frac{p_\Phi(z_\Phi(y,\epsilon)|y)}{\hat{p}_\Phi(z_\Phi(y,\epsilon))} + \lambda \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon)))$$
 
 {\color{red}
@@ -124,27 +146,6 @@ Setting $\Phi'$ so that
 
 \vfill
 gives {\color{red} $KL(p_{\Phi}(z|y),\hat{p}_\Phi(z)) = KL(p_{\Phi'}(z|y),{\cal N}(0,I))$}.
-
-\slide{Sampling}
-
-\centerline{Sample {\color{red} $z \sim {\cal N}(0,I)$} and compute {\color{red} $y_\Phi(z)$}}
-\vfill
-\centerline{\includegraphics[width = 4in]{../images/VariationalFaces}}
-\centerline{[Alec Radford]}
-
-\slide{Summary: Gaussian RDAs}
-
-
-\vfill
-Gaussian RDA: {\color{red} $z_\Phi(y,\epsilon) = \mu_\Phi(y) + \sigma_\Phi(y) \odot \epsilon$,\hspace{2em} $\epsilon \sim {\cal N}(0,I)$}
-
-{\color{red}
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi E_{y \sim \pop}\left(\begin{array}{l}\;\;\; \;KL(p_\Phi(z|y),{\cal N}(0,I)) \\
-\\
-+ \;\;\;\lambda E_\epsilon\; \mathrm{Dist}(y,y_\Phi(z_\Phi(y,\epsilon))) \end{array}\right)
-\end{eqnarray*}
-}
 
 \slide{END}
 

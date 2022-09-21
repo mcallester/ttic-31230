@@ -1,5 +1,6 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
+\def\entity#1{\vfill {[#1] =~}}
 
 \begin{document}
 
@@ -7,106 +8,113 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
 
 \vfill
-\centerline{\bf Representing Choices and Knowledge}
-\vfill
-\centerline{\bf with Natural Language}
+\centerline{\bf AGI: Natural Language}
   \vfill
   \vfill
 
-\slide{Natural Langauge as a General Learning Architecture}
 
-Is natural langauage a reflection of a general learning or knowledge representation architecture?
+\slide{Natural Language for Knowledge Representation}
 
-\vfill
-Will some NLP-motivated memory-based Transformer-like architecture prove to be general --- domain independent.
+Is natural language a reflection of a general learning or knowledge representation architecture?
 
 \vfill
-Is there ultimately an important relationship between language and logic?
+Will some Transformer-like architecture ultimately underly general intelligence?
 
-\slide{Natural Language Semantics}
+\slide{Natural Language for Knowledge Representation}
 
-Thousands of civilians have fled advances by Syrian government forces in eastern Ghouta as ...
-
-\slide{Stanford Parse Tree}
-\begin{verbatim}
-(NP (NP (NNS Thousands))
-    (PP (IN of) (NP (NNS civilians))))
-(VP (VBP have)
-    (VP (VBN fled)
-        (NP (NNS advances))
-        (PP (IN by) (NP (NP (JJ Syrian)
-                            (NN government)
-                            (NNS forces))
-                        (PP (IN in) (NP (JJ eastern)
-                                        (NNP Ghouta))))))))
-\end{verbatim}
-
-\slideplain{Stanford Dependencies}
-
-\begin{verbatim}
-root(ROOT-0, fled-5)
-  aux(fled-5, have-4)
-  nsubj(fled-5, Thousands-1)
-    nmod(Thousands-1, civilians-3)
-      case(civilians-3, of-2)
-  dobj(fled-5, advances-6)
-  nmod(fled-5, forces-10)
-    case(forces-10, by-7)
-    amod(forces-10, Syrian-8)
-    compound(forces-10, government-9)
-    nmod(forces-10, Ghouta-13)
-      case(Ghouta-13, in-11)
-      amod(Ghouta-13, eastern-12)
-\end{verbatim}
-
-\slideplain{Just Parantheses}
-
-\begin{verbatim}
-(Thousands of civilians)
-(have fled)
-(advances (by (Syrian government forces))
-          (in eastern Ghouta))
-\end{verbatim}
-
-\slideplain{Reference (Entity Linking)}
-
-{\color{blue} Thousands of civilians have fled advances by Syrian government forces in eastern Ghouta as}
-Damascus makes rapid gains against the last major rebel enclave near the capital.
+I like to sample news stories to try understand how language represents reality.
 
 \vfill
-Damascus $\Rightarrow$ Assad
+{\bf Example:} President Donald Trump on Tuesday insisted he was serious when he % 11
+revealed that he had directed his administration to slow coronavirus % 10
+testing in the United States, shattering the defenses of senior White % 11
+House aides who argued Trump’s remarks were made in jest. %10
+
+\slide{Natural Language for Knowledge Representation}
+
+I take the position that reference, rather than compositional meaning, is the fundamental semantic phenomenon in language.
 
 \vfill
-Rapid Gains $\Rightarrow$ advances-6
+Most of the phrases of a sentence refer to a particular entity or event.
 
 \vfill
-the last major rebel enclave ... $\Rightarrow$ Ghouta
+We can introduce constant symbols for the entities and events and break sentences down into simple
+statements involving the entities.
+
+\slide{Natural Language for Knowledge Representation}
+
+{\huge
+
 
 \vfill
-the capital $\Rightarrow$ Damascus
+President Donald Trump on Tuesday insisted he was serious when he % 11
+revealed that he had directed his administration to slow coronavirus % 10
+testing in the United States, shattering the defenses of senior White % 11
+House aides who argued Trump’s remarks were made in jest. %10
 
-\slide{Reference vs. Composition}
+\entity{the order} [Trump] directed his administration to reduce [{\large COVID} testing].
 
-Functional programming is compositional
+\entity{the revelation} [Trump] revealed [the order].
+
+\entity{the claim} [the order] was in jest.
+
+\entity{the assertion} [the aides] made [the claim].
+}
+
+\slide{Natural Language for Knowledge Representation}
+
+{\huge
+President Donald Trump on Tuesday insisted he was serious when he % 11
+revealed that he had directed his administration to slow coronavirus % 10
+testing in the United States, shattering the defenses of senior White % 11
+House aides who argued Trump’s remarks were made in jest. %10
+
+\entity{the aides} Senior White House aides
+
+\entity{the defense} [the assertion] defended [Trump].
+
+\entity{the insistence} on Tuesday [Trump] insisted [the order] was serious.
+
+\entity{the shattering} [the insistence] shattered [the defense].
+}
+
+\slide{Subtle Semantics}
+
+We would like to be able to represent the subtle semantics of words like ``insisted'', 
+``serious'', ``revealed'',
+``shattered'', ``defenses'' and ``argued''.
 
 \vfill
-$$x = f(y,z)$$
+A translation to first order logic would introduce predicate symbols for these words.
 
 \vfill
-The meaning of $x$ is computed by $f$ from the meaning of $y$ and $z$.
+However, their subtle meanings seem impossible to express in the rigid Boolean semantics of first order logic.
+
+\slide{Neural Semantics}
+
+In contrast to Boolean semantics, the meaning of words seems to require embeddings processed by neural networks.
 
 \vfill
-But in language we typically have that $f(y,z)$ is a mention and $x$ is its referent.
+But as in logic, discrete ``statements'' involving words and entities seem important for representing reality.
+
+\entity{the insistence} on Tuesday [Trump] insisted [the order] was serious.
+
+\slide{Natural Language in Code and Mathemamtics}
+
+Mnemonic names and natural language comments are essential in writing intelligible code or mathematical proofs.
 
 \vfill
-(the last (major rebel enclave) (near (the capital)))
+This supports the idea that natural language somehow underlies our understanding of what would seem to be purely logical constructs.
+
 
 \vfill
-$$x = (\mbox{the last $Q$ $P$})$$
+Rather than logic providing the meaning of language, neural language processing may support our understanding of logic.
 
+\vfill
+Or maybe logic and neural language processing just support each other.
 \slide{END}
 
 }

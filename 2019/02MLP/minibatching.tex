@@ -1,0 +1,83 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+  
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \vfill
+  \centerline{\bf Minibatching: The Batch Index}
+  \vfill
+  \vfill
+
+ \slide{Minibatching}
+ 
+We run some number of instances together (or in parallel) and then do a parameter update based on the average
+gradients of the instances of the batch.
+
+\vfill
+For NumPy minibatching is not so much about parallelism as about making the vector operations larger so that the vector operations dominate
+the slowness of Python.  On a GPU minibatching allows parallelism over the batch elements.
+\vfill
+
+\slide{Minibatching}
+\vfill
+With minibatching each input value and each computed value is actually a batch of values.
+
+\vfill
+We add a batch index as an additional first tensor dimension for each input and computed node.
+
+\vfill
+Parameters do not have a batch index.
+
+\slide{The Batch Index}
+
+We let $B$ be the number of elements in a single minibatch and let $b$, with $0 \leq b \leq B-1$, be an index naming a particular element of the current minibatch.
+
+\slide{MLP with a Batch Index}
+
+\centerline{$b$--- batch index,\hspace{3em} $i$ --- input feature index}
+\centerline{$j$ --- hidden layer index, \hspace{3em} $\hat{y}$ --- possible label}
+$$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
+
+\vfill
+\begin{eqnarray*}
+  {\color{red} h[b,j]} & = & \sigma\left(\sum_i \left(W^0[j,i] \;{\color{red} x[b,i]}\right) - b^0[j]\right) \\
+  \\
+  {\color{red} s[b,\hat{y}]} & = & \sigma\left(\sum_j \left(W^1[\hat{y},j]\;{\color{red} h[b,j]}\right) - b^1[\hat{y}]\right) \\
+  \\
+  {\color{red} P_\Phi[b,\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[b,\hat{y}]}
+\end{eqnarray*}
+
+\slideplain{Backpropagation with Minibatching}
+\vspace{-3ex}
+\begin{eqnarray*}
+  \mathrm{for}\;b,i,j\;\;\;\tilde{h}[b,j] & \pluseq & W[j,i]\;x[b,i]
+\end{eqnarray*}
+
+\begin{eqnarray*}
+\mathrm{for}\;b,i,j\;\;\;  x.\mathrm{grad}[b,i] & \pluseq & W[j,i]\tilde{h}.\mathrm{grad}[b,j] \\
+  \\
+\mathrm{for}\;b,i,j\;\;  W.\mathrm{grad}[j,i] & \pluseq & {\color{red} \frac{1}{B}}\;x[b,i]\tilde{h}.\mathrm{grad}[b,j]
+\end{eqnarray*}
+
+\vfill
+$B$ is the number of batch elements.  By convention parameter gradients are averaged over the batch.
+
+\slide{Setting the Batch Size}
+
+The batch is typically made as large as the hardware will support.
+
+\vfill
+Theoretically extremely large batches can make SGD require more epochs and hence more energy consumption even for parallel batch processing.
+
+\vfill
+But empirically, unless one has thousands of GPUs, it seems the batch can be as large as possible without requiring additional epochs.
+\slide{END}
+}
+
+\end{document}

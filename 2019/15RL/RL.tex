@@ -1,0 +1,284 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+\vfill
+  \centerline{\bf Deep Reinforcement Learning}
+  \vfill
+\vfill
+
+\slide{Definition of Reinforcement Learning}
+
+RL is defined by the following properties:
+
+\vfill
+\begin{itemize}
+\item An environment with {\bf state}.
+
+  \vfill
+\item State changes are influenced by {\bf sequential decisions}.
+
+  \vfill
+\item  Reward (or loss) depends on {\bf making decisions} that lead to {\bf desirable states}.
+\end{itemize}
+
+\slide{Reinforcement Learning Examples}
+
+\begin{itemize}
+\item Board games (chess or go)
+
+  \vfill
+\item Atari Games (pong)
+
+  \vfill
+\item Robot control (driving)
+
+  \vfill
+\item Dialog
+
+  \vfill
+\item Life
+
+\end{itemize}
+
+\slide{Policies}
+
+A policy is a way of behaving.
+
+\vfill
+Formally, a (nondeterministic) policy maps a state to a probability distribution over actions.
+
+\vfill
+\begin{eqnarray*}
+    \pi(a_t|s_t) & & \mbox{probability of action $a_t$ in state $s_t$}
+\end{eqnarray*}
+
+\slide{Imitation Learning}
+
+Construct a training set of state-action pairs $(s,a)$ from experts.
+
+\vfill
+Define stochastic policy $\pi_\Phi(s)$.
+
+\vfill
+$$\Phi^* = \argmin_\Phi \expectsub{(s,a) \sim \mathrm{Train}}{- \ln \pi_\Phi(a\;|\;s)}$$
+
+\vfill
+This is just cross-entropy loss where we think of $a$ as a ``label'' for $s$.
+
+\slide{Dangers of Imperfect Imitation Learning}
+
+Perfect imitation learning would reproduce expert behavior.
+
+Imitation learning is {\bf off-policy} ---
+the state distribution in the training data is different from that defined by the policy being learned.
+
+\vfill
+Imitating experts, such as expert fire eaters, can be dangersous.  ``Don't try this at home''.
+
+\vfill
+Also, it is difficult to exceed expert performance by imitating experts.  But this can happen.
+
+\slide{Markov Decision Processes (MDPs)}
+
+An MDP consists of a set ${\cal S}$ of states, a set ${\cal A}$ of allowed actions, a reward function $R$
+and a next-state probability function $P_T$.  We will use the following notation.
+
+\vfill
+$s_t \in {\cal S}$ is the state at time $t$
+
+\vfill
+$a_t \in {\cal A}$ is the action taken at time $t$.
+
+\vfill
+$r_t = R(s_t,a_t) \in \mathbb{R}$ is the reward at time $t$
+
+\vfill
+$P_T(s_{t+1}|s_t,a_t)$ is the probability of $s_{t+1}$ given $s_t$ and $a_t$.
+
+\vfill
+The function $R(s,a)$ can allow for a cost of the action $a$.
+
+\slide{Optimizing Reward}
+
+In RL we maximize reward rather than minimize loss.
+
+$$\pi^* = \argmax_\pi \;R(\pi)$$
+
+\vfill
+$$\begin{array}{rcll}
+  R(\pi) & = & E_\pi\;\sum_{t=0}^T \;r_t &\mbox{episodic reward (go)} \\
+\\
+& \mbox{or} & E_\pi\;\sum_{t=0}^\infty \;\gamma^t r_t &\mbox{discounted reward (financial planning)} \\
+\\
+& \mbox{or} & \lim_{T \rightarrow \infty}\;\frac{1}{T} \;\sum_{t=0}^T \;r_t &\mbox{asymptotic average reward (driving)}
+\end{array}$$
+
+
+\slide{The Value Function}
+
+For discounted reward:
+
+\begin{eqnarray*}
+  V^\pi(s) & = & E_\pi\;\sum_t \;\gamma^t r_t  \;\;|\; \pi, \; s_0 = s \\
+  \\
+  V^*(s) & = & \sup_\pi \;V^\pi(s) \\
+  \\
+  \pi^*(a|s) & = & \argmax_a\;R(s,a) + \gamma \expectsub{s' \sim P_T(s'|s,a)}{V^*(s')} \\
+  \\
+  V^*(s) & = & \max_a\; R(s,a) + \gamma \expectsub{s' \sim P_T(\cdot|s,a)}{V^*(s')}
+\end{eqnarray*}
+
+\slide{Value Iteration}
+
+Suppose the state space and action space are finite.
+
+\vfill
+In that case we can do value iteration.
+
+\begin{eqnarray*}
+  V_0(s) & = & 0 \\
+  \\
+  V_{i+1}(s) & = & \max_a\; R(s,a) + \gamma \expectsub{s' \sim P_T(\cdot|s,a)}{V_i(s')}
+\end{eqnarray*}
+
+\vfill
+If all rewards are non-negative then
+
+$$V_{i+1}(s) \geq V_i(s)\;\;\;\;V_i(s) \leq V^*(s)\;\;\;\;\mathrm{so}\;\lim_{i \rightarrow \infty}\;V_i(s)\;\mathrm{exists}$$
+
+\slide{Value Iteration}
+
+Theorem: {\bf For discounted reward}
+\vfill
+$$V_\infty(s) \doteq \lim_{i \rightarrow \infty}\;V_i(s) = V^*(s)$$
+
+\slide{Proof}
+
+\begin{eqnarray*}
+  \;\Delta & \doteq & \max_s\;\;V^*(s) - V_\infty(s) \\
+  \\
+  & = & \max_s \left(\begin{array}{l} \max_a R(s,a) + E_{s'|a} \gamma V^*(s') \\ - \max_a R(s,a) + E_{s'|a} \gamma V_\infty(s')\end{array}\right) \\
+  \\
+    & \leq & \max_s \max_a \left(\begin{array}{l} R(s,a) + E_{s'|a} \gamma V^*(s') \\ - R(s,a) + E_{s'|a} \gamma V_\infty(s')\end{array}\right) \\
+  \\
+  & = & \max_s \max_a \;E_{s'|a}\; \gamma (V^*(s') - V_\infty(s)) \\
+  \\  
+  & \leq & \gamma \Delta
+\end{eqnarray*}
+
+
+\slide{The $Q$ Function}
+
+For discounted reward:
+
+\begin{eqnarray*}
+  Q^\pi(s,a) & = & E_\pi\;\sum_t \;\gamma^tr_t \;\;|\; \pi, \; s_0 = s,\;a_0 = a \\
+  \\
+  Q^*(s,a) & = & \sup_\pi \;Q^\pi(s,a) \\
+  \\
+  \pi^*(a|s) & = & \argmax_a\;Q^*(s,a) \\
+  \\
+  Q^*(s,a) & = & R(s,a) + \gamma \expectsub{s' \sim P_T(\cdot|s,a)}{\max_{a'}\; Q^*(s',a')}
+\end{eqnarray*}
+
+\slide{$Q$ Function Iteration}
+
+It is possible to define $Q$-iteration by analogy with value iteration, but this is generally not discussed.
+
+\vfill
+Value iteration is typically done for finite state spaces.  Let $S$ be the number of states and $A$ be the number of actions.
+
+\vfill
+One update of a $Q$ table takes $O(S^2A^2)$ time while one update of value iteration is $O(S^2A)$.
+
+\slide{$Q$-Learning}
+
+When learning by updating the $Q$ function we typically assume a parameterized $Q$ function $Q_\Phi(s,a)$.
+\vfill
+{\bf Bellman Error:}
+{\huge $$\mathrm{Bell}_\Phi(s,a) \doteq \left(Q_\Phi(s,a) - \left(R(s,a) + \gamma\;\expectsub{s' \sim P_T(s'|s,a)}{\max_{a'}\;Q_\Phi(s',a')}\right)\right)^2$$}
+
+{\bf Theorem}: If $\mathrm{Bell}_\Phi(s,a) = 0$ for all $(s,a)$ then the induced policy is optimal.
+
+\vfill
+{\bf Algorithm}: Generate pairs $(s,a)$ from the policy $\argmax_a\;Q_\Phi(s_t,a)$ and repeat
+$$\Phi \;\minuseq\; \eta \nabla_\Phi \;\; \mathrm{Bell}_\Phi(s,a)$$
+
+
+\slide{Issues with $Q$-Learning}
+
+Problem 1: Nearby states in the same run are highly correlated.  This increases the variance of the cumulative gradient updates.
+
+\vfill
+Problem 2: SGD on Bellman error tends to be unstable. Failure of $Q_\Phi$ to model unused actions leads to policy change (exploration).
+But this causes $Q_\Phi$ to stop modeling the previous actions
+which causes the policy to change back ...
+
+\vfill
+To address these problems we can use a {\bf replay buffer}.
+
+\slide{Using a Replay Buffer}
+
+We use a replay buffer of tuples $(s_t,a_t,r_t,s_{t+1})$.
+
+\vfill
+Repeat:
+
+\vfill
+\begin{enumerate}
+
+\item Run the policy $\argmax_a Q_\Phi(s,a)$ to add tuples to the replay buffer.  Remove oldest tuples to maintain a maximum buffer size.
+
+\item {\color{red} $\Psi = \Phi$}
+  
+\item for $N$ times select a random element of the replay buffer and do
+$$\Phi \;\minuseq \; \eta \nabla_\Phi\;(Q_\Phi(s_t,a_t) - (r_t + \gamma \max_{a} Q_{\color{red} \Psi}(s_{t+1},a))^2$$
+\end{enumerate}
+
+\slide{Replay is Off-Policy}
+
+Note that the replay buffer is from a {\bf mixture of policies} and is {\bf off-policy} for $\argmax_a\;Q_\Phi(s,a)$.  This seems to be important for stability.
+
+\vfill
+This seems related to the issue of stochastic vs. deterministic policies.  More on this later.
+
+\slide{Multi-Step $Q$-learning}
+
+$$\Phi \;\minuseq \;\sum_t \nabla_\Phi \left(Q_\Phi(s_t,a_t) - \sum_{\delta = 0}^{D} \gamma^\delta r_{(t+\delta)}\right)^2$$
+
+\slidetwo{Human-level control through deep RL (DQN)}{Mnih et al., Nature, 2015. (Deep Mind)}
+\vfill
+We consider a CNN $Q_\Phi(s,a)$.
+
+\vfill
+\centerline{\includegraphics[width=6in]{../images/DQN}}
+
+\slide{Watch The Video}
+
+https://www.youtube.com/watch?v=V1eYniJ0Rnk
+
+\slide{Asynchronous $Q$-Learning (Simplified)}
+No replay buffer.
+Many asynchronous threads each repeating:
+\vfill
+
+  \begin{quotation}
+  \noindent $\tilde{\Phi} = \Phi$ (retrieve $\Phi$)\newline \newline
+  \noindent using policy $\argmax_a Q_{\tilde{\Phi}}(s,a)$ compute $$s_t,a_t,r_t,\ldots,s_{t+K},a_{t+K},r_{t+K}$$
+  \newline
+  \noindent {\huge $\Phi \;\minuseq\; \eta \sum_{i=t}^{t+K-D} \nabla_{\tilde{\Phi}}\;\left(Q_{\tilde{\Phi}}(s_i,a_i) - \sum_{\delta = 0}^D \gamma^\delta r_{i+\delta}\right)^2$} (update $\Phi$)
+  \end{quotation}
+
+\slide{END}
+
+}
+\end{document}
+
+

@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -7,7 +7,7 @@
   
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
   \vfill
   \vfill
   \centerline{\bf The Educational Framework (EDF)}
@@ -23,8 +23,8 @@ In EDF we write
 
 \vfill
 \begin{eqnarray*}
-  y & = & F(x) \\
-  z & = & G(y,x) \\
+  y & = & F(p,x) \\
+  z & = & G(q,y,x) \\
   u & = & H(z) \\
   {\cal L} &  = &  u
 \end{eqnarray*}
@@ -33,29 +33,39 @@ In EDF we write
 \vfill
 This is Python code where variables are bound to objects.
 
+\slide{Kinds of Nodes}
+
+There are three kinds of nodes --- inputs, parameters and computed nodes (CompNodes).
+
+\vfill
+Inputs and computed nodes have a batch index.  Parameters do not have a batch index.
+
+\vfill
+
+The value of inputs and parameters are provided. The value of CompNodes is computed by the forward pass.
+
 \anaslide{The EDF Framework}
 
 \begin{eqnarray*}
-  y & = & F(x) \\
-  z & = & G(y,x) \\
+  y & = & F(p,x) \\
+  z & = & G(q,y,x) \\
   u & = & H(z) \\
   {\cal L} &  = &  u
 \end{eqnarray*}
 
 \vfill
-This is Python code.
-
-\vfill
 $x$ is an object in the class {\tt Input}.
 
 \vfill
-$y$ is an object in the class $F$ (subclass of {\tt CompNode}).
+$p$ and $p$ are objects in subclasses of {\tt Parameter}.
 
 \vfill
-$z$ is an object in the class $G$ (subclass of {\tt CompNode}).
+$y$ is an object in the class $F$;
+$z$ is an object in the class $G$;
+and $u$ and ${\cal L}$ are the same object in the class $H$.
 
-\medskip
-$u$ and ${\cal L}$ are the same object in the class $H$ (suclass of {\tt CompNode}).
+\vfill
+The classes $F$, $G$, and $H$ are subclasses of {\tt CompNode}.
 
 \slide{The Core of EDF}
 
@@ -73,25 +83,25 @@ def \> SGD(): \\
        \>\>p.value -= eta*p.grad
 \end{tabbing}
 
-\anaslideplain{$y = F(x)$}
+\anaslideplain{$y = F(p,x)$}
 
 \begin{tabbing}
   class \=$F$(CompNode): \\
   \\
-    \>def \=\_\_init\_\_(self, x): \\
+    \>def \=\_\_init\_\_(self,p,x): \\
         \>\>CompNodes.append(self) \\
         \>\>self.x = x \\
+        \>\>self.p = p \\       
 \\
     \>def forward(self): \\
         \>\>self.value = ... compute the value ... \\
 \\
     \>def backward(self): \\
-        \>\>self.x.addgrad(... compute the gradient ...)
+        \>\>self.x.addgrad(... compute the gradient ...) \\
+        \>\>self.p.addgrad(... compute the gradient ...)        
 \end{tabbing}
 
-\slide{Nodes of the Computation Graph}
-
-There are three kinds of nodes in a computation graph --- inputs, parameters and computation nodes.
+\slideplain{The Classes Input and CompNode}
 
 \vfill
 \begin{tabbing}
@@ -109,7 +119,7 @@ class \=CompNode: \#initialization is handled by the subclass \\
    \>\>self.grad += delta
 \end{tabbing}
 
-\slide{}
+\slide{The Class Parameter}
 
 \begin{tabbing}
 class \=Parameter: \\
@@ -187,14 +197,14 @@ class Sigmoid:
   \tilde{y}.\mathrm{grad}[b,j] &\pluseq & y.\mathrm{grad}[b,j] \\
   B.\mathrm{grad}[j] & \minuseq & \frac{1}{B} \sum_b\;y.\mathrm{grad}[b,j] \\
   \\
-  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;\tilde{y}.\mathrm{grad}[b,j]W[i,j] = yW^\top\\
+  x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;\tilde{y}.\mathrm{grad}[b,j]W[i,j] = y.\grad\;W^\top\\
   \\
   W.\mathrm{grad}[i,j] & \pluseq & \frac{1}{B} \sum_b\;\tilde{y}.\mathrm{grad}[b,j]x[b,i] =\; ???
 \end{eqnarray*}
 }
 
-\vfill
-\eject
+\slide{}
+
 \begin{verbatim}
 class Affine(CompNode):
 
@@ -208,9 +218,9 @@ class Affine(CompNode):
                                self.Phi.w.value)
                       - self.Phi.b.value)
 \end{verbatim}
-\vfill
-\eject
-\vfill
+
+\slide{}
+
 \begin{verbatim}
     def backward(self):
 

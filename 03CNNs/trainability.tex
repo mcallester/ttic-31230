@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -12,15 +12,13 @@
     \vfill
   \centerline{\bf Trainability:}
   \vfill
-  \centerline{\bf Relu, Batch Normalization, Initialization,}
+  \centerline{\bf ReLU, Batch Normalization, Initialization,}
   \vfill
   \centerline{\bf and Residual Connections (ResNet)}
   \vfill
   \vfill
 
-
-
-
+\ignore{
 \slide{Universality Assumption}
 
 We often assume DNNs are universally expressive (can model any function) and trainable (the desired function can be found by SGD).
@@ -41,8 +39,9 @@ P \vee Q & \approx & \sigma(100*P + 100* Q -50) \\
 \\
 \neg P & \approx & \sigma(100*(1-P) - 50)
 \end{eqnarray*}
+}
 
-\slide{Universality Assumption: Trainability}
+\slide{Trainability}
 
 The main issue in making deep neural networks trainable is maintaining meaningful gradients.
 
@@ -54,7 +53,7 @@ There are various difficulties.
 Consider the sigmoid activation function $1/(1+ e^{-x})$.
 
 \vfill
-\centerline{\includegraphics[width= 4.0in]{../images/sigmoid2}}
+\centerline{\includegraphics[width= 4.0in]{\images/sigmoid2}}
 
 
 \vfill
@@ -62,23 +61,23 @@ The gradient of this function is quite small for $|x| > 4$.
 
 \vfill
 In deep networks backpropagation can go through many sigmoids and
-the gradient can ``vanish''
+we get ``vanishing gradients''.
 
-\slide{The Rectified Linear Unit Activation Function (Relu)}
+\slide{The Rectified Linear Unit Activation Function (ReLU)}
 
-$\mathrm{Relu}(x) = \max(x,0)$
-
-\vfill
-\centerline{\includegraphics[width= 4.0in]{../images/relu}}
+$\mathrm{ReLU}(x) = \max(x,0)$
 
 \vfill
-The activation function $\mathrm{Relu}(x)$ does not saturate for $x > 0$.
+\centerline{\includegraphics[width= 4.0in]{\images/relu}}
+
+\vfill
+The activation function $\mathrm{ReLU}(x)$ does not saturate for $x > 0$.
 
 \slide{Repeated Multiplication by Network Weights}
 
 Consider a deep CNN.
 
-$$L_{i+1} = \mathrm{Relu}(\mathrm{Conv}(\Phi_i,L_i))$$
+$$L_{i+1} = \mathrm{ReLU}(\mathrm{Conv}(\Phi_i,L_i))$$
 
 \vfill
 For $i$ large, $L_i$ has been multiplied by many weights.
@@ -182,7 +181,7 @@ as the inputs to a layer change the zero mean unit variance property underlying 
 \slide{Residual Connections (ResNet)}
 
 \vfill
-\includegraphics[width= 2.5in]{../images/resnet}
+\includegraphics[width= 2.5in]{\images/resnet}
 \hfill \begin{minipage}[b]{4in}
   A residual connection produces the sum of the previous layer and the new layer.
 
@@ -190,78 +189,104 @@ as the inputs to a layer change the zero mean unit variance property underlying 
   The residual connection connects input to output directly and hence preserves gradients.
 
   \bigskip
-  ResNets were introduced in late 2015 (Kaiming He et al.) and revolutionized computer vision.
+  Residual Connections were introduced in late 2015 (Kaiming He et al.) and are now standard in all areas of deep learning.
 \end{minipage}
 
-
-\slide{ResNet32}
-
-\centerline{\includegraphics[height= 5.5in]{../images/ResNetStack} {\large [Kaiming He]}}
-
-\anaslideplain{Simple Residual Skip Connections in CNNs (stride 1)}
+\anaslideplain{A Simple Residual Connection in CNNs (stride 1)}
 
 \medskip
 \begin{eqnarray*}
-R_{\color{red} \ell+1}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+1}[X,Y,J,J],B_{\color{red} \ell+1}[J],L_{\color{red} \ell}[B,X,Y,J]) \\
+L_{\color{red} \ell+1}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+1}[X,Y,J,J],B_{\color{red} \ell+1}[J],L_{\color{red} \ell}[B,X,Y,J]) \\
 \\
-\mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\\
-L_{\color{red} \ell+1}[b,x,y,j] & = & L_{\color{red}\ell}[b,x,y,j] + R_{\color{red} \ell+1}[b,x,y,j]
+& & + \;\; L_{\color{red} \ell}[B,X,Y,J]
 \end{eqnarray*}
 
 \vfill (Recall that we use capital letter indices to denote entire tensors and lower case letters for particular indeces.)
 
-\anaslide{Simple Residual Skip Connections in CNNs (stride 1)}
+\slide{Multiple Convolutions Between Additions}
+
+\begin{eqnarray*}
+L_{\color{red} \ell+1}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+1}[X,Y,J,J],B_{\color{red} \ell+1}[J],L_{\color{red} \ell}[B,X,Y,J]) \\
+\\
+L_{\color{red} \ell+2}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+2}[X,Y,J,J],B_{\color{red} \ell+2}[J],L_{\color{red} \ell+1}[B,X,Y,J]) \\
+\\
+L_{\color{red} \ell+3} & = & L_{\color{red} \ell} + L_{\color{red} \ell+2}
+\end{eqnarray*}
+
+\slide{ResNet32}
+
+\centerline{\includegraphics[height= 5.5in]{\images/ResNetStack} {\large [Kaiming He]}}
+
+\anaslideplain{Reducing Spacial Dimension}
 
 \medskip
 \begin{eqnarray*}
-R_{\color{red} \ell+1}[B,X,Y,J] & = & \mathrm{Conv}(W_{\color{red} \ell+1}[X,Y,J,J],B_{\color{red} \ell+1}[J],L_{\color{red} \ell}[B,X,Y,J]) \\
+L_{\color{red} \ell+1} & = & \mathrm{Conv}(W_{\color{red} \ell+1},B_{\color{red} \ell+1},L_{\color{red} \ell}) \\
 \\
-\mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\\
-L_{\color{red} \ell+1}[b,x,y,j] & = & L_{\color{red}\ell}[b,x,y,j] + R_{\color{red} \ell+1}[b,x,y,j]
+L_{\color{red} \ell+2} & = & \mathrm{Conv}(W_{\color{red} \ell+2},B_{\color{red} \ell+2},L_{\color{red} \ell+1}) \\
+\\
+L_{\color{red} \ell+3} & = & L_{\color{red} \ell} + L_{\color{red} \ell+2}
 \end{eqnarray*}
 
-\vfill Note that in the above equations $L_{\color{red} \ell}[B,X,Y,J]$ and $R_{\color{red} \ell+1}[B,X,Y,J]$ are the same shape.
+\vfill All these layers have the same shape.
+
+\anaslide{Reducing Spacial Dimension}
+
+\medskip
+\begin{eqnarray*}
+L_{\color{red} \ell+1} & = & \mathrm{Conv}(W_{\color{red} \ell+1},B_{\color{red} \ell+1},L_{\color{red} \ell},\;\mathrm{stride} \;s) \\
+\\
+L_{\color{red} \ell+2} & = & \mathrm{Conv}(W_{\color{red} \ell+2},B_{\color{red} \ell+2},L_{\color{red} \ell+1}) \\
+\\
+L_{\color{red} \ell+3} & = & \tilde{L}_{\color{red} \ell} + L_{\color{red} \ell+2}
+\end{eqnarray*}
+
 \vfill
-In the actual ResNet $R_{\color{red} \ell+1}$ is computed by two or three convolution layers.
-
-\slideplain{Handling Spacial Reduction}
-
-Consider $L_{\color{red} \ell}[B,X_{\color{red} \ell},Y_{\color{red} \ell},J_{\color{red} \ell}]$ and $R_{\color{red} \ell+1}[B,X_{\color{red} \ell+1},Y_{\color{red} \ell+1},J_{\color{red} \ell+1}]$
+where
 \begin{eqnarray*}
 X_{\color{red} \ell+1} & = & X_{\color{red} \ell}/s \\
 Y_{\color{red} \ell+1} & = & Y_{\color{red} \ell}/s \\
 J_{\color{red} \ell+1} & \geq &  J_{\color{red} \ell}
 \end{eqnarray*}
 
+\anaslide{Reducing Spacial Dimension}
+
+\medskip
+\begin{eqnarray*}
+L_{\color{red} \ell+1} & = & \mathrm{Conv}(W_{\color{red} \ell+1},B_{\color{red} \ell+1},L_{\color{red} \ell},\;\mathrm{stride} \;s) \\
+\\
+L_{\color{red} \ell+2} & = & \mathrm{Conv}(W_{\color{red} \ell+2},B_{\color{red} \ell+2},L_{\color{red} \ell+1}) \\
+\\
+L_{\color{red} \ell+3} & = & \tilde{L}_{\color{red} \ell} + L_{\color{red} \ell+2}
+\end{eqnarray*}
 
 \vfill
-In this case we construct $\tilde{L}_{\color{red} \ell}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}]$
-
 \begin{eqnarray*}
-\mathrm{for}\;b,x,y,j\;\;\tilde{L}_{\color{red} \ell}[b,x,y,j] & = & \left\{\begin{array}{ll} L_{\color{red} \ell}[b,s*x,s*y,j] & \mbox{for $j < J_{\color{red} \ell}$} \\ 0 & \mbox{otherwise} \end{array}\right.\\
-\\
-L_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] & = & \tilde{L}_{\color{red} \ell}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}] \\
-& & + R_{\color{red} \ell+1}[B,X_{\color{red} \ell +1},Y_{\color{red} \ell+1},J_{\color{red}\ell +1}]
+\tilde{L}_{\color{red} \ell}[b,x,y,j] & = & \left\{\begin{array}{ll} L_{\color{red} \ell}[b,s*x,s*y,j] & \mbox{for $j < J_{\color{red} \ell}$} \\ 0 & \mbox{otherwise} \end{array}\right.
 \end{eqnarray*}
 
 
-\slideplain{Deeper Versions use Bottleneck Residual Paths}
-We reduce the number of features to ${\color{red} K < J}$ before doing the convolution.
 
-{\huge
+\slide{ResNet32}
+
+\centerline{\includegraphics[height= 5.5in]{\images/ResNetStack} {\large [Kaiming He]}}
+
+
+\slideplain{Deeper Versions use Bottleneck Layers}
+We reduce the number of neurons at each position in an intermediate ``bottleneck'' layer.
+
 \begin{eqnarray*}
-U[B,X,Y,{\color{red} K}] & = & \mathrm{Conv}'(\Phi^A_{\ell+1}{ [1,1,{\color{red} J},{\color{red} K}]},L_\ell[B,X,Y,{\color{red} J}]) \\
-\\
-V[B,X,Y,{\color{red} K}] & = & \mathrm{Conv}'(\Phi^B_{\ell+1}{[3,3,{\color{red} K},{\color{red} K}]},U[B,X,Y,{\color{red} K}]) \\
-\\
-R[B,X,Y,{\color{red} J}] & = & \mathrm{Conv}'(\Phi^R_{\ell+1}{ [1,1,{\color{red} K},{\color{red} J}]},V[B,X,Y,{\color{red} K}]) \\
-\\
-L_{ \ell+1} & = & L_\ell + R
+L_{\color{red} \ell+1} & = & \mathrm{Conv}(W_{\color{red} \ell+1},B_{\color{red} \ell+1},L_{\color{red} \ell}) \\
+L_{\color{red} \ell+2} & = & \mathrm{Conv}(W_{\color{red} \ell+2},B_{\color{red} \ell+2},L_{\color{red} \ell+1}) \\
+L_{\color{red} \ell+3} & = & \mathrm{Conv}(W_{\color{red} \ell+3},B_{\color{red} \ell+3},L_{\color{red} \ell+2}) \\
+L_{\color{red} \ell+3} & = & L_{\color{red} \ell} + L_{\color{red} \ell+3}
 \end{eqnarray*}
-}
 
 \vfill
-Here $\mathrm{CONV}'$ may include batch normalization and/or an activation function.
+Here $J_{\color{red} \ell+3} = J_{\color{red} \ell}$ but $J_{\color{red} \ell+1} = J_{\color{red} \ell+2} < J_{\color{red} \ell}$.
+
+\vfill
+Reducing the number of neurons greatly reduces the size of the convolution weight tensor which has size $\Delta X \times \Delta Y \times J_{\color{red} \ell} \times J_{\color{red} \ell+1}$.
 
 \slide{A General Residual Connection}
 
@@ -284,7 +309,7 @@ The number $J_R$ of new features can be can be relatively small.
 
 \slideplain{ResNet Simplicity}
 
-\centerline{\includegraphics[height= 4.0 in]{../images/ResNetStack} {\large [Kaiming He]} \includegraphics[width = 5.0in]{../images/inception1}}
+\centerline{\includegraphics[height= 4.0 in]{\images/ResNetStack} {\large [Kaiming He]} \includegraphics[width = 5.0in]{\images/inception1}}
 
 \slide{ResNet Power}
 
@@ -294,7 +319,7 @@ ResNet gives powerful image classification.
 ResNet is used in folding proteins.
 
 \vfill
-ResNet is the netwwork used in AlphaZero for Go, Chess and Shogi.
+ResNet is the network used in AlphaZero for Go, Chess and Shogi.
 
 \vfill
 Residual connections are now universal in all forms of deep models such as RNNs and Transformers in language processing.

@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -11,32 +11,15 @@
   \vfill
   \centerline{\bf Language Modeling}
 
-\slide{Natural Language Understanding}
-
-GLUE: General Language Understanding Evaluation
-
-\vfill
-
-\centerline{\normalsize ArXiv 1804.07461}
-\centerline{\includegraphics[width= 7in]{\images/GLUE}}
-
-\slide{BERT and GLUE}
-
-\centerline{\includegraphics[width= 7in]{\images/GLUELeader}}
-
-\slide{BERT and SuperGLUE}
-
-\centerline{\includegraphics[width= 9in]{\images/SuperLeader}}
-
 \slide{Language Modeling}
 
 The recent progress on NLP benchmarks is due to pretraining on language modeling.
 
 \vfill
-Langauge modeling is based on unconditional cross-entropy minimiztion.
+Language modeling is based on unconditional cross-entropy minimiztion.
 
 \vfill
-$$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;-\ln P_\Phi(y)$$
+$$\Phi^* = \argmin_\Phi \;E_{y \sim \pop}\;\left[-\ln P_\Phi(y)\right]$$
 
 \vfill
 In language modeling $y$ is a sentence (or fixed length block of text).
@@ -52,7 +35,7 @@ Let $\mathrm{Pop}$ be a population distribution over $W^*$ (sentences).
 We want to train a model $P_\Phi(y)$ for sentences $y$
 
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \; E_{y \sim \mathrm{Pop}}\;-\ln P_\Phi(y)
+\Phi^* & = & \argmin_\Phi \; E_{y \sim \mathrm{Pop}}\;\left[-\ln P_\Phi(y)\right]
 \end{eqnarray*}
 
 \slide{Autoregressive Models}
@@ -63,7 +46,7 @@ A structured object, such as a sentence or an image, has an exponentially small 
 An autoregressive model computes conditional probability for each part given ``earlier'' parts.
 
 \vfill
-$$P_\Phi(w_0, w_1, \cdots, w_T) = \prod_{t=0}^T\;P_\Phi(w_t\;|\;w_1,\ldots,w_{t-1})$$
+$$P_\Phi(w_0, w_1, \cdots, w_T) = \prod_{t=0}^T\;P_\Phi(w_t\;|\;w_0,\ldots,w_{t-1})$$
 
 
 \slide{The End of Sequence Token {\tt <EOS>}}

@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \newcommand{\solution}[1]{\bigskip {\bf Solution}: #1}
 
@@ -8,7 +8,7 @@
 {\Huge
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
   \vfill
   \centerline{\bf Stochastic Gradient Descent (SGD)}
   \vfill
@@ -27,6 +27,10 @@ $$\Phi \;\minuseq\; \eta \hat{g}$$
   \\
   g & = & E_{(x,y) \sim \mathrm{Pop}}\;\nabla_\Phi\;\mathrm{loss}(\Phi,x,y) \\
 \end{eqnarray*}
+
+\vfill
+\centerline{$\eta$ is the ``learning rate'' hyper-parameter (a parameter not in $\Phi$).}
+
 
 \slide{Issues}
 
@@ -96,9 +100,15 @@ An arbitrarily large sample will become arbitrarily accurate as an estimate of t
 \vfill
 But since $\sum_t \eta_t = \infty$, no matter how small the learning rate gets, we still can make arbitrarily large motions in parameter space.
 
+
+\vfill
+{\Large
+\vfill
+For a rigorous proof see Neuro-Dynamic Programming, Bertsekas and Tsitsiklis, 1996.}
+
 \slidetwo{SGD as a form of MCMC}{Learning Rate as a Temperature Parameter}
 
-\centerline{\includegraphics[height= 4in]{../images/AnnealingSGD}}
+\centerline{\includegraphics[height= 4in]{\images/AnnealingSGD}}
 \centerline{\Large Gao Huang et. al., ICLR 2017}
 
 \slide{END}

@@ -1,0 +1,180 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+\bigskip
+\centerline{\bf SGD Problems.}
+
+\bigskip
+\bigskip
+~{\bf Problem 1. Variance of running averages.}  For two independent random variables $x$ and $y$ and a weighted sum $s = ax + by$ we have
+$$\sigma_s^2 = a^2\sigma_x^2 + b^2\sigma_y^2$$
+Now consider a runing average for computing $\hat{\mu}_1,\ldots,\hat{\mu}_t$ from $x_1,\ldots,x_t$
+$$\hat{\mu}_0 = 0$$
+$$\hat{\mu}_t = \left(1-\frac{1}{N}\right)\hat{\mu}_{t-1} + \frac{1}{N}x_t$$
+
+\medskip
+(a) Assume that the values of $x_t$ are independent and identically distributed with variance $\sigma_x^2$.
+We now have that $\hat{\mu}_t$ is a random variable depending on the draws of $x_t$.  The random variable $\hat{\mu}_t$ has a variance $\sigma^2_{\hat{\mu},t}$.
+Assume that as $t \rightarrow \infty$ we have that $\sigma^2_{\hat{\mu},t}$ converges to a limit (it does).  Solve for this limit $\sigma^2_{\hat{\mu},\infty}$.
+Your solution should yield that for $N=1$ we have $\sigma^2_{\hat{\mu},\infty} = \sigma_x^2$ (a sanity check).
+
+\solution{
+  The limit must satisfy
+  $$\sigma^2_{\hat{\mu},\infty} = \left(1-\frac{1}{N}\right)^2\sigma^2_{\hat{\mu},\infty} + \frac{1}{N^2}\sigma^2_x$$
+  We can then solve for $\sigma^2_{\hat{\mu},\infty}$
+  \begin{eqnarray*}
+    \sigma^2_{\hat{\mu},\infty} &  =  &\left(1-\frac{2}{N} + \frac{1}{N^2}\right)\sigma^2_{\hat{\mu},\infty} + \frac{1}{N^2}\sigma^2_x \\
+    \\
+    0 &  =  &\left(\frac{- 2}{N} + \frac{1}{N^2}\right)\sigma^2_{\hat{\mu},\infty} + \frac{1}{N^2}\sigma^2_x \\
+    \\
+    & = & \left((-2) + \frac{1}{N}\right)\sigma^2_{\hat{\mu},\infty} + \frac{1}{N}\sigma^2_x \\
+    \\
+    \sigma^2_{\hat{\mu},\infty} & = & \frac{1}{\left(2-\frac{1}{N}\right)N}\;\; \sigma_x^2
+  \end{eqnarray*}
+}
+
+\medskip
+(b) Compare your answer to (a) with the variance of an average of $N$ values of $x_t$ defined by
+$$\hat{\mu} = \frac{1}{N}\;\sum_{t=1}^N x_t$$
+
+\solution{
+  For an average of $N$ we have $\sigma_{\hat{\mu}}^2 = \sigma_x^2/N$.  For $N$ large we have that the answer to part (a) is about half as large.
+}
+
+\bigskip
+\bigskip
+~{\bf Problem 2. Reformulating Momentum as a Running Average.} Consider the following running update equation.
+
+\begin{eqnarray*}
+  y_0  & = & 0 \\
+  y_t & = & \left(1 - \frac{1}{N}\right)y_{t-1} + x_t
+\end{eqnarray*}
+
+(a) Assume that $y_t$ converges to a limit, i.e., that $\lim_{t \rightarrow \infty} y_t$ exists.
+If the input sequence is constant with $x_t = c$ for all $t \geq 1$, what is $\lim_{t \rightarrow \infty}\;y_t$?  Give a derivation of your answer
+(Hint: you do not need to compute a closed form solution for $y_t$).
+
+\solution{
+
+  The limit $y_\infty$ must satisfy
+  $$y_\infty = \left(1-\frac{1}{N}\right)y_\infty + c$$
+  giving $y_\infty = Nc$.
+}
+
+\medskip
+(b) $y_t$ is a running average of what quantity?
+
+\solution{
+  The update can be rewritten as
+  $$y_t = \left(1 - \frac{1}{N}\right)y_{t-1} + \frac{1}{N}(Nx_t)$$
+  so $y_t$ is the running average of $Nx_t$.
+}
+
+\medskip
+(c) Express $y_t$ as a function of $\mu_t$ where $\mu_t$ is defined by
+
+\begin{eqnarray*}
+  \mu_0  & = & 0 \\
+  \mu_t & = & \left(1 - \frac{1}{N}\right)\mu_{t-1} + \frac{1}{N}x_t
+\end{eqnarray*}
+
+\solution{
+  $y_t$ is the running average of $Nx_t$ which equals $N$ times the running average of $x_t$ so we have
+  $$y_t = N \mu_t$$
+}
+
+\bigskip
+~{\bf Problem 3.  Bias Correction}
+Consider the following update equation for computing $y_1,\ldots,y_t$ from $x_1,\ldots,x_t$.
+\begin{eqnarray*}
+  y_t & = & \left(1 - \frac{1}{\min(t,N)}\right)y_{t-1} + \frac{1}{\min(t,N)}\;x_t
+\end{eqnarray*}
+
+If $x_t = c$ for all $t \geq 1$ give a closed form solution for $y_t$.
+
+\solution{
+  For $t = 1$ we get $y_1 = x_1 = c$.  We then get that $y_{t+1}$ is a convex combination of $y_t$ and $x_t$ which maintains the invariant that $y_t = c$.
+}
+
+
+\bigskip
+~{\bf Problem 4. Batch Size Coupling to RMSProp and Adam.}
+Consider the following for-loop representation of a batch of matrix-vector products.
+
+$$\mbox{for}\;b,i,j\;\;y[b,j] \;\pluseq\; W[j,i]x[b,i]$$
+
+(a) Write the for-loop representation of back-propagation to $W.\grad$ following the convention that parameter gradients are averaged over the batch.
+
+\solution{
+  $$\mbox{for}\;b,i,j\;\;w.\grad[j,i] \pluseq \frac{1}{B}\;y.\grad[b,j]x[b,i]$$
+}
+
+\medskip
+(b) Write a for-loop representation for computing $W.\grad[b,i,j]$ where this is the derivative of loss with respect to $W[i,j]$ for batch element $b$.
+
+\solution{
+  $$\mbox{for}\;b,i,j\;\;w.\grad[b,j,i] \pluseq \;y.\grad[b,j]x[b,i]$$
+}
+
+\medskip
+(c) Consider
+$$W.\grad2[j,i] = \frac{1}{B} \;\sum_b\; W.\grad[b,j,i]^2$$
+Is it possible to compute $W.\grad2[j,i]$ from $W.\grad[j,i]$? Explain your answer.
+
+\solution{
+  No. $W.\grad2[j,i]$ is the average over the batch of the of the square of the gradient.
+  The average value does not determine the average square value --- the average value does not determine the variance.
+}
+
+\medskip
+(d) Explain how your answer to (c) is related to batch size scaling of RMSProp and Adam.
+
+\solution{
+Adam and RMSProp both compute a running average of $\hat{g}[i]^2$ defined by
+$$s_{t+1}[i] = \left(1-\frac{1}{N_s}\right)s_t + \frac{1}{N_s}\hat{g}[i]^2$$
+At batch sized greater than 1 this fails to take into account the variance of the
+gradiants within the batch.  This implies that $s_t[i]$ will be reduced as the batch size increases
+and in the limit of large batches $s_t[i]$ will converge to the mean squared rather than the second moment.
+}
+
+\bigskip
+\bigskip
+
+{\bf Problem 5.} This problem is on batch size scaling of continuous time stochastic differential equation (SDE) models of SGD.
+We consider batched SGD as defined by
+$$\Phi \;\minuseq \; \eta \hat{g}^B$$
+where $\hat{g}^B$ is the average of $B$ sampled gradients.  Let $g$ be the average gradient $g = E\;\hat{g}$.
+
+\medskip The covariance matrix at batch size $B$ is
+$$\Sigma^B[i,j] = E\;(\hat{g}^B[i] - g[i])(\hat{g}^B[j] - g[j]).$$
+
+\medskip The continuous time stochastic differential equation model is
+$$\Phi(t + \Delta t) = \Phi(t) - g\Delta t + \epsilon \sqrt{\Delta t}\;\;\;\epsilon \sim {\cal N}(0,\eta\Sigma^B)$$
+Show that for $\eta = B\eta_0$ the SDE is determined by $\eta_0$ independent of $B$.
+
+\solution{
+  \begin{eqnarray*}
+    \Sigma^B[i,j] & = & E\;(\hat{g}^B[i] - g[i])(\hat{g}^B[j] - g[j]) \\
+    \\
+    & = & \frac{1}{B^2} E \left(\sum_b \hat{g}_b[i] - g[i] \right)\left(\sum_b \hat{g}_b[j] - g[j]\right) \\
+    \\
+    & = & \frac{1}{B^2} E \sum_{b,b'}\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b'}[j] - g[j]\right) \\
+    \\
+    & = & \frac{1}{B^2} \sum_{b,b'}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b'}[j] - g[j]\right) \\
+    \\
+    & = & \frac{1}{B^2} \sum_{b}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b}[j] - g[j]\right) \\
+    \\
+    & = & \frac{1}{B} \Sigma^1[i,j]
+  \end{eqnarray*}
+
+  So for $\eta = B\eta_0$ we have $\eta\Sigma^B  = \eta_0\Sigma^1$ which yields the equivalence.
+}
+\end{document}

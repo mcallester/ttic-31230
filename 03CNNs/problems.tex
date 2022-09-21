@@ -1,5 +1,5 @@
 \documentclass{article}
-\input ../preamble
+\input ../../preamble
 \parindent = 0em
 
 %\newcommand{\solution}[1]{}
@@ -36,7 +36,7 @@ convolution --- all places in the image are treated the same.
 
 \medskip
 Images also have some degree of scale invariance --- a person detector must look for people of different sizes
-(near the camera or far from the camera).  We would like to design a deep architecture that treats all scales (sizes) the same in a manner that similar to the way CNNs
+(near the camera or far from the camera).  We would like to design a deep architecture that treats all scales (sizes) the same just as CNNs
 treat all places the same.
 
 \medskip
@@ -64,9 +64,9 @@ Note that these parameters do not depend on $s$ --- they are scale invariant.
 
 \solution{
   $$L_{\ell+1,s}[b,x,y,j] = \sigma\left(\begin{array}{ll}
-      & \sum_{\Delta x,\Delta y,i} W_{\ell+1,\leftarrow}[\Delta x, \Delta y, i]L_{\ell,s+1}[b,x+\Delta x,y+\Delta y,i,j] \\
-    + & \sum_{\Delta x,\Delta y,i} W_{\ell+1,\uparrow}\;[\Delta x, \Delta y, i]\;L_{\ell,s}\;[b,2x+\Delta x,2y+\Delta y,i,j] \\
-    + & B[j] \end{array}\right)$$
+      & \sum_{\Delta x,\Delta y,i} W_{\ell+1,\leftarrow}[\Delta x, \Delta y, i,j]L_{\ell,s+1}[b,x+\Delta x,y+\Delta y,i,j] \\
+    + & \sum_{\Delta x,\Delta y,i} W_{\ell+1,\uparrow}\;[\Delta x, \Delta y, i,j]\;L_{\ell,s}\;[b,2x+\Delta x,2y+\Delta y,i,j] \\
+    + & B_{\ell+1}[j] \end{array}\right)$$
 }
 
 Note: I am not aware of this architecture in the literature.  A somewhat related architecture is ``Feature Pyramid Networks'' arxiv 1612.03144.
@@ -78,7 +78,7 @@ where $B$ is initialized to zero and $f$ is an activation function such as a sig
 The vector $x$ is a random variable determined by a random draw of a training example.
 Assume that the components of $x$ are independent and that each component has zero mean and unit variance.
 Suppose that we initialize each weight in $W$ from a distribution with
-zero mean and variance $\sigma$ and that is symmetric about zero --- (the probability that $w[i] = z$ equals the probability that $w[i] = -z$).
+zero mean and variance $\sigma^2$ and that the distribution is symmetric about zero --- (the probability that $w[i] = z$ equals the probability that $w[i] = -z$).
 For example, $x[i]$ might be distributed as a zero-mean unit-variance Gaussian.
 Consider $y = \sum_i\;W[i]x[i]$ as a random variable defined by the distribution on $x$ and the independent random distribution on $W$.
 Recall that the variance $\sigma^2$ of
@@ -86,8 +86,7 @@ a sum of independent random variables is the sum of the variances and the varian
 random variables is the product of the variances.
 
 \medskip
-(a) What value of the initialization variance
-$\sigma$ for $W[i]$ gives zero mean and unit variance for $y$ if the vectors $w[I]$ and $x[I]$ have dimension $d$?  Show your derivation.
+(a) What value of $\sigma$ for $W[i]$ gives zero mean and unit variance for $y$ if the vectors $w[I]$ and $x[I]$ have dimension $d$?  Show your derivation.
 
 \solution{Let $\sigma^2$ be the variance of $x[i]$.  We then have that the variance of $\sum_i W[i]x[i]$ is $\sum_i \sigma^2 = d \sigma^2$.
   Setting $d\sigma^2$ equal to 1 gives
@@ -194,15 +193,41 @@ give an expression for the variance
 $\sigma^2_{\ell,\mathrm{grad}}$ of the components of $L_\ell.\mathrm{grad}[b,x,y,j]$ as a function of $\ell$, $D$, $J$ and $\sigma_W$.
 
 \solution{
-  We have
+The code we are concerned with is
+\begin{eqnarray*}
+  \mathrm{for}\;b,x,y,j\Delta x,\Delta y,j' \\
+  \;\;\;  R_{\ell+1}[b,x,y,j] & \pluseq & W_{\ell+1}[\Delta x, \Delta y, j',j]\; L_{\ell}[b,x + \Delta x, y + \Delta y, j'] \\
+  \\
+  \mathrm{for}\;b,x,y,j \;\;\;\;\;\;\;\;\;\;\;\\    \;\;\;  R_{\ell+1}[b,x,y,j] & \minuseq & B_{\ell+1}[j] \\
+  \\
+  \mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\;\;\;\;\;\\
+  L_{\ell+1}[b,x,y,j] & = & L_{\ell}[b,x,y,j] + R_{\ell+1}[b,x,y,j]
+\end{eqnarray*}
 
-  \medskip
-  For $b,x,y,j,\Delta x, \Delta y, j'$
-  $$L_{\ell}.\grad[b,x+\Delta x,y+\Delta y,j'] \;\pluseq \;W_{\ell+1}[\Delta x, \Delta y,j,j']L_{\ell+1}.\mathrm{grad}[b,x,y,j]$$
+The backpropagation program includes
 
-  which gives
+\begin{eqnarray*}
+  \mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\;\;\;\;\;\\
+  R_{\ell+1}.\grad [b,x,y,j] & = & L_{\ell+1}[b,x,y,j].\grad \\
+  L_{\ell}.\grad [b,x,y,j] & \pluseq & L_{\ell+1}[b,x,y,j].\grad \\
+  \\
+  \mathrm{for}\;b,x,y,j\Delta x,\Delta y,j'\;\;\;\;\;\;\;\;\;\;\; \\
+  \;\;\;  L_{\ell}.\grad[b,x + \Delta x, y + \Delta y, j'] & \pluseq & R_{\ell+1}.\grad[b,x,y,j] W_{\ell+1}[\Delta x, \Delta y, j',j]\;  \\
+  \\
+\end{eqnarray*}
 
-$$\sigma^2_{\ell,\mathrm{grad}} = (1 + D^2J\sigma^2_W)^{L-\ell}$$
+Each element of $L_\ell.\grad[b,x,y,j]$ has the same variance. Let $\sigma^2_\ell.\grad$ denote the variance of an element of $L_\ell.\grad[b,x,y,j]$.
+
+Note that $L_\ell.\grad[b,x,y,j]$ is a sum of $L_{\ell+1}.\grad[b,x,y,j]$ and $D^2J$ products of the form
+$R_{\ell+1}.\grad[b,x,y,j] W_{\ell+1}[\Delta x, \Delta y, j',j]$.  This gives
+
+$$\sigma_\ell^2.\grad = \sigma^2_{\ell+1}.\grad + D^2J\sigma^2_{\ell+1}.\grad\;\sigma^2_W = \sigma^2_{\ell+1}.\grad(1 + D^2J\sigma^2_W)$$
+
+and we get
+
+$$\sigma^2_{\ell,\mathrm{grad}} = \sigma^2_L.\grad(1 + D^2J\sigma^2_W)^{L-\ell}$$
+
+We have assumed that $\sigma^2_L.\grad$ is 1.
 }
 
 \end{document}

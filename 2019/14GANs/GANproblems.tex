@@ -1,0 +1,157 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+\parskip = 1ex
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+
+\bigskip
+
+\centerline{\bf Problems for GANs.}
+
+\bigskip
+\bigskip
+~{\bf Problem 1. Conditional GANs}  In a conditional GAN
+we model a conditional distribution $\pop(y|x)$ defined by a population distribution on pairs $\tuple{x,y}$.
+For conditional GANs we consider the probability distribution over triples
+$\tuple{x,y,i}$ defined by
+\begin{eqnarray*}
+\tilde{P}_\Phi(i = 1) & = & 1/2 \\
+\tilde{P}_\Phi(y|x,i=1) & =&  \popd(y|x) \\
+\tilde{P}_\Phi(y|x,i=-1) & = & p_\Phi(y|x)
+\end{eqnarray*}
+
+\medskip
+(a)  Write the conditional GAN adversarial objective function for this problem in terms of $\tilde{P}(x,y,i)$, $P_\Phi(y|x)$ and $P_\Psi(i|y,x)$.
+
+\solution{
+$$\Phi^* = \argmax_\Phi\;\min_\Psi \;E_{x,y,i \sim \tilde{P}(x,y,i)}\;\;-\ln P_\Psi(i|x,y)$$
+}
+ 
+\bigskip
+{\bf Problem 2. GAN instability}
+
+Consider the following adversarial objective where $x$ and $y$ are scalars (real numbers).
+
+$$\max_x\;\min_y \;xy$$
+
+\medskip
+(a) Write the differential equation for gradient flow of this adversarial objective.
+
+\solution{
+  \begin{eqnarray*}
+    \frac{dx}{dt} & = & y \\
+    \\
+    \frac{dy}{dt} & = & -x
+  \end{eqnarray*}
+}
+
+\medskip
+(b) Give a general solution to your differential equation. (Hint: It goes in a circle).  You solution should have parameters
+allowing for any given initial value of $x$ and $y$.
+
+\solution{
+
+  \begin{eqnarray*}
+    x & = & r_0\sin(t + \Theta_0) \\
+    \\
+    y & = & r_0\cos(t + \Theta_0)
+  \end{eqnarray*}
+}
+
+
+\bigskip
+{\bf Problem 3. Contrastive GANs.}
+
+A GAN can be built with a ``contrastive'' discriminator.  Rather than
+estimate the probability that $y$ is from the population, the
+discriminator must select which of $y_1,\ldots,y_N$ is from the
+population.
+
+\medskip
+More formally, for $N \geq 2$ let $\tilde{P}_\Phi^{(N)}$ be the distribution on tuples $\tuple{i,y_1,\ldots,y_N}$ defined by drawing one
+``positive'' from $\pop$ and $N-1$ IID negatives from $P_\Phi$; then
+inserting the positive at a random position among the negatives; and
+returning $(i,y_1,\ldots,y_N)$ where $i$ is the index of the positive.
+
+$$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y_1,\ldots,y_{N+1}) \sim \tilde{P}_\Phi^{(N)}}\; - \ln p_\Psi(i|y_1,\ldots,y_{N+1}) \;\;\;(1)$$
+
+\medskip
+Restate the above definition of $\tilde{P}_\Phi^{(N)}$ and the GAN adversarial objective for the case of conditional constrastive GANs.
+
+\solution{
+  $$\Phi^* = \argmax_\Phi \min_\Psi \;E_{(i,y_1,\ldots,y_{N+1},x) \sim \tilde{P}^{(N)}_\Phi} \ln - P_\Psi(i|y_1,\ldots,y_{N+1},x)$$
+}
+
+\ignore{
+~{\bf Problem 4. Jensen-Shannon Divergence}
+Consider a population distribution $\pop$ and subset $S$ of its support. Let $\pop_S$ be the restriction of $\pop$ to the set $S$.
+\begin{eqnarray*}
+  \pop_S(y) & = & \frac{1}{\pop(S)}\left\{\begin{array}{ll} \pop(y) & \mbox{for $y \in S$} \\ 0 & \mbox{otherwise} \end{array}\right.
+\end{eqnarray*}
+We also consider the Jensen-Shannon divergence
+$$\mathrm{JS}(P,Q) = \frac{1}{2}\left(\mathrm{KL}\left(P,\frac{P+Q}{2}\right) + \mathrm{KL}\left(Q,\frac{P+Q}{2}\right)\right)$$
+Where for distributions $P$ and $Q$ we define $P+Q$ by the equation $(P+ Q)(y) = P(y)+Q(y)$.
+
+\medskip
+(a) Solve for
+$$\mathrm{KL}\left(\pop_S,\frac{\pop+\pop_S}{2}\right)$$
+in terms of the probability mass $\pop(S)$ of the set $S$.  Your solution should have the form
+$\ln 2 - \ln (1 + \epsilon)$ where $\epsilon$ is a function of $P(S)$ with $0 \leq \epsilon \leq 1$.
+
+\solution{
+  \begin{eqnarray*}
+    \mathrm{KL}\left(\pop_S,\frac{\pop+\pop_S}{2}\right) & = & E_{y \sim \pop_S}\;\ln \frac{2\pop_S(y)}{\pop(y) + \pop_S(y)} \\
+    \\
+    & = & E_{y \sim \pop_S}\;\ln \frac{\frac{2\pop(y)}{\pop(S)}}{\pop(y) + \frac{\pop(y)}{\pop(S)}} \\
+    \\
+    & = & \ln \frac{2}{\pop(S) + 1} \\
+    \\
+    & = & \ln 2 - \ln (1 + P(S)) \\
+  \end{eqnarray*}
+}
+
+(b) Solve for
+$$\mathrm{KL}\left(\pop,\frac{\pop+\pop_S}{2}\right)$$
+in terms of the probability mass $\pop(S)$ of the set $S$.  Your solution should have the form $\ln 2 - \epsilon \ln (\epsilon + 1)/\epsilon$
+for $\epsilon$ a function of  $P(S)$ with $0 \leq \epsilon \leq 1$.
+Hint: Write the KL-divergence as $P(S)E_{y \sim P(y|y\in S)} [\ldots] + (1-P(S))E_{y \sim \pop(y|y \not \in S)}\;[\ldots]$.
+
+\solution{
+  \begin{eqnarray*}
+    & & \mathrm{KL}\left(\pop,\frac{\pop+\pop_S}{2}\right) \\
+    \\
+    & = & E_{y \sim \pop}\;\ln \frac{2\pop(y)}{\pop(y) + \pop_S(y)} \\
+    \\
+    & = & \pop(S)E_{y \sim \pop(y|y \in S)}\;\ln \frac{2\pop(y)}{\pop(y) + \frac{\pop(y)}{\pop(S)}}
+    +(1-\pop(S))E_{y \sim \pop(y|y \not \in S)} \ln \frac{2\pop(y)}{\pop(y)} \\
+    \\
+    & = & \pop(S)\;\ln \frac{2\pop(S)}{\pop(S)+1} + (1- \pop(S)) \ln 2 \\
+    \\
+    & = & \ln 2 - \pop(S)\;\ln \frac{\pop(S)+1}{\pop(S)} 
+  \end{eqnarray*}
+}
+
+\medskip
+(c) For $\epsilon << 1$ we have $\ln(1+ \epsilon) \approx \epsilon$ and $\ln(1+ \epsilon)/\epsilon \approx \ln(1/\epsilon)$.  Apply these approximation
+to get an approximate value for $\mathrm{JS}(\pop_S,\pop)$ for small values of $P(S)$.
+
+\solution{
+  \begin{eqnarray*}
+    \mathrm{JS}(\pop_S,\pop,Q) & =  &\frac{1}{2}\left(\mathrm{KL}\left(\pop_S,\frac{\pop_S+\pop}{2}\right) + \mathrm{KL}\left(\pop,\frac{\pop_S+\pop}{2}\right)\right) \\
+    \\
+    & \approx & \frac{1}{2}\left(\ln 2 - \epsilon + \ln 2 - \epsilon \ln \frac{1}{\epsilon}\right) \\
+    \\
+    & = & \ln 2 - \frac{\epsilon}{2}\left(1 + \ln \frac{1}{\epsilon}\right) \\
+    \\
+    \epsilon & = & \pop(S)
+  \end{eqnarray*}
+}
+}
+\end{document}

@@ -1,0 +1,78 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2020}
+  \vfill
+  \centerline{\bf Stochastic Gradient Descent (SGD)}
+  \vfill
+  \vfill
+  \centerline{\bf Gradient Flow}
+  \vfill
+
+\slide{Gradient Flow}
+
+Gradient flow is a non-stochastic ({\color{red} deterministic}) model of {\color{red} stochastic} gradient descent (SGD).
+
+\vfill
+Gradient flow is defined by the {\color{red} total gradient} differential equation
+
+$${\color{red} \frac{d \Phi}{d t} = - g(\Phi) \;\;\;\;\;\; g(\Phi) = \nabla_\Phi\; E_{(x,y) \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y)}$$
+
+\vfill
+We let $\Phi(t)$ be the solution to this differential equation satisfying $\Phi(0) = \Phi_{\mathrm{init}}$.
+
+\slide{Gradient Flow}
+$${\color{red} \frac{d \Phi}{d t} = - g(\Phi)}$$
+
+\vfill
+For small values of $\Delta t$ this differential equation can be approximated by
+
+\vfill
+$${\color{red} \Delta \Phi = - g(\Phi)\Delta t}$$
+
+\slide{Time as the Sum of the Learning Rates}
+
+Consider the total SGD update.
+
+
+{\color{red} $$\Delta \Phi = - g\Delta t$$}
+
+\vfill
+Here $\Delta t$ has both a natural interpretation as time in a numerical simulation of the flow differential equation.
+
+\vfill
+But it also has a natural interpretation as a learning rate.
+
+\vfill
+This leads to interpreting the sum of the learning rates as ``time'' in SGD.
+
+\slide{Gradient Flow and SGD}
+Consider a sequence of model parameters $\Phi_1$, $\ldots$, $\Phi_N$ produced by SGD with
+$$\Phi_{i+1} = \Phi_i - \eta \hat{g}_i$$
+and where $\hat{g}_i$ is the gradient of the $i$th randomly selected training point.
+
+\vfill
+Take $\eta \rightarrow 0$ and $N \rightarrow \infty$ using $N = t/\eta$.  We will show that in this limit for SGD we have that $\Phi_N$ converges to $\Phi(t)$
+as defined by gradient flow.
+
+\slide{Gradient Flow and SGD}
+For $\Phi_{i+1} = \Phi_i - \eta \hat{g}_i$ we divide $\Phi_1$, $\ldots$, $\Phi_N$ into $\sqrt{N}$ blocks.
+$$(\Phi_1,\dots,\Phi_{\sqrt{N}})\;(\Phi_{\sqrt{N}+1},\ldots,\Phi_{2\sqrt{N}})\;\cdots\;(\Phi_{T-\sqrt{N}+1},\ldots,\Phi_N)$$
+
+\vfill
+For $\eta \rightarrow 0$ and $N = t/\eta$ we have $\eta\sqrt{N} \rightarrow 0$ which implies
+$$\Phi_{\sqrt{N}} \sim \Phi_0 - \eta\sqrt{N} g$$
+where $g$ is the average (non-stochastic)
+gradient.
+
+\vfill
+Since the gradients within each block become non-stochastic, we are back to gradient flow.
+
+
+\slide{END}
+\end{document}

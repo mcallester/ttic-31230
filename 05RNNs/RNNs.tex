@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input /Users/davidmcallester/Icloude/tex/SlidePreamble
+\input /Users/davidmcallester/Icloude/tex/preamble
 
 \begin{document}
 
@@ -9,7 +9,7 @@
   \bigskip
   \centerline{David McAllester, Winter 2020}
   \vfill
-  \centerline{\bf Recurrent Nerual Networks (RNNs)}
+  \centerline{\bf Recurrent Neural Networks (RNNs)}
 
 \slide{Word Embeddings}
 
@@ -20,17 +20,17 @@ The matrix $e$ can be viewed as a dictionary assigning each word $w$ the vector 
 
 \slide{Recurrent Neural Network (RNN) Language Modeling}
 
-\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{\includegraphics[width=3.5in]{\images/RNN}}
 \centerline{{\large [Christopher Olah]}}
 
 \vfill
-A typical neural language model has the form
+A typical RNN neural language model has the form
 
-$$P_\Phi(w_t\;|\;w_1,\cdots,w_{t-1}) = \softmax_{w_t} e[w_t,I]h[t-1,I]$$
+$$P_\Phi(w_t\;|\;w_0,\cdots,w_{t-1}) = \softmax_{w_t} e[w_t,I]h[t-1,I]$$
 
 \slide{Vanilla RNNs}
 
-\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{\includegraphics[width=3.5in]{\images/RNN}}
 \centerline{{\large [Christopher Olah]}}
 
 A Vanilla RNN uses two-input linear threshold units.
@@ -69,7 +69,7 @@ See {\tt torch.nn.utils.clip\_grad\_norm}
 
 \slide{Time as Depth}
 
-\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{\includegraphics[width=3.5in]{\images/RNN}}
 \centerline{{\large [Christopher Olah]}}
 
 \vfill
@@ -87,7 +87,7 @@ In CNNs {\color{red} at each layer uses its own model parameters.}
 
 \slide{``Residual Connections'' Through Time}
 
-\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{\includegraphics[width=3.5in]{\images/RNN}}
 \centerline{{\large [Christopher Olah]}}
 
 \vfill
@@ -99,7 +99,7 @@ However, we have to handle the fact that the same model parameters are used at e
 
 \slideplain{Gated RNNs}
 
-\centerline{\includegraphics[width=3.5in]{../images/RNN}}
+\centerline{\includegraphics[width=3.5in]{\images/RNN}}
 \centerline{{\large [Christopher Olah]}}
 
 $$h[b,t,j] =  {\color{red} G_t[b,t,j]}h[b,t\!-\!1,j] + {\color{red} (1-G[b,t,j])}R[b,t,j]$$
@@ -139,7 +139,7 @@ $\odot$ is the Hadamard product (componentwise product) on vectors.
 
 \slide{Gated Recurrent Unity (GRU) by Cho et al. 2014}
 
-\centerline{\includegraphics[width=4.0in]{../images/GRU}}
+\centerline{\includegraphics[width=4.0in]{\images/GRU}}
 \centerline{{\huge [Christopher Olah]}}
 
 \vfill
@@ -149,7 +149,7 @@ The right half is a UGRNN.
 The GRU adds a gating on $h_{t-1}$ before the tanh.
 
 \slide{Long Short Term Memory (LSTM)}
-\centerline{\includegraphics[width=3.5in]{../images/LSTM}}
+\centerline{\includegraphics[width=3.5in]{\images/LSTM}}
 \centerline{{\large [figure: Christopher Olah]}}
 
 \centerline{\Large [LSTM: Hochreiter\&Shmidhuber, 1997]}
@@ -183,7 +183,7 @@ Return $h[T,J]$
 
 \slide{bidirectional RNNS}
 
-\centerline{\includegraphics[width = 3in]{../images/biRNN}}
+\centerline{\includegraphics[width = 3in]{\images/biRNN}}
 
 \begin{eqnarray*}
 \vec{h}[T,J] & = & \vec{\mathrm{RNN}}_{\Phi.LR}(x[T,I]) \\
@@ -195,7 +195,7 @@ h[t,2J] & = & \vec{h}[t,J];\cev{h}[t,J]
 
 \slide{Multi-Layer RNNs}
 
-\centerline{\includegraphics[width = 1.75in]{../images/RNNstack}}
+\centerline{\includegraphics[width = 1.75in]{\images/RNNstack}}
 
 We let $\ell$ indicate the layer of a multi-layer RNN.
 \begin{eqnarray*}

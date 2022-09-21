@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 
 \begin{document}
@@ -8,149 +8,116 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
   \vfill
-  \vfil
+  \vfill
+  \centerline{\bf Variational Auto-Encoders (VAEs)}
+  \vfill
   \centerline{\bf Posterior Collapse}
-  \vfill
-  \centerline{\bf VAE Non-Identifiability}
   \vfill
   \centerline{\bf $\beta$-VAEs}
   \vfill
+  \centerline{\bf Encoder Autonomy}
   \vfill
 
-\slide{Posterior Collapse}
+  \vfill
+  \vfill
 
-Assume Universal Expressiveness for $P_\Phi(y|z)$.
-
-\vfill
-This allows $P_\Phi(y|z) = \pop(y)$ independent of $z$.
-
-\vfill
-We then get a completely optimized model with $z$ taking a single (meaningless) determined value.
-
-\vfill
-$$\hat{P}_\Phi(z|y) = P_\Phi(z|y) = 1$$
-
-\anaslide{Colorization with Latent Segmentation}
-\medskip
-\centerline{\includegraphics[width = 5in]{../images/colorizationGreg2}}
-\centerline{$x$ \hspace{4em} $\hat{y}$ \hspace{4em} $y$}
-\centerline{\huge Larsson et al., 2016}
-
-\vfill
-Can colorization be used to learn latent segmentation?
-
-\vfill
-We introduce a latent segmentation into the model.
-
-\vfill
-In practice the latent segmentation is likely to ``collapse'' because the colorization can be done just as well without it.
-
-
-\slide{Independent Universality}
-
-$$\Phi^* = \argmin_\Phi E_{y\sim \pop,\;z \sim \hat{P}_\Phi(z|y)}\;\;-\ln \frac{P_\Phi(z,y)}{\hat{P}_\Phi(z|y)}$$
-
-\vfill
-It is natural to assume  that $\Phi$ has independent parameters for each distribution.  In practice parameters are often shared.
-
-\vfill
-Since $\Phi$ can independently parameterize each distribution, we will here assume independent universality ---
-that $\Phi$ can represent any triple of distributions $\hat{P}(z|y)$, $P(z)$ and $P(y|z)$.
-
-
-\slide{Independent Universality}
-
-More formally, we assume that for any triple of distributions $\hat{P}(z|y)$, $P(z)$ and $P(y|z)$ there exists a $\Phi$ that {\color{red} simultaneously} satisfies
-
+\slide{VAE}
+{\huge
 \begin{eqnarray*}
-\hat{P}_\Phi(z|y) & = & \hat{P}(z|y) \\
-P_\Phi(z) & = & P(z) \\
-P_\Phi(y|z) & = & P(y|z)
+P_\Psi(y,z) & = & \pop(y)P_\Psi(z|y)\;\;\;\;\mbox{The sampling distribution on $y$, $z$} \\
+\\
+z & = & z_\Psi(y,\epsilon) \;\;\;\mbox{$\epsilon$ parameter independent noise} \\
+\\
+\\
+\mbox{VAE:}\;\;\;\Psi^*,\Phi^*  & = & \argmin_{\Psi,\Phi}\; \parens{E_{y,z} \;\;{\ln \frac{P_\Psi(z|y)}{\hat{P}_\Phi(z)}}}  + \parens{E_{y,z}\;-\ln {\hat{P}_\Phi(y|z)}}
+\end{eqnarray*}}
+
+\slide{VAE}
+{\huge
+\begin{eqnarray*}
+P_\Psi(y,z) & = & \pop(y)P_\Psi(z|y) \\
+\\
+\mbox{VAE:}\;\;\;\Psi^*,\Phi^*  & = & \argmin_{\Psi,\Phi}\; \parens{E_{y,z} \;\;{\ln \frac{P_\Psi(z|y)}{\hat{P}_\Phi(z)}}}  + \parens{E_{y,z}\;-\ln {\hat{P}_\Phi(y|z)}} \\
+\\
+& = & \argmin_{\Psi,\Phi}\; {\color{red} \hat{I}_{\Psi,\Phi}(y,z)} \;+\; {\color{red} \hat{H}_{\Psi,\Phi}(y|z)}
 \end{eqnarray*}
 
-\vfill
-This assumption allows each distribution to be independently optimized while holding the others fixed.
+{\color{red}
+$$I_\Psi(y,z) \leq \hat{I}_{\Psi,\Phi}(y,z) \;\;\;\;\;\; H_\Psi(y|z) \leq \hat{H}_{\Psi,\Phi}(y|z)$$
 
+$$H(y) = I_\Psi(y,z) + H_\Psi(y|z)$$}
+}
 
-\slide{VAE Non-Identifiability}
+Inequalities hold with equality under universal expressiveness.
 
-A model is non-identifiable if different model parameters yield the same data distribution and hence cannot be distinguished based on the data.
+\slide{Posterior (Encoder) Collapse}
 
-\begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi E_{y\sim \pop,\;z \sim \hat{P}(z|y)}\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{\hat{P}_\Phi(z|y)}
-\end{eqnarray*}
-
-\vfill
-We will now hold $\hat{P}_\Phi(z|y)$ fixed at an arbitrary distribution and optimize $P_\Phi(z)$ and $P_\phi(y|z)$ assuming independent
-universality.
-
-\slide{VAE Non-Identifiability}
-
-\begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi E_{y\sim \pop,\;z \sim \hat{P}(z|y)}\;-\ln \frac{P_\Phi(z)P_\Phi(y|z)}{\hat{P}_\Phi(z|y)}
-\end{eqnarray*}
+$$\Psi^*,\Phi^* = \argmin_{\Psi,\Phi}\;\hat{I}_{\Psi,\Phi}(y,z) + \hat{H}_{\Psi,\Phi}(y|z)$$
 
 \vfill
-We will show that the optimal distributions for $P_\Phi(z)$ and $P_\Phi(y|z)$ occur when these are the distributions defined by
-$y \sim \pop$ and $z \sim \hat{P}_\Phi(z|y)$.
+Consider a trivial encoder with $P_\Psi(z^*|y) =1$ and $\hat{P}_\Phi(z^*) = 1$ for a fixed value $z^*$ independent of $y$ yielding
+{\color{red} $\hat{I}_{\Psi,\Phi}(y,z) = 0$}.
 
 \vfill
-\begin{eqnarray*}
-  P^*(z) & = & E_{y \sim \pop}\;\hat{P}_\Phi(z|y) \\
-  \\
-  P^*(y|z) & = & \frac{\pop(y)\hat{P}_\Phi(z|y)}{P^*(z)}
-\end{eqnarray*}
-
-
-\slide{VAE Non-Identifiability}
-
-\begin{eqnarray*}
-  & & E\;-\ln \frac{P^*(z)P^*(y|z)}{\hat{P}_\Phi(z|y)} \\
-  \\
-  \\
-  & = & E\;-\ln \frac{P^*(z)P^*(y|z)}{\pop(y)\hat{P}_\Phi(z|y)} - \ln \pop(y) \\
-  \\
-  \\
-    & = & E\;- \ln \pop(y) \;=\;H(y)
-\end{eqnarray*}
+Under universal expressiveness we have $\hat{P}_{\Phi^*}(y|z) = \pop(y)$ yielding {\color{red} $\hat{H}_{\Psi,\Phi}(y|z) = H(y)$}.
 
 \vfill
-Hence any choice of $\hat{P}_\Phi(z|y)$ gives optimal modeling of $y$.
+Therefore, under universal expressiveness {\bf there exists an optimal solution where
+the posterior (encoder) $P_\Psi(z|y)$ collapses}.
 
 \slide{The $\beta$-VAE}
 
-$\beta$-VAE: Learning Basic Visual Concepts With A
-Constrained Variational Framework, Higgins et al., ICLR 2017.
-
-\vfill
-The $\beta$-VAE introduces a parameter $\beta$ allow control of the rate-distortion trade off.
-
-\slide{The $\beta$-VAE}
-
-To control $I(y,z)$ we introduce a weighting $\beta$
-
+{\huge
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \; \beta I_\Phi(y,z) + H_\Phi(y|z) \\
-\mbox{$\beta$-VAE}\;\; \Phi^* & = & \argmin_\Phi E_{y\sim\pop,z\sim\hat{P}_\Phi(z|y)}\;-\beta \ln \frac{P_\Phi(z)}{\hat{P}_\Phi(z|y)} - \ln P_\Phi(y|z)
+P_\Psi(y,z) & = & \pop(y)P_\Psi(z|y)\;\;\;\;\mbox{The sampling distribution on $y$, $z$} \\
+\\
+\mbox{VAE:}\;\;\;\Psi^*,\Phi^*  & = & \argmin_{\Psi,\Phi}\; \hat{I}_{\Psi,\Phi}(y,z) \;+\; \hat{H}_{\Psi,\Phi}(y|z) \\
+\\
+\mbox{$\beta$-VAE:}\;\;\; \Psi^*,\Phi^* & = & \argmin_{\Psi,\Phi}\; {\color{red} \beta}\; \hat{I}_{\Psi,\Phi}(y,z) \;+\; \hat{H}_{\Psi,\Phi}(y|z)
+\end{eqnarray*}
+}
+
+The $\beta$-VAE introduces a rate-distortion tradeoff parameter into the VAE.  $\beta < 1$ may avoid posterior collapse.  $\beta > 1$ may improve interpretability.
+
+\slide{The Universality Theorem for $\beta$-VAEs}
+
+{\huge
+\begin{eqnarray*}
+\mbox{$\beta$-VAE:}\;\;\;\Psi^*,\Phi^*  & = & \argmin_{\Psi,\Phi}\; \beta\parens{E_{y,z} \;\;{\ln \frac{P_\Psi(z|y)}{\hat{P}_\Phi(z)}}}  + \parens{E_{y,z}\;-\ln {\hat{P}_\Phi(y|z)}}
 \end{eqnarray*}
 
-\vfill
-For $\beta < 1$ we no longer have an upper bound on $H_\popd(y)$ but we can force the use of $z$ (avoid posterior collapse).
+
+{\color{red}
+$$I_\Psi(y,z) \leq \hat{I}_{\Psi,\Phi}(y,z) \;\;\;\;\;\; H_\Psi(y|z) \leq \hat{H}_{\Psi,\Phi}(y|z)$$
+
+$$H(y) = I_\Psi(y,z) + H_\Psi(y|z)$$}
+}
+
+Assuming universaltiy, optimizing $\hat{P}_\Phi(z)$ while holding $P_\Psi(z|y)$ and $\hat{P}_\Phi(y|z)$ fixed drives the first inequality to equality.
 
 \vfill
-For $\beta > 1$ the bound on $H_\pop(y)$ becomes weaker and the latent variables carry less information.
+Optimizing $\hat{P}_\Phi(y|z)$ while holding $P_\Psi(z|y)$ and $\hat{P}_\Phi(z)$ fixed drives the second inequality to equality.
 
-\slide{RDAs vs. $\beta$-VAEs}
+\slide{Encoder Autonomy}
 
-Noisy channel RDAs and $\beta$-VAEs are essentially the same.
-
-\vfill
-RDA: $\Phi^* = \argmin_\Phi E_{y,\;z \sim P_\Phi(z|y)}\;-\ln \frac{\hat{P}_\Phi(z)}{P_\Phi(z|y)} + \lambda \mathrm{Dist}(y,y_\Phi(z))$
+Assuming universality, optimizing $\Phi$ for any fixed value of $\Psi$ yields the population distribution on $y$.
 
 \vfill
-$\beta$-VAE: $\Phi^* = \argmin_\Phi E_{y,\;z \sim \hat{P}_\Phi(z|y)}\;-\beta \ln \frac{P_\Phi(z)}{\hat{P}_\Phi(z|y)} \;-\;\ln P_\Phi(y|z)$
+This implies that we can add any loss on $\Psi$ alone and the universality theorem still holds.
+
+{\huge
+\begin{eqnarray*}
+\mbox{VAE:}\;\;\;\Psi^*,\Phi^*  & = & \argmin_{\Psi,\Phi}\;\; {\color{red} \beta}\; \hat{I}_{\Psi,\Phi}(y,z) \;+\; \hat{H}_{\Psi,\Phi}(y|z) + {\cal L}(\Psi)
+\end{eqnarray*}
+
+
+{\color{red}
+$$I_\Psi(y,z) \leq \hat{I}_{\Psi,\Phi}(y,z) \;\;\;\;\;\; H_\Psi(y|z) \leq \hat{H}_{\Psi,\Phi}(y|z)$$
+
+$$H(y) = I_\Psi(y,z) + H_\Psi(y|z)$$}
+}
 
 \slide{END}
 

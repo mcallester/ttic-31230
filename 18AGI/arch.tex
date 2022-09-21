@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input ../../SlidePreamble
+\input ../../preamble
 
 \begin{document}
 
@@ -7,50 +7,32 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2020}
 
 \vfill
-  \centerline{\bf The free Lunch Theorem}
-  \vfill
-  \centerline{\bf and The Intelligence Explosion}
+  \centerline{\bf AGI: Bootstrapping}
   \vfill
   \vfill
 
-\slide{The Free Lunch: Chomsky vs. Kolmogorov}
+\slide{Bootstrapping}
 
-\includegraphics[width=1.0 in]{../images/Chomsky} \begin{minipage}[b]{8in} Noam Chomsky: 
-  By the no free lunch theorem {\bf natural language grammar is unlearnable without an innate linguistic capacity}. In any domain a strong prior (a learning bias)
-  is required. \end{minipage}
+Programs were first written in binary machine code.
 
 \vfill
-\includegraphics[height=1.0 in]{../images/Levin}
-\includegraphics[height=1.0 in]{../images/Kolmogorov}
-\includegraphics[height=1.0 in]{../images/Hinton}
-\includegraphics[height=1.0 in]{../images/Schmidhuber}
-
-\begin{minipage}[b]{7in}
-  Leonid Levin, Andrey Kolmogorov, Geoff Hinton and J\"{u}rgen Schmidhuber: {\bf Universal learning algorithms exist.
-  No domain-specific innate knowledge is required.}
-\end{minipage}
-
-\slide{The Free Lunch Theorem}
-
-Consider any fixed language for naming functions. For example C++. (or English?)
+An assembler was written in binary.
 
 \vfill
-Let $|f|$ be the number of bits it takes to name function $f$ in that langauge.
+A Fortran interpreter was written in assembler.
 
 \vfill
-For $z \sim \pop$, let ${\cal L}(f,z) \in [0,L_{\mathrm{max}}]$ be a bounded loss function.
+A Fortran compiler was written in Fortran.
 
 \vfill
-{\bf Free Lunch Theorem:} With probability at least $1-\delta$ over the draw of training data $z_1,\;\ldots,\;z_N$ from $\pop$,
-the following holds {\em simultaneously} for all nameable functions $f$
-$${\cal L}(f) \leq\frac{10}{9}\parens{\widehat{\cal L}(f) + \frac{5L_{\mathrm{max}}}{N}\parens{(\ln 2)|f| + \ln\frac{1}{\delta}}}$$
+$\vdots$
 
-\slide{The Intelligence Explosion}
-
-Another kind of free lunch:
+\vfill
+Will we eventually just describe programs in informal English.
+\slide{Bootstrapping}
 
 \vfill
 \begin{quotation}
@@ -59,37 +41,59 @@ Let an ultraintelligent machine be defined as a machine that can far surpass all
 
 \vfill
 \rightline{I.J. Good, 1969}
-\slide{The Baldwin Effect: Learning Facilitates Adaptation}
 
-\includegraphics[width = 1.2in]{../images/hinton}
 
-In a 1987 paper entitled ``How Learning Can Guide Evolution'', Goeffrey Hinton and Steve Nowlan brought attention to a paper by Baldwin (1896).
+\slide{Representing Functions by Programs}
 
-\vfill
-The basic idea is that by facilitating adaptation of the individual, learning facilitates evolution of the species.
+High level scripting languages such as Python seem to be the most productive programming languages for human programmers.
 
 \vfill
-For example, longer arms are easier to evolve if arm control is learned --- arm control is then independent of arm length.  Arm control and arm structure become more modular.
-
-\slide{The Meta-Baldwin Effect: Learning Facilitates Learning}
-
-The Baldwin effect should apply to brain modules as well, such as vision or the motor cortex.
+Does Python represent a particularly effective universal learning bias?
 
 \vfill
-By facilitating adaptation of the individual during its lifetime, learning facilitates both the evolution of the use of a module as well
-as evolution of the module itself.
+Productivity in programming seems to be greatly enhanced by functional expressions (functional programming) and object-oriented programming
+(objects, classes an inheretitance).
 
-\slide{Levin's Universal Problem Solver}
+\vfill
+This seems crucial if we want to somehow achieve I. J. Good's intelligence explosion.
 
-\includegraphics[height=2.0 in]{../images/Levin}
+\slide{The Turing Tarpit}
+
+But in theory the choice of programming language does not matter.
+
+\vfill
+For any two Turing universal languages, say Python and Assmbler, there exists an interpreter $I$ for Python written in Assembler
+where write $I(h)$ for the assember interpreter $I$ applied to Python program $h$.  We then get
+
+$$|I(h)|_\mathrm{Assembler} = |h|_\mathrm{Python} + |I|_\mathrm{Assembler}$$
+
+\vfill
+Bootstrapping layers of language can make the interpreter small.
+
+\slide{The Turing Tarpit}
+
+$$|I(h)|_\mathrm{Assembler} = |h|_\mathrm{Python} + |I|_\mathrm{Assembler}$$
+
+\vfill
+Up to the additive constant of the interpreter, assembler gives just as good a learning bias as Python.
+
+\vfill
+Yet we know that the choice of language does matter --- Python is clearly better than assembler.
+
+\vfill
+Presumably this is because the search over Python is easier than the search over assembler.
+
+\slide{Searching over Programs: Levin Search, 1973}
+
+\includegraphics[height=2.0 in]{\images/Levin}
 Leonid Levin observed that one can construct a universal solver.  The solver takes as input a solution tester
 and returns as output a solution whenever a solution exists.
 
   \vfill
-Levin's solver is universal in the sense that it is not more than a constant factor slower than any other solver mapping testers to solutions.
+Levin's solver is universal in the sense that it is not more than a constant factor slower than any other solver for the given tester.
 
 \vfill
-It follows that for any problem in NP, the universal solver provides a P-time algorithm whenever any such algorithm exists.
+It follows that for any problem in NP, the universal solver provides a P-time algorithm whenever such an algorithm exists.
 
 
 \slide{Levin's Universal Solver}
@@ -106,24 +110,39 @@ where $h(n)$ is the time required to run program $h$ on a problem of size $n$ an
 \vfill
 Here $2^{-|h|}$ is independent of $n$ and is technically a constant.
 
-\slide{Learning the Universal Solver}
+\slidetwo{Bootstrapping the Search}
+{The Baldwin Effect: Learning Facilitates Adaptation}
+
+\includegraphics[width = 1.2in]{\images/hinton}
+
+In a 1987 paper entitled ``How Learning Can Guide Evolution'', Goeffrey Hinton and Steve Nowlan brought attention to a paper by Baldwin (1896).
+
 \vfill
-\includegraphics[width= 1in]{../images/schmidhuber}
+The basic idea is that Learning facilitates evolution --- if arm control is learned then arm structure is easier to change.
+
+\slide{Meta-Baldwin}
+
+The Baldwin effect should apply to brain modules as well, such as vision or the motor cortex.
+
+\vfill
+Learning should facilitate the evolution of brain modules.
+
+\vfill
+Meta-Baldwin: Learning should then facilitate the evolution of learning.
+
+\slide{Bootstrapping the Search}
+\vfill
+\includegraphics[width= 1in]{\images/schmidhuber}
 Schmidhuber proposes a learning algorithm for learning an optimal universal solver.
 The Optimally Ordered Problem Solver (OOPS), Schmidhuber, 2002.
 
-
-\slide{Levin and Schmidhuber}
-  
 \vfill
-We time share all programs giving time slice $2^{-|h|}$ to program $h$ where $|h|$
-is the length in bits of $h$.
+The ideas are similar to Meta-Baldwin --- we learn to search over programs, or learn the learner.
 
 \vfill
-Both Levin's universal solver and Schmidhuber's optimal problem solver involve exponentially large constants.
-
 \vfill
-There seems to be little insight here beyond that of I.J. Good's original formulation of the intelligence explosion.
+But as in Levin search, Schmidhuber's optimal problem solver still does an exponential search over programs.  This
+has not produces useful results to date.
 
 \slide{END}
 

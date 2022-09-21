@@ -1,5 +1,5 @@
-\input ../SlidePreamble
-\input ../preamble
+\input /Users/davidmcallester/ICloude/tex/SlidePreamble
+\input /Users/davidmcallester/ICloude/tex/preamble
 
 
 \begin{document}
@@ -8,19 +8,19 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2021}
   \vfill
   \vfil
   \centerline{Vector Quantized Variational Autoencoders (VQ-VAEs)}
   \vfill
   \vfill
-  
-\slide{Gaussian VAEs 2013}
 
-\centerline{Sample {\color{red} $z \sim {\cal N}(0,I)$} and compute {\color{red} $y_\Phi(z)$}}
+\slide{Gaussian VAEs for Faces 2014}
+
+We can sample faces from the VAE by sampling noise $z$ from $p_\Phi(z)$ and then sampling an image $y$ from $p_\Phi(y|z)$.
 
 \vfill
-\centerline{\includegraphics[width = 4in]{../images/VariationalFaces}}
+\centerline{\includegraphics[width = 3in]{\images/VariationalFaces}}
 \centerline{[Alec Radford]}
 
 \slide{VQ-VAEs 2019}
@@ -32,134 +32,146 @@ VQ-VAE-2, Razavi et al. June, 2019
 
 \slide{VQ-VAEs 2019}
 
-\centerline{\includegraphics[width = 10in]{/users/davidmcallester/tex/images/VQ-VAE21}}
+\centerline{\includegraphics[width = 10in]{\images/VQ-VAE21}}
 
 \vfill
 VQ-VAE-2, Razavi et al. June, 2019
 
 
-\slide{Vector Quantized VAEs (VQ-VAE)}
 
-VQ-VAEs effectively perform $k$-means on vectors in the model so as to represent vectors by discrete cluster centers.
+\slide{VQ-VAE-2 Model}
+
+
+\centerline{\includegraphics[height =2in]{\images/VQSampler}}
 
 \vfill
-For concreteness we will consider VQ-VAEs on images with a single layer of quantization.
+The probability of an image $y$ is defined by the generator.
 
 \vfill
-We use $x$ and $y$ for spatial image coordinates and use $s$ (for signal) to denote images.
+The generator is top-down and is similar to that of a progressive GAN.
 
-\slide{VQ-VAE Encoder-Decoder}
 
-We train a dictionary $C[K,I]$ where $C[k,I]$ is the center vector of cluster $k$.
+\slide{VQ-VAE-2 Model}
+
+We describe the case of just one layer.
+
+\vfill
+\centerline{\includegraphics[height = 2in]{\images/VQ-OneLayer}}
+
+\vfill
+A separate unit describes progressive VAEs which are inspired by an analogy with progressive GANs.  Progressive VAEs provide a speculative method
+of multi-layer VQ-VAE training.
+
+\slide{The Single-Layer VQ-VAE}
+
+Let $s$ denote the image (we are using $y$ for an image coordinate).
+
+\vfill
+We have an encoder network, such as a CNN, which produces a layer with a vector at each pixel position.
+
 \begin{eqnarray*}
 L[X,Y,I] & = & \mathrm{Enc}_\Phi(s) \\
-\\
+\end{eqnarray*}
+
+Intuitively we cluster the vectors $L(x,y,I)$ using K-means clustering to produce cluster centers where $C[k,I]$
+is the cluster center vector of cluster $k$.
+
+\slide{VQ-VAE Model}
+
+We then replace each vector $L[x,y,I]$ by the nearest cluster center to give $\hat{L}[X,Y,I]$.
+
+{\huge
+\begin{eqnarray*}
 z[x,y] & = & \argmin_k \;||L[x,y,I] - C[k,I]|| \\
 \\
 \hat{L}[x,y,I] & = & C[z[x,y],I] \\
-\\
-\hat{s} & = & \mathrm{Dec}_\Phi(\hat{L}[X,Y,I])
 \end{eqnarray*}
+}
 
-\vfill
 The ``symbolic image'' $z[X,Y]$ is the latent variable.
 
-\slide{VQ-VAE as an RDA}
+\slide{VQ-VAE Model}
 
-We will interpret the VQ-VAE as an RDA.
+Finally we decode $\hat{L}[X,Y,I]$ to get $\hat{s}_\Theta(z)$.
 
-$$\Phi^*  =  \argmin_\Phi E_s\;I(s,z) + \lambda\mathrm{Dist}(s,\hat{s})$$
+\slide{Two-Phase Optimization}
 
-\vfill
-The mutual information $I(s,z)$ is limited by the entropy of $z[X,Y]$ which can be no larger than $\ln K^{XY} = XY\ln K$.
+{\huge
+{\bf Phase 1:} Fix the prior $P_\Phi(z)$ at a simple (perhaps uniform) distribution and optimize the encoder $P_\Psi(z|s)$ and the decoder $P_\Theta(s|z)$.
 
-\vfill
-Maximizing $I(s,z)$ subject to this upper bound should reduce the distortion by providing the decoder with adequate information
-about the image.
-
-\slide{VQ-VAE Training Loss}
-
-We preserve information about the image $s$ by minimizing the distortion between $L[X,Y,I]$ and its reconstruction $\hat{L}[X,Y,I]$.
-
-\vfill
 \begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \;E_s\; \beta||L[X,Y,I] - \hat{L}[X,Y,I]||^2 + ||s -\hat{s}||^2
+\mbox{for}\;\;\;\Theta^*,\Psi^* &  = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)}  \;\ln \frac{P_\Psi(z|s)}{P_\Phi(z)}  - \ln P_\Theta(s|z)
+\\
+\\
+\mbox{we get}\;\;\Theta^* & = & \argmin_\Theta\;E_{s \sim \pop,z \sim P_{\Psi^*}(z|s)}\left[-\ln P_\Theta(s|z)\right]
 \end{eqnarray*}
 
 \vfill
-This is a two-level rate-distortion auto-encoder where the rate can be no larger than $XY\ln K$.
-
-\slide{Parameter-Specific Learning Rates}
-
-$$||L[X,Y,I] - \hat{L}[X,Y,I]||^2 = \sum_{x,y}\;||L[x,y,I] - C[z[x,y],I]||^2$$
-
-\vfill
-For the gradient of this they use
+{\bf Phase 2:} Train the prior $P_\Phi(z)$ holding the encoder and decoder fixed.
 
 \begin{eqnarray*}
-\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & 2\beta({L}[x,y,I]- C[z[x,y],I]) \\
-\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & 2(C[z[x,y],I] - L[x,y,I])
+\Phi^* &  = & \argmin_{\Phi}\;E_{s\sim \pop,z\sim P_{\Psi^*}(z|s)}\left[-\ln P_\Phi(z)\right]
 \end{eqnarray*}
 
 \vfill
-This gives a parameter-specific learning rate for $C[K,I]$.
+{\bf Two phase training can be motivated by autonomy of the encoder.  In principle the prior and the decoder can yield a perfect model for any encoder.}
 
-\vfill
-Parameter-specific learning rates do not change the stationary points (the points where the gradients are zero).
+}
 
-\slide{The Relationship to $K$-means}
 
+\slide{Phase 1 Special Case}
+
+For a fixed uniform prior and a deterministic encoder we get
+{\huge
 \begin{eqnarray*}
-\mathrm{for}\;x,y\;\;C[z[x,y],I].\grad & \pluseq & 2(C[z[x,y],I] - L[x,y,I])
+\Theta^*,\Psi^* &  = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)}\left[\ln \frac{P_\Psi(z|s)}{P_\Phi(z)}  - \ln p_\Theta(s|z)\right] \\
+\\
+& = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)}\left[- \ln p_\Theta(s|z)\right] \\
+\\
+& = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)} \;(s - \hat{s}_\Theta(z_\Psi(s)))^2
+\end{eqnarray*}
+}
+
+\slide{Handling Discrete Latents}
+
+{\huge
+\begin{eqnarray*}
+\Theta^*,\Psi^* & = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)} \;(s - \hat{s}_\Theta(z_\Psi(s)))^2 
 \end{eqnarray*}
 
-\vfill
-At a stationary point we get that $C[k,I]$ is the mean of the set of vectors $L[x,y,I]$ with $z[x,y] = k$ (as in $K$-means).
-
-\slide{Straight Through Gradients}
-
-The latent variables are discrete so some approximation to SGD must be used.
-
-\vfill
-They use ``straight-through'' gradients.
-
 \begin{eqnarray*}
-\mathrm{for}\;x,y\;\;L[x,y,I].\grad & \pluseq & \hat{L}[x,y,I].\grad
+z[x,y] & = & \argmin_k \;||L[x,y,I] - C[k,I]|| \\
+\\
+\hat{L}[x,y,I] & = & C[z[x,y],I]
 \end{eqnarray*}
+}
 
 \vfill
-This assumes low distortion between $L[X,Y,I]$ and $\hat{L}[X,Y,I]$.
+Since $z[x,y]$ is discrete we have $z[x,y].\grad = 0$.
 
-\slide{A Suggested Modification}
+\slide{Handling Discrete Latents}
+{\huge
+\begin{eqnarray*}
+\Theta^*,\Psi^* & = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)} \;(s - \hat{s}_\Theta(z_\Psi(s)))^2 
+\end{eqnarray*}
+}
 
-The parameter $\beta$ is paying two roles
+VQ-VAE uses ``straight-through'' gradients and ``k-means'' gradients.
 
-\vfill
-\begin{itemize}
-\item It controls the relative weight of the two distortion losses.
+{\huge
+\begin{eqnarray*}
+L[x,y,I].\grad & = & \hat{L}[x,y,I].\grad + \beta(L[x,y,I] - C[z[x,y],I]) \\
+\\
+C[k,I].\grad & = & \sum_{z[x,y]=k} \gamma(C[k,I] - L[x,y,I])
+\end{eqnarray*}
+}
 
-\vfill
-\item It controls the learning rate adjustment for the codebook.
-\end{itemize}
+\slide{One Layer VQ-VAE Training Phase 2}
 
-\vfill
-Shouldn't we have separate parameters for these two roles?
-
-\slide{Training Phase II}
-
-Once the model is trained we can sample images $s$ and compute the ``symbolic image'' $z[X,Y]$.
-
-\vfill
-Given samples of symbolic images $z[X,Y]$ we can learn an auto-regressive model of these symbolic images using a pixel-CNN.
-
-\vfill
-This yields a prior probability distribution $P_\Phi(z[X,Y])$ which provides a tighter upper bound on the rate.
+Finally we hold the encoder fixed and train the prior $P_\Phi(z)$ to be an auto-regressive model of the symbolic image $z[X,Y]$.
 
 \vfill
-We can then measure compression and distortion for test images.  This is something GANs cannot do.
-
-\slide{Multi-Layer Vector Quantized VAEs}
-\centerline{\includegraphics[width =10in]{\images/VQ-VAE24}}
+\centerline{\includegraphics[height = 2in]{\images/VQ-OneLayer}}
 
 \slide{Quantitative Evaluation}
 
@@ -174,7 +186,12 @@ We then train an image classifier from the generated pairs and measure its accur
 \vfill
 \centerline{\includegraphics[width=7in]{\images/VQ-VAE23}}
 
-\slide{Direct Rate-Distortion Evaluation.}
+\slide{Image Compression}
+
+\vfill
+\centerline{\includegraphics[width = 10in]{\images/VQgirl}}
+
+\slide{Rate-Distortion Evaluation.}
 
 Rate-distortion metrics for image compression to discrete representations support unambiguous rate-distortion evaluation.
 
@@ -184,86 +201,21 @@ Rate-distortion metrics also allow one to explore the rate-distortion trade-off.
 \vfill
 \centerline{\includegraphics[width = 10in]{\images/VQVAE2Scores}}
 
-\slide{Image Compression}
+\slide{DALL$\cdot$E: A Text-Conditional Image dVAE}
+\vfill
+DALL$\cdot$E is a text-conditional VQ-VAE model of images.
 
 \vfill
-\centerline{\includegraphics[width = 10in]{\images/VQgirl}}
-
-
-\slide{Vector Quantization (Emergent Symbols)}
-
-Vector quantization represents a distribution (or density) on vectors with a discrete set of embedded symbols.
+The Vector quantization is done independent of the text.  However, the model of the probability distribution of the symbolic image $z[x,y]$ is conditioned on text.
 
 \vfill
-Vector quantization optimizes a rate-distortion tradeoff for vector compression.
-
-\vfill
-The VQ-VAE uses vector quantization to construct a discrete representation of images and hence a measurable image compression rate-distortion trade-off.
-
-\slide{Symbols: A Better Learning Bias}
-
-Do the objects of reality fall into categories?
-
-\vfill
-If so, shouldn't a learning architecture be designed to categorize?
-
-\vfill
-Whole image symbols would yield emergent whole image classification.
-
-\slide{Symbols: Improved Interpretability}
-
-Vector quantization shifts interpretation from linear threshold units to the emergent symbols.
-
-\vfill
-This seems related to the use of t-SNE as a tool in interpretation.
+\centerline{\huge Ramesh et al. 2021}
 
 
-\slide{Symbols: Unifying Vision and Language}
+\slide{DALL$\cdot$E}
 
-Modern language models use word vectors.
+\centerline{\includegraphics[height= 5.5in]{\images/DALLE1}}
 
-\vfill
-Word vectors are embedded symbols.
-
-\vfill
-Vector quantization also results in models based on embedded symbols.
-
-\slide{Symbols: Addressing the ``Forgetting'' Problem}
-When we learn to ski we do not forget how to ride a bicycle.
-
-\vfill
-However, when a model is trained on a first task, retraining on a second tasks degrades performance on the first (the model ``forgets'').
-
-\vfill
-But embedded symbols can be task specific.
-
-\vfill
-The embedding of a task-specific symbol will not change when training on a different task.
-
-
-\slide{Symbols: Improved Transfer Learning.}
-
-Embedded symbols can be domain specific.
-
-\vfill
-Separating domain-general parameters from domain-specific parameters may improve transfer between domains.
-
-\slide{Unsupervised Machine Translation}
-
-We can treat the German sentence $z$ as a latent variable in a probability model of a English sentence $y$.
-
-$$\Phi^* = \argmin_\Phi\;E_{y,z \sim Q_\Phi(z|y)} \; \;-\beta \ln \frac{P_\Phi(z)}{Q_\Phi(z|y)} - \ln P_\Phi(y|z)$$
-
-\vfill
-Here $P_\Phi(z)$ can be a trained language model for German and $P_\Phi(y|z)$ and $Q_\Phi(z|y)$ are translation models.
-
-\slide{Unsupervised Machine Translation}
-
-In practice we use ``backtranslation''
-
-$$\Phi^* = \argmin_\Phi\;\begin{array}{ll} & E_{y\sim \pop_y,\;z \sim Q_\Phi(z|y)} \; \;-\ln P_\Phi(y|z) \\ \\
-+ & E_{z \sim \pop_z,\;y \sim P_\Phi(y|z)} \; \;-\ln Q_\Phi(z|y) \end{array}$$
-
-\slide{END}
+\slideplain{END}
 
 \end{document}

@@ -1,5 +1,5 @@
 \documentclass{article}
-\input ../preamble
+\input ../../preamble
 \parindent = 0em
 \parskip = 1ex
 
@@ -170,7 +170,7 @@ $$\frac{P_\Phi(\hat{y})}{\sum_c P_\Phi(\hat{y}[i:=c])} = \softmax_c s_\Phi(\hat{
   \\
   & = & \frac{e^{s_\Phi(\hat{y})}}{\sum_c e^{s_\Phi(\hat{y}[i:=c])}} \\
   \\
-  & = & \softmax_c\;s_\Phi(\hat{y}[i:=c]) \;\; \mbox{evaluated at $c = y[i]$}
+  & = & \softmax_c\;s_\Phi(\hat{y}[i:=c]) \;\; \mbox{evaluated at $c = \hat{y}[i]$}
 \end{eqnarray*}
 }
 

@@ -1,5 +1,5 @@
 \documentclass{article}
-\input ../preamble
+\input ../../preamble
 \parindent = 0em
 
 %\newcommand{\solution}[1]{}
@@ -14,7 +14,7 @@
 
 \bigskip
 \bigskip
-~{\bf Problem 1. Variance of running averages.}  For two independent random variables $x$ and $y$ and a weighted sum $s = ax + by$ we have
+~{\bf Problem 1. Variance of an exponential moving average.}  For two independent random variables $x$ and $y$ and a weighted sum $s = ax + by$ we have
 $$\sigma_s^2 = a^2\sigma_x^2 + b^2\sigma_y^2$$
 Now consider a runing average for computing $\hat{\mu}_1,\ldots,\hat{\mu}_t$ from $x_1,\ldots,x_t$
 $$\hat{\mu}_0 = 0$$
@@ -51,7 +51,7 @@ $$\hat{\mu} = \frac{1}{N}\;\sum_{t=1}^N x_t$$
 
 \bigskip
 \bigskip
-~{\bf Problem 2. Reformulating Momentum as a Running Average.} Consider the following running update equation.
+~{\bf Problem 2. Reformulating Momentum as a Exponential Moving Average.} Consider the following update equation.
 
 \begin{eqnarray*}
   y_0  & = & 0 \\
@@ -70,12 +70,12 @@ If the input sequence is constant with $x_t = c$ for all $t \geq 1$, what is $\l
 }
 
 \medskip
-(b) $y_t$ is a running average of what quantity?
+(b) $y_t$ is an exponential moving average of what quantity?
 
 \solution{
   The update can be rewritten as
   $$y_t = \left(1 - \frac{1}{N}\right)y_{t-1} + \frac{1}{N}(Nx_t)$$
-  so $y_t$ is the running average of $Nx_t$.
+  so $y_t$ is an exponential moving average of $Nx_t$.
 }
 
 \medskip
@@ -87,7 +87,7 @@ If the input sequence is constant with $x_t = c$ for all $t \geq 1$, what is $\l
 \end{eqnarray*}
 
 \solution{
-  $y_t$ is the running average of $Nx_t$ which equals $N$ times the running average of $x_t$ so we have
+  $y_t$ is an exponential moving average of $Nx_t$ which equals $N$ times the moving average of $x_t$ so we have
   $$y_t = N \mu_t$$
 }
 
@@ -138,7 +138,7 @@ Is it possible to compute $W.\grad2[j,i]$ from $W.\grad[j,i]$? Explain your answ
 (d) Explain how your answer to (c) is related to batch size scaling of RMSProp and Adam.
 
 \solution{
-Adam and RMSProp both compute a running average of $\hat{g}[i]^2$ defined by
+Adam and RMSProp both compute a moving average of $\hat{g}[i]^2$ defined by
 $$s_{t+1}[i] = \left(1-\frac{1}{N_s}\right)s_t + \frac{1}{N_s}\hat{g}[i]^2$$
 At batch sized greater than 1 this fails to take into account the variance of the
 gradiants within the batch.  This implies that $s_t[i]$ will be reduced as the batch size increases
@@ -148,17 +148,17 @@ and in the limit of large batches $s_t[i]$ will converge to the mean squared rat
 \bigskip
 \bigskip
 
-{\bf Problem 5.} This problem is on batch size scaling of continuous time stochastic differential equation (SDE) models of SGD.
-We consider batched SGD as defined by
+
+{\bf Problem 5. The stationary distribution with minibatching.} This problem is on batch size scaling and stationary distributions (temperature).  We consider batched SGD as defined by
 $$\Phi \;\minuseq \; \eta \hat{g}^B$$
 where $\hat{g}^B$ is the average of $B$ sampled gradients.  Let $g$ be the average gradient $g = E\;\hat{g}$.
 
 \medskip The covariance matrix at batch size $B$ is
 $$\Sigma^B[i,j] = E\;(\hat{g}^B[i] - g[i])(\hat{g}^B[j] - g[j]).$$
 
-\medskip The continuous time stochastic differential equation model is
+\medskip The stochastic differential equation model of SGD is
 $$\Phi(t + \Delta t) = \Phi(t) - g\Delta t + \epsilon \sqrt{\Delta t}\;\;\;\epsilon \sim {\cal N}(0,\eta\Sigma^B)$$
-Show that for $\eta = B\eta_0$ the SDE is determined by $\eta_0$ independent of $B$.
+Show that for $\eta = B\eta_0$ the stationary distribution is determined by $\eta_0$ independent of $B$.
 
 \solution{
   \begin{eqnarray*}
@@ -168,7 +168,11 @@ Show that for $\eta = B\eta_0$ the SDE is determined by $\eta_0$ independent of 
     \\
     & = & \frac{1}{B^2} E \sum_{b,b'}\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b'}[j] - g[j]\right) \\
     \\
-    & = & \frac{1}{B^2} \sum_{b,b'}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b'}[j] - g[j]\right) \\
+    & = & \frac{1}{B^2} \sum_{b}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b}[j] - g[j]\right)
+    + \sum_{b,b'\not = b}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b'}[j] - g[j]\right) \\
+    \\
+    & = & \frac{1}{B^2} \sum_{b}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b}[j] - g[j]\right)
+    + \sum_{b,b'\not = b}\;\left(E\;\hat{g}_b[i] - g[i] \right)\left(E\; \hat{g}_{b'}[j] - g[j]\right) \\
     \\
     & = & \frac{1}{B^2} \sum_{b}\;E\;\left(\hat{g}_b[i] - g[i] \right)\left(\hat{g}_{b}[j] - g[j]\right) \\
     \\
@@ -177,4 +181,27 @@ Show that for $\eta = B\eta_0$ the SDE is determined by $\eta_0$ independent of 
 
   So for $\eta = B\eta_0$ we have $\eta\Sigma^B  = \eta_0\Sigma^1$ which yields the equivalence.
 }
+
+\eject
+
+{\bf Problem 6. The stationary distribution of weighted average updates.}  In this problem we consider the more general principle that the
+stationary distribution (the temperature) is determined by the effect of each individual training point on the parameter vector.  This principle was used in the
+claim that in the presence of momentum setting the learning rate by $\eta = (1-\mu)B\eta_0$ yields a temperature determined by $\eta_0$ independent of
+$\mu$ and $B$.
+In this problem we justify the general principle of examining the influence of each individual training point.
+
+\medskip
+Let $\hat{g}_1, \ldots, \hat{g}_N$
+be the loss gradients of $N$ individual training points (Batch size 1).  Consider a weighted sum (such as that used in momentum).
+
+$$\Delta \Phi = \sum_i\; \alpha_i\hat{g}_i$$
+
+Assume the updates are small so that for any given training point $i$ we have that $\hat{g}_i$ is uneffected by the drift in the parameter vector.
+In that case, even if parameter updates are being made between gradient measurements, the random variables $g_i$ are essentially independent
+and identically distributed (over the random draw of a training point).  Let $\Sigma_g$ be the covariance matrix of the distribution of the
+random variable $\hat{g}_i$.  Let $\Sigma_{\Delta \Phi}$ be the covariance matrix of the random variable $\Delta \Phi$.
+Show
+
+$$\Sigma_{\Delta \Phi} = \left(\sum_i \alpha_i^2\right)\Sigma_g$$
+
 \end{document}
