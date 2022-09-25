@@ -1,0 +1,215 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning, winter 2019}
+\medskip
+\centerline{\bf Backpropagation  Problems}
+
+
+\bigskip
+~{\bf Problem 1:  Backpropagation through softmax.} Consider the following softmax.
+\begin{eqnarray*}
+  Z[b] & = & \sum_j\;\exp(s[b,j]) \\
+  p[b,j] & = & \exp(s[b,j])/Z[b]
+\end{eqnarray*}
+
+An alternative way to compute this is to initialize the tensors $Z$ and $p$ to zero and then execute the following loops.
+
+\medskip
+$\mathrm{for}\;b,j$
+$\;\;\;Z[b]\;\pluseq\;\exp(s[b,j])$
+
+\medskip
+$\mathrm{for}\;b,j$
+$\;\;\;p[b,j] \;\pluseq\; \exp(s[b,j])/Z[b]$
+
+\medskip
+Each individual $\pluseq$ operation inside the loops can be treated independently in backpropagation.
+
+\medskip
+(a) Give a back-propagation loop over $\pluseq$ updates based on the second loop for adding to $s.\grad$ using $p.\grad$
+(and using the forward-computed tensors $Z$ and $s$).
+
+\solution{
+  \medskip
+  For $b,j\;\;\;s.\grad[b,j] \;\pluseq\; p.\grad[b,j]\exp(s[b,j])/Z[b]$}
+
+\medskip
+(b) Give a back-propagation loop over $\pluseq$ updates based on the second equation for adding to $Z.\grad$ using $p.\grad$
+(and using the forward-computed tensors $s$ and $Z$).
+
+\solution{
+  \medskip
+  For $b,j\;\;\;Z.\grad[b] \;\minuseq\; p.\grad[b,j]\exp(s[b,j])/Z[b]^2$}
+
+\medskip
+(c) Give a back-propagation loop over $\pluseq$ updates based on the first equation for adding to $s.\grad$ using $Z.\grad$
+(and using the forward-computed tensor $s$).
+
+\solution{
+  \medskip
+  For $b,j\;\;\;s.\grad[b,j] \;\pluseq\; Z.\grad[b]\exp(s[b,j])$}
+
+
+\bigskip
+~{\bf Problem 2:  Optimizing Backpropagation through softmax.} Show that the addition to $s.\grad$ shown in problem 1 can be computed using the following more efficient updates.
+
+\medskip
+$\mathrm{for}\;b,j\;\;\;e[b] \; \minuseq \; p[b,j]p.\grad[b,j]$
+
+\medskip
+$\mathrm{for}\;b,j\;\;\;s.\grad[b,j] \;\pluseq \; p[b,j](p.\grad[b,j] + e[b])$
+
+\solution{
+  The updates for problem 1 can be written as
+
+  \medskip
+  \begin{eqnarray*}
+    \mathrm{for}\;b\;\;\;Z.\grad[b] & = & \sum_j \;-p.\grad[b,j]\exp(s[b,j])/Z[b]^2 \\
+    & = & \left(\sum_j -p[b,j]p.\grad[b,j]\right)/Z[b] \\
+    & = & e[b]/Z[b]
+  \end{eqnarray*}
+
+\begin{eqnarray*}
+  \mathrm{for}\;b,j\;\;\;s.\grad[b,j] & = & p.\grad[b,j]\exp(s[b,j])/Z[b] + Z.\grad[b]\exp(s[b,j]) \\
+  & = &  p.\grad[b,j]\left(\exp(s[b,j])/Z[b]\right) + e[b]\left(\exp(s[b,j])/Z[b]\right) \\
+    & = &  p[b,j](p.\grad[b,j] +e[b])
+\end{eqnarray*}
+
+}
+  
+\medskip
+This formula shows how hand-written back-propagation methods for ``layers'' such as softmax
+can be more efficient than compiler-generated back-propagation code.
+While optimizing compilers can of course be written, one must keep in mind the trade-off
+between the abstraction level of the programming language and the efficiency of the generated code.
+
+
+\medskip
+~{\bf Problem 3. Backpropogation through batch normalization.}
+Consider the following set of $\pluseq$ statements defining batch normalization
+where all computed tensors are initialized to zero.
+
+\medskip
+For $b,j \;\;\mu[j] \;\pluseq\; \frac{1}{B}\;x[b,j]$
+
+\medskip
+For $b,j\;\;s[j] \;\pluseq\; \frac{1}{B-1}\;(x[b,j] - \mu[j])^2$
+
+\medskip
+For $b,j\;\;x'[b,j] \;\pluseq\; \frac{x[b,j] - \mu[j]}{\sqrt{s[j]}}$
+
+\medskip
+Give backpropagation $\pluseq$ (or $\minuseq$) loops for computing $x.\grad[b,j]$, $\mu.\grad[j]$, and $s.\grad[j]$ from $x'.\grad[b,j]$.
+The loops should be given in the order they are to be executed.
+
+\medskip
+\solution{
+
+  $$\begin{array}{lrcl}
+
+    \mbox{For}\;b,j & x.grad[b,j] &\pluseq & \frac{x'.\grad[b,j]}{\sqrt{s[j]}} \\
+    \\
+    \mbox{For}\; b,j & \mu.grad[j] &\minuseq & \frac{x'.\grad[b,j]}{\sqrt{s[j]}} \\
+    \\
+    \mbox{For}\; b,j & s.grad[j] &\minuseq & \frac{1}{2}(x[b,j] - \mu[j])s[j]^{-3/2}\;x'.grad[b,j] \\
+    \\
+    \mbox{For}\; b,j & x.grad[b,j] &\pluseq & \frac{2}{B-1}\;(x[b,j] - \mu[j])s.\grad[j] \\
+    \\
+    \mbox{For}\; b,j & \mu.\grad[j] &\minuseq & \frac{2}{B-1}\;(x[b,j] - \mu[j])s.\grad[j] \\
+    \\
+    \mbox{For}\; b,j & x.grad[b,j] &\pluseq & \frac{1}{B}\;\mu.\grad[j]
+  \end{array}$$
+}
+
+
+\bigskip
+~{\bf Problem 4. Backpropagation through a UGRNN.}
+Equations defining a UGRNN are given below.
+
+\begin{eqnarray*}
+\tilde{R}_t[b,j] & = & \left(\sum_i\;W^{h,R}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,R}[j,k]{\color{red} x_t[b,k]}\right) - B^R[j] \\
+\\
+R_t[b,j] & = & \mathrm{\tanh}(\tilde{R}_t[b,j]) \\
+\\
+\tilde{G}_t[b,j] & = & \left(\sum_i\;W^{h,G}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,G}[j,k]{\color{red} x_t[b,k]}\right) - B^G[j] \\
+\\
+G_t[b,j] & = & \mathrm{\sigma}(\tilde{G}_t[b,j]) \\
+\\
+{\color{red} h_t[b,j]} & = & G_t[b,j]{\color{red} h_{t-1}[b,j]} + (1-G_t[b,j])R_t[b,j]
+\end{eqnarray*}
+
+(a) Rewrite the first equation defining $\tilde{R}_t$ using $\pluseq$ loops instead of summations assuming that all computed tensors are initialized to zero.
+
+
+\solution{
+\begin{eqnarray*}
+\mbox{for}\; b,j,i\;\tilde{R}_t[b,j] & \pluseq & W^{h,R}[j,i]h_{t-1}[b,i] \\
+\\
+\mbox{for}\;b,j,k\;\tilde{R}_t[b,j] & \pluseq & W^{X,R}[k,i]x_t[b,k] \\
+\\
+\mbox{for}\;b,j\;\tilde{R}_t[b,j] & \minuseq & B^R[j]
+\end{eqnarray*}
+}
+
+\medskip
+(b) Give $\pluseq$ loops for the backward computation for your solution to part (a) using the convention that
+parameter gradients are averaged over the batch and where the batch size is $B$.
+
+\solution{
+\begin{eqnarray*}
+\mbox{for}\; b,j,i\;W^{h,R}.\grad[j,i] & \pluseq & \frac{1}{B}\;h_{t-1}[b,i]\tilde{R}_t.\grad[b,j] \\
+\\
+\mbox{for}\; b,j,i\; h_{t-1}.\grad[b,j] & \pluseq & W^{h,R}[j,i]\tilde{R}_t.\grad[b,j] \\
+\\
+\mbox{for}\; b,j,k\;W^{x,R}.\grad[j,k] & \pluseq & \frac{1}{B}\;x[b,k]\tilde{R}_t.\grad[b,j] \\
+\\
+\mbox{for}\;b,j\;B^R.\grad[j] & \minuseq & \frac{1}{B}\;\tilde{R}_t.\grad[b,j]
+\end{eqnarray*}
+}
+
+\bigskip
+~{\bf Problem 5. Writing framework code.} Consider a function $c:R^d \times R^s \rightarrow R^s$, in other words a function that takes a
+vector of dimension $d$ and a vector of dimension $s$ and yields a vector of dimension
+$s$.  Given a sequence of vectors $x_0$, $x_2$, $\ldots$, $x_T$ with $x_t \in R^d$ we can define a sequence of vectors $h_0$, $h_1$, $\ldots$, $h_T$ by the equations
+\begin{eqnarray*}
+  h_{0} & = & c(x_0,0) \\
+  h_{t} & = & c(x_t,h_{t-1})\;\mbox{for $1 \leq t \leq T$} 
+\end{eqnarray*}
+When the function $c$ is defined by a neural network the resulting network mapping $x_1$, $\ldots$, $x_T$ to $h_0$, $\ldots$, $h_T$ is called a recurrent neural network (RNN).
+
+{\bf a.} In the educational framework EDF we work with objects where each object has a value attribute and a gradient attribute each of which have tensor values
+where the value tensor and the gradient tensor are the same shape. 
+Each object is assigned a value in a forward pass and assigned a gradient in a backward pass.
+Suppose that we are given an EDF procedure {\tt CELL} which takes as
+arguments a parameter object {\tt Phi} and two EDF objects {\tt X} and {\tt H} where the value attribute of the object {\tt X} is a $d$-dimensional vector and the value attribute of the object {\tt H} is an $s$-dimensional vector.  A call to the procedure {\tt CELL(Phi,X,H)} returns an EDF object whose value attribute is computed in a forward pass in some possibly complex way
+from the value attributes of {\tt Phi}, {\tt X} and {\tt H}. 
+Given a sequence {\tt X[]} of EDF objects whose value attributes are $d$-dimensional vectors, and an EDF object {\tt ZERO} representing the constant $s$-dimensional zero vector,
+write a procedure for constructing the sequence of EDF objects representing $h_1$, $h_2$, $\ldots$, $h_T$ as defined by the above RNN equations.
+Your solution can be in Python or informal high level pseudo code.
+
+\solution{
+We can use the equations given as the definition of the computation graph if we replace $c$ in the equations with the function {\tt CELL}.
+\begin{tabbing}
+  X = list() \\
+  H = list() \\
+  H[0] = CELL(Phi,X[0],ZERO) \\
+  for \=t in range(1,T) \\
+  \>H[t] = CELL(Phi,X[t],H[t-1])
+\end{tabbing}
+}
+
+{\bf b.} Deep learning systems generally make extensive use of parallel computation for training.
+How does the parallel running time of an RNN computation graph scale with the length $T$?
+
+\solution{
+  The parallel running time is proportional to $T$. RNNS are fundamentally serial and this is a problem.  RNNs have recently been largely replaced by the transformer architecture.}
+    
+\end{document}
