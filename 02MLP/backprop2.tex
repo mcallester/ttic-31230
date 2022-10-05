@@ -90,16 +90,15 @@ $$\mathrm{for}\;i\;\;W.\grad[j,i] \;\pluseq\;x.\mathrm{value}[i]*y.\grad[j]$$
 \slide{A Linear Threshold Layer}
 
 \begin{eqnarray*}
-   s & = & \sigma\left(W^1h - B^1 \right)
+   s & = & \sigma\left(Wh - B \right)
 \end{eqnarray*}
 
-\vfill
 $$\begin{array}{lrcl}
 \mathrm{for}\;j &  \tilde{s}[j] & = & 0 \\
 \\
-\mathrm{for}\;j,i &  \tilde{s}[j] & \pluseq &  W^1[j,i]h[i] \\
+\mathrm{for}\;j,i &  \tilde{s}[j] & \pluseq &  W[j,i]h[i] \\
 \\
-\mathrm{for}\; j & s[j] & = & \sigma(\tilde{s}[j] - B^1[j])
+\mathrm{for}\; j & s[j] & = & \sigma(\tilde{s}[j] - B[j])
 \end{array}$$
 
 \vfill
@@ -111,17 +110,15 @@ In practice all deep learning source code can be written unsing scalar assignmen
 For example:
 
 $$\begin{array}{rrcl}
-\mathrm{for}\; h,i,j,k & \tilde{Y}[h,i,j] & \;\pluseq\; & A[h,i,k]\;B[h,j,k] \\
-\mathrm{for}\; h,i,j & Y[h,i,j] & = & \sigma(\tilde{Y}[h,i,j])
+\mathrm{for}\; h,i,j,k & Y[h,i,j] & \;\pluseq\; & A[h,i,k]\;B[h,j,k] \\
 \end{array}$$
 
 \vfill
 has backpropagation loops
 
 $$\begin{array}{rrcl}
-\mathrm{for}\;h,i,j & \tilde{Y}.\grad[h,i,j] & \pluseq & Y.\grad[h,i,j]\;\;\sigma'(\tilde{Y}.\grad[h,i,j]) \\
-\mathrm{for}\;h,i,j,k & A.\grad[h,i,k] & \pluseq & \tilde{Y}.\grad[h,i,j] \;B[h,j,k] \\
-\mathrm{for}\;h,i,j,k & B.\grad[h,j,k] & \pluseq & \tilde{Y}.\grad[h,i,j]\;A[h,i,k]
+\mathrm{for}\;h,i,j,k & A.\grad[h,i,k] & \pluseq & Y.\grad[h,i,j] \;B[h,j,k] \\
+\mathrm{for}\;h,i,j,k & B.\grad[h,j,k] & \pluseq & Y.\grad[h,i,j]\;A[h,i,k]
 \end{array}$$
 
 \slide{END}
