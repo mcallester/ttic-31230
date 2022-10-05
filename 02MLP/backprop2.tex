@@ -117,8 +117,8 @@ $$\begin{array}{rrcl}
 has backpropagation loops
 
 $$\begin{array}{rrcl}
-\mathrm{for}\;h,i,j,k & A.\grad[h,i,k] & \pluseq & Y.\grad[h,i,j] \;B[h,j,k] \\
-\mathrm{for}\;h,i,j,k & B.\grad[h,j,k] & \pluseq & Y.\grad[h,i,j]\;A[h,i,k]
+\mathrm{for}\;h,i,j,k & A.\grad[h,i,k] & \pluseq & Y.\grad[h,i,j] \;B.\mathrm{value}[h,j,k] \\
+\mathrm{for}\;h,i,j,k & B.\grad[h,j,k] & \pluseq & Y.\grad[h,i,j]\;A.\mathrm{value}[h,i,k]
 \end{array}$$
 
 \slide{END}
