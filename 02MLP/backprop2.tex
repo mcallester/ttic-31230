@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -7,40 +7,91 @@
   
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Winter 2022}
   \vfill
   \vfill
   \centerline{\bf Backpropagation with Arrays and Tensors}
   \vfill
   \vfill
 
-\slide{Handling Arrays}
+\slide{Program Values as Objects}
 
+Consider a scalar product ($x$, $y$ and $z$ are each just real numbers).
+$$z = xy$$
+
+\vfill
+In a framework the values of the variables $x$, $y$ $z$ are objects in the sence of object oriented programming or Python.
+
+\vfill
+The forward pass fills in the atributes $x.\mathrm{value}$ and $y.\mathrm{value}$ which in the base case are just inputs or parameters.
+
+\slide{Program Values as Objects}
+$$z = xy$$
+
+\vfill
+The forward pass calls the procedure $z.\mathrm{forward}$ on each computed value $z$.
+
+\vfill
+The object $z$ holds its own inputs in its attributes.
+
+\vfill
+Since $z$ computed from a product the procedure $z.\mathrm{forward}$ assigns
+
+\vfill
+$$z.\mathrm{value} = x.\mathrm{value}*y.\mathrm{value}$$
+
+\slide{Backprop with Objects}
+$$z = xy$$
+
+\vfill
+Each object $x$ has an attribure $x.\grad$ which holds the gradient of the loss with respect to $x$.
+
+We want
+$$z.\grad = \frac{\partial {\cal L}}{\partial z}$$
+
+\vfill
+Backpropagation calls $z.\mathrm{backward}$ on each computed value $z$ in the reverse order.
+
+\vfill
+For $z = xy$ we have that $z.\mathrm{backward}$ does
 \begin{eqnarray*}
-  {\color{red} h} & = & \sigma\left(W^0{\color{red} x} - B^0\right) \\
-  {\color{red} s} & = & \sigma\left(W^1{\color{red} h} - B^1 \right) \\
-  {\color{red} P_\Phi[\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[\hat{y}]} \\
-  {\cal L} & = & - \ln P[y]
+x.\grad & \pluseq & y.\mathrm{value}*z.\grad \\
+y.\grad & \pluseq & x.\mathrm{value}* z.\grad
 \end{eqnarray*}
 
-\vfill
-Each array (matrix) {\color{red} $W$} is represented by an object with attributes
-{\color{red} $W.\mathrm{value}$} and {\color{red} $W.\mathrm{grad}$}.
+\slide{Handling Arrays}
+Consider an inner product between vectors
+$$z = x^\top y$$
 
 \vfill
-{\color{red} $W.\mathrm{grad}$} is an array storing {\color{red} $\nabla_W{\cal L}$}.
+In this case case $z.\mathrm{forward}$ does
+$$z.\mathrm{value} = 0$$
+$$\mathrm{for}\;i\;\;z.\mathrm{value} \;\pluseq\;x.\mathrm{value}[i]*y.\mathrm{value}[i]$$
 
 \vfill
-{\color{red} $W.\mathrm{grad}$} has same indeces (same ``shape'') as {\color{red} $W.\mathrm{value}$}.
+The backward procedure $z.\mathrm{backward}$ treats each $\pluseq$ instruction seperately and does.
+$$\mathrm{for}\;i\;\;x.\grad[i] \;\pluseq\;y.\mathrm{value}[i]*z.\grad$$
+$$\mathrm{for}\;i\;\;y.\grad[i] \;\pluseq\;x.\mathrm{value}[i]*z.\grad$$
 
-\slide{Source Code Loops}
+\slide{Handling Arrays}
+Now consider multiplying a vector $x$ by a matrix $W$.
+$$y = Wx$$
+
+\vfill
+In this case case $y.\mathrm{forward}$ does
+$$\mathrm{for}\;j\;\;y.\mathrm{value}[j] = 0$$
+$$\mathrm{for}\;i,j\;\;y.\mathrm{value}[j] \;\pluseq\;W.\mathrm{value}[j,i]*x.\mathrm{value}[i]$$
+
+\vfill
+The backward procedure $y.\mathrm{backward}$ treats each individual $\pluseq$ as a scalar product and does
+$$\mathrm{for}\;i,j\;\;x.\grad[i] \;\pluseq\;W.\mathrm{value}[j,i]*y.\grad[j]$$
+$$\mathrm{for}\;i\;\;W.\grad[j,i] \;\pluseq\;x.\mathrm{value}[i]*z.\grad[j]$$
+
+\slide{A Linear Threshold Layer}
 
 \begin{eqnarray*}
    s & = & \sigma\left(W^1h - B^1 \right)
 \end{eqnarray*}
-
-\vfill
-Can be written as
 
 \vfill
 $$\begin{array}{lrcl}
@@ -51,37 +102,8 @@ $$\begin{array}{lrcl}
 \mathrm{for}\; j & s[j] & = & \sigma(\tilde{s}[j] - B^1[j])
 \end{array}$$
 
-\slide{Backpropagation on Loops}
-the backpropagation for
-
-$$\begin{array}{lrcl}
-\mathrm{for}\;j & {\color{red} s[j]} & = & \sigma(\tilde{s}[j] - B[j])
-\end{array}$$
-
 \vfill
-is
-
-\vfill
-$$\begin{array}{lrcl}
-\mathrm{for}\;j & {\color{red} \tilde{s}.\grad[j]} & \pluseq & {\color{red} s.\grad[j]\sigma'(\tilde{s}[j] - B[j])} \\
-\\
-\mathrm{for}\;j & {\color{red} B.\grad[j]} & \minuseq & {\color{red} s.\grad[j]\sigma'(\tilde{s}[j] - B[j])}
-\end{array}$$
-
-\slide{Backpropagation on Loops}
-the backpropagation for
-
-$$\begin{array}{lrcl}
-\mathrm{for}\;j,i & {\color{red} \tilde{s}[j]} & \pluseq & {\color{red} W[j,i]h[i]}
-\end{array}$$
-
-\vfill
-is
-$$\begin{array}{lrcl}
-\mathrm{for}\;j,i & {\color{red} W.\grad[j,i]} & \pluseq & {\color{red} \tilde{s}.\grad[j] h[i]} \\
-\\
-& {\color{red} h.\grad[i]} & \pluseq & {\color{red} \tilde{s}.\grad[j] W[j,i]} \\
-\end{array}$$
+backpropagation is also done with loops treating each individual assigningments and $\pluseq$ instructions.
 
 \slide{General Tensor Operations}
 
