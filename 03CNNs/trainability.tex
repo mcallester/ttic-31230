@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -151,6 +151,20 @@ For CNNs we convert a tensor $x[b,x,y,j]$ to $\tilde{x}[b,x,y,j]$ as follows.
   \tilde{x}[b,x,y,j]& = & \frac{x[b,x,y,j] - \hat{\mu}[j]}{\hat{\sigma}[j]}
 \end{eqnarray*}
 
+\slide{Layer Normalization}
+
+For CNNs we convert a tensor $x[b,x,y,j]$ to $\tilde{x}[b,x,y,j]$ as follows.
+
+\begin{eqnarray*}
+  \hat{\mu}[b,j] & = & \frac{1}{XY} \sum_{x,y}\;x[b,x,y,j] \\
+  \\
+  \\
+  \hat{\sigma}[b,j] & = & \sqrt{\frac{1}{XY-1} \sum_{x,y} (x[b,x,y,j]-\hat{\mu}[j])^2} \\
+  \\
+  \\
+  \tilde{x}[b,x,y,j]& = & \frac{x[b,x,y,j] - \hat{\mu}[b,j]}{\hat{\sigma}[b,j]}
+\end{eqnarray*}
+
 \slide{Adding an Affine Transformation}
 
 $$\breve{x}[b,x,y,j] = \gamma[j] \tilde{x}[b,x,y,j] + \beta[j]$$
@@ -279,11 +293,11 @@ We reduce the number of neurons at each position in an intermediate ``bottleneck
 L_{\color{red} \ell+1} & = & \mathrm{Conv}(W_{\color{red} \ell+1},B_{\color{red} \ell+1},L_{\color{red} \ell}) \\
 L_{\color{red} \ell+2} & = & \mathrm{Conv}(W_{\color{red} \ell+2},B_{\color{red} \ell+2},L_{\color{red} \ell+1}) \\
 L_{\color{red} \ell+3} & = & \mathrm{Conv}(W_{\color{red} \ell+3},B_{\color{red} \ell+3},L_{\color{red} \ell+2}) \\
-L_{\color{red} \ell+3} & = & L_{\color{red} \ell} + L_{\color{red} \ell+3}
+L_{\color{red} \ell+4} & = & L_{\color{red} \ell} + L_{\color{red} \ell+3}
 \end{eqnarray*}
 
 \vfill
-Here $J_{\color{red} \ell+3} = J_{\color{red} \ell}$ but $J_{\color{red} \ell+1} = J_{\color{red} \ell+2} < J_{\color{red} \ell}$.
+Here $J_{\color{red} \ell+4} = J_{\color{red} \ell}$ but $J_{\color{red} \ell+1} = J_{\color{red} \ell+2} < J_{\color{red} \ell}$.
 
 \vfill
 Reducing the number of neurons greatly reduces the size of the convolution weight tensor which has size $\Delta X \times \Delta Y \times J_{\color{red} \ell} \times J_{\color{red} \ell+1}$.
