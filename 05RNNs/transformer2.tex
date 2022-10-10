@@ -71,7 +71,7 @@ These days both word embedding and position embeddings are trained as model para
 To do language modeling we do {\bf causal masking} --- we fix $\alpha[k,t_1,t_2] = 0$ for $t_2 > t_1$.
 
 \vfill
-We can then predict the word $w_t$ as without looking into the future with
+We can then predict the word $w_t$ without looking into the future with
 
 \vfill
 $$P(w_t|w_1,\ldots,w_{t-1}) = \softmax_{w_t}\;e[w_t,I]L_\mathrm{top}[t-1,I]$$
