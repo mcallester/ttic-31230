@@ -1,5 +1,5 @@
-\input /Users/davidmcallester/Icloude/tex/SlidePreamble
-\input /Users/davidmcallester/Icloude/tex/preamble
+\input ../SlidePreamble
+\input ../preamble
 
 
 \begin{document}
@@ -18,11 +18,7 @@
 Attention is All You Need, Vaswani et al., June 2017
 
 \vfill
-The Transformer has now essentially replaced RNNs in natural language applications.
-
-\vfill
-
-The recent progress on the natural language understanding evaluation (GLUE) is based on general language modeling using Transformers.
+The Transformer has now essentially replaced RNNs and is now used in speech, protein folding and vision.
 
 \slide{Vector Sequences}
 \centerline{\includegraphics[height=3in]{\images/transformer}}
@@ -36,10 +32,7 @@ This is the same shape as layers in an RNN --- a sequence of vectors $L[t,J]$.
 
 \slide{Parallel Layer Computation}
 
-However, in the transformer we can compute the layer $L_{\ell+1}[T,J]$ from $L_\ell[T,J]$ in $O(\ln T)$ time (in parallel).
-
-\vfill
-The log comes from the time to compute a large sum in parallel using a tree of additions.
+However, in the transformer we can compute the layer $L_{\ell+1}[T,J]$ from $L_\ell[T,J]$ in parallel.
 
 \vfill
 This is an important difference from RNNs which compute sequentially over time.
@@ -54,15 +47,11 @@ The fundamental innovation of the transformer is the self-attention layer.
 \vfill
 For each position $t$ in the sequence we compute an attention over the other positions in the sequence.
 
-\vfill
-These attentions can be viewed as a soft directed graph over the positions where
-the attention from $t_1$ to $t_2$ can be viewed as a weighted directed edge from position $t_1$ to position $t_2$.
-
-\vfill
-There is an intuitive analogy between this soft graph and a dependency parse tree.
-
 \slide{Transformer Heads}
 
+There is an intuitive analogy between this soft graph and a dependency parse tree.
+
+\vfill
 In a dependency parse edges are typically labeled with grammatical roles such as ``subject-of'' or ``object-of''.
 
 \vfill
@@ -77,9 +66,9 @@ from $t_1$ to $t_2$ with head (label) $k$.
 For each head $k$ and position $t$ we compute a key vector and a query vector with dimension $I$ typically smaller than dimension $J$.
 
 \begin{eqnarray*}
-\mathrm{Query}_{\ell+1}[k,t,i] & = & W^Q_{\ell+1}[k,i,J]L_\ell[t,J] \\
+\mathrm{Query}_{\ell+1}[k,t,I] & = & W^Q_{\ell+1}[k,I,J]L_\ell[t,J] \\
 \\
-\mathrm{Key}_{\ell+1}[k,t,i] & = &  W^K_{\ell+1}[k,i,J]L_\ell[t,J] \\
+\mathrm{Key}_{\ell+1}[k,t,I] & = &  W^K_{\ell+1}[k,I,J]L_\ell[t,J] \\
 \\
 \alpha_{\ell+1}[k,t_1,t_2] & = & \softmax_{t_2}\; \frac{1}{\sqrt{I}}\;\mathrm{Query}_{\ell+1}[k,t_1,I]\mathrm{Key}_{\ell+1}[k,t_2,I]
 \end{eqnarray*}
@@ -87,13 +76,13 @@ For each head $k$ and position $t$ we compute a key vector and a query vector wi
 \slide{Computing the Output}
       
 \begin{eqnarray*}
-\mathrm{Value}_{\ell+1}[k,t,i] & = & W^V_{\ell+1}[k,i,J]L_\ell[t,J] \\
+\mathrm{Value}_{\ell+1}[k,t,I] & = & W^V_{\ell+1}[k,I,J]L_\ell[t,J] \\
 \\
-h^1_{\ell+1}[k,t,i] & = & \alpha[k,t,T]\mathrm{Value}[k,T,i] \\
+h^1_{\ell+1}[k,t,I] & = & \alpha[k,t,T]\mathrm{Value}[k,T,I] \\
 \\
 h^2_{\ell+1}[t,C] & = & h^1_{\ell+1}[0,t,I];\cdots;h^1_{\ell+1}[K-1,t,I] \\
 \\
-L_{\ell+1}[t,j] & = & W^0_{\ell+1}[j,C]h^2[t,C]
+L_{\ell+1}[t,J] & = & W^0_{\ell+1}[J,C]h^2[t,C]
 \end{eqnarray*}
 
 \vfill

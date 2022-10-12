@@ -22,7 +22,7 @@
 
 \slide{Layer Normalization}
 
-The Transformer uses layer normalization rather than batch normalization to handle internal covariate shift.
+The transformer uses layer normalization rather than batch normalization.
 
 \vfill
 \begin{eqnarray*}
@@ -90,6 +90,7 @@ This can be done with separate models for the encoder and decoder (an encoder mo
 Or it can be done with a {\bf decoder-only} model in which We take the input English sentence followed by a special token and then generate the output from the Transformer  language model.
 In this case causal masking is done on the input sentence as well as the generation of the translation.
 
+
 \slide{Continuing from a Prompt}
 
 
@@ -141,6 +142,14 @@ Definition \#2: Over-Thinking (OT) is the act of trying to come up with ideas th
 \vfill
 ...
 
+
+\slide{Visual Transformers}
+
+{\bf An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale} Alexey Dosovitskiy et al., Google Brain, October 2010.
+
+\vfill
+\centerline{\includegraphics[width = 5  in]{\images/Vit}}
+
 \slide{Few Shot Learning}
 
 GPT-3 can be prompted with a sequence of German-to-English translation pairs ending in a German sentence without the English translation.
@@ -153,6 +162,29 @@ The translaion is not close to state of the art but still startling.
 
 \vfill
 Various other tasks can be done with few-shot examples in this way.  For example question answering, unscrambling words and three digit arithmetic.
+
+\slide{Chain of Thought Prompting}
+
+{\bf Chain of Thought Prompting Elicits Reasoning in Large Language Models}, Wei et al, Google Brain, January 2022.
+
+\vfill
+\centerline{\includegraphics[height=3.5in]{\images/ChainofThought1}\includegraphics[height=3.5in]{\images/ChainofThought2}}
+
+\slide{Step by Step Prompting, June 2022}
+
+{\bf Large Language Models are Zero-Shot Reasoners} Kojima et al, University of Tokyo, June 2022
+
+\vfill
+
+\centerline{\includegraphics[height=3.5in]{\images/StepByStep1}}
+
+\slide{Step by Step Prompting, June 2022}
+
+{\bf Large Language Models are Zero-Shot Reasoners} Kojima et al, University of Tokyo, June 2022
+
+\vfill
+\centerline{\includegraphics[height=3.5in]{\images/StepByStep2}}
+
 
 \slide{END}
 
