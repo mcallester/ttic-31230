@@ -420,49 +420,4 @@ This is the Donsker-Varadhan variational representation of KL-divergence.
 This can be used in cases where we can sample from $P$ and $Q$ but cannot compute $P(y)$ or $Q(y)$.
 Instead we can use a model score $s_\Phi(y)$ where $s_\Phi(y)$ can be computed.
 
-\bigskip
-{\bf Problem 11: (25 pts).}  This problem is on softmax, entropy and cross entropy.  Let the variable $i$ range over the non-negative integers (0 to $\infty$).
-Consider the following softmax distribution where $\beta> 0$ is an inverse temperature parameter.
-
-$$P(i) = \softmax_i \left[-\beta i\right]$$
-
-{\bf (a)} Give an expression for $P(i)$ in terms of $i$ without using a softmax or infinite sum.  You can use the equality that for $0 < \lambda < 1$ we have
-
-$$\sum_{n=0}^{\infty} \lambda^n = \frac{1}{1-\lambda}$$
-
-\solution{$$P(i) = \frac{e^{-\beta i}}{\sum_{i=0}^\infty e^{-\beta i}} = (1-e^{-\beta})e^{-\beta i}$$}
-
-{\bf (b)} Solve for the entropy of this distribution. You can use the equality that for $0 < \lambda < 1$ we have
-
-$$\sum_{n=0}^{\infty} \;n \lambda^n = \frac{\lambda}{(1-\lambda)^2}$$
-
-\solution{
-
-  \begin{eqnarray*}
-    H(P) & = & E_i\;\left[-\ln P(i)\right] =  \sum_{i=0}^\infty P(i)\;\left( - \;\ln \left((1-e^{-\beta})e^{-\beta i}\right)\right) \\\\
-    & = & \sum_{i=0}^\infty P(i)\;\left(-\ln \left(1-e^{-\beta}\right) + \beta i\right) \\
-    & = & \left(-\ln \left(1-e^{-\beta}\right)\sum_{i=0}^\infty P(i)\right) + \sum_i (1-e^{-\beta})e^{-\beta i} \;\beta i \\
-    & = & - \ln \left(1-e^{-\beta}\right) + \beta(1-e^{-\beta})\;\;\sum_{i=0}^\infty i(e^{-\beta})^i \\
-    & = & - \ln \left(1-e^{-\beta}\right) + \beta(1-e^{-\beta})\;\;\frac{e^{-\beta}}{(1-e^{-\beta})^2} \\
-    & = & - \ln \left(1-e^{-\beta}\right) + \frac{\beta e^{-\beta}}{(1-e^{-\beta})}
-  \end{eqnarray*}
-}
-
-{\bf (c)} Consider a one-hot population distribution defined by $\pop(k) = 1$ and $\pop(i) = 0$ for $i \not = k$.
-What is the cross-entropy $H(\pop,P)$ and KL-divergence $KL(\pop,P)$?  What is the cross-entropy $H(P,\pop)$ and the KL divergence $KL(P,\pop)$?
-
-\solution{
-  \begin{eqnarray*}
-    H(\pop,P) & = & E_{i\sim \pop}\left[ - \ln P(i)\right] \\
-    & = & -\ln P(k) \\
-    & = & -\ln (\;(1-e^{-\beta})e^{-\beta k}\;) \\
-    & = & \beta k - \ln(1-e^{-\beta}) \\
-      \\
-      KL(\pop,P) & = & H(\pop,P) - H(\pop) \\
-      & =& \beta k - \ln (1-e^{-\beta}) - 0 \\
-      \\
-      H(P,\pop) & = & KL(P,\pop) = \infty
-  \end{eqnarray*}
-}
-
 \end{document}
