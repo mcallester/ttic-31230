@@ -26,7 +26,61 @@ We will adopt the convention, similar to true Einstein notation, that repeated c
 the inner product $e[w,I]^\top h[t,I]$ simply as $e[w,I]h[t,I]$ without the need for the (meaningless) transpose operation.
 
 \bigskip
-{\bf Problem 1.}  Consider a regression problem where we want to predict a scalar value $y$ from a vector $x$.
+{\bf Problem 1.}  This problem is on initialization.  Consider a single unit defined by
+$$u = f\left(\left(\sum_{i=1}^N\;W[i]x[i]\right) - B\right).$$
+where $B$ is initialized to zero and $f$ is an activation function such as a sigmoid or ReLU.
+The vector $x$ is a random variable determined by a random draw of a training example.
+Assume that the components of $x$ are independent and that each component has zero mean and unit variance.
+Suppose that we initialize each weight in $W$ from a distribution with
+zero mean and variance $\sigma^2$ and that the distribution is symmetric about zero --- (the probability that $w[i] = z$ equals the probability that $w[i] = -z$).
+For example, $x[i]$ might be distributed as a zero-mean unit-variance Gaussian.
+Consider $y = \sum_i\;W[i]x[i]$ as a random variable defined by the distribution on $x$ and the independent random distribution on $W$.
+Recall that the variance $\sigma^2$ of
+a sum of independent random variables is the sum of the variances and the variance of a product of zero mean independent
+random variables is the product of the variances.
+
+\medskip
+(a) What value of $\sigma$ for $W[i]$ gives zero mean and unit variance for $y$ if the vectors $w[I]$ and $x[I]$ have dimension $d$?  Show your derivation.
+
+\solution{Let $\sigma^2$ be the variance of $x[i]$.  We then have that the variance of $\sum_i W[i]x[i]$ is $\sum_i \sigma^2 = d \sigma^2$.
+  Setting $d\sigma^2$ equal to 1 gives
+  $$\sigma = \frac{1}{\sqrt{d}}$$
+}
+
+
+\medskip
+(b) For a sigmoid activation function what is the mean of $u$.
+
+\solution{
+  We are given that the probability that $W[i] = z$ is the same as the probability of $w[i]= -z$.  This implies that for a given value of
+  $x[i]$ we have that the probability that $w[i]x[i] = z$ equals the probability that $w[i]x[i] = -z$.  This further implies that, for a given value $y$, the
+  probability that $\sum_i w[i]z[i] = y$ equals the probability that $\sum_i w[i]x[i] = -y$.  So the input to the sigmoid is distributed symmetrically about 0.
+  Since the sigmoid function is itself symmetric about 0, we get that the expected value of the output of the sigmoid is its value at zero which is 1/2.
+}
+
+\medskip
+(c) For a sigmoid activation function
+is the variance of $u$ larger than, equal to, or smaller than the variance of $y$?
+
+\solution{
+  The variance is smaller.  To show this it suffices to show that the slope of the sigmoid function is everywhere less than 1.  The slope is largest at the input zero.
+  The sigmoid function is
+  $$f(z) = \frac{1}{1 + e^{-y}}$$
+  The slope is
+  $$f'(y) = \frac{e^{-y}}{(1+e^{-y})^2}$$
+  which equals $1/4$ at $y = 0$.
+}
+
+\medskip
+(d) What is the largest possible variance of the output of a sigmoid?
+
+\solution{
+  The larest valriance occurs when $y = \infty$ with probability 1/2 and $y = -\infty$ with probability 1/2 ;-).  Tn this case $f(y)$ is 0 with probability 1/2 and 1 with probability 1/2.
+  Which gives a variance of 1/4.
+}
+
+\bigskip
+{\bf Problem 2.}  Consider a regression problem where we want to predict a scalar value $y$ from a vector $x$.
 Consider the L-layer perceptron for this problem defined by the following equations
 which compute hidden layer vectors $h_1[I], \ldots, h_L[I]$ and predictions $\hat{y}_1, \ldots, \hat{y}_L$ where
 the prediction $\hat{y}_\ell$ is done with a linear regression on the hidden vector $h_\ell[I]$.
@@ -77,8 +131,114 @@ good to you.
 \end{eqnarray*}
 }
 
+
+
+\bigskip
+{\bf Problem 3.} This problem is on the initialization of ResNet filters.
+Consider the following residual skip connection where $R_{\ell+1}$ is computed with an $N \times N$ filter.
+
+\begin{eqnarray*}
+  \mathrm{for}\;b,x,y,j\Delta x,\Delta y,j' \\
+  \;\;\;  R_{\ell+1}[b,x,y,j] & \pluseq & W_{\ell+1}[\Delta x, \Delta y, j',j]\; L_{\ell}[b,x + \Delta x, y + \Delta y, j'] \\
+  \\
+  \mathrm{for}\;b,x,y,j \;\;\;\;\;\;\;\;\;\;\;\\
+    \;\;\;  R_{\ell+1}[b,x,y,j] & \minuseq & B_{\ell+1}[j] \\
+\\
+\mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\;\;\;\;\;\\
+L_{\ell+1}[b,x,y,j] & = & L_{\ell}[b,x,y,j] + R_{\ell+1}[b,x,y,j]
+\end{eqnarray*}
+
+
+Here we have omitted an activation function that would be present in practice.  This omission allows an analysis that seems to provide insight
+into the more complex case with activations.
+
+Assume that $L_0[b,x,y,j]$
+is computed from the input in some unspecified way such that $L_0[b,x,y,j]$ has unit variance.
+Assume that the values $L_\ell[b,x,y,j]$  and $R_{\ell+1}[b,x,y,j]$ are all independent.
+Suppose that each weight $W_\ell[\Delta x,\Delta y,j,j']$ is drawn independently at random
+from a distribution with zero mean and variance $\sigma_W$. Recall that the variance $\sigma^2$ of
+a sum of independent random is the sum of the variances and the variance of a product of independent random variables is the product of the variances.
+
 \medskip
-{\bf Problem 2. Gated CNNs}
+(a) Give an expression for
+the variance $\sigma^2_\ell$ of $L_{\ell+1}[b,x,y,j]$ as a function of $\ell$, the filter dimension $D = \Delta X = \Delta Y$,
+the feature dimension $J$, and the weight variance $\sigma_W^2$.
+
+\solution{
+Assuming everything is independent we have
+
+\begin{eqnarray*}
+\sigma^2_{\ell+1} & = & \sigma^2_{\ell} + D^2J\sigma^2_w\sigma^2_{\ell} \\
+\\
+& = & \sigma^2_\ell(1 + D^2J\sigma^2_w)
+\end{eqnarray*}
+
+This gives
+$$\sigma^2_\ell = (1 + D^2J\sigma^2_w)^\ell$$
+} 
+
+\medskip
+(b) Using $(1+\epsilon)^N \approx e^{\epsilon N}$ solve for the value of $\sigma_W$ such that $\sigma^2_L = 2$.
+
+\solution{
+
+\begin{eqnarray*}
+\sigma^2_L & = & (1 + D^2J\sigma^2_w)^L \\
+\\
+& \approx & e^{LD^2J\sigma_W^2}
+\end{eqnarray*}
+
+setting
+$$e^{LD^2J\sigma_W^2} = 2$$
+gives
+$$\sigma_w \approx \sqrt{\frac{\ln 2}{LD^2J}}$$
+}
+
+\medskip
+(c) Assuming $L_L.\grad[b,x,y,j]$ has unit variance, and that all components of $L_\ell.\grad[b,x,y,j]$ and $R_\ell.\grad[b,x,y,j]$ are independent,
+give an expression for the variance
+$\sigma^2_{\ell,\mathrm{grad}}$ of the components of $L_\ell.\mathrm{grad}[b,x,y,j]$ as a function of $\ell$, $D$, $J$ and $\sigma_W$.
+
+\solution{
+The code we are concerned with is
+\begin{eqnarray*}
+  \mathrm{for}\;b,x,y,j\Delta x,\Delta y,j' \\
+  \;\;\;  R_{\ell+1}[b,x,y,j] & \pluseq & W_{\ell+1}[\Delta x, \Delta y, j',j]\; L_{\ell}[b,x + \Delta x, y + \Delta y, j'] \\
+  \\
+  \mathrm{for}\;b,x,y,j \;\;\;\;\;\;\;\;\;\;\;\\    \;\;\;  R_{\ell+1}[b,x,y,j] & \minuseq & B_{\ell+1}[j] \\
+  \\
+  \mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\;\;\;\;\;\\
+  L_{\ell+1}[b,x,y,j] & = & L_{\ell}[b,x,y,j] + R_{\ell+1}[b,x,y,j]
+\end{eqnarray*}
+
+The backpropagation program includes
+
+\begin{eqnarray*}
+  \mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\;\;\;\;\;\\
+  R_{\ell+1}.\grad [b,x,y,j] & = & L_{\ell+1}[b,x,y,j].\grad \\
+  L_{\ell}.\grad [b,x,y,j] & \pluseq & L_{\ell+1}[b,x,y,j].\grad \\
+  \\
+  \mathrm{for}\;b,x,y,j\Delta x,\Delta y,j'\;\;\;\;\;\;\;\;\;\;\; \\
+  \;\;\;  L_{\ell}.\grad[b,x + \Delta x, y + \Delta y, j'] & \pluseq & R_{\ell+1}.\grad[b,x,y,j] W_{\ell+1}[\Delta x, \Delta y, j',j]\;  \\
+  \\
+\end{eqnarray*}
+
+Each element of $L_\ell.\grad[b,x,y,j]$ has the same variance. Let $\sigma^2_\ell.\grad$ denote the variance of an element of $L_\ell.\grad[b,x,y,j]$.
+
+Note that $L_\ell.\grad[b,x,y,j]$ is a sum of $L_{\ell+1}.\grad[b,x,y,j]$ and $D^2J$ products of the form
+$R_{\ell+1}.\grad[b,x,y,j] W_{\ell+1}[\Delta x, \Delta y, j',j]$.  This gives
+
+$$\sigma_\ell^2.\grad = \sigma^2_{\ell+1}.\grad + D^2J\sigma^2_{\ell+1}.\grad\;\sigma^2_W = \sigma^2_{\ell+1}.\grad(1 + D^2J\sigma^2_W)$$
+
+and we get
+
+$$\sigma^2_{\ell,\mathrm{grad}} = \sigma^2_L.\grad(1 + D^2J\sigma^2_W)^{L-\ell}$$
+
+We have assumed that $\sigma^2_L.\grad$ is 1.
+}
+
+\bigskip
+{\bf Problem 4. Gated CNNs}
 
 A UGRNN is defined by the following equations.
 
@@ -110,7 +270,7 @@ $$\Phi = (W^{L,R}_{\ell+1}[\Delta x, \Delta y,j,j'], B^R_{\ell+1}[j], W^{L,G}_{\
   \end{eqnarray*}
 }
 
-{\bf Problem 3.} RNNs
+{\bf Problem 5.} RNNs
 
 Below are the equations defining the update cell of the UGRNN which takes as data inputs $h[B,t-1,I]$ and $x[B,t,K]$ and produces
 $h[B,t,J]$.
@@ -146,7 +306,7 @@ This gated RNN is similar to, but different from, a GRU which also has two gates
     }
 
 \bigskip
-~{\bf Problem 4. RNN parallel run time.}  Consider an autoregressive RNN neural language model with $P_\Phi(w_{t+1}|w_1,\ldots,w_t)$ defined by
+~{\bf Problem 6. RNN parallel run time.}  Consider an autoregressive RNN neural language model with $P_\Phi(w_{t+1}|w_1,\ldots,w_t)$ defined by
 $$P_\Phi(w_t| w_1,\ldots,w_{t-1}) = \softmax_{w_{t+1}}\;\;e[w_t,I]h[t-1,I]$$
 Here $e[w,I]$ is the word vector for word $w$, $h[t,I]$ is the hidden state vector at time $t$ of a left-to-right RNN, and as described above $e[w,I]h[t,I]$
 is the inner prodcut of these two vectors where we have assumed that they have the same dimension.
@@ -169,7 +329,7 @@ run on a sentence $w_1,\ldots,w_T$?  Explain your answer.
 
 
 \bigskip
-~{\bf Problem 5. Translating diagrams into equations.} A UGRNN cell for computing $h[b,t,J]$ from $h[b,t-1,J]$ and $x[b,t,J]$ can be written as
+~{\bf Problem 7. Translating diagrams into equations.} A UGRNN cell for computing $h[b,t,J]$ from $h[b,t-1,J]$ and $x[b,t,J]$ can be written as
 
 \begin{eqnarray*}
 G[b,t,j] & = & \sigma\left(W^{h,G}[j,I] h[b,t\!-\!1,I] +  W^{x,G}[j,K] x[b,t,K] - B^G[j]\right) \\
