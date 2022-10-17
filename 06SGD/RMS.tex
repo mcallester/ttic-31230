@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \newcommand{\solution}[1]{\bigskip {\bf Solution}: #1}
 
@@ -50,45 +50,26 @@ If the mean $g[i]$ is small then $s[i]$ approximates the variance of $\hat{g}[i]
 \vfill
 There is a ``centering'' option in PyTorch RMSProp that switches from the second moment to the variance.
 
-\slide{RMSProp Motivation}
+\slide{RMSProp Analysis}
 
-If we assume constant noise covariance and locally positive definite quadratic loss in the neighborhood of the stationary distribution then, in a coordinate system
-where the Hessian is the identity matrix, vanilla SGD has a stationary distribution of the form
-$$p(\Phi) \propto \exp\left(-\sum_i \frac{{\Phi_i^2}}{\alpha\eta\sigma_i^2}\right)$$
+For sufficiently small $\epsilon$, RMSProp makes the update independent of the scale of the gradient.
 
-\vfill
-where, because we have used the Hessian-normalized coordinate system, we have 
-$${\cal L} = ||\Phi||^2$$
+{\color{red} $$\Phi[i] \;\minuseq \; \eta\;\frac{\hat{g}[i]}{\sqrt{s[i]}}$$}
 
-\slide{RMSProp Motivation}
-
-If we set $\eta_i = \eta_0/\sigma_i^2$ this becomes
-
-$$p(\Phi) \propto \exp\left(\frac{-{\cal L}}{\alpha\eta_0}\right)$$
+If the gradient $\hat{g}_i$ is scaled up by a factor of $\alpha$ we have that $\sqrt{s[i]}$ is also scaled by $\alpha$.
 
 \vfill
-The Gibbs stationary distribution seems desirable for exploration.
+This makes the learning rate $\eta$ dimensionless.
 
-\slide{RMSProp Motivation}
+\slide{RMSProp Analysis}
 
-However, computing the Hessian is extremely challenging and RMSprop works in the given coordinates.
-
-\vfill
-Also, centered RMSProp divides by $\sigma_i$ rather than $\sigma_i^2$.
-
-\slide{RMSProp is Theoretically Mysterious}
-
-{\color{red} $$\Phi[i] \;\minuseq \; \eta\;\frac{\hat{g}[i]}{\sigma[i]}\;\;(1)\hspace{5em}\Phi[i] \;\minuseq \; \eta\;\frac{\hat{g}[i]}{\sigma^2[i]}\;\;(2)$$}
+{\color{red} $$\Phi[i] \;\minuseq \; \eta\;\frac{\hat{g}[i]}{\sqrt{s[i]}}$$}
 
 \vfill
-Although (1) seems to work better, (2) is better motivated theoretically.  To see this we can consider units.
+It is not completely clear why making the update invariant to gradient scaling is a good thing.
 
 \vfill
-If parameters have units of ``weight'', and loss is in bits, then (2) type checks with $\eta$ having units of bits --- the numerical value of $\eta$
-has no dependence on the choice of the weight unit.
-
-\vfill
-Consistent with the dimensional analysis, many theoretical analyses support (2) over (1) contrary to apparent empirical performance.
+It would be nice to have an analysis directly tied to convergence rates.
 
 \slide{Adam --- Adaptive Momentum}
 
@@ -162,7 +143,7 @@ The published version of Adam has a more obscure form of bias correction which y
 $$\Phi_{t+1}[i] =  \Phi_t - \frac{\eta}{\sqrt{s_{t}[i]} + \epsilon}\;\;\tilde{g}_{t}[i]$$
 
 \vfill
-The optimal $\epsilon$ is often large.
+The optimal $\epsilon$ is sometimes large.
 For large $\epsilon$ it is useful to set $\eta = \epsilon\eta_0$ in which case we get
 
 $$\Phi_{t+1}[i] =  \Phi_t - \frac{\eta_0}{1 + \frac{1}{\epsilon}\sqrt{s_{t}[i]}}\;\;\tilde{g}_{t}[i]$$
@@ -170,30 +151,47 @@ $$\Phi_{t+1}[i] =  \Phi_t - \frac{\eta_0}{1 + \frac{1}{\epsilon}\sqrt{s_{t}[i]}}
 \vfill
 We then get standard SGD  as $\epsilon \rightarrow \infty$ holding $\eta_0$ fixed.
 
-\slide{Making Adam Independent of $B$}
+\slide{Making Adam Adapt to the Batch Size $B$}
 
-Making Adam independent of the batch size $B$ is difficult.
+Adam alreaady adapts to momentum by using and EMA of the gradient as momentum.
+Adapting to batch size requires some analysis.
 
 \vfill
-Rather than
-$$s_t[i] = \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2$$
+$$\Phi[i] \;\minuseq \; \eta\;\frac{\hat{g}[i]}{\sqrt{s[i]}}$$
+
 \vfill
-we would like
+Since we are taking a long moving average of $\hat{g}[i]^2$ we can assume $s[i] = E\;\hat{g}[i]^2$ and we have
+
+      \begin{eqnarray*}
+        s[i] & = & E \;\hat{g}[i]^2 \;\; = \;\; \mu^2 + \sigma^2/B \\
+ \mu & = & E\;\hat{g}[i] \; = \; E\;g[i]\\
+ \sigma^2 & = & E (g[i] - \mu)^2
+  \end{eqnarray*}  
+
+\slide{Making Adam Adapt to the Batch Size $B$}
+
+\vfill
 \begin{eqnarray*}
-s_t[i] & = &  \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \left(\frac{1}{B} \sum_b \hat{g}_{t,b}[i]^2\right)
+\Phi[i] & \minuseq & \eta\;\frac{\hat{g}[i]}{\sqrt{\mu^2 + \sigma^2/B}} \\
+\\
+E\;\Delta\Phi & = & - \eta \frac{\mu}{\sqrt{\mu^2 + \sigma^2/B}} \\
 \end{eqnarray*}
 
+For $\mu^2 >> \sigma^2/B$ we want $\eta = B \eta_0$ as with vanilla SGD.
+
+\vfill
+For $\sigma^2/B >> \mu^2$ we want $\eta = \sqrt{B} \;\eta_0$.
+
+
 \slide{Making Adam Independent of $B$}
 
-In PyTorch this is difficult because ``optimizers'' are defined as a function of $\hat{g}_t$.
+The previous analysis looses information.  We could estmate $g[i]^2$ more accurately by computing $g[i]^2$ for each batch element
+rather than measuring $\hat{g}[i]^2$ where $\hat{g}[i]$ is alread averaged over the batch.
 
 \vfill
-$\hat{g}_t[i]$ is not sufficient for computing $\sum_b \;\hat{g}_{t,b}[i]^2$.
-
-\vfill
-To compute $\sum_b \;\hat{g}_{t,b}[i]^2$ we need to maintain a batch index in the gradiant attribute of parameters.
+This would require adding a batch index
+to the parameter gradients.
 
 \slide{END}
 
 } \end{document}
-
