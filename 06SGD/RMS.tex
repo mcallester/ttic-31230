@@ -35,6 +35,7 @@ RMSProp is based on a running average of $\hat{g}[i]^2$ for each scalar model pa
 {\color{red} \Phi_{t+1}[i]} & {\color{red} =} & {\color{red} \Phi_t[i] - \frac{\eta}{\sqrt{s_t[i]} + \epsilon}\;\; \hat{g}_t[i]}
 \end{eqnarray*}
 
+\ignore{
 \slide{RMSProp}
 The second moment of a scalar random variable $x$ is $E\;x^2$
 
@@ -49,6 +50,7 @@ If the mean $g[i]$ is small then $s[i]$ approximates the variance of $\hat{g}[i]
 
 \vfill
 There is a ``centering'' option in PyTorch RMSProp that switches from the second moment to the variance.
+}
 
 \slide{RMSProp Analysis}
 
