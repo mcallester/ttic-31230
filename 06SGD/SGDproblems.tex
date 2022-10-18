@@ -1,9 +1,9 @@
 \documentclass{article}
-\input ../../preamble
+\input ../preamble
 \parindent = 0em
 
-\newcommand{\solution}[1]{}
-%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
 
 \begin{document}
 
@@ -11,6 +11,7 @@
 \centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
 \bigskip
 \centerline{\bf SGD Problems.}
+
 
 \bigskip
 {\bf Problem 1: Running Averages.}  Consider a sequence of vectors $x_0$, $x_1$, $\ldots$ and two running averages $y_t$ and $z_t$ defined by
@@ -232,7 +233,7 @@ $$E_{\tuple{x,y} \sim \pop}\;\frac{1}{\sqrt{s(\Phi^*,x,y)+ \epsilon}}\;\nabla_\P
 \solution{Yes, the example considered here is just a special case of RMSProp or Adam which are in fact not guaranteed to converge to a stationary point (or local optimum) of the loss function.}
 
 \bigskip
-{\bf Problem 7.}  This problem is on a non-standard form of adaptive learning rates.  In general when we consider the significance of a change $\Delta x$ to a number $x$ it is reasonable to consider
+{\bf Problem 7}  This problem is on a non-standard form of adaptive learning rates.  In general when we consider the significance of a change $\Delta x$ to a number $x$ it is reasonable to consider
 the change as a percentage of $x$.  For example, a baseline annual raise in salary is often a percentage raise when different employees have significantly different salaries.  So we might consider the following
 ``multiplicative update SGD'' which we will write here for batch size 1.
 
@@ -298,10 +299,5 @@ function $\Phi$ with ${\cal L}(\Phi,x_1,y_1) \not =  {\cal L}(\Phi,x_2,y_2)$ and
 In Adam and RMSProp we have a weighting that depends on a moving average of the second moment of the gradients.  This is essentially a weighting that depends on a random draw over the training data.
 It has been shown that stationary points of Adam and RMSProp updates do not necessarily correspond to stationary points of the loss function.
 }
-
-
-\bigskip
-    
-    
 
 \end{document}
