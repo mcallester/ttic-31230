@@ -1,0 +1,72 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+\newcommand{\solution}[1]{}
+%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+\bigskip
+\centerline{\bf Regularization and  Generalization Problems}
+
+\bigskip
+\bigskip
+
+
+\bigskip
+
+{\bf Problem 1: Upper Bounding $H(y)$}
+
+\medskip
+We consider a population distribution $\pop$ on a set of observable values $y$ and a stochastic encoder defining a conditional distribution $P_\Psi(z|y)$.
+We assume that we can sample from $P_\Psi(z|y)$ and that for any given $z$ and $y$ we can compute $P_\Psi(z|y)$.
+The population and the encoder define a joint distribution $P_{\pop,\Psi}(y,z)$ where $y$ is drawn from the population and $z$ is drawn from $P_\Psi(z|y)$.
+All probabilities and information-theoretic quantities in this problem refer to this joint distribution.
+
+\vfill
+We will use the fact that mutual information satisfies
+$$I(y,z) = H(y) - H(y|z) = H(z)- H(z|y)$$
+which implies
+\begin{equation}
+  \label{eq:info}
+H(y) = H(z) - H(z|y) + H(y|z)
+\end{equation}
+
+\medskip
+(a) Rewrite (\ref{eq:info}) in terms of expectations over $y \sim \pop$ and $z \sim P_\Psi(z|y)$ of quantities defined on $\pop(y)$, $P_{\pop,\Psi}(z)$, $P_{\pop,\Psi}(z|y)$ and $P_{\pop,\Psi}(y|z)$.
+
+\solution{
+  $$E_{y \sim \pop} \; -\ln\;\pop(y) = E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\;\; - \ln P_{\Psi}(z) + \ln P_{\pop,\Psi}(z|y) - \ln P_{\pop,\Psi}(y|z)$$
+}
+
+\medskip
+(b) Which of the terms in (\ref{eq:info}) can be directly esimated by simply sampling $y \sim \pop$ and $z \sim P_\Psi(z|y)$.
+
+\solution{
+  Just the middle term $H(z|y)$.}
+
+\medskip
+
+(c) Recall that the cross-entropy $H(P,Q)$ is defined to be $E_{x \sim P} \;-\ln Q(x)$ and that $H(P) \leq H(P,Q)$ for any $Q$.
+Let $P_\Phi(z)$ and $P_\Theta(y|z)$ be two additional models and consider the cross entropies $H(P_{\pop,\Psi}(z),P_\Phi(z))$ and $H(P_{\pop,\Psi}(y|z),P_\Theta(y|z))$.
+Using the fact that cross-entropies upper bound entropies give an upper bound on $H(y)$ derived from (\ref{eq:info}) by replacing entropies by cross-entropies to these models.
+Express your upper bound as an expectation over sampling.
+
+\solution{
+  $$H(y) \leq  E_{y \sim \pop,\;z \sim P_\Psi(z|y)}\;\; - \ln P_\Phi(z)\; \;+ \ln P_{\Psi}(z|y)\; - \ln P_{\Theta}(y|z)$$}
+
+
+\medskip
+(d) Which terms in you solution to (c) can be estimated directly by sampling.
+
+\solution{All}
+
+\medskip
+(e) Consider minimizing the upper bound on $H(y)$ given in your solution to (c).  How is this related the VAE training objective?
+
+\solution{It is exactly the same.}
+
+
+\end{document}

@@ -3,8 +3,8 @@
 \parindent = 0em
 \parskip = 1ex
 
-\newcommand{\solution}[1]{}
-%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
 
 \begin{document}
 
@@ -274,6 +274,7 @@ Now define $Z_t(y)$ by
   \end{eqnarray*}
 }
 
+
 \bigskip
 {\bf Problem 7.}  Consider a probability distribution on structured labels ${\cal Y}[N]$ where ${\cal Y}[n]$ is either -1, 0 or 1.  Consider a score function $s({\cal Y})$ defined by
 $$s({\cal Y}) =  \left(\sum_{n=0}^{N-2} {\cal Y}[n]\;{\cal Y}[n+1]\right) + {\cal Y}[N-1]{\cal Y}[0]$$
@@ -323,6 +324,5 @@ $$Z_s = \sum_{\cal Y}e^{s({\cal Y})}$$
     - \ln \tilde{P}({\cal Y}) & = & N \ln \frac{1}{1 + e^{-2} + e^{-4}} \approx .14\;N\; \mbox{nats}.
   \end{eqnarray*}
 }
-
 
 \end{document}

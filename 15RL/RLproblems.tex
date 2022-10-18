@@ -119,5 +119,78 @@ $$\nabla_\Phi R(\pi_\Phi) = E_{s \sim P_\pi(s),\;a\sim \pi(a|s)}\;\nabla_\Phi \l
 You do not have to prove this.
 
 
+\bigskip
+
+{\bf Problem 3: How Advantage-Actor-Critic (A2C) Reduces Variance.}  This problem will consider a simple artificial example that demonstrates the power of the advantage actor-critic algorithm.
+We start with policy gradient theorems for the episodic case.
+
+$$\begin{array}{lrcl}
+  \mathrm{REINFORCE:} &\nabla_\Phi R(\pi) & =  &E_{s_0,a_0,\ldots,s_T,a_T \sim \pi_\Phi}\;\;\sum_{t=0}^T (\nabla_\Phi \ln \pi_\Phi(a_t|s_t))\left(\sum_{t' = t}^T R(s_t,a_t)\right) \\
+  \\
+  \mathrm{A2C:} &\nabla_\Phi R(\pi) & =  &E_{s_0,a_0,\ldots,s_T,a_T \sim \pi_\Phi}\;\;\sum_{t=0}^T (\nabla_\Phi \ln \pi_\Phi(a_t|s_t))\;(Q^\pi(s_t,a_t) - V^\pi(s_t)) \\
+  \\
+  & V^\pi(s) & = & E_{s_0,a_0,\ldots,s_T,a_T \sim \pi_\Phi \;|s_0=s,}\;\;\sum_{t=0}^T R(s_t,a_t) \\
+  \\
+  & Q^\pi(s,a) & = & E_{s_0,a_0,\ldots,s_T,a_T \sim \pi_\Phi \;|s_0=s,\;a_0 = a}\;\;\sum_{t=0}^T R(s_t,a_t)
+\end{array}$$
+
+In practice we use approximators $V_\Psi(s)$ and $Q_\Theta(s,a)$
+for $V^\pi(s)$ and $Q^\pi(s,a)$. But we will ignore that here and just consider $V^\pi(s)$ and $Q^\pi(s,a)$ as defined above for which the above equations are exactly true.
+
+\medskip
+We consider an MDP where we want to get to a goal state as quickly as possible.
+We consider an MDP where we have two actions $a_1$ and $a_2$ and a policy is just
+a biased coin flip between $a_1$ and $a_2$ independent of the state.  We also suppose that $a_1$ always fails to advance, that $a_2$ always advances by one, and that we reach a goal
+as soon as we have advances $N$ times. When we reach the goal, but only when we reach the goal, we get reward $-T$ (or equivalently, cost $T$)
+where $T$ is the number of actions taken to reach the goal.  Of course the best policy is to always pick $a_2$ which gives $N$ advancements in $N$ actions getting reward $-N$ (cost $N$).
+We define a state $s$ to be the pair $(i,t)$ where $t$ is the number of actions taken so far and $i$ is the number of advancements made so far.
+
+\medskip
+(a) Define the state $s_{t+1}$ as a function of $s_t$ and $a_t$.
+The state transition is deterministic so don't worry about formulating this as a probability.  Just say what the next state is in terms of the previous state and the action.
+
+\solution{ Let $(i,t)$ be the state $s_t$.  If the action is $a_1$ then $s_{t+1} = (i,t+1)$ and if the action is $a_2$ and $s_{t+1} = (i+1,t+1)$.}
+
+\medskip
+(b) If the stochastic policy picks $a_2$ with probability $\lambda$ then the expected number actions taken to advance 1 step is $\sum_{t = 1}^\infty \lambda(1-\lambda)^{t-1}t = \frac{1}{\lambda}$.
+Use this fact to give an expression for $V^\pi(i,t)$. (Remember that the reward, given only at the end, is $-T$).
+
+\solution{From state $(i,t)$ reward occurs when we have made $N-i$ additional advances.  The expected time for each advance is $\frac{1}{\lambda}$.  So the expected value of $T$ given state $(i,t)$
+  is $t +\frac{N-i}{\lambda}$ and so $V^\pi(i,t) = - (t + (N-i)/\lambda)$
+  }
+
+\medskip
+(c) It can be shown that $Q^\pi(s,a) = R(s,a) + E_{s'\;| s,a} V^\pi(s')$.  Use this and your result from (b) to give an analytic expressions for $Q^\pi(s,a)$ and the advantage $A^\pi(s,a) = Q^\pi(s,a) - V^\pi(i,t)$
+for $a = a_1$ and $a= a_2$.
+
+\solution{
+  In this example, $R(s,a) = 0$ except at the end where $R((N-1,t),a_2) = -(t+1)$.  So in all but the last step we have $Q^\pi(s,a) = V^\pi(s')$ where $s'$ is the next state.
+  \begin{eqnarray*}
+    Q^\pi((i,t)a_1) & = & V^\pi(i,t+1) \;=\; -(t+1  + (N-i)/\lambda)\\
+    \\
+    Q^\pi((i,t),a_2) & = & V^\pi(i+1,t+1) \;=\; -(t+1 + (N-i-1)/\lambda) \\
+    \\
+    V^\pi(i,t) & = & -(t + (N-i)/\lambda) \\
+    \\
+    A^\pi((i,t,),a_1) & = & -1 \\
+    \\
+    A^\pi((i,t,),a_1) & = & \frac{1}{\lambda} -1
+  \end{eqnarray*}
+  It turns out that these equations handle the last step as well.
+  }
+
+\medskip
+(d) Policy gradient adjusts the probability $\lambda$ of selecting $a_2$.  It is possible that for some samples of runs the REINFORCE algorithm decreases $\lambda$
+--- it moves the policy in the wrong direction.  For example, this happens when $\lambda = 1/2$ and there happens to be are more occurrences of $a_2$ than $a_1$ (note that the reward is always negative).
+But the reward (or cost) is correlated with the number of occurrences of $a_1$ so the expected update is still correct.
+
+\medskip
+Given your answer to (c), is it possible that the A2C update ever reduces $\lambda$? Explain your answer.
+
+\solution{In this example A2C always increases $\lambda$. The update on $\lambda$ is the sum of the updates for each time step.
+  In this case each time step behaves independently because the advantage is determined by the action taken at that time.
+  At each time step we have that if the action selected is $a_1$ then the advantage is negative which decreases the probability of $a_1$ and hence increases the probability of $a_2$.
+  When the action selected is $a_2$ the advantage is positive and the probability of $a_2$ is again increased.}
+
 
 \end{document}
