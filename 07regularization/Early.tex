@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 
 \begin{document}
@@ -15,33 +15,6 @@
 \centerline{\bf Regularization: Early Stopping and Shrinkage}
 \vfill
 \vfill
-
-\slide{Expectation Notation}
-
-\begin{eqnarray*}
-E_{z \sim P}\left[f(z)\right] & = & \sum_z P(z) f(z) \\
-\\
-\\
-E_{(x,y) \sim \pop}\left[{\cal L}(x,y)\right] &  = & \frac{1}{|\mathrm{support}|}\sum_{(x,y) \in \mathrm{suppot}} \;\pop(x,y) \;{\cal L}(x,y)
-\end{eqnarray*}
-
-\vfill
-Oops: the size of the support (the items with nonzero probability) is unknown.
-
-\slide{Expectation Notation}
-
-\vfill
-Rather than sum over the support we can sample.
-
-\vfill
-Draw a sample $S = \{(x_1,y_1),\ldots,(x_N,y_N)\}$ IID from the distribution $P$.
-\vfill
-\begin{eqnarray*}
-\hat{f}(S) & = & \frac{1}{|S|} \sum_{z\in S}\;f(z) \\
-\\
-\\
-E_{z \sim P}\left[f(z)\right] & = & \lim_{|S| \rightarrow \infty}\;\hat{f}(S)
-\end{eqnarray*}
 
 \slide{Fitting Finite Training Data}
 
@@ -136,11 +109,22 @@ We first give a Bayesian derivation. We put a prior probability on $\Phi$ and ma
 \begin{eqnarray*}
 \Phi^* & = & \argmax_\Phi\;p(\Phi | \tuple{x_1,y_1},\ldots,\tuple{x_n,y_n}) \\
 \\
- & = & \argmax_\Phi\;p(\Phi,\;\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n}) \\
- \\
-  & = & \argmax_\Phi\;p(\Phi)P(\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n}\;|\;\Phi) \\
- \\
+ & = & \argmax_\Phi\;\frac{p(\Phi,\; \tuple{x_1,y_1},\ldots,\tuple{x_n,y_n})}{p(\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n})} \\
+\\
+ & = & \argmax_\Phi\;p(\Phi,\;\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n})
+ \end{eqnarray*}
+}
+
+\slide{Shrinkage: $L_2$ regularization}
+
+\vfill
+{\huge
+\begin{eqnarray*}
+\Phi^* & = & \argmax_\Phi\;p(\Phi,\;\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n}) \\
+\\
  & = & \argmax_\Phi \; p(\Phi)\;\prod_i \pop(x_i)P_\Phi(y_i|x_i) \\
+ \\
+  & = & \left(\prod_i p(x_i)\right) \argmax_\Phi \; p(\Phi)\;\prod_i  P_\Phi(y_i|x_i) \\
  \\
   & = & \argmax_\Phi \; p(\Phi)\;\prod_i P_\Phi(y_i|x_i)
  \end{eqnarray*}
