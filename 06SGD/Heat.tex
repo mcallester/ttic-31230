@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -90,7 +90,7 @@ Let $P_\eta$ be the distribution on $\Delta\Phi = \Phi - \Phi^*$ with $\Phi \sim
 \\
 & = & E_b\; {\cal L}_b(\Phi^*) + E_{\Delta \Phi \sim P_\eta} \;\;\;\;(E_b\;g_b) \;\Delta \Phi + \frac{1}{2}\;\Delta \Phi^\top (E_b\; H_b) \Delta \Phi \\
 \\
-& = & {\cal L}(\Phi^*)\;\; + \;\; E_{\Delta \Phi \sim P_\eta}\;\;\;\frac{1}{2}\;\Delta \Phi^\top (E_b\;H_b) \Delta \Phi
+& = & {\cal L}(\Phi^*)\;\; + \;\; {\color{red} E_{\Delta \Phi \sim P_\eta}\;\;\;\frac{1}{2}\;\Delta \Phi^\top (E_b\;H_b) \Delta \Phi}
 \end{eqnarray*}
 
 \slide{Proof: Step 3}
@@ -102,12 +102,20 @@ $$E_{\Delta \Phi \sim P_\eta}E_b\; ||\Delta \Phi - \eta (g_b + H_b\Delta \Phi)||
 $$E_{\Delta \Phi \sim P_\eta}E_b\;-2\eta \Delta \Phi^\top (g_b + H_b\Delta \Phi) +\eta^2||(g_b + H_b\Delta \Phi)||^2 = 0$$
 
 \vfill
-$$E_{\Delta \Phi \sim P_\eta}\;\left(\frac{1}{2}\Delta \Phi^\top (E_b \;H_b)\Delta \Phi\right) = \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_b \;||(g_b + H_b\Delta \Phi)||^2$$
+$${\color{red} E_{\Delta \Phi \sim P_\eta}\;\;\frac{1}{2}\Delta \Phi^\top (E_b \;H_b)\Delta \Phi)} = \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_b \;||(g_b + H_b\Delta \Phi)||^2$$
+
+\slide{Proof: Step 4}
+
+
+$${\cal L}(\eta)  = {\cal L}(\Phi^*)\;\; + \;\; {\color{red} E_{\Delta \Phi \sim P_\eta}\;\;\;\frac{1}{2}\;\Delta \Phi^\top (E_b\;H_b) \Delta \Phi}$$
 
 \vfill
-$${\color{red} {\cal L}(\eta)  = {\cal L}(\Phi^*) + \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_b \;||(g_b + H_b\Delta \Phi)||^2}$$
+$${\color{red} E_{\Delta \Phi \sim P_\eta}\;\;\frac{1}{2}\Delta \Phi^\top (E_b \;H_b)\Delta \Phi} = \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_b \;||(g_b + H_b\Delta \Phi)||^2$$
 
-\slide{Proof Step 4}
+\vfill
+$${\cal L}(\eta)  = {\cal L}(\Phi^*) + \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_b \;||(g_b + H_b\Delta \Phi)||^2$$
+
+\slide{Proof Step 5}
 
 \begin{eqnarray*}
 {\color{red} {\cal L}(\eta)}  & {\color{red} =} & {\color{red} {\cal L}(\Phi^*) + \frac{\eta}{4}\;E_{\Delta \Phi \sim P_\eta}E_b \;||(g_b + H_b\Delta \Phi)||^2} \\

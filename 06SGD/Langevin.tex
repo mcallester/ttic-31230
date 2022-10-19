@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -96,7 +96,7 @@ The mean of $\hat{g}$ is the true gradient $g(\Phi)$.
 \vfill
 By the central limit theorem $\sum_{j=1}^N (g(\Phi) - \hat{g}_i)$ is approximately Gaussian.
 
-\slide{In One Dimensional}
+\slide{In One Dimension}
 
 We first consider the case of one parameter (a one dimensional optimization problem) so that $\hat{g}$ is a scalar.
 
@@ -107,12 +107,8 @@ To model the noise as Gaussian we take $\epsilon \sim {\cal N}(0,\sigma^2)$ wher
 \Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \eta \epsilon \sqrt{N} \\
 \end{eqnarray*}
 
-\slide{In One Dimensional}
+\slide{In One Dimension}
 
-
-Letting $\epsilon'$ denote $\sqrt{\eta}\epsilon$ we have
-
-\vfill
 \begin{eqnarray*}
 \Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t +  \eta \epsilon \sqrt{N} \\
 \\
