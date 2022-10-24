@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 
 \begin{document}
@@ -111,11 +111,13 @@ Ensemble models almost always perform better than any single model.
 
 It is important to note that
 
-\vfill
 $$-\ln E_k \;P_k(y|x) \;\;\leq E_k -\ln P_k(y|x)$$
 
 \vfill
 for each individual pair $\tuple{x,y}$.
+
+\vfill
+$\forall z\; f(z) \leq g(z)$ is stronger than $(E_z\;f(z)) \leq (E_z\; g(z))$.
 
 \vfill
 This may explain why in practice an ensemble model is typically better than any single component model.

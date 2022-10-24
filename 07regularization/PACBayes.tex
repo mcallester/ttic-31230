@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -46,10 +46,10 @@ where $x$ is drawn uniformly from ${\cal X}$.  No learning algorithm can predict
 
 \slide{The Occam Guarantee (Free Lunch Theorem)}
 
-Consider a classifier $f$ written in C++ with an arbitrarily large standard library.
+Consider a classifier $f$ written in Python with an arbitrarily large standard library.
 
 \vfill
-Let $|f|$ be the number of bits needed to represent $f$.
+Let $|f|$ be the number of bits needed to represent $f$ (any compression algorithm is allowed).
 
 \slide{The Occam Guarantee (Free Lunch Theorem)}
 
@@ -73,7 +73,7 @@ Code length is inter-convertable with with probability.
 $$P(h) = 2^{-|h|}\;\;\;\mbox{or}\;\;\;|h| = - \log_2 P(h)$$
 
 \vfill
-Instead of fixing the language (e.g., C++ with a large library) we fix a prior $P(h)$.
+Instead of fixing the language (e.g., Python with a large library) we fix a prior $P(h)$.
 
 \vfill
     {\bf Theorem:} With probability

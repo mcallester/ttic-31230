@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 
 \begin{document}
@@ -43,10 +43,10 @@ It can be shown that when the training vectors are linearly independent any zero
 
 \slide{Implicit Regularization of SGD}
 
-In a labeling problem a model with parameters $\Phi$ defines a model propbability $P(y|\Phi,x)$.
+In a labeling problem a model with parameters $\Phi$ defines a model propbability $P_\Phi(y|x)$.
 
 \vfill
-This defines a log loss $-\ln P(y|\Phi,x)$ on which we do gradient descent.
+This defines a log loss $-\ln P_\Phi(y|x)$ on which we do gradient descent.
 
 \vfill
 Let {\color{red} $\mathrm{SGD}\!\brackets{P,\Phi_{\mathrm{Init}},\train}$} be the vector that results from running SGD on model $P$ with initial parameters $\Phi_{\mathrm{Init}}$
