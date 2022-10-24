@@ -17,57 +17,6 @@
 \bigskip
 \centerline{\bf Exam 3}
 
-\bigskip
-{\bf Problem 1: 25 pts.}  Consider a probability distribution on structured labels ${\cal Y}[N]$ where ${\cal Y}[n]$ is either -1, 0 or 1.  Consider a score function $s({\cal Y})$ defined by
-$$s({\cal Y}) =  \left(\sum_{n=0}^{N-2} {\cal Y}[n]\;{\cal Y}[n+1]\right) + {\cal Y}[N-1]{\cal Y}[0]$$
-We can think of this as a ring of edge potentials with no node potentials. We are interested in the probability defined by the exponential softmax
-
-$$P_s({\cal Y}) = \frac{1}{Z_s} e^{s({\cal Y})}$$
-$$Z_s = \sum_{\cal Y}e^{s({\cal Y})}$$
-
-{\bf (a)} Given an expression for the negative log pseud-likelihood $- \ln \tilde{P}_s({\cal Y})$ where ${\cal Y}$ is the constant assignment defined by ${\cal Y}[n] = 0$ for all $n$.  Your expression should be a simple function of $N$.
-
-\solution{
-  \begin{eqnarray*}
-    - \ln \tilde{P}({\cal Y}) & = & - \sum_n \ln P_n({\cal Y}[n] \;|\;{\cal Y}/n) \\
-    \\
-    P_n({\cal Y}[n] \;|\;{\cal Y}/n) & = & \frac{1}{Z_n}e^{s({\cal Y})} \\
-    \\
-    Z_n & = & e^{s({\cal Y}[n=1])} + e^{s({\cal Y}[n=0])} +e^{s({\cal Y}[n=-1])} \\
-    \\
-    s({\cal Y}[n=i]) = s({\cal Y}) & = & 0 \\
-    \\
-    e^{s({\cal Y}[n=i])} & = & 1 \\
-    \\
-    Z_n & = & 3 \\
-    \\
-    P_s({\cal Y}[n]\;|\;{\cal Y}/n) & = & 1/3 \\
-    \\
-    - \ln \tilde{P}({\cal Y}) & = & N \ln \frac{1}{3} \approx 1.1\;N\; \mbox{nats (you didn't have to calculate it)}
-  \end{eqnarray*}
-}
-
-{\bf (b)}  Repeat part (a) but for the constant structured label defined by ${\cal Y}[n] = 1$.
-
-\solution{
-  \begin{eqnarray*}
-    Z_n & = & e^{s({\cal Y}[n=1])} + e^{s({\cal Y}[n=0])} +e^{s({\cal Y}[n=-1])} \\
-    \\
-    s({\cal Y}[n=1]) = s({\cal Y}) & = & N \\
-    \\
-    s({\cal Y}[n=0]) & = & N-2 \\
-    \\
-    s({\cal Y}[n=-1]) & = & N-4 \\
-    \\
-    Z_n & = & e^N(1+e^{-2} + e^{-4}) \\
-    \\
-    P_s({\cal Y}[n]\;|\;{\cal Y}/n) & = & \frac{1}{1 + e^{-2} + e^{-4}} \approx .87 \\
-    \\
-    - \ln \tilde{P}({\cal Y}) & = & N \ln \frac{1}{1 + e^{-2} + e^{-4}} \approx .14\;N\; \mbox{nats}.
-  \end{eqnarray*}
-}
-
-
 
 
 

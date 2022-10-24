@@ -77,7 +77,8 @@ With probability at least $1-\delta$ over the draw of $\train$ we have
 \vfill
 {\huge
 \begin{eqnarray*}
-{\cal L}(\train) & \leq & \frac{10}{9}\parens{ \hat{\cal L}(\train) + \frac{5\lmax}{N_\mathrm{Train}}\parens{KL(p(\Phi|\train),p(\Phi)})+ \ln\frac{1}{\delta}}} \\
+{\cal L}(\train) & \leq & \frac{10}{9}\parens{ \hat{\cal L}(\train) + \frac{5\lmax}{N_\mathrm{Train}}\parens{KL(p(\Phi|\train),p(\Phi)})+ \ln\frac{1}{\delta}} \\
+\\
 \\
 & = & \frac{10}{9}\parens{ \hat{\cal L}(\train) + \frac{5\lmax}{N_\mathrm{Train}}\parens{I(\Phi,\train)+ \ln\frac{1}{\delta}}}
 \end{eqnarray*}
@@ -86,7 +87,7 @@ With probability at least $1-\delta$ over the draw of $\train$ we have
 There is no obvious way to calculate this guarantee.
 
 \vfill
-However, it can be shown that $p_{A,\pop}$ is the optimal PAC-Bayeisan prior for algorithm $A$ run on data drawn from $\pop$.
+However, it can be shown that $p(\Phi)$ is the optimal PAC-Bayeisan prior for given algorithm run on training data data drawn from $\pop^N$.
 
 \slide{END}
 
