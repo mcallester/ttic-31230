@@ -9,7 +9,7 @@
 
 \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
 \bigskip
-\centerline{David McAllester, Autumn 2020}
+\centerline{David McAllester, Autumn 2022}
 
 \vfill
 \centerline{\bf Implicit Regularization}
@@ -25,11 +25,11 @@ The algorithm, especially with early stopping, can implicitly incorporate a pref
 
 \slide{Implicit Regularization in Linear Regression}
 
-Linear regression with many more parameters than data points
+Linear regression (minimizing the $L_2$ loss of a linear predictor) where we have more parameters than data points
 has many solutions.
 
 \vfill
-But SGD converges to the minimum norm solution.
+But SGD converges to the minimum norm solution ($L_2$-regularized solution) without the need for explicit regularization.
 
 \slide{Implicit Regularization in Linear Regression}
 
@@ -41,47 +41,34 @@ Any zero-loss (squared loss) solution can be projected on the span of training v
 \vfill
 It can be shown that when the training vectors are linearly independent any zero loss solution in the span of the training vectors is a least-norm solution.
 
-\slide{Implicit Regularization of SGD}
+\slide{Implict Priors}
 
-In a labeling problem a model with parameters $\Phi$ defines a model propbability $P_\Phi(y|x)$.
-
-\vfill
-This defines a log loss $-\ln P_\Phi(y|x)$ on which we do gradient descent.
+Let $A$ be any algorithm mapping a training set $\train$ to a probability density $p(\Phi|\train)$.
 
 \vfill
-Let {\color{red} $\mathrm{SGD}\!\brackets{P,\Phi_{\mathrm{Init}},\train}$} be the vector that results from running SGD on model $P$ with initial parameters $\Phi_{\mathrm{Init}}$
-using training data $\train$ (and a fixed set of hyperparameters, learning rate schedule, and fixed order in which training instances are considered,
-and fixed number of iterations).
-
-
-\slide{Implicit Regularization of SGD}
-
-To get a generalization bound when learning a continuous parameter vector we add Gaussian noise to simulate limited precision of the real numbers.
-
-$$\Phi = \mathrm{SGD}\!\brackets{P,\Phi_{\mathrm{Init}},\mathrm{Train}} + \epsilon$$
+For example, the algorithm might be SGD where we add a small amount of noise to the final parameter vector so that $p(\Phi|\train)$ is a smooth density.
 
 \vfill
-The algorithm defines an {\bf implicit prior:}
-$$p\!\parens{\Phi\;|\;P,\Phi_{\mathrm{Init}},\pop} = E_{\parens{\mathrm{Train} \sim \pop^N}}\;\;p\!\parens{\Phi\;|\;P,\Phi_{\mathrm{Init}},\train}$$
+But in general we can consider any leaning algorithm that produces a smooth density $p(\Phi|\train)$.
+
+\slide{Implicit Priors}
+
+Drawing $\train$ from $\pop^N$ and $\Phi$ from $P(\Phi|\train)$ defines a joint distribution on $\train$ and $\Phi$.  We can take the marginal distribution on $\Phi$
+to be a prior distribution (independent of any training data).
 
 \vfill
-The implicit prior $p\!\parens{\Phi\;|\;P,\Phi_{\mathrm{Init}},\pop}$ is a valid prior!  It does not depend on training data!
-
-\slide{Implict Priors: the General Case}
-
-Let $A$ be any algorithm mapping a training set $\train$ to a probability density $q_{A,\train}(\Phi)$ over model parameters $\Phi$.
+$$p(\Phi) = E_{\parens{\mathrm{Train} \sim \pop^N}}\;\;p(\Phi\;|\train)$$
 
 \vfill
-The implicit prior defined by algorithm $A$ and the given population distribution is
+It can be shown that the implicit prior $p(\Phi)$ is an optimal prior for the PAC-Bayesian generalization guarantees applied to the algorithm defining $p(\Phi|\train)$
 
-$$p_{A,\pop}(\Phi) = E_{\parens{\mathrm{Train} \sim \pop^{N}}} \;\;q_{A,\train}(\Phi)$$
-
+\vfill
 \slide{A PAC-Bayes Analysis of Implicit Regularization}
 
 \begin{eqnarray*}
-{\cal L}(q_{A,\train}) & = & E_{\tuple{x,y} \sim {\color{red}  \pop}, \;\;\Phi \sim q_{A,\train}}\;{\cal L}(\Phi,x,y) \\
+{\cal L}(\train) & = & E_{\tuple{x,y} \sim {\color{red}  \pop}, \;\;\Phi \sim p(\Phi|\train)}\;{\cal L}(\Phi,x,y) \\
 \\
-\hat{\cal L}(q_{A,\train}) & = & E_{\tuple{x,y} \sim {\color{red} \train}, \;\;\Phi \sim q_{A,\train}}\;{\cal L}(\Phi,x,y)
+\hat{\cal L}(\train) & = & E_{\tuple{x,y} \sim {\color{red} \train}, \;\;\Phi \sim p(\Phi|\train)}\;{\cal L}(\Phi,x,y)
 \end{eqnarray*}
 
 \slide{A PAC-Bayes Analysis of Implicit Regularization}
@@ -89,7 +76,11 @@ $$p_{A,\pop}(\Phi) = E_{\parens{\mathrm{Train} \sim \pop^{N}}} \;\;q_{A,\train}(
 With probability at least $1-\delta$ over the draw of $\train$ we have
 \vfill
 {\huge
-$${\cal L}(q_{A,\train}) \leq \frac{10}{9}\parens{ \hat{\cal L}(q_{A,\train}) + \frac{5\lmax}{N_\mathrm{Train}}\parens{KL(q_{A,\train},p_{A,\pop})+ \ln\frac{1}{\delta}}}$$
+\begin{eqnarray*}
+{\cal L}(\train) & \leq & \frac{10}{9}\parens{ \hat{\cal L}(\train) + \frac{5\lmax}{N_\mathrm{Train}}\parens{KL(p(\Phi|\train),p(\Phi)})+ \ln\frac{1}{\delta}}} \\
+\\
+& = & \frac{10}{9}\parens{ \hat{\cal L}(\train) + \frac{5\lmax}{N_\mathrm{Train}}\parens{I(\Phi,\train)+ \ln\frac{1}{\delta}}}
+\end{eqnarray*}
 }
 \vfill
 There is no obvious way to calculate this guarantee.
