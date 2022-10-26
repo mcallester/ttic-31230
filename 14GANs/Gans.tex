@@ -1,5 +1,5 @@
-\input /Users/davidmcallester/ICloude/tex/SlidePreamble
-\input /Users/davidmcallester/ICloude/tex/preamble
+\input ../SlidePreamble
+\input ../preamble
 
 
 \begin{document}
@@ -64,12 +64,12 @@ We want $p_\Phi(y)$ to model a natural image distribution such as the distributi
 \bigskip
 We can sample from $p_\Phi(y)$ by sampling $z$.  But we cannot compute $p_\Phi(y)$ for $y$ sampled from the population.
 
-\slidetwo{Increasing Spatial Dimension}{(ConvTranspose in PyTorch)}
+\slide{Increasing Spatial Dimension}
 
 \centerline{\includegraphics[width=5in]{\images/generator1}}
 
 \vfill
-To increase spatial dimension we use 4 times the desired number of output features.
+A conceptually simple way to increase spatial dimension is to use 4 times the desired number of output features and then ``reshape'' the result.
 
 \begin{eqnarray*}
   L'_{\ell+1}[x,y,i] & = & \sigma\left(W[\Delta X, \Delta Y, J,i]\; L'_\ell[x + \Delta X, y + \Delta Y, J]\right)
@@ -78,7 +78,12 @@ To increase spatial dimension we use 4 times the desired number of output featur
 \vfill
 We then convert $L'_{\ell+1}[X,Y,I]$ to $L'_{\ell+1}[2X,2Y,I/4]$.
 
-\slide{Generative Adversarial Networks (GANs)}
+\slide{PyTorch ConvTranspose2d}
+
+Rather than a convolution and then reshaping, ConvTranspose2d does this in one step and is more general.  It is sometimes called a ``fracionally strided'' convolution.
+
+
+\slideplain{Generative Adversarial Networks (GANs)}
 
 Let $y$ range over images.  We have a generator $p_\Phi$. For $i \in \{-1,1\}$ we define a probability distribution over pairs
 $\tuple{i,y}$ by
@@ -89,12 +94,12 @@ $\tuple{i,y}$ by
 \end{eqnarray*}
 
 \vfill
-We also have a discriminator $P_\Psi(i|y)$ that tries to determine the source $i$ given the image $y$.
+We also have a discriminator $P_\disc(i|y)$ that tries to determine the source $i$ given the image $y$.
 
 \vfill
 The generator tries to fool the discriminator.
 \begin{eqnarray*}
-\Phi^* & = & \argmax_\Phi\;\;\min_\Psi\;E_{\tuple{i,y} \sim \tilde{p}_\Phi}\;-\ln P_\Psi(i|y)
+\gen^* & = & \argmax_\gen\;\;\min_\disc\;E_{\tuple{i,y} \sim \tilde{p}_\gen}\;-\ln P_\disc(i|y)
 \end{eqnarray*}
 
 \slide{GANs}
@@ -103,11 +108,11 @@ The generator tries to fool the discriminator.
 
 \vfill
 \begin{eqnarray*}
-\Phi^* & = & \argmax_\Phi\;\;\min_\Psi\;E_{\tuple{i,y} \sim \tilde{p}_\Phi}\;-\ln P_\Psi(i|y)
+\gen^* & = & \argmax_\gen\;\;\min_\disc\;E_{\tuple{i,y} \sim \tilde{p}_\gen}\;-\ln P_\disc(i|y)
 \end{eqnarray*}
 
 \vfill
-Assuming universality of both the generator $p_\Phi$ and the discriminator $P_\Psi$ we have {\color{red} $p_{\Phi^*} = \popd$}.
+Assuming universality of both the generator $p_\gen$ and the discriminator $P_\disc$ we have {\color{red} $p_{\gen^*} = \popd$}.
 
 \vfill
 Note that this involves only discrete cross-entropy.
@@ -117,13 +122,13 @@ Note that this involves only discrete cross-entropy.
 To make the gradient descent clearer we write
 
 \vfill
-$$E_{\tuple{i,y} \sim \tilde{p}_\Phi}\;-\ln P_\Psi(i|y)$$
+$$E_{\tuple{i,y} \sim \tilde{p}_\gen}\;-\ln P_\disc(i|y)$$
 
 \vfill
 as
 
 \vfill
-$$\frac{1}{2} E_{y \sim \popd}\;-\ln P_\Psi(1|y) \;\;\;+\;\;\; \frac{1}{2} E_{z \sim {\cal N}(0,I)}\;-\ln P_\Psi(-1|y_\Phi(z))$$
+$$\frac{1}{2} E_{y \sim \popd}\;-\ln P_\disc(1|y) \;\;\;+\;\;\; \frac{1}{2} E_{z \sim {\cal N}(0,I)}\;-\ln P_\disc(-1|y_\gen(z))$$
 
 \slidetwo{Generative Adversarial Nets}{Goodfellow et al., June 2014}
 \centerline{\includegraphics[width = 9in]{\images/GAN2014}}
