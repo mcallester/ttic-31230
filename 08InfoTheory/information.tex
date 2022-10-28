@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -20,7 +20,7 @@
 
 \vfill
 \begin{eqnarray*}
-\mbox{VAE:}\;\;\;\Phi^*,\Psi^* &  = & \argmin_{\Phi,\Psi}\;E_{y,z}  \;\ln \frac{\hat{p}_\Psi(z|y)}{p_\Phi(z)}  - \ln p_\Phi(y|z) \\
+\mbox{VAE:}\;\;\;\pri^*,\dec^*,\enc^* &  = & \argmin_{\pri,\dec,\enc}\;E_{y,z}  \;- \ln \frac{p_\pri(z)p_\dec(y|z)}{p_\enc(z|y)} \\
 \end{eqnarray*}
 
 \vfill
@@ -29,11 +29,11 @@ All models are Gaussian densities.
 \vfill
 {\huge 
 \begin{eqnarray*}
-p_\Phi(z[i]) & \propto & \exp((z[i]-\mu_\Phi[i])^2/2\sigma^2_\Phi[i])\\
+p_\pri(z[i]) & \propto & \exp((z[i]-\mu_\pri[i])^2/2\sigma^2_\pri[i])\\
 \\
-p_\Psi(z[i]|y) & \propto & \exp((z[i]-\hat{z}_\Psi(y)[i])^2/2\sigma^2_\Psi(y)[i])\\
+p_\enc(z[i]|y) & \propto & \exp((z[i]-\hat{z}_\enc(y)[i])^2/2\sigma^2_\enc(y)[i])\\
 \\
-p_\Phi(y[i]|z) & \propto & \exp((y[i]-\hat{y}_\Phi(z)[i])^2/2\sigma_\Phi^2(z)[i])\\
+p_\dec(y[i]|z) & \propto & \exp((y[i]-\hat{y}_\dec(z)[i])^2/2\sigma_\dec^2(z)[i])\\
 \end{eqnarray*}
 }
 
@@ -97,13 +97,13 @@ when measuring in inches than when measuring in feet.
 
 Consider the unsupervised training objective.
 
-$$\Phi^* = \argmin_\Phi E_{y \sim \mathrm{train}}\;-\ln p_\Phi(y)$$
+$$\pri^*,\dec^* = \argmin_{\pri,\dec} E_{y \sim \mathrm{train}}\;-\ln p_{\pri,dec}(y)$$
 
 \vfill
 The training set is finite (discrete).
 
 \vfill
-For each $y$ the density $p_\Phi(y)$ can go to infinity.
+For each $y$ the density $p_{\pri,dec}(y)$ can go to infinity.
 
 \vfill
 This will drive the cross-entropy training loss to $-\infty$.
@@ -179,11 +179,11 @@ For a Gaussian VAE on images we typically have
 
 {\huge
 \begin{eqnarray*}
-\Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  - \ln p_\Phi(y|z)\\
+\pri^*,\dec^*, \enc^* & = & \argmin_{\pri,\dec,\enc}\; E_{y,z}\;\; - \ln \frac{p_\pri(z)p_\dec(y|z)}{p_\enc(z|y)}  \\
 \\
-p_\Phi(y|z) & \propto & \frac{1}{Z}\;\exp(-||y-\hat{y}_\Phi(z)||^2/2\sigma^2) \\
+p_\dec(y|z) & = & \frac{1}{Z}\;\exp(-||y-\hat{y}_\dec(z)||^2/2\sigma^2) \\
 \\
-\Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  \;{\color{red} +\; \frac{1}{2\sigma^2}||y-\hat{y}_\Phi(z)||^2 + d\ln \sigma}
+\pri^*,\dec^*, \enc^* & = & \argmin_{\pri,\dec,\enc}\; E_{y,z}\;\; KL(p_\enc(z|y),p_\pri(z))  \;{\color{red} +\; \frac{1}{2\sigma^2}||y-\hat{y}_\dec(z)||^2 + d\ln \sigma}
 \end{eqnarray*}
 }
 
@@ -194,7 +194,7 @@ The KL divergence term is not problematic. The problematic differential cross-en
 
 {\huge
 \begin{eqnarray*}
-\Phi^*, \Psi^* & = & \argmin_{\Phi,\Psi}\; E_{y\sim\popd,z \sim \hat{p}_\Psi(z|y)}\;\; \ln \frac{ \hat{p}_\Psi(z|y)}{p_\Phi(z)}  \;{\color{red} +\; \lambda\;\mathrm{Dist}(y,\hat{y}_\Phi(z))}
+\pri^*,\dec^*, \enc^* & = & \argmin_{\pri,\dec,\enc}\; E_{y,z}\;\; KL(p_\enc(z|y),p_\pri(z)) \;{\color{red} +\; \lambda\;\mathrm{Dist}(y,\hat{y}_\dec(z))}
 \end{eqnarray*}
 }
 

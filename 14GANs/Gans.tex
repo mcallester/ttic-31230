@@ -65,25 +65,23 @@ We want $p_\Phi(y)$ to model a natural image distribution such as the distributi
 We can sample from $p_\Phi(y)$ by sampling $z$.  But we cannot compute $p_\Phi(y)$ for $y$ sampled from the population.
 
 \slide{Increasing Spatial Dimension}
-
-\centerline{\includegraphics[width=5in]{\images/generator1}}
-
-\vfill
-A conceptually simple way to increase spatial dimension is to use 4 times the desired number of output features and then ``reshape'' the result.
-
-\begin{eqnarray*}
-  L'_{\ell+1}[x,y,i] & = & \sigma\left(W[\Delta X, \Delta Y, J,i]\; L'_\ell[x + \Delta X, y + \Delta Y, J]\right)
-\end{eqnarray*}
+ 
+Reducing spatial dimention with strided convolution:
+\begin{tabbing}
+For \= $x,y,j,\Delta x,\Delta y, i$ \\
+\\
+\>$L_{{\ell+1}}[{\color{red}x},{\color{red}y},j]\; \pluseq \;W[\Delta x, \Delta y, i, j] L_{{\ell}}[{\color{red} s*x} + \Delta x, {\color{red} s*y} + \Delta y, i]$
+\end{tabbing}
 
 \vfill
-We then convert $L'_{\ell+1}[X,Y,I]$ to $L'_{\ell+1}[2X,2Y,I/4]$.
+Increasing spatial dimension with PyTorch ConvTranspose2d:
+\begin{tabbing}
+For \= $x,y,j,\Delta x,\Delta y, i$ \\
+\\
+\>$L_{{\ell+1}}[{\color{red} s*x} + \Delta x, {\color{red} s*y} + \Delta y, i]\; \pluseq \;W[\Delta x, \Delta y, i, j]L_\ell[{\color{red}x},{\color{red}y},j]$
+\end{tabbing}
 
-\slide{PyTorch ConvTranspose2d}
-
-Rather than a convolution and then reshaping, ConvTranspose2d does this in one step and is more general.  It is sometimes called a ``fracionally strided'' convolution.
-
-
-\slideplain{Generative Adversarial Networks (GANs)}
+\slide{Generative Adversarial Networks (GANs)}
 
 Let $y$ range over images.  We have a generator $p_\Phi$. For $i \in \{-1,1\}$ we define a probability distribution over pairs
 $\tuple{i,y}$ by

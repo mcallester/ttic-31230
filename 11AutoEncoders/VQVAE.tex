@@ -1,5 +1,5 @@
-\input /Users/davidmcallester/ICloude/tex/SlidePreamble
-\input /Users/davidmcallester/ICloude/tex/preamble
+\input ../SlidePreamble
+\input ../preamble
 
 
 \begin{document}
@@ -17,7 +17,7 @@
 
 \slide{Gaussian VAEs for Faces 2014}
 
-We can sample faces from the VAE by sampling noise $z$ from $p_\Phi(z)$ and then sampling an image $y$ from $p_\Phi(y|z)$.
+We can sample faces from the VAE by sampling noise $z$ from $p_\pri(z)$ and then sampling an image $y$ from $p_\dec(y|z)$.
 
 \vfill
 \centerline{\includegraphics[width = 3in]{\images/VariationalFaces}}
@@ -62,113 +62,92 @@ We describe the case of just one layer.
 A separate unit describes progressive VAEs which are inspired by an analogy with progressive GANs.  Progressive VAEs provide a speculative method
 of multi-layer VQ-VAE training.
 
-\slide{The Single-Layer VQ-VAE}
+\slide{The Encoder}
 
 Let $s$ denote the image (we are using $y$ for an image coordinate).
 
 \vfill
-We have an encoder network, such as a CNN, which produces a layer with a vector at each pixel position.
+We have an encoder network, such as a CNN, which produces a layer $L_\enc(s)[X,Y,I]$ with a vector at each pixel position.
 
-\begin{eqnarray*}
-L[X,Y,I] & = & \mathrm{Enc}_\Phi(s) \\
-\end{eqnarray*}
-
-Intuitively we cluster the vectors $L(x,y,I)$ using K-means clustering to produce cluster centers where $C[k,I]$
+\vfill
+Intuitively we cluster the vectors $L_\enc(s)[x,y,I]$ using K-means clustering to produce cluster centers where $C[k,I]$
 is the cluster center vector of cluster $k$.
 
-\slide{VQ-VAE Model}
+\vfill
+The set of cluster centers $C[K,I]$ is a trained parameter of the encoder.
 
-We then replace each vector $L[x,y,I]$ by the nearest cluster center to give $\hat{L}[X,Y,I]$.
+\slide{The Encoder}
 
-{\huge
-\begin{eqnarray*}
-z[x,y] & = & \argmin_k \;||L[x,y,I] - C[k,I]|| \\
-\\
-\hat{L}[x,y,I] & = & C[z[x,y],I] \\
-\end{eqnarray*}
-}
+We then find the nearest cluster center to each vector $L_\enc(s)[x,y,I]$.
 
-The ``symbolic image'' $z[X,Y]$ is the latent variable.
+\vfill
+$$k_\enc(s)[x,y] = \argmin_k \;||L_\enc(s)[x,y,I] - C[k,I]||$$
 
-\slide{VQ-VAE Model}
+\vfill
+The ``symbolic image'' $k_\enc(s)[X,Y]$ is the latent variable $z$.
 
-Finally we decode $\hat{L}[X,Y,I]$ to get $\hat{s}_\Theta(z)$.
+\slide{The Decoder}
+
+To decode $z$ we first construct a layer using the cluster center vectors at each $x,y$ position.
+
+$$\hat{L}_\dec(z)[x,y,I] = C[k[x,y],I]$$
+
+\vfill
+Finally we decode $\hat{L}_\dec(z)[X,Y,I]$ to get an image $\hat{s}_\dec(z)$.
 
 \slide{Two-Phase Optimization}
 
 {\huge
-{\bf Phase 1:} Fix the prior $P_\Phi(z)$ at a simple (perhaps uniform) distribution and optimize the encoder $P_\Psi(z|s)$ and the decoder $P_\Theta(s|z)$.
+{\bf Phase 1:} Train the encoder and the decoder to minimize reconstruction error.
 
-\begin{eqnarray*}
-\mbox{for}\;\;\;\Theta^*,\Psi^* &  = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)}  \;\ln \frac{P_\Psi(z|s)}{P_\Phi(z)}  - \ln P_\Theta(s|z)
-\\
-\\
-\mbox{we get}\;\;\Theta^* & = & \argmin_\Theta\;E_{s \sim \pop,z \sim P_{\Psi^*}(z|s)}\left[-\ln P_\Theta(s|z)\right]
-\end{eqnarray*}
+$$\enc^*,\dec^* = \argmin_{\enc,\dec}\;E_{s \sim \pop,z \sim P_\enc(z|s)}\left[-\ln P_\dec(s|z)\right]$$
+
 
 \vfill
-{\bf Phase 2:} Train the prior $P_\Phi(z)$ holding the encoder and decoder fixed.
+{\bf Phase 2:} Train the prior holding the encoder and decoder fixed.
 
-\begin{eqnarray*}
-\Phi^* &  = & \argmin_{\Phi}\;E_{s\sim \pop,z\sim P_{\Psi^*}(z|s)}\left[-\ln P_\Phi(z)\right]
-\end{eqnarray*}
+$$\pri^*   =  \argmin_{\pri}\;E_{s\sim \pop,z\sim P_\enc(z|s)}\left[-\ln P_\pri(z)\right]$$
 
 \vfill
-{\bf Two phase training can be motivated by autonomy of the encoder.  In principle the prior and the decoder can yield a perfect model for any encoder.}
+Under the universality assumption this two phase method succeeds in modeling the popluation ---
+for any encoder it suffices to optimize the decoder and the prior.
 
-}
 
+\slide{Image Autoencoding}
 
-\slide{Phase 1 Special Case}
+The VQ-VAE for images uses
 
-For a fixed uniform prior and a deterministic encoder we get
-{\huge
-\begin{eqnarray*}
-\Theta^*,\Psi^* &  = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)}\left[\ln \frac{P_\Psi(z|s)}{P_\Phi(z)}  - \ln p_\Theta(s|z)\right] \\
-\\
-& = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)}\left[- \ln p_\Theta(s|z)\right] \\
-\\
-& = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)} \;(s - \hat{s}_\Theta(z_\Psi(s)))^2
-\end{eqnarray*}
-}
+\vfill
+$$\enc^*,\dec^* = \argmin_{\enc,\dec}\;E_{s \sim \pop}\left[||s - \hat{s}_\dec(z_\enc(s))||^2\right]$$
 
 \slide{Handling Discrete Latents}
 
-{\huge
-\begin{eqnarray*}
-\Theta^*,\Psi^* & = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)} \;(s - \hat{s}_\Theta(z_\Psi(s)))^2 
-\end{eqnarray*}
-
-\begin{eqnarray*}
-z[x,y] & = & \argmin_k \;||L[x,y,I] - C[k,I]|| \\
-\\
-\hat{L}[x,y,I] & = & C[z[x,y],I]
-\end{eqnarray*}
-}
+$$\enc^*,\dec^* = \argmin_{\enc,\dec}\;E_{s \sim \pop}\left[||s - \hat{s}_\dec(z_\enc(s))||^2\right]$$
 
 \vfill
-Since $z[x,y]$ is discrete we have $z[x,y].\grad = 0$.
+Since $z = k_\enc(s)[x,y]$ is discrete we have
+
+\vfill
+$$k_\enc(s)[x,y].\grad = 0.$$
 
 \slide{Handling Discrete Latents}
-{\huge
-\begin{eqnarray*}
-\Theta^*,\Psi^* & = & \argmin_{\Theta,\Psi}\;E_{s\sim \pop,z\sim P_\Psi(z|s)} \;(s - \hat{s}_\Theta(z_\Psi(s)))^2 
-\end{eqnarray*}
-}
 
+$$\enc^*,\dec^* = \argmin_{\enc,\dec}\;E_{s \sim \pop}\left[||s - \hat{s}_\dec(z_\enc(s))||^2\right]$$
+
+\vfill
 VQ-VAE uses ``straight-through'' gradients and ``k-means'' gradients.
 
 {\huge
 \begin{eqnarray*}
-L[x,y,I].\grad & = & \hat{L}[x,y,I].\grad + \beta(L[x,y,I] - C[z[x,y],I]) \\
+L_\enc(s)[x,y,I].\grad & = & \hat{L}_\dec(z)[x,y,I].\grad + \beta(L_\enc(s)[x,y,I] - C[k_\enc(s)[x,y],I]) \\
 \\
-C[k,I].\grad & = & \sum_{z[x,y]=k} \gamma(C[k,I] - L[x,y,I])
+C[k,I].\grad & = & \sum_{k_\enc(s)[x,y]=k} \gamma(C[k,I] - L_\enc(s)[x,y,I])
 \end{eqnarray*}
 }
 
 \slide{One Layer VQ-VAE Training Phase 2}
 
-Finally we hold the encoder fixed and train the prior $P_\Phi(z)$ to be an auto-regressive model of the symbolic image $z[X,Y]$.
+Finally we hold the encoder fixed and train the prior $P_\pri(z)$ to be an auto-regressive model of the symbolic image $k_\enc(s)[X,Y]$.
 
 \vfill
 \centerline{\includegraphics[height = 2in]{\images/VQ-OneLayer}}

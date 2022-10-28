@@ -1,5 +1,5 @@
-\input /Users/davidmcallester/ICloude/tex/SlidePreamble
-\input /Users/davidmcallester/ICloude/tex/preamble
+\input ../SlidePreamble
+\input ../preamble
 
 
 \begin{document}
@@ -8,7 +8,7 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Autumn 2021}
+  \centerline{David McAllester, Autumn 2022}
   \vfill
   \vfil
   \centerline{Progressive VAEs}
@@ -16,67 +16,53 @@
   \vfill
 
 \slide{Progressive VAEs}
-I am going to describe a general method of constructing multi-layer VQ-VAEs that is different from the method described in the VQ-VAE paper but seems (to me) better theoretically motivated.
+These slides were written ``gedanken'' (as a thought experient) while teaching this class in 2021.  They were not based on any paper.
 
 \vfill
-The method described here trains a progressive GAN generator with a VAE objective rather than a discriminator.
+While written independently of diffusion models, these slides provide a good theoretical framework for diffusion models (currently very hot).
+
+\vfill
+The original motivation for these slides was to provide a theoretically clean approach to a multi-layer VQ-VAE.
+
 
 \slide{Progressive VAEs}
 
-We consider a general VAE with a sequence of latent variables $z_1,\dots,z_n$ where we want to model an observable variable $s$.
+We consider a VAE with layers of latent variables $z_1,\dots,z_{L}$ and a population distribution on an observable variable $y$.
 
 \vfill
-In the image VQ-VAE $z_1,\dots,z_N$ is a sequence of symbolic images of increasing spacial dimension.
+The encoder will define $P_\enc(z_1|y)$ and $P_\enc(z_{\ell+1}|z_\ell)$.
 
 \vfill
-A progressive VAE has the following structure on the prior and decoder.
-$$P_\Phi(z_1,\ldots,z_N) = P_\Phi(z_1)\prod_{i=2}^N\;P_\Phi(z_i\;|\;z_{i-1})$$
-$$P_\Theta(s|z_1,\ldots,z_N) = P_\Theta(s|z_N)$$
+The decoder will define $P_\dec(z_{\ell-1}|z_\ell)$ and $P_\dec(y|z_1)$.
 
 \vfill
-This copies the structure of a progressive GAN generator.
-
-\slide{Progressive VAE Training}
-
-The discriminator of the progressive GAN is replaced by a series of encoders that go up from a given image to create the latent layers.
+Following VQ-VAE, we will train the encoder and the decoder independent of any prior.
 
 \vfill
-The encoder is analogous to a GAN inverter.
+We then train a prior on the top layer latent variable.  The top level prior and decoder allow us to sample $y$ from the model.
+
+\slide{Phase One Training}
+
+We train a encoders and decoders $\enc_1,\dec_1$, $\ldots$, $\enc_L,\dec_L$ where the distribution on $z_1,\ldots,Z_L$ is defined by $y$ and the encoder.
+
+$$\enc_1^*,\dec_1^* =\argmin_{\enc_1,\dec_1}\;E_{y,z_1} \left[-\ln P_{\dec_1}(y|z_1)\right]$$
 
 \vfill
-But here, recognizing the automony of the encoder for VAEs, we train the generator to match the inverter rather than other way around.
-
-\slide{Progressive VAE Training}
-First we train $P_\Psi(z_N|s)$ and $P_\Theta(s|z_N)$ under a fixed simple prior on $z_N$ as in phase 1 of a two phase training of a single layer.
+$$\enc_{\ell+1}^*,\dec_{\ell+1}^* = \argmin_{\enc_{\ell+1},\dec_{\ell+1}}\;E_{z_\ell,z_{\ell+1}}\;\left[-\ln P_{\dec_{\ell+1}}(z_{\ell-1}|z_\ell)\right]$$
 
 \vfill
-Next we train $P_\Psi(z_{N-1}|z_N)$ and $P_\Theta(z_N|z_{N-1})$ under a fixed simple prior on $z_{N-1}$ as in single layer phase 1 training.
+If these encoders and decoders share parameters the shared parameters are influenced by all of the above training losses (this observation was added
+after seeing DALLE-2's diffision model).
+
+\slide{Phase Two Training}
+
+$$\pri^*   =  \argmin_{\pri}\;E_{z_L}\left[-\ln P_\pri(z_L)\right]$$
 
 \vfill
-We continue in this way training $P_\Psi(z_{i-1}|z_i)$ and $P_\Theta(z_i|z_{i-1})$
-
-
-\slide{Progressive VAE Training}
-
-
-We now have an encoder $P_\Psi(z_N,\ldots,z_1|s)$ and appropriately strong decoders $P_\Theta(s|z_N)$ and $P_\Theta(z_{i-1}|z_i)$.
+Because of the autonomy of the encoder, the universality assumption implies that we get a perfect model of the population distribution on $y$.
 
 \vfill
-For each $s$ we how have a highest latent variable $z_1(s)$ and we can train a strong auto-regressive prior $P_\Phi(z_1)$.
-
-\vfill
-We then define the prior by
-
-$$P_\Phi(z_1,\ldots,z_n) = P_\Phi(z_1)\prod_{i=2}^N\;P_\Theta(z_i\;|\;z_{i-1})$$
-
-
-\slide{Progressive VAE Motivation}
-
-As in two-phase VAE training, the progressive VAE training is motivated by the autonomy of encoder.
-
-\vfill
-The encoder (the GAN inverter) is less important than the prior and the decoder (the GAN generator)
-as long as the prior and decoder are trained on latent structure defined by the encoder.
+Given the prior and the decoder we can sample images.
 
 \slide{END}
 
