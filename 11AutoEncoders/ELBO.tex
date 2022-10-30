@@ -66,7 +66,7 @@ $P_\dec(y|z)$.
 So the rate-distortion auto-encoder has three parts $P_\enc(z|y)$, $P_\pri(z)$, and $P_\dec(y|z)$.
 
 \vfill
-The {\bf variational autoencoder (VAE)} with latent variables $z$ is mathematically the same as a rate-distortion autoencoder
+The {\bf variational autoencoder (VAE)} with latent variable $z$ is mathematically the same as a rate-distortion autoencoder
 with compressed form $z$.
 
 
@@ -154,18 +154,85 @@ In such cases we are far from universality and we need to optimize the encoder. 
 
 \slide{The ELBO}
 
-For $y \sim \pop$ and $z \sim P_\enc(z|y)$ one can show
+\begin{eqnarray*}
+P_{\pri,\dec}(y) & = & \sum_z\;P_\pri(z)P_\dec(y|z) \\
+\\
+& = & E_{z\sim P_\pri(z)}\;\;\;P_\dec(y|z)
+\end{eqnarray*}
 
-$$\ln\left(\sum_z\;P_\pri(z)P_\dec(y|z)\right) \geq E_{z\sim P_\enc(z|y)}\;\left[\ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
 
 \vfill
-A Bayesian analysis treats the models $P_\pri(z)$ and $P_\dec(y|z)$ as ``truth'' and treats $y$ as evidence for $z$.
+$$\pri^*,\dec^* = \argmin_{\pri,\dec}\;E_{y \sim \pop}\;[- \ln P_{\pri,\dec}(y)]$$
+
+\slide{The ELBO}
+
+We will show
+
+$$\mathrm{ELBO:}\;\;\ln \;P_{\pri,\dec}(y) \geq E_{z\sim P_\enc(z|y)}\;\left[\ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
 
 \vfill
 The left hand side is the log-probability of the evidence $y$ and the right hand side is the {\bf evidence lower bound} or ELBO.
 
 \vfill
+$$\mathrm{VAE:}\;\; \enc^*,\pri^*,\dec^* = \argmin_{\enc,\pri,\dec}\;\;E_{y,z}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
+
+\vfill
 The negative ELBO is the loss function of the VAE.
+
+\slide{Deriving the ELBO}
+
+But even when $P_\pri(z)$ and $P_\dec(y|z)$ are samplable, if $z$ is a structured value we cannot typically compute $P_{\pri,\dec}(y)$.
+
+\vfill
+$$P_{\pri,\dec}(y) = \sum_z\;P_\pri(z)P_\dec(y|z) = E_{z\sim P_\pri(z)}\;P_\dec(y|z)$$
+
+\vfill
+The sum is too large and sampling $z$ from $P_\pri(z)$ is unlikely to sample the values that dominate the sum.
+
+\slide{Deriving the ELBO}
+
+\vfill
+A much better estimate could be achieved by importance sampling --- sampling $z$ from the posterior $P_{\pri,\dec}(z|y)$.
+
+{\huge
+\begin{eqnarray*}
+P_{\pri,\dec}(y) & = & \sum_z\;P_\pri(z) P_\dec(y|z) \\
+\\
+ & = & \sum_z\;P_{\pri,\dec}(z|y)\;\frac{P_\pri(z)P_\dec(y|z)}{P_{\pri,\dec}(z|y)} \\
+ \\
+ \\
+  & = & E_{z\sim P_{\pri,\dec}(z|y)}\;\;\;\frac{P_\pri(z)P_\dec(y|z)}{P_{\pri,\dec}(z|y)}
+\end{eqnarray*}
+}
+
+\slide{Deriving the ELBO}
+
+\begin{eqnarray*}
+P_{\pri,\dec}(y) & = & E_{z\sim P_{\pri,\dec}(z|y)}\;\;\frac{P_\pri(z)P_\dec(y|z)}{P_{\pri,\dec}(z|y)}
+\end{eqnarray*}
+
+\vfill
+Unfortunately the conditional distribution $P_{\pri,\dec}(z|y)$ also cannot be computed or sampled from.
+
+\vfill
+Variational Bayes side-steps the intractability problem by introducing another model component --- a model $P_\enc(z|y)$ to approximate the intractible $P_{\pri,\dec}(z|y)$.
+
+\slide{The Evidence Lower Bound (The ELBO)}
+
+{\huge
+\begin{eqnarray*}
+ {\color{red} \ln P_{\pri,\dec}(y)} & = & E_{z \sim {\color{red} P_\enc(z|y)}} \ln \frac{P_{\pri,\dec}(y)P_{\pri,\dec}(z|y)}{P_{\pri,\dec}(z|y)} \\
+        \\
+        \\
+ & = & E_{z \sim {\color{red} P_\enc(z|y)}} \left(\ln \frac{P_{\pri,\dec}(z,y)}{{\color{red} P_\enc(z|y)}} + \ln \frac{{\color{red} P_\enc(z|y)}}{P_{\pri,\dec}(z|y)}\right) \\
+ \\
+ \\
+  & = & \left(E_{z \sim {\color{red} P_\enc(z|y)}} \ln \frac{P_{\pri,\dec}(z,y)}{{\color{red} P_\enc(z|y)}}\right) + KL({\color{red} P_\enc(z|y)},P_{\pri,\dec}(z|y)) \\
+  \\
+  \\
+  &  \geq & E_{z \sim {\color{red} P_\enc(z|y)}} \ln \frac{P_{\pri,\dec}(z,y)}{{\color{red} P_\enc(z|y)}} \;\;\;\;\;\mbox{The ELBO}
+\end{eqnarray*}
+}
 
 \slide{The Re-Parameterization Trick}
 
