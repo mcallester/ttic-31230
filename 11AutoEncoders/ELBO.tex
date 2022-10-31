@@ -7,7 +7,7 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2021}
+  \centerline{David McAllester, Winter 2022}
   \vfill
   \vfill
   \centerline{\bf Variational Auto-Encoders (VAEs)}
@@ -259,7 +259,7 @@ Most commonly $\epsilon \in R^d$ with $\epsilon \sim {\cal N}(0,I)$ and
 $$z^i_\enc(y,\epsilon) = \hat{z}^i_\enc(y) + \sigma^i\epsilon^i.$$
 
 \vfill
-Optimizing the encoder is tricky for discrete $z$.  Discrete $z$ is handled effectively in the low-distortion regime in VQ-VAEs.
+Optimizing the encoder is tricky for discrete $z$.  Discrete $z$ is handled effectively in EM algorithms and in VQ-VAEs.
 
 \slide{EM is Alternating Optimization of the VAE}
 
