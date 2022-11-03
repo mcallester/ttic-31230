@@ -1,0 +1,106 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Winter 2022}
+  \vfill
+  \vfill
+  \centerline{\bf Diffusion Models}
+  \vfill
+  \vfill
+
+\slide{Modeling Densities on $R^d$}
+
+Consider a model density $p_\Phi(y)$ on $y \in R^d$ (for example sound waves or images).
+
+\vfill
+Ideally we want to be able to compute $p_\Phi(y)$, the denisty for any given $y$, and to also sample $y$ from $p_\Phi(y)$.
+
+\slide{Continuous Softmax}
+
+We consider the case where a density is defined by a softmax integral,
+
+\vfill
+\begin{eqnarray*}
+  p_\score(y) & = & \softmax_y\; s(y) \\
+  \\
+  & = & \frac{1}{Z} e^{\score(y)} \\
+  \\
+  Z & = & \int dy\;e^{\score(y)}
+\end{eqnarray*}
+
+\vfill
+Here $\score(y)$ is a parameterized model computing a score and defining a probability density on $R^d$.
+
+\vfill
+if $y$ is discrete, but from an exponentially large space (such as sentences) we can use MCMC sampling
+(the Metropolis algorithm or Gibbs sampling).
+
+\vfill
+In the continuous case the analogue of MCMC sampling is Langevin dynamics.
+
+\slide{next}
+
+\vfill
+In principe we can sample from $P_\score(y)$
+\vfill
+Suppose that we want to sample $y$ from this distribution.
+
+\vfill
+In theory this can be done with Langaevin dynamics.
+
+\begin{eqnarray*}
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t +  \epsilon \sqrt{\Delta t} \\
+\epsilon & \sim & {\cal N}(0,\eta\sigma^2)
+\end{eqnarray*}
+
+\vfill
+We can take this last equation to hold in the limit of arbitrarily small $\Delta t$ in which case we get a continuous time stochastic process.  This process can be written as
+
+{\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\sigma^2)$$}
+
+\slide{The Stationary Distribution with Constant Gradiant Noise}
+
+We consider the one dimensional case --- a single parameter $x$ --- and a probability density $p(x)$.
+
+\vfill
+We will assume the stationary distribution is limited to a region where the gradient noise is effectively constant.
+
+\vfill
+The gradient flow is equal to $- p(x)g$.
+
+\vfill
+The diffusion flow is  $- \frac{1}{2} \;\eta\sigma^2\;dp(x)/dx$ (see the appendix).
+
+
+\vfill
+For a stationary distribution the sum of the two flows is zero giving.
+
+\vfill
+{\color{red} $$\frac{1}{2} \eta \sigma^2 \frac{dp}{dx} = - p\frac{d{\cal L}}{dx}$$}
+
+
+\slide{The 1-D Stationary Distribution}
+
+\vspace{-2ex}
+\begin{eqnarray*}
+\frac{1}{2} \eta^2 \sigma^2 \frac{dp}{dx} & = & - \eta p\frac{d{\cal L}}{dx} \\
+\\
+\frac{dp}{p} & = & \frac{-2d{\cal L}}{\eta\sigma^2} \\
+\\
+\ln p & = & \frac{-2{\cal L}}{\eta \sigma^2} + C \\
+\\
+{\color{red} p(x)} & = & {\color{red} \frac{1}{Z}\exp\left(\frac{-2{\cal L}(x)}{\eta \sigma^2}\right)}
+\end{eqnarray*}
+
+\vfill
+We get a Gibbs distribution with $\eta$ as temperature!
+
+\slide{END}
+}
+\end{document}
