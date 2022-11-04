@@ -17,16 +17,19 @@
 
 \slide{Progressive VAEs}
 
-We consider a VAE with layers of latent variables $z_1,\dots,z_{L}$ and a population distribution on an observable variable $y$.
+Diffusion models are a special case of progrssive VAEs.
 
 \vfill
-The encoder will defines $P_\enc(z_1|y)$ and $P_\enc(z_{\ell+1}|z_\ell)$.
+A progressive VAE for an observed valriable $y$ (such as an image) has layers of latent variables $z_1,\dots,z_{L}$.
 
 \vfill
-In diffusion models the encoder is fixed (not trained) where we have that $H_\enc(z_{\ell+1}|z_\ell)$ is small (each encoder step is nearly deterministic).
+The encoder defines $P_\enc(z_1|y)$ and $P_\enc(z_{\ell+1}|z_\ell)$ (defining a Markov chain).
 
 \vfill
-We have that the mutual information
+In a diffusion model the encoder is held fixed (not trained) and defined in a way that guarantees that
+the mutual ingformation $I(z_{\ell+1},y) < I(z_\ell,y)$ and $I(z_L,y) = 0$ with $P_\enc(z_L|y)$ being noise independent of $y$.
+
+\slide{Progressive VAE Loss Function}
 
 \vfill
 The model has a prior $P_\pri(x_L)$.  In a diffusion model this prior analytically determined by the encoders and isnot trained.
