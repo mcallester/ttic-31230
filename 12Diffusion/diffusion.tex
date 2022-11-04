@@ -1,18 +1,66 @@
 \input ../SlidePreamble
 \input ../preamble
 
+
 \begin{document}
 
 {\Huge
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2022}
+  \centerline{David McAllester, Autumn 2022}
+  \vfill
+  \vfil
+  \centerline{Diffusion Models}
   \vfill
   \vfill
-  \centerline{\bf Diffusion Models}
-  \vfill
-  \vfill
+
+\slide{Progressive VAEs}
+
+We consider a VAE with layers of latent variables $z_1,\dots,z_{L}$ and a population distribution on an observable variable $y$.
+
+\vfill
+The encoder will defines $P_\enc(z_1|y)$ and $P_\enc(z_{\ell+1}|z_\ell)$.
+
+\vfill
+In diffusion models the encoder is fixed (not trained) where we have that $H_\enc(z_{\ell+1}|z_\ell)$ is small (each encoder step is nearly deterministic).
+
+\vfill
+We have that the mutual information
+
+\vfill
+The model has a prior $P_\pri(x_L)$.  In a diffusion model this prior analytically determined by the encoders and isnot trained.
+
+decoder will $P_\dec(z_{\ell-1}|z_\ell)$ and $P_\dec(y|z_1)$.
+
+\vfill
+Following VQ-VAE, we will train the encoder and the decoder independent of any prior.
+
+\vfill
+We then train a prior on the top layer latent variable.  The top level prior and decoder allow us to sample $y$ from the model.
+
+\slide{Phase One Training}
+
+We train a encoders and decoders $\enc_1,\dec_1$, $\ldots$, $\enc_L,\dec_L$ where the distribution on $z_1,\ldots,Z_L$ is defined by $y$ and the encoder.
+
+$$\enc_1^*,\dec_1^* =\argmin_{\enc_1,\dec_1}\;E_{y,z_1} \left[-\ln P_{\dec_1}(y|z_1)\right]$$
+
+\vfill
+$$\enc_{\ell+1}^*,\dec_{\ell+1}^* = \argmin_{\enc_{\ell+1},\dec_{\ell+1}}\;E_{z_\ell,z_{\ell+1}}\;\left[-\ln P_{\dec_{\ell+1}}(z_{\ell-1}|z_\ell)\right]$$
+
+\vfill
+If these encoders and decoders share parameters the shared parameters are influenced by all of the above training losses (this observation was added
+after seeing DALLE-2's diffision model).
+
+\slide{Phase Two Training}
+
+$$\pri^*   =  \argmin_{\pri}\;E_{z_L}\left[-\ln P_\pri(z_L)\right]$$
+
+\vfill
+Because of the autonomy of the encoder, the universality assumption implies that we get a perfect model of the population distribution on $y$.
+
+\vfill
+Given the prior and the decoder we can sample images.
 
 \slide{Modeling Densities on $R^d$}
 
@@ -23,11 +71,11 @@ Ideally we want to be able to compute $p_\Phi(y)$, the denisty for any given $y$
 
 \slide{Continuous Softmax}
 
-We consider the case where a density is defined by a softmax integral,
+We consider the case where a density is defined by a continuous softmax.
 
 \vfill
 \begin{eqnarray*}
-  p_\score(y) & = & \softmax_y\; s(y) \\
+  p_\score(y) & = & \softmax_y\; \score(y) \\
   \\
   & = & \frac{1}{Z} e^{\score(y)} \\
   \\
@@ -37,69 +85,56 @@ We consider the case where a density is defined by a softmax integral,
 \vfill
 Here $\score(y)$ is a parameterized model computing a score and defining a probability density on $R^d$.
 
-\vfill
-if $y$ is discrete, but from an exponentially large space (such as sentences) we can use MCMC sampling
+\slide{Langevin Dynamics --- MCMC for Continuous Densities} 
+
+If $y$ is discrete, but from an exponentially large space (such as sentences or a semantic image segmentation) we can use MCMC sampling
 (the Metropolis algorithm or Gibbs sampling).
 
 \vfill
 In the continuous case the analogue of MCMC sampling is Langevin dynamics.
 
-\slide{next}
-
-\vfill
-In principe we can sample from $P_\score(y)$
-\vfill
-Suppose that we want to sample $y$ from this distribution.
-
-\vfill
-In theory this can be done with Langaevin dynamics.
+\slide{Langevin Dynamics}
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t +  \epsilon \sqrt{\Delta t} \\
-\epsilon & \sim & {\cal N}(0,\eta\sigma^2)
+y(t + \Delta t) & = & y(t) + 2g\Delta t +  \epsilon \sqrt{\Delta t} \\
+\\
+g & = & \nabla_y\;\score(y) \\
+\\
+\epsilon & \sim & {\cal N}(0,I)
 \end{eqnarray*}
 
 \vfill
-We can take this last equation to hold in the limit of arbitrarily small $\Delta t$ in which case we get a continuous time stochastic process.  This process can be written as
+This give a well-defined distribution on functions of time in the limit as $\Delta t \rightarrow 0$.
 
-{\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\sigma^2)$$}
+{\color{red} $$dy =  2 g dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,I)$$}
 
-\slide{The Stationary Distribution with Constant Gradiant Noise}
+\slide{The Stationary Density}
 
-We consider the one dimensional case --- a single parameter $x$ --- and a probability density $p(x)$.
-
-\vfill
-We will assume the stationary distribution is limited to a region where the gradient noise is effectively constant.
+The gradient flow is equal to $ 2 p(x) \;\nabla_y \;\score(y)$.
 
 \vfill
-The gradient flow is equal to $- p(x)g$.
-
-\vfill
-The diffusion flow is  $- \frac{1}{2} \;\eta\sigma^2\;dp(x)/dx$ (see the appendix).
-
-
-\vfill
-For a stationary distribution the sum of the two flows is zero giving.
-
-\vfill
-{\color{red} $$\frac{1}{2} \eta \sigma^2 \frac{dp}{dx} = - p\frac{d{\cal L}}{dx}$$}
-
-
-\slide{The 1-D Stationary Distribution}
+The diffusion flow is  $- 2 \nabla _y\;p(y)$ (see the slides on SGD).
 
 \vspace{-2ex}
 \begin{eqnarray*}
-\frac{1}{2} \eta^2 \sigma^2 \frac{dp}{dx} & = & - \eta p\frac{d{\cal L}}{dx} \\
+\nabla_y\; p(y) & = & p(y)\; \nabla_y\; \score(y) \\
 \\
-\frac{dp}{p} & = & \frac{-2d{\cal L}}{\eta\sigma^2} \\
+\frac{dp}{p} & = & d\;\score \\
 \\
-\ln p & = & \frac{-2{\cal L}}{\eta \sigma^2} + C \\
+\ln p & = & \score + C \\
 \\
-{\color{red} p(x)} & = & {\color{red} \frac{1}{Z}\exp\left(\frac{-2{\cal L}(x)}{\eta \sigma^2}\right)}
+{\color{red} p(y)} & = & {\color{red} \frac{1}{Z}\;e^{\score(y)}} \;\;= \;\;{\color{red} \softmax_y\;\score(y)}
 \end{eqnarray*}
 
+\slide{The Stationary Density}
+
+So in a limit where $\Delta t \rightarrow 0$ but $t \rightarrow \infty$ we have $p_t(y) = \softmax_y\;s(y)$.
+
 \vfill
-We get a Gibbs distribution with $\eta$ as temperature!
+In theory this gives a sampling algorithm for $p(y) = \softmax_y \;\score(y)$.
+
+\vfill
+This is called ``score matching'' --- $Z$ remains unknown and we do not get any way of computing $Z$ or $p_\score(y)$.
 
 \slide{END}
 }
