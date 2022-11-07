@@ -90,9 +90,9 @@ For a diffusion model this expression can be converted into a form involving KL 
 & = & E_\enc -\ln \frac{p_\pri(z_L)}{p_\enc(z_L|z_0)} - \sum_{\color{red} \ell \geq 2} \ln \frac{p_\dec(z_{\ell-1}|z_\ell)}{p_\enc(z_{\ell-1}|z_\ell,z_0)} - \ln p_\dec(z_0|z_1) \\
 \\
 \\
-& = & E_\enc \left\{\begin{array}{l}KL(p_\pri(z_L),p_\enc(z_L|z_0)) \\
+& = & E_\enc \left\{\begin{array}{l}KL(p_\enc(z_L|z_0),p_\pri(z_L)) \\
 \\
-+ \sum_{\ell \geq 2} KL(p_\dec(z_{\ell-1}|z_\ell),p_\enc(z_{\ell-1}|z_\ell,z_0)) \\
++ \sum_{\ell \geq 2} KL(p_\enc(z_{\ell-1}|z_\ell,z_0),p_\dec(z_{\ell-1}|z_\ell)) \\
 \\
 - \ln p_\dec(z_0|z_1) \end{array} \right.
 \end{eqnarray*}
