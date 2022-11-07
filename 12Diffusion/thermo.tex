@@ -1,0 +1,135 @@
+\input ../SlidePreamble
+\input ../preamble
+
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Autumn 2022}
+  \vfill
+  \vfil
+  \centerline{The Thermodynamic Interpretation of Diffusion Models}
+  \vfill
+  \centerline{Why are they called ``Diffusion'' Models?}
+  \vfill
+  \vfill
+
+ 
+\slidetwo{Generative Modeling by Estimating Gradients ...}
+  {Song and Erman, July 2019}
+
+Consider a model density defined by a continuous softmax on a model score.
+
+\vfill
+\begin{eqnarray*}
+  p_\score(y) & = & \softmax_y\; \score(y) \\
+  \\
+  & = & \frac{1}{Z} \;e^{\score(y)} \\
+  \\
+  Z & = & \int e^{\score(y)}\;dy
+\end{eqnarray*}
+
+\vfill
+Here $\score(y)$ is a parameterized model computing a score and defining a probability density on $R^d$.
+
+\slidetwo{Sampling from a Continuous Softmax}{Langevin Dynamics}
+
+If $y$ is discrete, but from an exponentially large space (such as sentences or a semantic image segmentation) we can use MCMC sampling
+(the Metropolis algorithm or Gibbs sampling).
+
+\vfill
+In the continuous case we can use Langevin dynamics.
+
+\slide{Langevin Dynamics for Sampling From a Model}
+
+Noisy gradient ascent on score.
+\begin{eqnarray*}
+  y(t+ \Delta t) & = & y(t) + \eta g \Delta t +  \sigma \epsilon \sqrt{\Delta t} \\
+\\
+g & = & \nabla_y\;\score(y) \\
+\\
+\epsilon & \sim & {\cal N}(0,I)
+\end{eqnarray*}
+
+\vfill
+This give a well-defined distribution on functions of time in the limit as $\Delta t \rightarrow 0$.
+
+{\color{red} $$dy =  \eta g dt + \sigma \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,I)$$}
+
+\slide{Langevin Dynamics for Sampling From a Model}
+
+$$dy =  \eta g dt + \sigma \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,I)$$
+
+\vfill
+This has stationary (equilibrium) density.
+
+\vfill
+The derivation is mathematically identical to the derivation of the stationary distribution of SGD at a learning rate $\eta$ and noise covariance $\Sigma$.
+
+\vfill
+However, here we have isotropic noise rather than arbitrary gradient noise.
+
+\vfill
+Isotropic noise always yields a Gibbs distribution.
+
+\vfill
+Imposing isotropic noise is called Langevin dynamics.
+
+
+\slide{The Stationary Density}
+
+To derive the stationary density we consider a gradient flow and a {\bf diffusion flow} as a function of density $p(y)$.
+
+\vfill
+The gradient flow is $\eta p(y) \nabla_y \score(y)$ and the diffusion flow is $\frac{1}{2}\eta\sigma^2 \nabla_y p(y)$
+
+\vfill
+Setting them to be opposite and solving the resulting differential equation gives
+
+\vfill
+$$p(y)  = \frac{1}{Z}\;e^{\frac{2\score(y)}{\eta\sigma^2}}$$
+
+
+\slide{The Stationary Density}
+
+$$p(y)  = \frac{1}{Z}\;e^{\frac{2\score(y)}{\eta\sigma^2}}$$
+
+\vfill
+Setting $\eta = 1$ and $\sigma^2 = 2$ gives
+
+\vfill
+$$p(y)  = \frac{1}{Z}\;e^{\score(y)} \;\;= \;\;\softmax_y\;\score(y)$$
+
+\vfill
+Running Langevin dynamics long enough (like the age of the universe) will yield a sample from the softmax distribution.
+
+\slide{Score Matching}
+
+In score matching we train $g(y)$ rather than $\score(y)$ so as to make $g(y) \approx \nabla_y \;\score(y)$
+
+\vfill
+The training objective for the decoder of a diffusion model can be viewed as training an update direction $g$
+to approximate $\nabla_y \ln \pop(y)$.
+
+\vfill
+{\bf Warning:} The term ``score'' in score matching refers to the gradient vector $\nabla_y\; \score(y)$ rather than to the scalar ``score'' used in the softmax.
+
+\slide{Simulated Annealing}
+
+In simulated annealing one tries to avoid local optima by first running at a high temperature and then then gradually reducing the temperature.
+
+\vfill
+In the diffusion model $\sigma_\ell$ increases with increasing $\ell$ which is claimed to be an analogy with simulated annealing.
+
+\vfill
+However, simulated annealing corresponds to adding noise {\bf in sampling} rather than adding noise to a population sample.
+
+\vfill
+The VAE interpretation of diffusion models does not rely on Langevin dynamics, score matching or simulated annealing.
+
+\slide{END}
+}
+\end{document}

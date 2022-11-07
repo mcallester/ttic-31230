@@ -11,133 +11,204 @@
   \centerline{David McAllester, Autumn 2022}
   \vfill
   \vfil
-  \centerline{Diffusion Models}
+  \centerline{Diffusion Model Basics}
   \vfill
   \vfill
+
+\slidetwo{Denoising Diffusion Probabilistic Models}{Ho, Jain and Abbeel, June 2020}
+
+\centerline{\includegraphics[width = 4in]{\images/DiffCeleb}}
+
 
 \slide{Progressive VAEs}
 
-Diffusion models are a special case of progrssive VAEs.
+Diffusion models are a special case of progressive VAEs.
 
 \vfill
-A progressive VAE for an observed valriable $y$ (such as an image) has layers of latent variables $z_1,\dots,z_{L}$.
+A progressive VAE has layers of latent variables $z_1,\dots,z_{L}$.
 
 \vfill
-The encoder defines $P_\enc(z_1|y)$ and $P_\enc(z_{\ell+1}|z_\ell)$ (defining a Markov chain).
+The encoder defines $P_{\enc_0}(z_1|y)$ and $P_{\enc_\ell}(z_{\ell+1}|z_\ell)$ (defining a Markov chain).
 
 \vfill
-In a diffusion model the encoder is held fixed (not trained) and defined in a way that guarantees that
-the mutual ingformation $I(z_{\ell+1},y) < I(z_\ell,y)$ and $I(z_L,y) = 0$ with $P_\enc(z_L|y)$ being noise independent of $y$.
-
-\slide{Progressive VAE Loss Function}
+We have a prior $P_\pri(z_L)$ and a decoder defined by $P_{\dec_\ell}(z_{\ell}|z_{\ell+1})$ and $P_{\dec_0}(y|z_1)$.
 
 \vfill
-The model has a prior $P_\pri(x_L)$.  In a diffusion model this prior analytically determined by the encoders and isnot trained.
+Ho et al. take {\color{red} $L = 1000$.}
 
-decoder will $P_\dec(z_{\ell-1}|z_\ell)$ and $P_\dec(y|z_1)$.
+\slide{The Ho et al. Diffusion Model}
 
-\vfill
-Following VQ-VAE, we will train the encoder and the decoder independent of any prior.
-
-\vfill
-We then train a prior on the top layer latent variable.  The top level prior and decoder allow us to sample $y$ from the model.
-
-\slide{Phase One Training}
-
-We train a encoders and decoders $\enc_1,\dec_1$, $\ldots$, $\enc_L,\dec_L$ where the distribution on $z_1,\ldots,Z_L$ is defined by $y$ and the encoder.
-
-$$\enc_1^*,\dec_1^* =\argmin_{\enc_1,\dec_1}\;E_{y,z_1} \left[-\ln P_{\dec_1}(y|z_1)\right]$$
+The encoder is not trained --- The encoder just adds noise.
 
 \vfill
-$$\enc_{\ell+1}^*,\dec_{\ell+1}^* = \argmin_{\enc_{\ell+1},\dec_{\ell+1}}\;E_{z_\ell,z_{\ell+1}}\;\left[-\ln P_{\dec_{\ell+1}}(z_{\ell-1}|z_\ell)\right]$$
+The encoder is designed so that $Z_L$ is distributed as ${\cal N}(0,I)$.  The prior is not trained.
 
 \vfill
-If these encoders and decoders share parameters the shared parameters are influenced by all of the above training losses (this observation was added
-after seeing DALLE-2's diffision model).
+The decoder is a single network applied to all layers but taking the layer as an argument.
 
-\slide{Phase Two Training}
+\slide{A Gaussian Noise Encoder}
 
-$$\pri^*   =  \argmin_{\pri}\;E_{z_L}\left[-\ln P_\pri(z_L)\right]$$
-
-\vfill
-Because of the autonomy of the encoder, the universality assumption implies that we get a perfect model of the population distribution on $y$.
+We assume $y \in R^d$ and $z_\ell \in R^d$.
 
 \vfill
-Given the prior and the decoder we can sample images.
-
-\slide{Modeling Densities on $R^d$}
-
-Consider a model density $p_\Phi(y)$ on $y \in R^d$ (for example sound waves or images).
+In the case of images every $z_\ell$ is an image with the same dimension as $y$.
 
 \vfill
-Ideally we want to be able to compute $p_\Phi(y)$, the denisty for any given $y$, and to also sample $y$ from $p_\Phi(y)$.
-
-\slide{Continuous Softmax}
-
-We consider the case where a density is defined by a continuous softmax.
+For notational convenience we define $z_0 = y$.
 
 \vfill
-\begin{eqnarray*}
-  p_\score(y) & = & \softmax_y\; \score(y) \\
-  \\
-  & = & \frac{1}{Z} e^{\score(y)} \\
-  \\
-  Z & = & \int dy\;e^{\score(y)}
-\end{eqnarray*}
+The index $\ell$ will always range from $1$ to $L$ where $z_{\ell-1}$ might be $z_0$.
 
 \vfill
-Here $\score(y)$ is a parameterized model computing a score and defining a probability density on $R^d$.
+The encoder is fixed (not trained) and is defined by a sequence of noise levels $\sigma_1$, $\ldots$, $\sigma_L$ where for $1 \leq \ell \leq L$ we have
 
-\slide{Langevin Dynamics --- MCMC for Continuous Densities} 
+$$z_\ell = \sqrt{1-\sigma^2_\ell}\;z_{\ell-1} + \sigma_\ell \epsilon\;\;\;\;\epsilon \sim {\cal N}(0,I)$$
 
-If $y$ is discrete, but from an exponentially large space (such as sentences or a semantic image segmentation) we can use MCMC sampling
-(the Metropolis algorithm or Gibbs sampling).
+\slide{A Gaussian Noise Encoder}
+
+$$z_\ell = \sqrt{1-\sigma^2_\ell}\;z_{\ell-1} + \sigma_\ell \epsilon\;\;\;\;\epsilon \sim {\cal N}(0,I)$$
 
 \vfill
-In the continuous case the analogue of MCMC sampling is Langevin dynamics.
+This is designed so that if $z_\ell$ as unit variance in each dimension then $z_{\ell+1}$ also has unit variance in each dimension.
 
-\slide{Langevin Dynamics}
+\vfill
+$z_0 = y$ is scaled so that each coordinate is in the interval $[0,1]$.
 
-\begin{eqnarray*}
-y(t + \Delta t) & = & y(t) + 2g\Delta t +  \epsilon \sqrt{\Delta t} \\
+\vfill
+The constant variance of $z_\ell$ is important because the same decoder is being used at all $\ell$ and we want
+the scale of the decoder input to be independent of $\ell$.
+
+\slide{A Gaussian Noise Encoder}
+
+$$z_\ell = \sqrt{1-\sigma^2_\ell}\;z_{\ell-1} + \sigma_\ell \epsilon\;\;\;\;\epsilon \sim {\cal N}(0,I)$$
+
+\vfill
+Note that the mean of $z_\ell$ equals $\sqrt{1-\sigma_\ell}$ times the mean of $z_{\ell-1}$.
+
+\vfill
+This repeated reduction drives the mean of $z_L$ to a negligible level.
+
+\vfill
+We then get that $z_L$ is distributed as ${\cal N}(0,I)$.
+
+\slide{A Gaussian Noise Encoder}
+
+$$z_\ell = \sqrt{1-\sigma^2_\ell}\;z_{\ell-1} + \sigma_\ell \epsilon\;\;\;\;\epsilon \sim {\cal N}(0,I)$$
+
+\vfill
+They increase the noise at higher levels.  After some experimentation they use
+
+$$\sigma^2_\ell = 10^{-4} + .02\;\frac{\ell}{L}\;\;\;(\mbox{with $L = 1000$)}$$
+
+
+
+\slide{Direct Sampling of $z_\ell$}
+
+We can sample from $P_\enc(z_\ell|z_0)$ directly
+
+$$\mbox{define}\;\;\;\alpha_\ell = \prod_{\ell = 1}^\ell \sqrt{1-\sigma^2_\ell}$$
+
+\vfill
+
+$$z_\ell = \alpha_\ell z_0 + \sqrt{1-\alpha^2_\ell} \;\epsilon\;\;\;\epsilon \sim {\cal N}(0,I)$$
+
+\vfill
+The variance of the noise term can be derived by solving a recurrence relation or by observing that $z_\ell$ must have unit variance for unit variance $z_0$.
+
+\slide{A Natural but Problematic Loss Function}
+
+$$\dec^* = \argmin_{\dec}\;\;E_{z_0,\ell,z_{\ell-1},z_\ell} \;\;||z_{\ell-1} - \dec(z_\ell,\ell)||^2$$
+
+\vfill
+Here $z_{\ell-1}$ is sampled directly from $z_0$ and $z_\ell$ is sampled from $z_{\ell-1}$.
+
+\slide{Reducing the Decoder's Dependence on $\ell$.}
+
+We have already reduced the decoder's dependence on $\ell$ by making $z_\ell$ have unit variance for all $\ell$.
+
+\vfill
+But predicting $z_{\ell-1}$ from $z_\ell$ behaves differently for different $\ell$.
+
+\vfill
+For small $\ell$, where $\sigma_\ell$ is small, $z_{\ell-1}$ is near $z_\ell$.
+For large $\ell$ we have that $z_{\ell-1}$ is far from $z_\ell$.  Since the same network is used at all $\ell$ we want to reduce the dependence on $\ell$.
+
+\vfill
+This can be accomplished by using an $\epsilon$-decoder.
+
+\slide{An $\epsilon$-Decoder}
+
+First we solve for $z_{\ell-1}$ in terms of $z_\ell$ and $\epsilon$.
+
+$$z_\ell = \sqrt{1-\sigma^2_\ell}\;z_{\ell-1} + \sigma_\ell \epsilon\;\;\;\;\epsilon \sim {\cal N}(0,I)$$
+
+\vfill
+$$z_{\ell-1} = \frac{1}{\sqrt{1-\sigma_\ell^2}}(z_\ell - \sigma_\ell \epsilon)$$
+
+\vfill
+$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon_\Phi(z_\ell,\ell)\right)\; +\; \sigma_\ell\delta\;\;\;\;\;\delta \sim {\cal N}(0,I)$$
+
+\vfill
+Here $\epsilon_\Phi(z_\ell,\ell)$ is a trained network whose target value has the same behavior at all levels of $\ell$.
+
+\slide{An $\epsilon$-Decoder}
+
+$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon_\Phi(z_\ell,\ell)\right)$$
+
+\vfill
+However, SGD on the loss $\left|\left|z_{\ell-1} - \dec(z_\ell,\ell)\right|\right|^2$ now scales the SGD gradients on $\epsilon$ differently for different $\ell$.
+
+\vfill
+We effectively have different learning rates for different $\ell$.
+
+\slide{Training the $\epsilon$-Decoder}
+
+To make the scale of the SGD gradients independent of $\ell$ we use the following loss.
+
+\vfill
+$$\epsilon^* = \argmin_{\epsilon}
+\left\{\begin{array}{l}\;E_{z_0,\ell,z_{\ell-1},\epsilon \sim {\cal N}(0,I)}\; \\
 \\
-g & = & \nabla_y\;\score(y) \\
-\\
-\epsilon & \sim & {\cal N}(0,I)
-\end{eqnarray*}
+~\;\;\;\;\left|\left|\epsilon - \epsilon_\Phi\left(z_\ell(z_{\ell-1},\epsilon),\ell)\right)\right|\right|^2
+\end{array}\right.$$
 
 \vfill
-This give a well-defined distribution on functions of time in the limit as $\Delta t \rightarrow 0$.
+We now repeatedly sample $z_0$, $\ell$, $z_{\ell-1}$ and $\epsilon$ and do gradient updates on $\epsilon_\Phi$.
 
-{\color{red} $$dy =  2 g dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,I)$$}
+\slide{$\epsilon$-Decoder Architecture}
 
-\slide{The Stationary Density}
+The $\epsilon$-decoder is a U-Net.
 
-The gradient flow is equal to $ 2 p(x) \;\nabla_y \;\score(y)$.
+\centerline{\includegraphics[width = 8in]{\images/U-NET}}
 
-\vfill
-The diffusion flow is  $- 2 \nabla _y\;p(y)$ (see the slides on SGD).
+\slide{Voila}
 
-\vspace{-2ex}
-\begin{eqnarray*}
-\nabla_y\; p(y) & = & p(y)\; \nabla_y\; \score(y) \\
-\\
-\frac{dp}{p} & = & d\;\score \\
-\\
-\ln p & = & \score + C \\
-\\
-{\color{red} p(y)} & = & {\color{red} \frac{1}{Z}\;e^{\score(y)}} \;\;= \;\;{\color{red} \softmax_y\;\score(y)}
-\end{eqnarray*}
+\centerline{\includegraphics[width = 4in]{\images/DiffCeleb}}
 
-\slide{The Stationary Density}
+\slide{Progressive VAEs}
 
-So in a limit where $\Delta t \rightarrow 0$ but $t \rightarrow \infty$ we have $p_t(y) = \softmax_y\;s(y)$.
+Diffusion models are a special case of progressive VAEs.
 
 \vfill
-In theory this gives a sampling algorithm for $p(y) = \softmax_y \;\score(y)$.
+A progressive VAE has layers of latent variables $z_1,\dots,z_{L}$.
 
 \vfill
-This is called ``score matching'' --- $Z$ remains unknown and we do not get any way of computing $Z$ or $p_\score(y)$.
+It is not clear whether the diffusion model is the best way to do this.
+
+\vfill
+It could be that the important idea is simply having large $L$ with
+$I(z_0,z_\ell)$ going from $H(z_0)$ to 0 as $\ell$ goes from $0$ to $L$.
+
+
+\slide{Progressive VAEs}
+
+A progressive VAE has layers of latent variables $z_1,\dots,z_{L}$.
+
+\vfill
+It seems more natural for image modeling to have spacial resolution decline with increasing $\ell$.
+
+\vfill
+This should eliminate the need for U-Nets and reduce computational cost.
 
 \slide{END}
 }
