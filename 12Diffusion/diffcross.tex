@@ -102,11 +102,10 @@ For a diffusion model this expression can be converted into a form involving KL 
 \slide{Measuring The Cross Entropy}
 
 {\huge
-\begin{eqnarray*}
-- \ln p_\gen(z_0) & \leq &
-E_\enc \left\{\begin{array}{l}KL(p_\pri(z_L),p_\enc(z_L|z_0)) \\
+  \begin{eqnarray*}
+    - \ln p_\gen(z_0) & \leq & E_\enc \left\{\begin{array}{l}KL(p_\enc(z_L|z_0),p_\pri(z_L)) \\
 \\
-+ \sum_{\ell > 1} KL(p_\dec(z_{\ell-1}|z_\ell),p_\enc(z_{\ell-1}|z_\ell,z_0)) \\
++ \sum_{\ell \geq 2} KL(p_\enc(z_{\ell-1}|z_\ell,z_0),p_\dec(z_{\ell-1}|z_\ell)) \\
 \\
 - \ln p_\dec(z_0|z_1) \end{array} \right.
 \end{eqnarray*}
@@ -120,37 +119,16 @@ the computed Gaussian rounds to the actual discrete value.
 
 \slide{Optimizing the Decoder Variances}
 
-$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right)\; +\; \tilde{\sigma}_\ell\delta\;\;\;\;\;\delta \sim {\cal N}(0,I)$$
+We now introduce a decoder network $\tilde{\sigma}_\Psi(z_\ell,\ell) \in R^d$ to give the decoder noise level.
 
 \vfill
-Nichol and Dhariwal train the decoder noise $\tilde{\sigma}_\ell$ with the VLB objective.
+$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right)\; +\; \tilde{\sigma}_\Psi(z_\ell,\ell)\odot\delta\;\;\;\;\delta \sim {\cal N}(0,I)$$
 
 \vfill
-This significantly improves the value of the VLB (not surprising).
-
-\slide{Optimizing the Decoder Variances}
-
-$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right)\; +\; \tilde{\sigma}_\ell\delta\;\;\;\;\;\delta \sim {\cal N}(0,I)$$
+The decoder noise network $\tilde{\sigma}_\Psi(z_\ell,,\ell) \in R^d$ is trained with the VLB objective.
 
 \vfill
-Training $\tilde{\sigma}_\ell$ by optimizing the VLB gives $\tilde{\sigma}_\ell < \sigma_\ell$ which makes the decoder more deterministic.
-
-\vfill
-We can think of $\tilde{\sigma}_\ell$ as secifying the numerical precision of the decoder output.
-
-\vfill
-Making the decoder more deterministic (higher precision) reduces the required number of levels from 1000 to 50 while still achieving good cross entropy loss.
-
-\slide{Optimizing the Decoder Variances}
-
-Song, Meng and Ermon, October 2021, found independently that deterministic decoding allows the number of levels to be reduced while achieving similar FID scores.
-
-\vfill
-The deterministic decoding version is called DDIM (denoising diffusion implicit models) as opposed to the original version DDPM
-(denoising diffusion probabilistic models).
-
-\vfill
-But decoding over infinite precision reals destroys the VLB.
+This improves the value of the VLB.
 
 \slidetwo{Diffusion Models Beat GANs on Image Synthesis}{Dharwali and Nichol, May 2021}
 
