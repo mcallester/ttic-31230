@@ -44,9 +44,21 @@ DALLE combines diffusion models with CLIP.
 
 \centerline{\includegraphics[height= 4in]{\images/CLIPTraining}}
 
-\slide{}
 
-Slides Under development.
+\slidetwo{GLIDE: Towards Photorealistic Image Generation ...}
+         {Nichol, Dhariwal, Ramesh, et al., March 2022}
+
+For text $x$ let $C_T(x) \in R^I$ be the CLIP embedding of $x$.
+
+\vfill
+For a (possibly noised) image $z$ let $C_I(z)$ be a CLIP embedding of $z$.
+
+\vfill
+Here CLIP is re-trained to handle noised images.
+
+A first approach to is to define the update direction by
+
+$\epsilon(z_\ell,
 
 \slide{END}
 }

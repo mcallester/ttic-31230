@@ -11,12 +11,33 @@
   \centerline{David McAllester, Autumn 2022}
   \vfill
   \vfil
-  \centerline{Improving Diffusion Models}
+  \centerline{The DALL$\cdot$E-2 Code Base}
   \vfill
   \vfill
 
 \slidetwo{Improved Denoising Diffusion Probabilistic Models}
 {Nichol and Dhariwal, February 2021}
+
+\vfill
+This paper provides a method for training an ``uncertinty level'' for each color channel of each pixel.
+
+\vfill
+Later papers in the code base use these uncertainty levels to weight guidance strength for each color channel of each pixel in ``guided diffusion''.
+
+\vfill
+Guided diffusion with channel-level guiding strength is used in DALLE-2.
+
+\slide{Getting Per-Pixel Decoder Uncertainty}
+
+Per-pixel decoder yncertainty will be estimated by optimizing the VAE bound on cross-entropy loss.
+
+\vfill
+These papers call it the variational lower bound (VLB) rather than the ELBO.
+
+\vfill
+The paper is written from the perspective of simply optimizing the VLB.
+
+\slide{Why Optimize the VLB?}
 
 We can compare any two models of a distribution by computing upper bounds on cross-entropy loss for each model.
 
@@ -33,12 +54,9 @@ For image models the cross entropy is generally refered to as negative log likel
 
 \centerline{\includegraphics[width=5in]{\images/DiffNLL}}
 
-\slide{Reducing the variance of the VLB}
+\slide{Rewriting the VLB}
 
-The community seems to be now calling the ELBO the VLB (variational lower bound).  Perhaps a slight to Bayesians.
-
-\vfill
-For a progressive VAE with layers $z_0,\ldots,z_L$ where $z_0 = y$ the VLB (ELBO) gives
+For a progressive VAE with layers $z_0,\ldots,z_L$ where $z_0 = y$ the VLB is
 
 {\huge
 \begin{eqnarray*}
@@ -50,22 +68,7 @@ For a progressive VAE with layers $z_0,\ldots,z_L$ where $z_0 = y$ the VLB (ELBO
 \end{eqnarray*}
 }
 
-\slide{Reducing the variance of the VLB}
-
-{\huge
-\begin{eqnarray*}
-- \ln p_{\gen}(z_0) & \leq & E_\enc\; -\ln \frac{p_\gen(z_L,\ldots,z_0)}{p_\enc(z_1,\ldots,z_L|z_0)}
-\\
-\\
-\\
-& = & E_\enc -\ln p_\pri(z_L) - \sum_{\ell } \frac{\ln p_\dec(z_{\ell-1}|z_\ell)}{\ln p_\enc(z_\ell|z_{\ell-1})}
-\end{eqnarray*}
-}
-
-\vfill
-For a diffusion model this expression can be converted into a form involving KL divergences between Gaussians which can be calculated analytically.
-
-\slide{Measuing Cross Entropy}
+\slide{Rewriting the VLB}
 
 {\huge
 \begin{eqnarray*}
@@ -79,8 +82,7 @@ For a diffusion model this expression can be converted into a form involving KL 
 \end{eqnarray*}
 }
 
-
-\slide{Measuring The Cross Entropy}
+\slide{Rewriting the VLB}
 
 {\huge
 \begin{eqnarray*}
@@ -99,7 +101,7 @@ For a diffusion model this expression can be converted into a form involving KL 
 }
 
 
-\slide{Measuring The Cross Entropy}
+\slide{Rewriting the VLB}
 
 {\huge
   \begin{eqnarray*}
@@ -117,7 +119,7 @@ All of the KL-divergences can be computed analytically from Gaussians.  This red
 Nichol and Dhariwal compute $- \ln p_\dec(z_0|z_1)$ by treating each image channel as a discrete set of 256 values and computing the probability that a draw from
 the computed Gaussian rounds to the actual discrete value.
 
-\slide{Optimizing the Decoder Variances}
+\slide{Optimizing Per-Channel Decoder Variances}
 
 We now introduce a decoder network $\tilde{\sigma}_\Psi(z_\ell,\ell) \in R^d$ to give the decoder noise level.
 
@@ -130,77 +132,65 @@ The decoder noise network $\tilde{\sigma}_\Psi(z_\ell,,\ell) \in R^d$ is trained
 \vfill
 This improves the value of the VLB.
 
+\slide{Optimizing Per-Channel Decoder Variances}
+
+$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right)\; +\; \tilde{\sigma}_\Psi(z_\ell,\ell)\odot\delta\;\;\;\;\delta \sim {\cal N}(0,I)$$
+
+\vfill
+One can interpret $\tilde{\sigma}(z_\ell,\ell)[i]$ is a level of uncertainty in the decoder estimate of $\epsilon(z_\ell,\ell)[i]$.
+
+\vfill
+The more uncertain the model $\epsilon(z_\ell,\ell)$ the more guidance should be used in adjusting it.
+
 \slidetwo{Diffusion Models Beat GANs on Image Synthesis}{Dharwali and Nichol, May 2021}
 
+This paper introduces guided diffusion.
+
+\vfill
+A form of guided diffusion is used in DALLE-2.
+
+\slidetwo{Diffusion Models Beat GANs on Image Synthesis}{Dharwali and Nichol, May 2021}
+
+Guided diffusion is introduced as an approach to class-conditional image generation for ImageNet.
+
+\vfill
 \centerline{\includegraphics[width = 6in]{\images/DiffGAN}}
 
+\slide{Class-Conditional Image Generation}
+
+Previous approaches have trained a model (a GAN) for each class.
+
+\vfill
+Here we will train a a single unconditional diffusion model $\epsilon(z_\ell,\ell)$ on the entire Imagenet distribution.
+
+\vfill
+We also assume a classifier $P(x|y)$ where $x$ is the ImageNert label for image $y$.
+
+\vfill
+We will generate an image by using $P(x|y)$ to ``guide'' generation from the unconditional model $\epsilon(z_\ell,\ell)$.
+
 \slide{Class-Conditional Generation}
 
-Consider training a model $\Phi$ on pairs $(x,y)$ using
-
-$$\Phi^* = \argmin_\Phi\;-\ln\;P_\Phi(y|x)$$
+We assume a model of $P(x|y)$ where $y$ is an image and $x$ is a class label.
 
 \vfill
-We are interested in the case where $y$ is an image or sound wave and we consider sampling $y$ from $P_\Phi(y|x)$.
+We want $P(y|x)$.
 
 \vfill
-Here we consider the case where $x$ is a class label (as in a class conditional GAN).
+$$P_\Phi(y|x) = \frac{P(y)P(x|y)}{P(x)} \propto P(y)P(x|y)$$
 
 \vfill
-We assume that we can train a model of $P(x|y)$  --- for example an ImageNet classifier.
+Score-matching interprets $\epsilon(z_\ell,\ell)$ as $- \nabla_z \ln p(z)$.
 
-\slide{Class-Conditional Generation}
+\slide{Using the Score Matching Interpretation}
 
-$$\Phi^* = \argmin_\Phi\;-\ln\;P_\Phi(y|x)$$
-
-\vfill
-We assume a model of $P(x|y)$.
-
-\vfill
-Sampling $y$ from $P_\Phi(y|x)$ can be done by sampling the pair $(y,x)$ from a the joint distribution defined by $p_\Phi(y)P(x|y)$.
-
-\slide{Using the Score Matching (thermodynamic) Interpretation}
-
-Compare the decoding update
-$$z_{\ell-1} = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell) \right)\; +\; \tilde{\sigma}_\ell\delta$$
-
-\vfill
-with the thermodynamic interpretation
-
-$$z_{t+1} = z_t + \nabla_z \;\score(z) + \sigma \delta$$
-
-
-\slide{Using the Score Matching (thermodynamic) Interpretation}
+We now want
 \begin{eqnarray*}
-  z_{\ell-1} & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell) \right)\; +\; \tilde{\sigma}_\ell\delta \\
+  \dec(z_\ell,\ell) & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell + \sigma_\ell\; \nabla_z \;\ln \;P(z)P(x|z)\;\right)\; +\; \tilde{\sigma}_\ell\delta \\
   \\
-  z_{t+1} & = & z_t + \nabla_z\; \score(z) + \sigma \delta
+  & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell) + {\color{red} s \nabla_{z} \ln P(x|z)}\right)\; +\; \tilde{\sigma}_\ell\delta
 \end{eqnarray*}
 
-
-\vfill
-Ignoring the expansion term we get that $- \sigma_\ell \epsilon(z_\ell,\ell)$ is identitified with $\nabla_z\; \score(z)$.
-
-\slide{Using the Score Matching (thermodynamic) Interpretation}
-\begin{eqnarray*}
-  z_{\ell-1} & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell) \right)\; +\; \tilde{\sigma}_\ell\delta \\
-  \\
-  z_{t+1} & = & z_t + \nabla_z\; \score(z) + \sigma \delta
-\end{eqnarray*}
-
-
-\vfill
-
-\vfill
-Taking $\score(z,x) = \score(z) + \ln P(x|z)$, and introducing a hyperparameter $s$, we can do an update on the joint score as
-
-
-$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell) + {\color{red} s \nabla_{z} \ln P(x|z)}\right)\; +\; \tilde{\sigma}_\ell\delta$$
-
-
-\slide{Using the Score Matching (thermodynamic) Interpretation}
-
-$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell) + {\color{red} s \nabla_{z} \ln P(x|z)}\right)\; +\; \tilde{\sigma}_\ell\delta$$
 
 \vfill
 Empirically it was found that $s > 1$ is needed to get good class specificity of the generated image.
@@ -209,92 +199,46 @@ Empirically it was found that $s > 1$ is needed to get good class specificity of
 
 Various architectural choices in the U-Net were optimized based on FID score (not NLL).
 
-\slide{Voila: Class-Conditional Image Generation}
 
-\centerline{\includegraphics[width = 6in]{\images/DiffGAN}}
+\slidetwo{Image Super-Resolution via Iterative Refinement}{Saharia et al., April 2021}
+
+They construct a super-resolution diffusion model as conditional model for pairs for pairs $(x,y)$ with $x$ is a downsampling of $y$.
+
+\vfill
+\centerline{\includegraphics[width = 4 in]{\images/DiffUp1}}
+
+\slidetwo{Cascaded Diffusion Models ...}{Ho et al, May 2021}
+
+A series of super-resolution diffusion models each conditioned on a class label.
+
+\centerline{\includegraphics[width = 8 in]{\images/DiffUp2}}
+
 
 \slidetwo{Classifier-Free Diffusion Guidance}
 {Ho and Salimans, December 2021 (NeurIPS workshop)}
 
-We assume training data consisting of $(x,y)$ pairs.
+We assume training data consisting of $(x,y)$ pairs and we want to generate from the distribution $P(y|x)$.  For example generating images from text.
 
 \vfill
 An obvious approach to conditional diffusion models $P(y|x)$ is to draw a pair $(x,y)$ and pass the conditioning information $x$ to the decoder
-$\epsilon(z_\ell,\ell,x)$ when decoding for $z_0 = y$.
+$\epsilon(z_\ell,\ell,x)$.
 
 \vfill
-This simple modification to the decoder seems to be insufficient (no one is using the naive approach).
-
-\vfill
-Instead people have modified the naive approach by modeling $P(x|z)$ in terms of the conditional decoder.
+This paper proposes a modification to this naive approach which seems to help.
 
 \slide{Classifier-Free Diffusion Guidance}
 
-As in the naive approach we pass the conditional information to the decoder and train $\epsilon(z_\ell,\ell,x)$ to generate the $y$ associated with $x$.
+5\% of the time we set $x = \emptyset$ where $\emptyset$ is a fixed value unrelated to the image.
 
 \vfill
-But 5\% of the time we set $x = \emptyset$ where $\emptyset$ is a fixed value unrelated to the image.
+We take a score matching interpretation:
+
+They then use
+
+$$\hat{\epsilon}(z_\ell,\ell,x) = \epsilon(z_\ell,\ell,x) - \alpha\epsilon(z_\ell,\ell,\emptyset)\;\;\;\alpha>0$$
 
 \vfill
-We then interpret generation conditioned on $\emptyset$ to model the marginal distribution on $y$.
-
-\slide{Classifier-Free Diffusion Guidance}
-
-We now observe
-$$p(x|y) = \frac{p(y|x)p(x)}{p(y)} \propto \frac{p(y|x)}{p(y)}$$
-
-\vfill
-This allows to take $\score(x|y) = \score(y|x) - \score(y)$.
-
-\vfill
-Following the thermodynamic interpretation we interpret $- \epsilon(z_\ell,\ell,x)$ as $\nabla_z\; \score(z_\ell|x)$
-
-\vfill
-This gives
-
-$$\nabla_z \ln P(x|z) = \epsilon(z_\ell,\ell,\emptyset) - \epsilon(z_\ell,\ell,x)$$
-
-
-\slide{Classifier-Free Diffusion Guidance}
-
-The classifier-guided decoding
-$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(
-\begin{array}{l}z_\ell - \sigma_\ell \epsilon(z_\ell,\ell) \\
-  {\color{red} +  \; s \nabla_{z} \ln P(x|z)}\end{array}\right)\; +\; \tilde{\sigma}_\ell\delta$$
-
-can be written as
-$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell {\color{red} \hat{\epsilon}(z_\ell,\ell)}\right)\; +\; \tilde{\sigma}_\ell\delta$$
-
-with
-$${\color{red} \hat{\epsilon}(z_\ell,\ell)} = \epsilon(z_\ell,\ell) - s'\nabla_z \ln P(x|z)$$
-
-\slide{Classifier-Free Diffusion Guidance}
-$$\hat{\epsilon}(z_\ell,\ell) = \epsilon(z_\ell,\ell) - s'\nabla_z \ln P(x|z)$$
-
-$$\nabla_z \ln P(x|z) = \epsilon(z_\ell,\ell,\emptyset) - \epsilon(z_\ell,\ell,x)$$
-
-gives
-
-$$\hat{\epsilon}(z_\ell,\ell) = \epsilon(z_\ell,\ell,\emptyset) - s'(\epsilon(z_\ell,\ell,\emptyset) - \epsilon(z_\ell,\ell,x))$$
-
-\vfill
-where we take $s' > 1$ so that we are repelled from $\epsilon(z_\ell,\ell,\emptyset)$
-
-\slide{Classifier-Free Diffusion Guidance}
-
-$$\hat{\epsilon}(z_\ell,\ell) = \epsilon(z_\ell,\ell,\emptyset) - s'(\epsilon(z_\ell,\ell,\emptyset) - \epsilon(z_\ell,\ell,x))$$
-
-\vfill
-I am not convinced by this derivation but the result is intuitive --- drive away from images in general and toward the conditioned distribution to increase the effect of the conditioning.
-
-\vfill
-It seems likely to me that this hurts NLL while strengthening use of the condition information.
-
-\slidetwo{GLIDE: Towards Photorealistic Image Generation ...}
-         {Nichol, Dhariwal, Ramesh, et al., March 2022}
-
-Slides under development.
-
+This drives the image away from being generic and strengthens the dependence on $x$.
 
 \slide{END}
 }
