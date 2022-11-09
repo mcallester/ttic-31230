@@ -153,7 +153,7 @@ Here $\epsilon_\Phi(z_\ell,\ell)$ is a trained network whose target value has th
 
 \slide{An $\epsilon$-Decoder}
 
-$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon_\Phi(z_\ell,\ell)\right)$$
+$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon_\Phi(z_\ell,\ell)\right)\; +\; \sigma_\ell\delta\;\;\;\;\;\delta \sim {\cal N}(0,I)$$
 
 \vfill
 However, SGD on the loss $\left|\left|z_{\ell-1} - \dec(z_\ell,\ell)\right|\right|^2$ now scales the SGD gradients on $\epsilon$ differently for different $\ell$.
@@ -185,31 +185,8 @@ The $\epsilon$-decoder is a U-Net.
 
 \centerline{\includegraphics[width = 4in]{\images/DiffCeleb}}
 
-\slide{Progressive VAEs}
-
-Diffusion models are a special case of progressive VAEs.
-
 \vfill
-A progressive VAE has layers of latent variables $z_1,\dots,z_{L}$.
-
-\vfill
-It is not clear whether the diffusion model is the best way to do this.
-
-\vfill
-It could be that the important idea is simply having large $L$ with
-$I(z_0,z_\ell)$ going from $H(z_0)$ to 0 as $\ell$ goes from $0$ to $L$.
-
-
-\slide{Progressive VAEs}
-
-A progressive VAE has layers of latent variables $z_1,\dots,z_{L}$.
-
-\vfill
-It seems more natural for image modeling to have spacial resolution decline with increasing $\ell$.
-
-\vfill
-This should eliminate the need for U-Nets and reduce computational cost.
-
+But this is ``mearly'' a face generator. DALLE and DALLE-2 do text-conditioned image generation.
 \slide{END}
 }
 \end{document}

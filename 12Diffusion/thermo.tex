@@ -104,7 +104,7 @@ Setting $\eta = 1$ and $\sigma^2 = 2$ gives
 $$p(y)  = \frac{1}{Z}\;e^{\score(y)} \;\;= \;\;\softmax_y\;\score(y)$$
 
 \vfill
-Running Langevin dynamics long enough (like the age of the universe) will yield a sample from the softmax distribution.
+Running Langevin dynamics long enough will yield a sample from the softmax distribution.
 
 \slide{Score Matching}
 
@@ -112,10 +112,13 @@ In score matching we train $g(y)$ rather than $\score(y)$ so as to make $g(y) \a
 
 \vfill
 The training objective for the decoder of a diffusion model can be viewed as training an update direction $g$
-to approximate $\nabla_y \ln \pop(y)$.
+to approximate $\nabla_y \ln p(y)$.
 
 \vfill
-{\bf Warning:} The term ``score'' in score matching refers to the gradient vector $\nabla_y\; \score(y)$ rather than to the scalar ``score'' used in the softmax.
+{\bf The score matching interpretation identifies the diffusion model decoding vector $\epsilon(z)$ with $- \nabla_z\;\ln p(z)$}
+
+\vfill
+{\bf Warning:} The term ``score'' in score matching technically refers to the gradient vector $\nabla_y\; \score(y)$ rather than to the scalar ``score'' used in the softmax.
 
 \slide{Simulated Annealing}
 
@@ -127,8 +130,13 @@ In the diffusion model $\sigma_\ell$ increases with increasing $\ell$ which is c
 \vfill
 However, simulated annealing corresponds to adding noise {\bf in sampling} rather than adding noise to a population sample.
 
-\vfill
+\slide{Score Matching vs. VAE}
+
 The VAE interpretation of diffusion models does not rely on Langevin dynamics, score matching or simulated annealing.
+
+\vfill
+However, the score matching interpretation, which identifies $\epsilon(z_\ell,\ell)$ with $- \nabla_z\; p(z)$,
+plays a role in ``classifier conditioned guidance'' used in DALLE-2.
 
 \slide{END}
 }
