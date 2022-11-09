@@ -11,7 +11,7 @@
   \centerline{David McAllester, Autumn 2022}
   \vfill
   \vfil
-  \centerline{The DALL$\cdot$E-2 Code Base}
+  \centerline{Diffusion Image Modeling Timeline}
   \vfill
   \vfill
 
@@ -137,10 +137,11 @@ This improves the value of the VLB.
 $$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right)\; +\; \tilde{\sigma}_\Psi(z_\ell,\ell)\odot\delta\;\;\;\;\delta \sim {\cal N}(0,I)$$
 
 \vfill
-One can interpret $\tilde{\sigma}(z_\ell,\ell)[i]$ is a level of uncertainty in the decoder estimate of $\epsilon(z_\ell,\ell)[i]$.
+One can interpret $\tilde{\sigma}(z_\ell,\ell)[i]$ is a level of uncertainty in the decoder value $\epsilon(z_\ell,\ell)[i]$.
 
 \vfill
-The more uncertain the model $\epsilon(z_\ell,\ell)$ the more guidance should be used in adjusting it.
+The more uncertainty the model has in $\epsilon(z_\ell,\ell)[i]$ the more guidance should be used in adjusting it.
+
 
 \slidetwo{Diffusion Models Beat GANs on Image Synthesis}{Dharwali and Nichol, May 2021}
 
@@ -164,16 +165,13 @@ Previous approaches have trained a model (a GAN) for each class.
 Here we will train a a single unconditional diffusion model $\epsilon(z_\ell,\ell)$ on the entire Imagenet distribution.
 
 \vfill
-We also assume a classifier $P(x|y)$ where $x$ is the ImageNert label for image $y$.
+We also assume a classifier $P(x|y)$ where $x$ is the ImageNet label for image $y$.
 
 \vfill
 We will generate an image by using $P(x|y)$ to ``guide'' generation from the unconditional model $\epsilon(z_\ell,\ell)$.
 
 \slide{Class-Conditional Generation}
 
-We assume a model of $P(x|y)$ where $y$ is an image and $x$ is a class label.
-
-\vfill
 We want $P(y|x)$.
 
 \vfill
@@ -185,12 +183,16 @@ Score-matching interprets $\epsilon(z_\ell,\ell)$ as $- \nabla_z \ln p(z)$.
 \slide{Using the Score Matching Interpretation}
 
 We now want
+{\huge
 \begin{eqnarray*}
-  \dec(z_\ell,\ell) & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell + \sigma_\ell\; \nabla_z \;\ln \;P(z)P(x|z)\;\right)\; +\; \tilde{\sigma}_\ell\delta \\
+  \dec(z_\ell,\ell) & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell + \sigma_\ell\; \nabla_z \;\ln \;P(z)P(x|z)\;\right)\; +\; \tilde{\sigma}_\ell\odot\delta \\
   \\
-  & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell) + {\color{red} s \nabla_{z} \ln P(x|z)}\right)\; +\; \tilde{\sigma}_\ell\delta
+  & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell) + {\color{red} s\tilde{\sigma}\odot\nabla_{z} \ln P(x|z)}\right)\; +\; \tilde{\sigma}_\ell\odot\delta
 \end{eqnarray*}
+}
 
+\vfill
+Here $s$ is called the scale of the guidance.
 
 \vfill
 Empirically it was found that $s > 1$ is needed to get good class specificity of the generated image.
@@ -199,6 +201,49 @@ Empirically it was found that $s > 1$ is needed to get good class specificity of
 
 Various architectural choices in the U-Net were optimized based on FID score (not NLL).
 
+\vfill
+These improvements are used in DALLE-2.
+
+
+\slidetwo{Classifier-Free Diffusion Guidance}
+{Ho and Salimans, December 2021 (NeurIPS workshop)}
+
+Classification diffusion guidance uses a classifion model $P(x|y)$.
+
+\vfill
+This paper introduces ``classifier-free'' diffusion guidance.
+
+\vfill
+Classifier-free diffusion guidance is used in DALLE-2.
+
+\slide{Classifier-Free Diffusion Guidance}
+
+We assume training data consisting of $(x,y)$ pairs and we want to generate from the distribution $P(y|x)$.  For example generating images from text.
+
+\vfill
+An obvious approach is to draw a pair $(x,y)$ and pass the conditioning information $x$ to the decoder
+$\epsilon(z_\ell,\ell,x)$.
+
+\vfill
+While this encorporates the conditioning information $x$, this, in itself, seems to provide insufficient conditioning on $x$.
+
+\vfill
+In addition to conditioning $\epsilon(z_\ell,\ell,x)$ on $x$ we add a ``guidance term''.
+
+\slide{Classifier-Free Diffusion Guidance}
+
+5\% of the time we set $x = \emptyset$ where $\emptyset$ is a fixed value unrelated to the image.
+
+\vfill
+The decoder then uses
+
+$$\tilde{\epsilon}(z_\ell,\ell,x) = s\epsilon(z_\ell,\ell,x) - (s-1)\epsilon(z_\ell,\ell,\emptyset)$$
+
+\vfill
+where $s \geq 1$ controls the relative weight of the two terms.
+
+\vfill
+DALLE-2 incorporates the channel-level uncertainties $\tilde{\sigma}$ as weights on classifier-free diffusion guidance provided by CLIP.
 
 \slidetwo{Image Super-Resolution via Iterative Refinement}{Saharia et al., April 2021}
 
@@ -213,33 +258,145 @@ A series of super-resolution diffusion models each conditioned on a class label.
 
 \centerline{\includegraphics[width = 8 in]{\images/DiffUp2}}
 
+\vfill
+This architecture is used in DALLE-2.
 
-\slidetwo{Classifier-Free Diffusion Guidance}
-{Ho and Salimans, December 2021 (NeurIPS workshop)}
+\slide{CLIP Does Contrastive Coding}
 
-We assume training data consisting of $(x,y)$ pairs and we want to generate from the distribution $P(y|x)$.  For example generating images from text.
+\centerline{\includegraphics[height= 4in]{\images/CLIPTraining}}
 
 \vfill
-An obvious approach to conditional diffusion models $P(y|x)$ is to draw a pair $(x,y)$ and pass the conditioning information $x$ to the decoder
-$\epsilon(z_\ell,\ell,x)$.
+CLIP is used in DALLE-2 and in DALLE-2's predicessor GLIDE.
+
+\slidetwo{GLIDE: Towards Photorealistic Image Generation ...}
+         {Nichol, Dhariwal, Ramesh, et al., March 2022}
+
+GLIDE compares two forms of diffusion guidance.
 
 \vfill
-This paper proposes a modification to this naive approach which seems to help.
-
-\slide{Classifier-Free Diffusion Guidance}
-
-5\% of the time we set $x = \emptyset$ where $\emptyset$ is a fixed value unrelated to the image.
+\begin{itemize}
+\item[(a)] Classifier-free guidance based on comparing conditioned and unconditioned decoding directions.
 
 \vfill
-We take a score matching interpretation:
+\item[(b)] Classifer guidance based on CLIP.
+\end{itemize}
 
-They then use
+\slide{Classifier-free (self-guided) GLIDE}
 
-$$\hat{\epsilon}(z_\ell,\ell,x) = \epsilon(z_\ell,\ell,x) - \alpha\epsilon(z_\ell,\ell,\emptyset)\;\;\;\alpha>0$$
+$$\tilde{\epsilon}(z_\ell,\ell,x) = s\epsilon(z_\ell,\ell,x) - (s-1)\epsilon(z_\ell,\ell,\emptyset)$$
 
 \vfill
-This drives the image away from being generic and strengthens the dependence on $x$.
+Classifier-free GLIDE does not use CLIP.
+
+\vfill
+The classifier-free guidance differs from the original version in that here we are conditioning on text
+rather than as Imagenet labels.
+
+\vfill
+The text is transformed to a feature vector by a transformer before being fed to the decoder.
+
+\slide{CLIP-guided GLIDE}
+
+Let $C_I(y)$ be the CLIP vector for image $y$ and let $C_T(x)$ be the CLIP vector for text $x$.
+
+{\huge
+\begin{eqnarray*}
+z_{\ell-1}  & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell) + {\color{red} s \tilde{\sigma}\odot\nabla_{z} C_T(x)^\top C_I(z)}\right)\; +\; \tilde{\sigma}_\ell\odot\delta
+\end{eqnarray*}
+}
+
+\vfill
+Here CLIP is re-trained to handle noised images.
+
+\slide{Upsamling}
+
+Both GLIDE versions use diffusion upsampling to go from $64 \times 64$ to $256 \times 256$.
+
+\vfill
+The GLIDE paper concludes that the classifer-free model taking raw text as input is superior to the CLIP-guided model.
+
+\slide{DALL$\cdot$E-2}
+
+\centerline{\hfill \includegraphics[width = 4 in]{\images/DALLEpanda} \hfill \includegraphics[width = 3in]{\images/DALLE2}}
+
+CLIP-guided DALLE-2 is similar in quality to self-guided GLIDE but is more diverse.
+
+\slide{DALL$\cdot$E-2}
+
+\vfill
+\centerline{\includegraphics[width = 8in]{\images/DALLE2a}}
+
+This figure is misleaning.  The lines in the figure do not correspond to the actual data paths of DALLE-2.
+
+\slide{A Conditional Image Auto-Encoder}
+
+\centerline{\includegraphics[height = 2.5in]{\images/DiffDALLE}}
+
+\vfill
+Let $C_I(y)$ denote the CLIP embedding of image $y$.
+
+\vfill
+$C_I(y)$ is the encoder of an auto-encoder for $y$ given $x$.
+
+\vfill
+$P(C_I(y)|x)$ is the optimal prior for this auto-encoder.
+
+\vfill
+$P(y|C_I(y),x)$ is the optimal decoder.
+
+\vfill
+In DALLE-2 the prior and the decoder both see the text $x$.
+
+\slide{Putting it all Together}
+
+We are given text $x$.
+
+\vfill
+Draw $\hat{C}$ from the prior $P(C_I(y)|x)$
+
+\vfill
+Do diffusion decoding with two upsampling models:
+
+\vfill
+\begin{quotation}
+compute $\tilde{z}_{\ell-1}$ using $\hat{\epsilon} = s\epsilon(z_\ell,\ell,x) - (s-1)\epsilon(z_\ell,\ell,\emptyset)$
+\vfill
+$z_{\ell-1} = \hat{z}_{\ell-1} + s'\tilde{\sigma}\odot\nabla_z\;\hat{C}^\top C_I(z)$
+\end{quotation}
+
+\slide{The Prior}
+
+They experiment with two priors $P(C_I(y)|x)$.
+
+\vfill
+An autoregressive model and a conditional diffusion model.
+
+\vfill
+They say both priors use self-guidance.
+
+\slide{The Autoregressive Prior}
+
+First do PCA on the distibution of vectors $C_I(y)$ to reduce their dimensionality from 1024 to 319.
+
+\vfill
+Sort the eigenvectors in decreasing order of eigenvalue.
+
+\vfill
+Quantize each of 319 values into 1024 discrete buckets.
+
+\vfill
+We train a transformer to take the vector $C_T(x)$ followed by the string $x$
+and to predict a string of 319 symbols with a vocabulary of size 1024 which can be converted back into the vector $\hat{C}$.
+
+\slide{The Diffusion Prior}
+
+\centerline{\includegraphics[width = 9in]{\images/DiffPrior}}
+
+\vfill
+\vfill
+What?
 
 \slide{END}
 }
 \end{document}
+
