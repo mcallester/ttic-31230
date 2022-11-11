@@ -14,33 +14,6 @@
   \vfill
   \vfill
 
-\slidetwo{Meaningful Latent Variables:}
-{Learning Phonemes and Words}
-
-A child exposed to speech sounds learns to distinguish phonemes and then words.
-
-\vfill
-The phonemes and words are ``latent variables'' learned from listening to sounds.
-
-\vfill
-We will use $y$ for the raw input (sound waves) and $z$ for the latent variables (phonemes).
-
-\slide{Other Examples}
-
-$z$ might be a parse tree, or some other semantic representation, for an observable sentence (word string) $y$.
-
-\vfill
-$z$ might be a segmentation of an image $y$.
-
-\vfill
-$z$ might be a depth map (or 3D representation) of an image $y$.
-
-\vfill
-$z$ might be a class label for an image $y$.
-
-\vfill
-Here we are interested in the case where $z$ is {\bf latent} in the sense that we do not have training labels for $z$.
-
 \slide{Rate-Distortion Autoencoders}
 
 Consider image compression where we compress an image $y$ into a compressed file $z$.
@@ -89,17 +62,19 @@ For any $P_\enc(z|y)$ the universality assumption for $\pri^*$ and $\dec^*$ give
 \vfill
 $$\pop(y) = \sum_z\;\;P_{\pri^*}(z)P_{\dec^*}(y|z)$$
 
-\slide{An Encoder First Treatment of VAEs}
 
-Fix an arbitrary encoder model $P_\enc(z|y)$.
+\slide{Upper Bounding $H(y)$}
 
-\vfill
-$$\pop(y) = \sum_z\;\;P_{\pri^*}(z)P_{\dec^*}(y|z)$$
+Cross-entropy upper bounds $H(y)$ and equals $H(y)$ assuming universality.
 
 \vfill
-This encoder first formulation will be particularly relevant to the diffusion models underlying DALL$\cdot$E-2.
+The ELBO plays the role of cross-entropy for latent variable models.
 
-\slide{An Encoder First Treatment of VAEs}
+\vfill
+The negative ELBO uppr bounds $H(y)$ and equals $H(y)$ assuming universality.
+
+
+\slide{Deriving the ELBO}
 
 Sample $y \sim \pop$ and $z \sim P_\enc(z|y)$.
 
@@ -112,7 +87,7 @@ Solving for $H(y)$ gives
 $$H(y) = H(z) + H(y|z) - H(z|y)$$
 
 \slide{An Encoder First Treatment of VAEs}
-Sample $y \sim \pop$ and $z \sim P_\enc(z|y)$.
+Replace the first two entropies by cross entropies.
 
 \vfill
 \begin{eqnarray*}
@@ -126,11 +101,10 @@ H_\dec(y|z) & = & E_{y,z}\;[- P_\dec(y|z)]
 \end{eqnarray*}
 
 \slide{VAE}
-Sample $y \sim \pop$ and $z \sim P_\enc(z|y)$.
-
-\vfill
 \begin{eqnarray*}
-H(y) & \leq & H_\pri(z) + H_\dec(y|z) - H_\enc(z|y) \\
+H(y) & = & H(z) + H(y|z) - H_\enc(z|y) \\
+\\
+ & \leq & H_\pri(z) + H_\dec(y|z) - H_\enc(z|y) \\
 \\
  & = & E_{y,z}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]
 \end{eqnarray*}
@@ -138,98 +112,6 @@ H(y) & \leq & H_\pri(z) + H_\dec(y|z) - H_\enc(z|y) \\
 \vfill
 $$\enc^*,\pri^*,\dec^* = \argmin_{\enc,\pri,\dec}\;\;E_{y,z}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
 
-
-\slide{VAE}
-Sample $y \sim \pop$ and $z \sim P_\enc(z|y)$.
-
-\vfill
-$$\enc^*,\pri^*,\dec^* = \argmin_{\enc,\pri,\dec}\;\;E_{y,z}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
-
-\vfill
-Under the universality assumption for the prior and the decoder we do not need to optimize the encoder.
-
-\vfill
-Before the deep revolution the structure of the prior and the decoder was typically highly restricted.
-In such cases we are far from universality and we need to optimize the encoder.  This is related to EM  as discussed below.
-
-\slide{The ELBO}
-
-\begin{eqnarray*}
-P_{\pri,\dec}(y) & = & \sum_z\;P_\pri(z)P_\dec(y|z) \\
-\\
-& = & E_{z\sim P_\pri(z)}\;\;\;P_\dec(y|z)
-\end{eqnarray*}
-
-
-\vfill
-$$\pri^*,\dec^* = \argmin_{\pri,\dec}\;E_{y \sim \pop}\;[- \ln P_{\pri,\dec}(y)]$$
-
-\slide{The ELBO}
-
-We will show
-
-$$\mathrm{ELBO:}\;\;\ln \;P_{\pri,\dec}(y) \geq E_{z\sim P_\enc(z|y)}\;\left[\ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
-
-\vfill
-The left hand side is the log-probability of the evidence $y$ and the right hand side is the {\bf evidence lower bound} or ELBO.
-
-\vfill
-$$\mathrm{VAE:}\;\; \enc^*,\pri^*,\dec^* = \argmin_{\enc,\pri,\dec}\;\;E_{y,z}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
-
-\vfill
-The negative ELBO is the loss function of the VAE.
-
-\slide{Deriving the ELBO}
-
-But even when $P_\pri(z)$ and $P_\dec(y|z)$ are samplable, if $z$ is a structured value we cannot typically compute $P_{\pri,\dec}(y)$.
-
-\vfill
-$$P_{\pri,\dec}(y) = \sum_z\;P_\pri(z)P_\dec(y|z) = E_{z\sim P_\pri(z)}\;P_\dec(y|z)$$
-
-\vfill
-The sum is too large and sampling $z$ from $P_\pri(z)$ is unlikely to sample the values that dominate the sum.
-
-\slide{Deriving the ELBO}
-
-\vfill
-A much better estimate could be achieved by importance sampling --- sampling $z$ from the posterior $P_{\pri,\dec}(z|y)$.
-
-{\huge
-\begin{eqnarray*}
-P_{\pri,\dec}(y) & = & \sum_z\;P_\pri(z) P_\dec(y|z) \\
-\\
- & = & \sum_z\;P_{\pri,\dec}(z|y)\;\frac{P_\pri(z)P_\dec(y|z)}{P_{\pri,\dec}(z|y)} \\
- \\
- \\
-  & = & E_{z\sim P_{\pri,\dec}(z|y)}\;\;\;\frac{P_\pri(z)P_\dec(y|z)}{P_{\pri,\dec}(z|y)}
-\end{eqnarray*}
-}
-
-\slide{Deriving the ELBO}
-
-\begin{eqnarray*}
-P_{\pri,\dec}(y) & = & E_{z\sim P_{\pri,\dec}(z|y)}\;\;\frac{P_\pri(z)P_\dec(y|z)}{P_{\pri,\dec}(z|y)}
-\end{eqnarray*}
-
-\vfill
-Unfortunately the conditional distribution $P_{\pri,\dec}(z|y)$ also cannot be computed or sampled from.
-
-\vfill
-Variational Bayes side-steps the intractability problem by introducing another model component --- a model $P_\enc(z|y)$ to approximate the intractible $P_{\pri,\dec}(z|y)$.
-
-\slide{The Evidence Lower Bound (The ELBO)}
-
-{\huge
-\begin{eqnarray*}
- {\ln P_{\pri,\dec}(y)} & = & \ln E_{z \sim { P_\enc(z|y)}} \frac{P_{\pri,\dec}(y)}{P_{\enc}(z|y)} \\
-\\
-\\
-  &  \geq & E_{z \sim { P_\enc(z|y)}} \ln \frac{P_{\pri,\dec}(z,y)}{{ P_\enc(z|y)}} \;\;\;\;\;\mbox{The ELBO}
-\end{eqnarray*}
-}
-
-
-Where the second line follows from Jensen's inequality for concave functions.
 
 \slide{The Re-Parameterization Trick}
 

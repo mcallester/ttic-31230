@@ -402,16 +402,30 @@ Sort the eigenvectors in decreasing order of eigenvalue.
 Quantize each of 319 values into 1024 discrete buckets.
 
 \vfill
-We train a transformer to take the vector $C_T(x)$ followed by the string $x$
+We train a transformer to take the text sequence $x$ followed by the text embedding $C_T(x)$ and to
 and to predict a string of 319 symbols with a vocabulary of size 1024 which can be converted back into the vector $\hat{C}$.
 
 \slide{The Diffusion Prior}
 
-\centerline{\includegraphics[width = 9in]{\images/DiffPrior}}
+Let $z_\ell$ be the noising of $C_I(y)$ to level $\ell$.  For the decoder they train a transformer to take the text string $x$, the text embedding $C_T(x)$, the noised
+image embedding $z_\ell$, and the level $\ell$. A final ``classifier token'' is added to the end of this string and vector computed for that token by the transformer is used as a prediction of $C_I(y)$.
+This predictor $f(x,z_\ell,\ell)$ is trained on the objective
+
+$$f^* = \argmin_f\;E_{x,y,z_\ell,\ell}\; ||f(x,z_\ell,\ell) - C_I(y)||^2$$
+
+\slide{Sampling $\hat{C}$ from the Diffusion Prior}
+
+The paper does not describe the decoding process that computes $z_{\ell-1}$ from $z_\ell$ but the following seems reasonable.
+
+$$z_{\ell-1} = f(x,z_\ell,\ell) +\tilde{\sigma}\delta\;\;\;\;\delta \sim {\cal N}(0,I)$$
 
 \vfill
+They can draw samples of $\hat{C}$ using different values $\delta$
+
+$$z_0 = f(x,z_1,1) + \tilde{\sigma}\delta\;\;\;\delta \sim {\cal N}(0,I)$$
+
 \vfill
-What?
+They draw two samples $\hat{C}$ and $\hat{C}'$ and use the one with larger inner product with $C_T(x)$.
 
 \slide{Progressive VAEs}
 
