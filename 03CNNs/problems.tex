@@ -44,7 +44,43 @@ to both space and time.
   }
 
 \bigskip
-{\bf Problem 3:} Images have translation invariance --- a person detector must look for people at various places in the image.  Translation invariance is the motivation for
+{\bf Problem 3.}  Consider a bottleneck multi-layer perceptron (MLP) with residual connections defined as follows where $h[0,J]$ is an input vector and where $I$ is small compared to $J$.
+
+\begin{eqnarray*}
+  b[\ell,I] & = & \relu(W^b[I,J]h[\ell,J]) \\
+  h[\ell+1,J] & = & h[\ell,J] +  \;\relu(W^h[\ell,J,I]b[\ell,I])
+\end{eqnarray*}
+
+\medskip {\bf (a)} What is the number of multiplications done by this network as a function of the hidden layer dimension $J$, the bottleneck vector dimension $I$ and the number of layers $L$? 
+Under what conditions does this give fewer multiplications than the standard MLP with one matrix between layers?
+(For the tensor $h[L,I]$ we have that $\ell$ ranges from 0 to $L-1$.  We use this as a standard convention for tensor indeces. The input layer has $\ell = 0$ and the final layer has $\ell = L-1$.)
+
+
+\solution{The number of multiplications is 2JI(L-1).  For a standard MLP (with no botleneck) the number of multiplications is $J^2(L-1)$.  The bottleneck layer has fewer multiplications for $I < J/2$.}
+
+
+\medskip {\bf (b)} We now consider introducing a multiplicative constant $\gamma$ into the residual connection.
+
+\begin{eqnarray*}
+  b[\ell,I] & = & \relu(W^b[I,J]h[\ell,J]) \\
+  h[\ell+1,J] & = & \gamma(\;h[\ell,J] +  \;\relu(W^h[\ell,J,I]b[\ell,I])\;)
+\end{eqnarray*}
+
+If the network is initialized such that each of $h[\ell,j]$ and $\relu(W^h[\ell,j,I]b[\ell,I])$ are zero mean and unit variance, and are assummed to be independent, what value of $\gamma$ gives that
+$h[\ell+1,j]$ has zero mean and unit variance.
+
+\solution{$1/\sqrt{2}$}
+  
+\medskip
+{\bf (c)} The main advantage of a stack of residual connections is that there is direct additive
+path from the loss to each layer of the stack, including the input layer.  Give a reason why the introduction of the constant $\gamma < 1$ as in part (b)
+might be damaging to the optimization of the lower layers of the residual stack.
+
+\solution{When we introduce $\gamma < 1$ as in (b) the gradient update on the bottom layer is reduced by $\gamma^{L-2}$.  This could harm the learning along the direct connection
+  between the loss and the first layer of the network.}
+
+\bigskip
+{\bf Problem 4:} Images have translation invariance --- a person detector must look for people at various places in the image.  Translation invariance is the motivation for
 convolution --- all places in the image are treated the same.
 
 \medskip

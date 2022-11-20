@@ -96,8 +96,152 @@ of size $O(1)$). Compare this with the parallel run time of an RNN.
 
 \solution{The CNN has $O(L)$ parallel run time while the RNN is $O(T)$ or $O(T+L)$ with $L$ layers of RNN.}
 
+\bigskip {\bf Problem 4.} A dependency parse is a labeled directed graph on the words in a sentence.
+For example,
+
+\centerline{\includegraphics[width = 3in]{/users/davidmcallester/ttic-31230/images/DepParsing.png}}
+
+\medskip
+In this example the edges are labeled with {\bf nsubj}, {\bf dobj}, {\bf det}, {\bf nmod} and {\bf case}.
+A dependency parse determines a tree with a root node labeled as {\bf root} and with the other nodes labeled with the words of the sentence.
+This tree structure defines a set of phrases where each phrase
+consists of words beneath a given node of the tree.
+
+\medskip{\bf (a)} Let $k$ range over the set of possible labels in a dependency parse.  There is typically a small fixed set of such labels.
+If we interpret $k$ has a transformer head, what attention $\alpha({\mbox{\bf dobj}},{\bf prefer},w)$ over the words $w$ attended from the word {\bf prefer} by the head
+{\bf dobj} corresponds to the above dependency parse?
+
+\solution{
+  $$\alpha({\bf dobj},{\bf prefer},w) = \left\{\begin{array}{rl} 1 & \mbox{if $w$ is {\bf flight}} \\ 0 & \mbox{otherwise}\end{array}\right.$$
+  }
+
+\medskip
+{\bf (b)} A dependency parse rarely has two edges leading from a given word that both have the same label.  GTP-3 has 96 heads in each of 96 self-attention layers.
+It might be reasonable that, with so many heads, each head chould be encouraged to focus its attention on a small number of words (as would be typical in a dependency parse).
+Define a loss ${\cal L}_{\mathrm{focus}}$ that can be combined with the log loss term of the language model such that
+${\cal L}_{\mathrm{focus}}$ encourages each head to focus on a small number of words.  Write the total loss as a weighted sum of the language model loss ${\cal L}_{\mathrm{LM}}$
+and ${\cal L}_{\mathrm{focus}}$.  You do not need to define ${\cal L}_{\mathrm{LM}}$, just ${\cal L}_\mathrm{focus}$.
+
+\solution{
+  \begin{eqnarray*}
+    {\cal L}_{\mathrm{total}} & = & {\cal L}_{\mathrm{LM}} + \lambda {\cal L}_{\mathrm{focus}} \\
+    \\
+      {\cal L}_{\mathrm{focus}} & = & \frac{1}{KTL} \;\sum_{\ell,k,t_1} \;H(k,t_1,T_2) \\
+      \\
+      & = & \frac{1}{KTL} \sum_{\ell, k,t_1}\;\sum_{t_2} \; \alpha[\ell,k,t_1,t_2] (-\ln \alpha[\ell,k,t_1,t_2])
+  \end{eqnarray*}
+
+  The factor of $\frac{1}{KTL}$ can be incorporated into $\lambda$ which is also a correct solution although it introduces a stronger
+  coupling of the hyper-parameter $\lambda$ with the size of the transformer model.
+}
+
+\medskip
+    {\bf (c)} Dependency edges tend to be between nearby words.
+    Repeat part {\bf (b)} but for a loss ${\cal L}_{\mathrm{near}}$ which encourages the attention $\alpha[\ell,k,t_1,T_2]$ to be focused near $t_1$.
+The loss ${\cal L}_{\mathrm{near}}$ should be ``robust'' in the sense that it has a maximum value that is independent of the length $T$ of the transformer
+window.  This should allow some ``outlier'' long distance attentions which are needed for coreference.
+
+\solution{
+  \begin{eqnarray*}
+    {\cal L}_{\mathrm{total}} & = & {\cal L}_{\mathrm{LM}} + \lambda {\cal L}_{\mathrm{near}} \\
+    \\
+    {\cal L}_{\mathrm{near}} & = & \frac{1}{KT(L-1)} \sum_{k,t_1,0 \leq \ell \leq L-2}\;\min\left(L_{\mathrm{max}}, \sum_{t_2} \; \alpha[\ell,k,t_1,t_2] (t_1-t_2)^2\right)
+  \end{eqnarray*}
+
+  Other solutions are also possible.
+}
+
+\medskip
+{\bf (d)} State the ``universalty assumption'' under which the ``loss shaping'' terms of {\bf (b)} and ${\bf (c)}$ above only hurts the langauge modeling performance.  Also give a plausibility argument
+that these terms might help in practice.
+
+\solution{The universality assumption is that the model parameters will be be optimized so as to find the actual minimum of the loss on the population distribution.  In that case
+  the loss shaping terms can only hurt performance.  If, on the other hand, the training does not find the optimal parameters on the population then it seems plausible that the loss shaping terms might help with the optimization or the generalization.}
+  
+
 \bigskip
-{\bf Problem 4.} A self-attention layer in the transformer takes a sequence of vectors $h_\mathrm{in}[T,J]$ and computes
+{\bf Problem 5.} For a typical language model the softmax operation defining the probablility $P(w_{t+1}\;|\;w_1,\ldots,w_t)$ has the form
+$$\alpha[\ell,t,w] = \softmax_{w} h[\ell,t,I] e[w,I]$$
+We now consider adding a ``temperature parameter'' $\beta$ to this softmax.
+\begin{equation}
+  \alpha[\ell,t,w] = \softmax_{w}\;\; \beta\;h[\ell,t,I] e[w,I] \label{eqlang}
+\end{equation}
+
+
+\medskip
+{\bf (a)} Assume that the components of the vector $h[t,I]$ are independent with zero mean and unit variance.  Also assume that that the word vectors have
+been initialized so that the components of the vector $e[w,I]$ are zero mean and unit variance.  What initial value of $\beta$ gives the result that
+the inner product $\beta h[t,I]e[w,I]$ has zero mean and unit variance. Explain your answer.  (Use $I$ to denote the dimension of the vectors $h[t,I]$ and $w[w,I]$.)
+
+\solution{The mean of a sum of zero mean variables has zero mean.  The standard deviation of a sum of $I$ independent variables each with unit variance
+  is $\sqrt{I}$.  Therrefore we get unit variance by setting $\beta = \frac{1}{\sqrt{I}}$.
+  }
+
+\medskip
+{\bf (b)} Relate your answer to (a) to the equation used for the self attention $\alpha(k,t_1,t_2)$ computed in the tansformer.
+
+\solution{The transformer attention is given by
+  $$\alpha[\ell,k,t_1,t_2] = \softmax_{t_2}\; \frac{1}{\sqrt{I}}\;\mathrm{Query}[\ell,k,t_1,I]\mathrm{Key}[\ell,k,t_2,I]$$
+  This has the same ``temperature parameter'' as the answer to part (a).}
+
+\bigskip
+{\bf Problem 6.} This problem is on transformer self-attention.  Modern classification problems tend to use a softmax operation of the form
+\begin{equation}
+  P(y|h) = \softmax_y\;h^\top e(y) \label{eqproduct}
+\end{equation}
+where $h$ is a vector computed by the neural network and $e(y)$ is a vector embedding for the label $y$.  Perhaps five years ago many systems would insert a parameter matrix
+so that we have
+\begin{equation}
+  P(y|h) = \softmax_y\;h^\top W e(y) \label{eqgenprod}
+\end{equation}
+
+However, it was generally observed that additional parameterization of the inner product operation does not improve the results.  The vector $h$ and the embedding $e(y)$
+can be learned to be such that the standard inner product works well.
+
+However, the attention softmax of the transformer (\ref{eqgenprod}) does not use a naive inner product.
+
+\medskip
+    {\bf (a)} Explain why we cannot replace (\ref{eqgenprod}) with a naive inner product of $L[\ell,t_1,J]$ and $L[\ell,t_2,J]$ as in (\ref{eqproduct}).
+
+    \solution{The attention $\alpha[\ell,k,t_1,t_2]$ need to depend on the particular head $k$.  Different heads compute different information as indicated in problem 2.}
+    
+\medskip
+{\bf (b)} Rewrite the transformer self-attention equation (\ref{eqgenprod}) in the form of (\ref{eqgenprod}) where
+the matrix $W$ in (\ref{eqgenprod}) is replaced by by a matrix defined in terms of $W^K$ and $W^Q$.
+
+\solution{
+  \begin{eqnarray*}
+    \alpha[\ell,k,t_1,t_2] & = & \softmax_{t_2}\; \frac{1}{\sqrt{I}}\;L[\ell,t_1,J]\;W^{QK}[\ell,k,J,J']\;L[\ell,t2,J'] \\
+    \\
+    w^{QK}[\ell,k,j_1,j_2] & = & W^Q[\ell,k,I,j_1]W^K[\ell,k,I,j_2]
+  \end{eqnarray*}
+}
+
+\medskip
+{\bf (c)} Give the number of multiplications computed by the self attention computations (\ref{eqlang}) through (\ref{eqgenprod}) for a single layer $\ell$  and head $k$ as a function of the sequence
+length $T$ and vector dimensions $I$ and $J$.  Compare this with the number of multiplications for your solution to (b) assuming that the matrix you introduced is taken to be a parameter matrix of the self attantion as in
+(\ref{eqgenprod}).
+
+
+
+\solution{
+  For equations (\ref{eqgenproda}) through (\ref{eqgenprod}) we get $2TIJ + T^2I^2$.  For the solution to (a) we get $T^2J^2$.  Since we typically have $I << J$ the solution to (a) is much less efficient.
+}
+
+
+\bigskip {\bf Problem 7.}  Here we consider a neural trigram model.  In a trigram model each word is predicted from the two preceding words using a conditional probability $P_\Phi(w_{t+2}|w_t,w_{t+1})$.
+We will assume trained word embeddings $e(w)$ for each word $w$ and a neural network predictor of the form
+$$P(w_{t+1}|w_t,w_{t+1}) = \softmax_{w_{t+2}} \beta \; h_\Phi(e(w_t),e(w_{t+1}))^\top\;e(w_{t+2})$$
+where $h_\Phi$ is some arbitray neural network returnnig a quey vector and $\beta$ is a temperature parameter.
+We will assume that the model has been trained with $\beta$ held fixed at 1 but that we will generate from this trigram model with different values of $\beta$.
+What degenerate behavior are we guaranteed to see if we sample at zero temperature?  Explain your answer.
+
+\solution{We are guaranteed to eventually repeat a bigram (a pair of words).  At zero temperature the generation is deterministic
+  and hence when a pair of words is repeated we must then see exactly the sequence following the first occurance of that bigram and the generation enters a deterministic loop.
+  This happens in practice with many transformer models when sampling at low temperatures.}
+
+\bigskip
+{\bf Problem 8.} A self-attention layer in the transformer takes a sequence of vectors $h_\mathrm{in}[T,J]$ and computes
 a sequence of vectors $h_\mathrm{out}[T,J]$ using the following equations where $k$ ranges over ``heads''. Heads are intended to allow for
 different relationship between words such as ``coreference'' or ``subject of'' for a verb. But the actual meaning emerges during training
 and is typically difficult or impossible to interpret.  In the following equations we typically hve $U < J$ and we require $I = J/K$
@@ -136,7 +280,7 @@ where we first compute the scores to be used in the softmax and then compute the
 
 \bigskip
 
-{\bf Problem 5.}
+{\bf Problem 9.}
 Just as CNNs can be done in two dimensions for vision and in one dimension for language, the Transformer can be done in two dimensions for vision --- the so-called spatial transformer.
 
 \medskip
@@ -167,7 +311,7 @@ of $X$, $Y$, $J$ and $K$ (we have that $I$ and $U$ are both less than $J$).
 
 
 \bigskip
-{\bf Problem 6.} The self-attention in the transformer is computed by the following equations.
+{\bf Problem 10.} The self-attention in the transformer is computed by the following equations.
 
 \begin{eqnarray*}
 \mathrm{Query}_{\ell+1}[k,t,i] & = & W^Q_{\ell+1}[k,i,J]L_\ell[t,J] \\
@@ -206,5 +350,6 @@ what is the resulting number of query matrix parameters for a given layer and ho
 \solution{
   The original version uses $2(I \times J)$ key-query matrix parameters for each head.  If we use only the single query matrix we use $J^2$ parameters for each head.  These are the same for $I = J/2$.
 }
+
 
 \end{document}

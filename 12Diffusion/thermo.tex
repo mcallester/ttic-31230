@@ -16,10 +16,11 @@
   \centerline{Why are they called ``diffusion'' models?}
   \vfill
   \vfill
+  \centerline{\bf Generative Modeling by Estimating Gradients ...}
+\centerline{\bf Song and Erman, July 2019}
 
  
-\slidetwo{Generative Modeling by Estimating Gradients ...}
-  {Song and Erman, July 2019}
+\slide{Langevin Dynamics}
 
 Consider a model density defined by a continuous softmax on a model score.
 
@@ -35,7 +36,7 @@ Consider a model density defined by a continuous softmax on a model score.
 \vfill
 Here $\score(y)$ is a parameterized model computing a score and defining a probability density on $R^d$.
 
-\slidetwo{Sampling from a Continuous Softmax}{Langevin Dynamics}
+\slide{Langevin Dynamics}
 
 If $y$ is discrete, but from an exponentially large space (such as sentences or a semantic image segmentation) we can use MCMC sampling
 (the Metropolis algorithm or Gibbs sampling).
@@ -43,7 +44,7 @@ If $y$ is discrete, but from an exponentially large space (such as sentences or 
 \vfill
 In the continuous case we can use Langevin dynamics.
 
-\slide{Langevin Dynamics for Sampling From a Model}
+\slide{Langevin Dynamics}
 
 Noisy gradient ascent on score.
 \begin{eqnarray*}
@@ -59,7 +60,7 @@ This give a well-defined distribution on functions of time in the limit as $\Del
 
 {\color{red} $$dy =  \eta g dt + \sigma \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,I)$$}
 
-\slide{Langevin Dynamics for Sampling From a Model}
+\slide{Langevin Dynamics}
 
 $$dy =  \eta g dt + \sigma \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,I)$$
 
@@ -137,6 +138,68 @@ The VAE interpretation of diffusion models does not rely on Langevin dynamics, s
 \vfill
 However, the score matching interpretation, which identifies $\epsilon(z_\ell,\ell)$ with $- \nabla_z\; p(z)$,
 plays a role in ``classifier conditioned guidance'' used in DALLE-2.
+
+\slide{The DDPM Stochastic Differential Equation (SDE)}
+
+Consider a DDPM (denoising diffision probabilistic model) for modeling $P(y)$ with $y \in R^d$ where the noise model is defined by
+
+\begin{eqnarray*}
+  z_0 & = & y \\
+  \\
+  z_\ell & = & \alpha z_{\ell-1} + \sqrt{1-\alpha^2}\; \epsilon\;\;\;\epsilon\sim {\cal N}(0,I)
+\end{eqnarray*}
+
+\vfill
+For technical simplicity we take $\alpha$ to be constant for all $\ell$ and allow $\ell \geq 1$ to be arbitrarily large.
+
+\slide{The DDPM SDE}
+
+For sampling $z_\ell$ given $z_0$ the unit variance constraint gives
+
+\vfill
+$$z_\ell = \alpha^\ell z_0 + \sqrt{1 - \alpha^{2\ell}}\;\epsilon \;\;\;\epsilon \sim {\cal N}(0,I)$$
+
+\vfill
+For sampling $z_{(\ell+k)}$ given $z_\ell$ we have
+
+\vfill
+$$z_{(\ell + k)} = \alpha^k z_\ell + \sqrt{1 - \alpha^{2k}}\;\epsilon \;\;\;\epsilon \sim {\cal N}(0,I)$$
+
+\slide{The DDPM SDE}
+
+\medskip
+Setting $\alpha = e^{\frac{-1}{N}}$ we have
+
+
+\begin{eqnarray*}
+  z_\ell & = & e^{\frac{-\ell}{N}} z_0 + \sqrt{1 - e^{\frac{-2\ell}{N}}}\;\epsilon \;\;\;\epsilon \sim {\cal N}(0,I) \\
+  \\
+  z_{(\ell + k)|\ell} & = & e^{\frac{-k}{N}} z_\ell + \sqrt{1 - e^{\frac{-2k}{N}}}\;\epsilon \;\;\;\epsilon \sim {\cal N}(0,I)
+\end{eqnarray*}
+
+\slide{The DDPM SDE}
+
+\medskip
+Taking $t = \frac{\ell}{N}$. We have $\ell = Nt$ and the previous slide can be written as
+
+\begin{eqnarray*}
+  z(t) & = & e^{-t} z(0) + \sqrt{1 - e^{-2t}}\;\epsilon \;\;\;\epsilon \sim {\cal N}(0,I) \\
+  \\
+  z(t+\Delta t) & = & e^{- \Delta t} z(t) + \sqrt{1 - e^{-2\Delta t}}\;\epsilon \;\;\;\epsilon \sim {\cal N}(0,I)
+\end{eqnarray*}
+
+\slide{The DDPM SDE}
+For small $\epsilon$ we have $e^{-\epsilon} \approx 1-\epsilon$ and for small $\Delta t$ the previous slide can be written as
+
+\vfill
+  \begin{eqnarray*}
+    z((t + \Delta t)|t) & \approx & z(t) - z(t)\Delta t + \sqrt{2\Delta t} \;\epsilon \\
+    \\
+    \Delta z & \approx & -z \Delta t + \sqrt{\Delta t} \;\delta \;\;\;\delta \sim {\cal N}(0,2I)
+    \end{eqnarray*}    
+
+\vfill
+This can be interpreted as the stochastic differential equation for the forward process (the encoder) for diffusion models.
 
 \slide{END}
 }

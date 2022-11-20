@@ -1,0 +1,102 @@
+\documentclass{article}
+\input /users/davidmcallester/ttic-31230/preamble
+\parindent = 0em
+
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+
+\begin{document}
+
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning, Fall 2022}
+\centerline{\bf Quiz 3}
+
+\bigskip
+{\bf Problem 1.}
+Consider a diffusion encoding process defined by
+
+\begin{eqnarray*}
+  z_0 & = & y \\
+  \\
+  z_\ell & = & \alpha z_{\ell-1} + \sqrt{1-\alpha^2}\; \epsilon\;\;\;\epsilon\sim {\cal N}(0,I)
+\end{eqnarray*}
+
+Take $\alpha$ constant for all $\ell$ with $0 <\alpha < 1$ with $1 \leq \ell \leq L$.
+We assume that $\alpha^L$ is sufficiently small that $z_L$ is independent of $y$.
+
+\medskip
+Now consider training a deterministic decoder (aka denoiser) $\hat{y}_\Phi(z_\ell,\ell)$ for recovering the image $y$ from $z_\ell$
+using the following loss.
+\begin{equation}
+  \label{train}
+  \Phi^* = \argmin_{\Phi}\;E_{y,\ell,z_\ell}\;||y - z_\Phi(z_\ell,\ell)||^2
+\end{equation}
+
+This is done in training the decoder in some successful diffusion models.
+
+\medskip
+Although the model $z_\Phi(z_\ell,\ell)$ is trained to predict $y$ it is used to generate $z_{\ell-1}$ from $z_\ell$ in generation.
+The decoding process is sometimes made to be deterministic with
+
+\begin{equation}
+  \label{decode}
+  z_{\ell-1} = z_\Phi(z_\ell,\ell)
+\end{equation}
+
+\medskip
+{\bf (a)} Assuming universality for $\Phi$, and assuming that $z_L$ is distributed as ${\cal N}(0,I)$ independent of $y$,
+write $z_{\Phi^*}(z_L,L)$ as an expression not involving optimization (not involving argmin).
+
+\solution{
+  Since $z_L$ is independent of $y$, the minimizer is just the mean image.
+  $$\hat{y}_{\Phi^*}(z_L,L) = E\;y$$
+}
+
+\medskip
+{\bf (b)} Does your answer to (a) have implications for the diversity of generated images in a model that uses both (\ref{train}) and (\ref{decode}).  Explain your answer.
+
+\solution{
+  Part (a) gives that $z_{L-1}$ is deterministically the mean image independent of the noise $z_L$.  If all other stages in the decoding are deterministic
+  then the sampler should always get the same image.
+}
+
+\medskip
+{\bf (c)} Why might an image generator based on (\ref{train}) and (\ref{decode}) be diverse in practice?
+
+\solution{
+  The universality assumption does not hold in practice and hence we should not expect $z_{\ell-1}(z_L,L)$ to be truly constant independent of $z_L$.  This variation
+  can be amplified through the decoding process.}
+
+\bigskip
+
+{\bf Problem 2.} In a progressive VAE we are interested in modeling the distribution $p_\Phi(z_{\ell-1}|z_\ell,\ell)$.  Current
+diffusion models use
+$$z_{\ell-1} = z_\Phi(z_\ell,\ell) + \sigma\delta\;\;\;\delta \sim {\cal N}(0,I)$$
+However, if want to reduce the number of layers we have more noise between layers and the true conditional distribution $p(z_{\ell-1}|z_\ell,\ell)$ will not be Gaussian.
+
+\medskip
+This problem asks you to formulate a conditional Gaussian VAE model for the conditional distribution $p_\Phi(z_{\ell-1}|z_\ell,\ell)$.
+Here $z_\ell$ and $\ell$ are given and you are to introduce a latent variable with an encoder, decoder and prior, for modeling
+$p_\Phi(z_{\ell-1}|z_\ell,\ell)$.  In a Gaussian VAE we have that, without loss of generality, the prior can be taken to be ${\cal N}(0,I)$.
+In a Gaussian VAE for images the latent variable typically has smaller dimension than the images.
+
+\medskip
+Letting $\epsilon$ denote the latent variable of the Gaussian VAE, and taking the prior to be ${\cal N}(0,1)$, sampling from the prior, followed by sampling from the decoder, can be written as
+$$z_{\ell-1} = z_\Phi(\epsilon,z_\ell,\ell) + \sigma_\Phi(\epsilon,z_\ell,\ell)\odot\delta\;\;\;\epsilon \sim {\cal N}(0,I), \;\;\delta \sim {\cal N}(0,I)$$
+Here $\odot$ denotes Hadamard product, or diminsionwise product, with $(x \odot y)[i] = x[i]y[i]$.
+
+\medskip
+Write a similar equation for the Gaussian VAE encoder generating the latent variable $\epsilon$ from $z_\ell$ and $\ell$ and give the objective function for jointly training the encoder and the decoder.
+
+\solution{
+For encoding the latent variable $\epsilon$ we introduce a model
+$$\epsilon = \epsilon_\Psi(z_{\ell-1},z_\ell,\ell) + \sigma_\Psi(z_{\ell-1},z_\ell,\ell) \odot \gamma\;\;\;\gamma \sim {\cal N}(0,I)$$
+The training objective is then
+$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi} \;E_{y,\ell,z_{\ell-1},z_\ell,\epsilon}\;\;KL(p_\Psi(\epsilon|z_{\ell-1},z_\ell,\ell),{\cal N}(0,I)) - \ln p_\Phi(z_{\ell-1}|\epsilon,z_\ell,\ell)$$
+
+\medskip
+There are various equivalent ways of writing this which also get full credit.
+}
+    
+\end{document}
+
