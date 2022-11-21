@@ -14,52 +14,45 @@
   \vfill
   \vfill
 
-\slide{Program Values as Objects}
-
-Consider a scalar product ($x$, $y$ and $z$ are each just real numbers).
-$$z = xy$$
-
-\vfill
-In a framework the values of the variables $x$, $y$ $z$ are objects in the sence of object oriented programming or Python.
-
-\vfill
-In computing $z.\mathrm{value}$ we assume that $x.\mathrm{value}$ and $y.\mathrm{value}$ are known. In the base case these are are just inputs or parameters.
 
 \slide{Program Values as Objects}
-$$z = xy$$
 
 \vfill
-The forward pass calls the procedure $z.\mathrm{forward}$ on each computed value $z$.
+In a framework the program (or deep model) variables are objects in the sense of object oriented programming or Python.
 
 \vfill
-The object $z$ holds its own inputs in its attributes.
+Each object $x$ stores its input objects in its instance variables and has an instance variable $x.\mathrm{value}$ storing its value.
 
 \vfill
-Since $z$ computed from a product the procedure $z.\mathrm{forward}$ assigns
+The instance variable $x.\mathrm{value}$ is filled by sending $x$ a forward message after its inputs have computed their values.
 
 \vfill
+Each object $x$ has an instance variable $x.\grad$ storing $\partial {\cal L}/\partial x$.
+
+\vfill
+$x.\grad$ is filled by the backward methods of objects $y$ that
+use $x$ as an input.  The backward method for $y$ is called after $y.\grad$ has been filled and adds into $x.\grad$ for each input $x$.
+
+\slide{Scalar Products}
+
+Consider a scalar product $z = xy$.
+
+\vfill
+The forward method for $z$ computes.
+
 $$z.\mathrm{value} = x.\mathrm{value}*y.\mathrm{value}$$
 
-\slide{Backprop with Objects}
-$$z = xy$$
-
 \vfill
-Each object $x$ has an attribure $x.\grad$ which holds the gradient of the loss with respect to $x$.
+The backward method for $z$ computes
 
-We want
-$$z.\grad = \frac{\partial {\cal L}}{\partial z}$$
-
-\vfill
-Backpropagation calls $z.\mathrm{backward}$ on each computed value $z$ in the reverse order.
-
-\vfill
-For $z = xy$ we have that $z.\mathrm{backward}$ does
 \begin{eqnarray*}
-x.\grad & \pluseq & y.\mathrm{value}*z.\grad \\
-y.\grad & \pluseq & x.\mathrm{value}* z.\grad
+x.\grad & \pluseq & z.\grad * y.\mathrm{value} \\
+\\
+y.\grad & \pluseq & z.\grad * x.\mathrm{value}
 \end{eqnarray*}
 
 \slide{Handling Arrays}
+
 Consider an inner product between vectors
 $$z = x^\top y$$
 
@@ -69,7 +62,7 @@ $$z.\mathrm{value} = 0$$
 $$\mathrm{for}\;i\;\;z.\mathrm{value} \;\pluseq\;x.\mathrm{value}[i]*y.\mathrm{value}[i]$$
 
 \vfill
-The backward procedure $z.\mathrm{backward}$ treats each $\pluseq$ instruction seperately and does.
+The backward method for $z$  treats each $\pluseq$ instruction seperately and does.
 $$\mathrm{for}\;i\;\;x.\grad[i] \;\pluseq\;y.\mathrm{value}[i]*z.\grad$$
 $$\mathrm{for}\;i\;\;y.\grad[i] \;\pluseq\;x.\mathrm{value}[i]*z.\grad$$
 
@@ -106,7 +99,7 @@ Backpropagation is also done with loops treating each individual assignment and 
 
 \slide{General Tensor Operations}
 
-In practice all deep learning source code can be written unsing scalar assignments and loops over scalar assignments.
+In practice all deep learning source code can be written using scalar assignments and loops over scalar assignments.
 For example:
 
 $$\begin{array}{rrcl}
