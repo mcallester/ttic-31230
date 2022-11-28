@@ -1,5 +1,5 @@
-\input /Users/davidmcallester/ICloude/tex/SlidePreamble
-\input /Users/davidmcallester/ICloude/tex/preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -56,23 +56,36 @@ $$P(\hat{\cal Y}[n]\;|\;\hat{\cal Y}/n) = \frac{1}{Z_n}e^{s(\hat{\cal Y})}\;\;\;
 \vfill
 While computing $P_s(\hat{\cal Y})$ is intractable, computing $\tilde{P}_s(\hat{\cal Y})$ involves only local partition functions and is tractable.
 
-\slide{Pseudo Cross-entropy Loss}
+\slide{Pseudo Cross-Entropy Loss}
 
-We can then do SGD on pseudo cross-entropy loss.
+We can then do SGD on pseudo cross-Entropy loss.
 \vfill
 {\color{red} $$\Phi^* = \argmin_\Phi E_{\tuple{x,{\cal Y}} \sim \pop}\;\;-\ln \tilde{P}_{\Phi,x}({\cal Y})$$}
 
 \slide{Pseudolikelihood Theorem}
 
-{\color{red} $$\argmin_Q \; E_{{\cal Y} \sim \pop} \;-\ln \tilde{Q}({\cal Y}) = \pop$$}
+We will show that for any $Q$ we have
 
 \vfill
-It suffices to show that for any $Q$ we have
+$$E_{{\cal Y} \sim \pop}\;-\ln \widetilde{\pop}({\cal Y}) \leq \;E_{{\cal Y} \sim \pop}\;-\ln \tilde{Q}({\cal Y})$$
 
 \vfill
-$$ E_{{\cal Y} \sim \pop}\;-\ln \widetilde{\pop}({\cal Y}) \leq \;E_{{\cal Y} \sim \pop}\;-\ln \tilde{Q}({\cal Y})$$
+Hence $\pop$ is a minimizer of the pseudo-likelihood cross-entropy.
 
-\slide{Proof II}
+\slide{Pseudolikelihood Theorem}
+
+\vfill
+$$E_{{\cal Y} \sim \pop}\;-\ln \widetilde{\pop}({\cal Y}) \leq \;E_{{\cal Y} \sim \pop}\;-\ln \tilde{Q}({\cal Y})$$
+
+\vfill
+It is also true that if the support of $\pop$ is ``ergotic'' in the sense that it is connected under the neighbor relation defined by changing a single node, then
+$\pop$ is the {\em only} minimizer of the pseudo-liklihood loss.
+
+\vfill
+To see that ergodicity is needed consider a two node network with Boolean nodes that agree with probability 1.  The conditional distributions do not determine
+the probability that the nodes are true and hence many distributions minimize the pseudo-likelihood cross-entropy.
+
+\slide{Proof that $\pop$ is a Minimizer}
 
 {\huge
 \begin{eqnarray*}

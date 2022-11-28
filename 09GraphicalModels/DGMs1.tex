@@ -1,5 +1,5 @@
-\input /users/davidmcallester/ICloude/tex/SlidePreamble
-\input /users/davidmcallester/ICloude/tex/preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -17,14 +17,31 @@
 \vfill
 \vfill
 
-\slide{Distributions on Exponentially Large Label Sets}
+\slide{Energy Based Models}
 
-{\color{red}
-$$\Phi^* = \argmin_\Phi E_{(x,{\cal Y}) \sim \mathrm{Pop}}\;-\ln \;P({\cal Y}|x)$$
+Energy based models are an alternative to autoregressive models.
+
+\vfill
+An energy based model computes a score and the distributions is defined by an exponentially large softmax.
+
+\vfill
+{\huge
+\begin{eqnarray*}
+{\color{red} P_s(\hat{{\cal Y}})} & = & \softmax_{\hat{{\cal Y}}}\;s(\hat{{\cal Y}}) \;\;\;\mbox{\color{red} all possible $\hat{{\cal Y}}$} \\
+\\
+\mbox{cross-entropy loss} & = & - \ln P_s({\cal Y}) \;\;\;{\color{red} \;\;\;\;\mbox{gold label (training label) ${\cal Y}$}}
+\end{eqnarray*}
 }
 
 \vfill
-{\color{red} The structured case:} The number of possible labels is exponentially large --- iteration over the possible labels is infeasible.
+Of course we cannot directly compute the exponentially large softmax distribution.
+
+\slide{Graphical Models}
+
+Graphical models are a form of energy based model where the energy is computed by summing up local energies.
+
+\vfill
+A subclass of graphical models allow the probability $P_s({\cal Y})$ to be computed efficiently by dynamic programming.
 
 \slide{Parsing and CKY}
 
@@ -45,8 +62,7 @@ possible transcriptions.
 Connectionist Temporal classification (CTC) is a dynamic programming algorithm for finding the most likely output under a certain family of energy based models.
 
 \vfill
-CTC is still the most accurate way to do speech recognition where the energy based model is computed by a deep network.
-
+CTC is still used in many speech recognition systems.
 
 \slide{Semantic Segmentation}
 \centerline{\includegraphics[height = 2.5in]{\images/SemSeg}}
@@ -59,7 +75,7 @@ For example ``person'', ``car'', ``building'', ``sky'' or ``other''.
 
 \slide{Semantic Segmentation}
 
-\centerline{\includegraphics[height = 2.5in]{\images/SemSeg}}
+\centerline{\includegraphics[height = 2in]{\images/SemSeg}}
 
 \vfill
 Although semantic segmentation is not currently done with energy based models, perhaps it should be.
@@ -67,7 +83,10 @@ Although semantic segmentation is not currently done with energy based models, p
 \vfill
 Semantic segmentation is simpler than parsing or speech recognition and will be used as a simple example of energy based models.
 
-\slide{Distributions on Exponentially Large Sets: Notation}
+\vfill
+The graphical models historically used for semantic segmentation do not support dynamic programming solutions.
+
+\slide{Notation}
 
 $x$ is an input (e.g. an image).
 
@@ -80,18 +99,6 @@ For example $n$ might range over the pixels of an image and $\hat{\cal Y}[n]$ na
 \vfill
 ${\cal Y}[N]$ is the gold label for input $x$ --- the structured label assigned to $x$ in the training data.
 
-\slide{Exponential Softmax}
-
-{\huge
-\begin{eqnarray*}
-{\color{red} P_s(\hat{{\cal Y}})} & = & \softmax_{\hat{{\cal Y}}}\;s(\hat{{\cal Y}}) \;\;\;\mbox{\color{red} all possible $\hat{{\cal Y}}$} \\
-\\
-\\
-\\
-\\
-\mbox{cross-entropy loss} & = & - \ln P_s({\cal Y}) \;\;\;{\color{red} \;\;\;\;\mbox{gold label (training label) ${\cal Y}$}}
-\end{eqnarray*}
-}
 
 
 \slidetwo{Compactly Representing Scores}{on Exponentially Many Labels}
@@ -99,7 +106,7 @@ ${\cal Y}[N]$ is the gold label for input $x$ --- the structured label assigned 
 We will call $n$ a ``node''.
 
 \vfill
-We will compute a ``node potential'' tensor {\color{red} $s^N[N,L]$} that holds $NL$ scores --- a score each possible assignment of a label $\ell$ to $n$.
+We will compute a ``node potential'' tensor {\color{red} $s^N[N,L]$} that holds $NL$ scores --- a score for each possible assignment of a label $\ell$ to $n$.
 
 \vfill
 We assume a set $E$ of ``edges'' with $E \subseteq N \times N$.
