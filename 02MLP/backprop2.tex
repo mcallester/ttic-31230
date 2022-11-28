@@ -78,7 +78,7 @@ $$\mathrm{for}\;i,j\;\;y.\mathrm{value}[j] \;\pluseq\;W.\mathrm{value}[j,i]*x.\m
 \vfill
 The backward procedure $y.\mathrm{backward}$ treats each individual $\pluseq$ as a scalar product and does
 $$\mathrm{for}\;i,j\;\;x.\grad[i] \;\pluseq\;W.\mathrm{value}[j,i]*y.\grad[j]$$
-$$\mathrm{for}\;i\;\;W.\grad[j,i] \;\pluseq\;x.\mathrm{value}[i]*y.\grad[j]$$
+$$\mathrm{for}\;i,j\;\;W.\grad[j,i] \;\pluseq\;x.\mathrm{value}[i]*y.\grad[j]$$
 
 \slide{A Linear Threshold Layer}
 
