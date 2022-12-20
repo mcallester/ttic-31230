@@ -27,120 +27,42 @@ Later papers in the code base use these uncertainty levels to weight guidance st
 \vfill
 Guided diffusion with channel-level guiding strength is used in DALLE-2.
 
-\slide{Getting Per-Pixel Decoder Uncertainty}
+\slide{Optimizing the ELBO}
 
-Per-pixel decoder uncertainty will be estimated by optimizing the VAE bound on cross-entropy loss.
-
-\vfill
-These papers call it the variational lower bound (VLB) rather than the ELBO.
+For image VAEs the ELBO is refered to as negative log likelihood (or NLL) and is measured in bits per image channel.
 
 \vfill
-The paper is written from the perspective of simply optimizing the VLB.
-
-\slide{Why Optimize the VLB?}
-
-We can compare any two models of a distribution by computing upper bounds on cross-entropy loss for each model.
-
-\vfill
-Since gradient descent on corss entropy (GPT-3) is so successful, maybe we shuld also be doing {\bf graduate student descent} on cross entropy.
-
-\vfill
-In other words, cross entropy may be an undervalued metric for comparing different systems trained with different architectures.
-
-
-\slide{Improved Cross-Entropy Loss}
-
-For image models the cross entropy is generally refered to as negative log likelihood (or NLL) and is measured in bits per image channel.
-
 \centerline{\includegraphics[width=5in]{\images/DiffNLL}}
 
-\slide{Rewriting the VLB}
 
-For a progressive VAE with layers $z_0,\ldots,z_L$ where $z_0 = y$ the VLB is
+\slide{Optimizing Per-Channel Prior Variances}
 
-{\huge
-\begin{eqnarray*}
-- \ln p_{\gen}(z_0) & \leq & E_\enc\; -\ln \frac{p_\gen(z_L,\ldots,z_0)}{p_\enc(z_1,\ldots,z_L|z_0)}
-\\
-\\
-\\
-& = & E_\enc -\ln p_\pri(z_L) - \sum_{\ell } \frac{\ln p_\dec(z_{\ell-1}|z_\ell)}{\ln p_\enc(z_\ell|z_{\ell-1})}
-\end{eqnarray*}
-}
+We now introduce a prior network $\sigma_\Psi(z_\ell,\ell) \in R^d$ to give the prior noise level.
 
-\slide{Rewriting the VLB}
-
-{\huge
-\begin{eqnarray*}
-- \ln p_{\gen}(z_0) & \leq & E_\enc -\ln p_\pri(z_L) - \sum_{\ell } \ln \frac{p_\dec(z_{\ell-1}|z_\ell)}{p_\enc(z_\ell|z_{\ell-1})} \\
-\\
-& = & E_\enc -\ln p_\pri(z_L) - \sum_{\ell } \ln \frac{p_\dec(z_{\ell-1}|z_\ell)}{p_\enc(z_\ell|z_{\ell-1},z_0)} \\
-\\
-& = & E_\enc -\ln p_\pri(z_L) - \sum_{\ell } \ln \frac{p_\dec(z_{\ell-1}|z_\ell)p(z_{\ell-1}|z_0)}{p_\enc(z_\ell,z_{\ell-1}|z_0)} \\
-\\
-& = & E_\enc -\ln p_\pri(z_L) - \sum_{\ell } \ln \frac{p_\dec(z_{\ell-1}|z_\ell)p_\enc(z_{\ell-1}|z_0)}{p_\enc(z_{\ell-1}|z_\ell,z_0)p_\enc(z_\ell|z_0)}
-\end{eqnarray*}
-}
-
-\slide{Rewriting the VLB}
-
-{\huge
-\begin{eqnarray*}
-- \ln p_\gen(z_0) & \leq & E_\enc -\ln p_\pri(z_L) - \sum_{\ell } \ln \frac{p_\dec(z_{\ell-1}|z_\ell)}{p_\enc(z_{\ell-1}|z_\ell,z_0)}
-- \ln \frac{p_\dec(z_{\ell-1}|z_0)}{p_\enc(z_\ell|z_0)} \\
-\\
-& = & E_\enc -\ln \frac{p_\pri(z_L)}{p_\enc(z_L|z_0)} - \sum_{\color{red} \ell \geq 2} \ln \frac{p_\dec(z_{\ell-1}|z_\ell)}{p_\enc(z_{\ell-1}|z_\ell,z_0)} - \ln p_\dec(z_0|z_1) \\
-\\
-\\
-& = & E_\enc \left\{\begin{array}{l}KL(p_\enc(z_L|z_0),p_\pri(z_L)) \\
-\\
-+ \sum_{\ell \geq 2} KL(p_\enc(z_{\ell-1}|z_\ell,z_0),p_\dec(z_{\ell-1}|z_\ell)) \\
-\\
-- \ln p_\dec(z_0|z_1) \end{array} \right.
-\end{eqnarray*}
-}
-
-
-\slide{Rewriting the VLB}
-
-{\huge
-  \begin{eqnarray*}
-    - \ln p_\gen(z_0) & \leq & E_\enc \left\{\begin{array}{l}KL(p_\enc(z_L|z_0),p_\pri(z_L)) \\
-\\
-+ \sum_{\ell \geq 2} KL(p_\enc(z_{\ell-1}|z_\ell,z_0),p_\dec(z_{\ell-1}|z_\ell)) \\
-\\
-- \ln p_\dec(z_0|z_1) \end{array} \right.
-\end{eqnarray*}
-}
-
-All of the KL-divergences can be computed analytically from Gaussians.  This reduces the variance in estimating the bound.
+$$z_{\ell-1} = f_\Phi(\ell,z_\ell) + {\sigma}_\Psi(z_\ell,\ell)\odot\delta,\;\;\;\;\delta \sim {\cal N}(0,I)$$
 
 \vfill
-Nichol and Dhariwal compute $- \ln p_\dec(z_0|z_1)$ by treating each image channel as a discrete set of 256 values and computing the probability that a draw from
-the computed Gaussian rounds to the actual discrete value.
-
-\slide{Optimizing Per-Channel Decoder Variances}
-
-We now introduce a decoder network $\tilde{\sigma}_\Psi(z_\ell,\ell) \in R^d$ to give the decoder noise level.
+The prior noise network $\sigma_\Psi(z_\ell,,\ell) \in R^d$ is trained with the ELBO objective.
 
 \vfill
-$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right)\; +\; \tilde{\sigma}_\Psi(z_\ell,\ell)\odot\delta\;\;\;\;\delta \sim {\cal N}(0,I)$$
+This is unneccessary under the stochastic differential equation model of DDPM but improves the ELBO when using a discrete approximation to the differential equation.
+
+
+\slide{Optimizing Per-Channel Prior Variances}
+
+$$z_{\ell-1} = f_\Phi(\ell,z_\ell) + {\sigma}_\Psi(z_\ell,\ell)\odot\delta,\;\;\;\;\delta \sim {\cal N}(0,I)$$
 
 \vfill
-The decoder noise network $\tilde{\sigma}_\Psi(z_\ell,,\ell) \in R^d$ is trained with the VLB objective.
+Here $\sigma(z_\ell,\ell)[i]$ expresses a prior uncertainty in $z_{\ell-1}[i]$ given $z_\ell[i]$.
 
 \vfill
-This improves the value of the VLB.
-
-\slide{Optimizing Per-Channel Decoder Variances}
-
-$$\dec(z_\ell,\ell) = \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right)\; +\; \tilde{\sigma}_\Psi(z_\ell,\ell)\odot\delta\;\;\;\;\delta \sim {\cal N}(0,I)$$
+This uncertainty will be larger for pixels in a region with fine random texture than for pixels in a large region a contant value.
 
 \vfill
-One can interpret $\tilde{\sigma}(z_\ell,\ell)[i]$ is a level of uncertainty in the decoder value $\epsilon(z_\ell,\ell)[i]$.
+The U-Net can distinguish these different regions of the input.
 
 \vfill
-The more uncertainty the model has in $\epsilon(z_\ell,\ell)[i]$ the more guidance should be used in adjusting it.
+The more uncertain the model at a given pixel, the more guidance should be used in adjusting it.
 
 
 \slidetwo{Diffusion Models Beat GANs on Image Synthesis}{Dharwali and Nichol, May 2021}
@@ -208,7 +130,7 @@ We want a step in direction $\nabla_z\;\ln p(z)P(x|z)$. They use
 
 {\huge
 \begin{eqnarray*}
-  \dec(z_\ell,\ell) & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right) \; +\; \tilde{\sigma}_\ell\odot\delta\; + {\color{red} s\tilde{\sigma}\odot\nabla_{z} \ln P(x|z)}
+  \pri(z_\ell,\ell) & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right) \; +\; \tilde{\sigma}_\ell\odot\delta\; + {\color{red} s\tilde{\sigma}\odot\nabla_{z} \ln P(x|z)}
 \end{eqnarray*}
 }
 
@@ -216,7 +138,7 @@ We want a step in direction $\nabla_z\;\ln p(z)P(x|z)$. They use
 
 {\huge
 \begin{eqnarray*}
-  \dec(z_\ell,\ell) & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right) \; +\; \tilde{\sigma}_\ell\odot\delta\; + {\color{red} s}\tilde{\sigma}\odot\nabla_{z} \ln P(x|z)
+  \pri(z_\ell,\ell) & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right) \; +\; \tilde{\sigma}_\ell\odot\delta\; + {\color{red} s}\tilde{\sigma}\odot\nabla_{z} \ln P(x|z)
 \end{eqnarray*}
 }
 
@@ -252,7 +174,7 @@ Classifier-free diffusion guidance is used in DALLE-2.
 5\% of the time we set $x = \emptyset$ where $\emptyset$ is a fixed value unrelated to the image.
 
 \vfill
-The decoder then uses
+The prior then uses
 
 $$\tilde{\epsilon}(z_\ell,\ell,x) = s\epsilon(z_\ell,\ell,x) - (s-1)\epsilon(z_\ell,\ell,\emptyset)$$
 
@@ -310,7 +232,7 @@ The classifier-free guidance differs from the original version in that here we a
 rather than as Imagenet labels.
 
 \vfill
-The text is transformed to a feature vector by a transformer before being fed to the decoder.
+The text is transformed to a feature vector by a transformer before being fed to the prior.
 
 \slide{CLIP-guided GLIDE}
 
@@ -359,10 +281,10 @@ $C_I(y)$ is the encoder of an auto-encoder for $y$ given $x$.
 $P(C_I(y)|x)$ is the optimal prior for this auto-encoder.
 
 \vfill
-$P(y|C_I(y),x)$ is the optimal decoder.
+$P(y|C_I(y),x)$ is the optimal prior.
 
 \vfill
-In DALLE-2 the prior and the decoder both see the text $x$.
+In DALLE-2 the prior and the prior both see the text $x$.
 
 \slide{Putting it all Together}
 
@@ -407,7 +329,7 @@ and to predict a string of 319 symbols with a vocabulary of size 1024 which can 
 
 \slide{The Diffusion Prior}
 
-Let $z_\ell$ be the noising of $C_I(y)$ to level $\ell$.  For the decoder they train a transformer to take the text string $x$, the text embedding $C_T(x)$, the noised
+Let $z_\ell$ be the noising of $C_I(y)$ to level $\ell$.  For the prior they train a transformer to take the text string $x$, the text embedding $C_T(x)$, the noised
 image embedding $z_\ell$, and the level $\ell$. A final ``classifier token'' is added to the end of this string and vector computed for that token by the transformer is used as a prediction of $C_I(y)$.
 This predictor $f(x,z_\ell,\ell)$ is trained on the objective
 
@@ -427,12 +349,12 @@ $$z_0 = f(x,z_1,1) + \tilde{\sigma}\delta\;\;\;\delta \sim {\cal N}(0,I)$$
 \vfill
 They draw two samples $\hat{C}$ and $\hat{C}'$ and use the one with larger inner product with $C_T(x)$.
 
-\slide{Progressive VAEs}
+\slide{Markovian VAEs}
 
-Diffusion models are a special case of progressive VAEs.
+Diffusion models are a special case of Markovian VAEs.
 
 \vfill
-A progressive VAE has layers of latent variables $z_1,\dots,z_{L}$.
+A Markovian VAE has latent variable $z = (z_0,z_1,\dots,z_{L})$.
 
 \vfill
 It is not clear whether diffusion models are the best way to do this.

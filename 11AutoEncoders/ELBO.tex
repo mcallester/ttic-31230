@@ -14,108 +14,119 @@
   \vfill
   \vfill
 
-\slide{Rate-Distortion Autoencoders}
 
-Consider image compression where we compress an image $y$ into a compressed file $z$.
+\slide{Image Compression and Image Generation}
 
-\vfill
-We will assume a stochastic compression algorithm
-which we will call the ``encoder'' $P_\enc(z|y)$.
+Suppose that we want to model a population distribution on $y$, for example the distribution of ``natural images''.
 
 \vfill
-The number of bits needed for the compressed file is given by $H(z)$.  $H(z)$
-is the ``rate'' (bits per image) for transmitting compressed images.
+Shannon's source coding theorem implies that there exists a coding function with an inverse decoding function such that
+decoding a random string samples an image from the population distribution on images.
 
 \vfill
-The number of unknown additional bits needed to exactly recover $y$ is $H(y|z)$.
-$H(y|z)$ is a measure of the ``distortion'' of $y$ when $y$ is decoded without the missing bits.
+While we cannot optimally compress images, it can be useful to represent a population distribution on $y$ in terms of a latent (unabserved) variable $z(y)$ loosely analogous to a compressed form.
 
-\slide{Rate-Distortion Autoencoders}
+\slide{The Encoder, Decoder and the Prior}
 
-In practice we model $H(z)$ with a ``prior model'' $P_\pri(z)$ and model $H(y|z)$ with a ``decoder model''
-$P_\dec(y|z)$.
+Consider a probabilistic encoder algorithm $P_\enc(z|y)$ --- perhaps a stochastic image compression algorithm.
 
 \vfill
-So the rate-distortion auto-encoder has three parts $P_\enc(z|y)$, $P_\pri(z)$, and $P_\dec(y|z)$.
+The encoder $P_\enc(z|y)$ defines a joint probability distribution on pairs $(y,z)$.
 
 \vfill
-The {\bf variational autoencoder (VAE)} with latent variable $z$ is mathematically the same as a rate-distortion autoencoder
-with compressed form $z$.
+We will also introduce a decoder model (decompressor) $P_\dec(y|z)$ and a prior probability model $P_\pri(z)$ which are to be trained
+using a cross-entropy loss to $P(y|z)$ and and $P(z)$ as defined by the encoder.
 
+\slide{The ELBO}
 
-\slide{An ``Encoder First'' Treatment of VAEs}
-
-Fix an arbitrary encoder model $P_\enc(z|y)$.
-
-\vfill
-For $y \sim \pop$ and $z \sim P_\enc(z|y)$ train models $\pri$ and $\dec$.
-
+{\huge
 \begin{eqnarray*}
-\mbox{Prior Model:}\;\;\pri^* & = & \argmin_\pri \;\; E_{y,z}\;\;-\ln P_\pri(z) \\
+H(y,z) & = & H(y) + H(z|y) \; = \; H(z) + H(y|z) \\
 \\
-\mbox{Decoder Model:}\;\dec^* & = & \argmin_\dec\;\; E_{y,z}\;\;-\ln P_\dec(y|z)
+H(y) & = & H(z) + H(y|z) - H(z|y) \\
+\\
+& \leq & CE(P(z),P_\pri(z)) + CE(P(y|z),P_\dec(y|z)) -H_\enc(z|y) \\
+\\
+& = & E_{y\sim \pop, z \sim P_\enc(z|y)}\;-\ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}
 \end{eqnarray*}
-
+}
 \vfill
-For any $P_\enc(z|y)$ the universality assumption for $\pri^*$ and $\dec^*$ gives
-
-\vfill
-$$\pop(y) = \sum_z\;\;P_{\pri^*}(z)P_{\dec^*}(y|z)$$
+The last line is the (negative) ELBO.  ELBO stands for ``Evidence Lower Bound'' but this terminaology is obscure and unhelpful.
 
 
-\slide{Upper Bounding $H(y)$}
+\slide{The ELBO Loss}
 
-Cross-entropy upper bounds $H(y)$ and equals $H(y)$ assuming universality.
+We now interpret the ELBO as a loss on a given value $y$.
 
-\vfill
-The ELBO plays the role of cross-entropy for latent variable models.
+{\huge
+\begin{eqnarray*}
+H(y) & \leq & E_{y\sim \pop, z \sim P_\enc(z|y)}\;-\ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)} \\
+\\
+& = & E_{y \sim \pop}\; {\cal L}_E(y) \\
+\\
+\\
+{\cal L}_E(y) & = & E_{ z \sim P_\enc(z|y)}\;-\ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)} \\
+\end{eqnarray*}
+}
 
-\vfill
-The negative ELBO uppr bounds $H(y)$ and equals $H(y)$ assuming universality.
+\slide{A Third Fundamental Equation}
 
-
-\slide{Deriving the ELBO}
-
-Sample $y \sim \pop$ and $z \sim P_\enc(z|y)$.
-
-\vfill
-$$H(y,z) = H(y) + H(z|y) = H(z) + H(y|z)$$
-
-\vfill
-Solving for $H(y)$ gives
-
-$$H(y) = H(z) + H(y|z) - H(z|y)$$
-
-\slide{An Encoder First Treatment of VAEs}
-Replace the first two entropies by cross entropies.
+$$\pri^*,\dec^*  = \argmin_{\pri,\dec}\;\;E_{y}\;{\cal L}_E(y)$$
 
 \vfill
 \begin{eqnarray*}
-H(y) & = & H(z) + H(y|z) - H_\enc(z|y) \\
-\\
- & \leq & H_\pri(z) + H_\dec(y|z) - H_\enc(z|y) \\
- \\
-H_\pri(z) & = & E_{y,z}\;[-\ln P_\pri(z)] \\
-\\
-H_\dec(y|z) & = & E_{y,z}\;[- P_\dec(y|z)]
+  & &   E_y\;{\cal L}_E(y) \\
+  \\
+  & = & E_{y \sim \pop,\;z\sim P_\enc(z|y)} \;\; \ln \frac{P_\enc(z|y)}{P_\pri(z)P_\dec(y|z)} \\
+  \\
+  & = & E_y\;\left[-\ln \pop(y)\right] + KL(\pop(y)P_\enc(z|y),\;\;P_\pri(z)P_\dec(y|z)) \\
+  \\
+  & = & H(y) + KL(\pop(y)P_\enc(z|y),\;\;P_\pri(z)P_\dec(y|z))
 \end{eqnarray*}
 
-\slide{VAE}
+\slide{The ELBO Loss}
+
 \begin{eqnarray*}
-H(y) & = & H(z) + H(y|z) - H_\enc(z|y) \\
-\\
- & \leq & H_\pri(z) + H_\dec(y|z) - H_\enc(z|y) \\
-\\
- & = & E_{y,z}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]
+  E_y\;{\cal L}_E(y)
+  & = & H(y) + KL(\pop(y)P_\enc(z|y),\;\;P_\pri(z)P_\dec(y|z))
 \end{eqnarray*}
 
 \vfill
-$$\enc^*,\pri^*,\dec^* = \argmin_{\enc,\pri,\dec}\;\;E_{y,z}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
+Minimization occurs when the prior and the docoder satisfy
+
+\vfill
+$$P_\pri(z)P_\dec(y|z) = \pop(y)P_\enc(z|y)$$
 
 
-\slide{The Re-Parameterization Trick}
+\slide{The ELBO Loss}
+\begin{eqnarray*}
+  E_y\;{\cal L}_E(y)
+  & = & H(y) + KL(\pop(y)P_\enc(z|y),\;\;P_\pri(z)P_\dec(y|z))
+\end{eqnarray*}
 
-$$\enc^*,\pri^*,\dec^* = \argmin_{\enc,\pri,\dec}\;\;E_{y,{\color{red} z\sim P_\enc(z|y)}}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
+\vfill
+Minimizing gives
+$$P_\pri(z)P_\dec(y|z) = \pop(y)P_\enc(z|y) = P(y,z)$$
+
+\vfill
+and hence
+$${\cal L}_E(y) = \;\;E_z\;\ln \frac{P(z|y)}{P(z,y)} = E_z\;\ln \frac{P(z,y)/P(y)}{P(z,y)}\;\; = -\ln \pop(y)$$
+\vfill
+After optimization one can interpret ${\cal L}_E(y)$ as $-\ln \pop(y)$.
+
+\slide{Optimizing the Encoder}
+
+Although in princile the encoder need not be trained, it is sometimes jointly optimized with the prior and the decoder.
+
+\vfill
+$$\pri^*,\dec^*,\enc^* = \argmin_{\pri,\dec,\enc}\;\;E_{y,{\color{red} z\sim P_\enc(z|y)}}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
+
+\vfill
+This is necessary if want to interpret $z$ as some kind of ``understanding'' of the distribution on $y$ that facilitates representing the prior and the decoder.
+
+\slide{Optimizing the Encoder}
+
+$$\pri^*,\dec^*,\enc^* = \argmin_{\pri,\dec,\enc}\;\;E_{y,{\color{red} z\sim P_\enc(z|y)}}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
 
 \vfill
 Gradient descent on the encoder parameters must take into account the fact that we are sampling from the encoder.
@@ -140,11 +151,11 @@ $$z^i_\enc(y,\epsilon) = \hat{z}^i_\enc(y) + \sigma^i\epsilon^i.$$
 \vfill
 Optimizing the encoder is tricky for discrete $z$.  Discrete $z$ is handled effectively in EM algorithms and in VQ-VAEs.
 
-\slide{EM is Alternating Optimization of the VAE}
+\slide{EM is Alternating Optimization of the ELBO Loss}
 
 Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_{\pri,\dec}(z|y)$ is samplable and computable.
 EM alternates exact optimization of $\enc$ and the pair $(\pri,\dec)$ in:
-$$\mbox{VAE:}\;\;\;\;\;\;\; {\color{red} \pri^*,\dec^*} = \argmin_{\color{red} \pri,\dec} \min_{\color{red} \enc} E_{y,\;z \sim P_{\color{red} \enc}(z|y)}\;\;- \ln \frac{P_{\color{red} \pri}(z,y)}{P_{\color{red} \enc}(z|y)}$$
+$$\mbox{VAE:}\;\;\;\;\;\;\; {\color{red} \pri^*,\dec^*} = \argmin_{\color{red} \pri,\dec} \min_{\color{red} \enc} E_{y,\;z \sim P_{\color{red} \enc}(z|y)}\;\;- \ln \frac{P_{\color{red} \pri,\dec}(z,y)}{P_{\color{red} \enc}(z|y)}$$
 
 \vfill
 $$\mbox{EM:}\;\;\;\;\;\; {\color{red} \pri^{t+1},\dec^{t+1}} =  \argmin_{\color{red} \pri,\dec}\;\;\;\;E_{y,\;z \sim P_{\color{red} \pri^t,\dec^t}(z|y)}\; - \ln P_{\color{red} \pri,\dec}(z,y)$$
