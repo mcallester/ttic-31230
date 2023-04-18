@@ -15,9 +15,10 @@
 \vfill
 \vfill
 
+
 \slide{Early History}
 
-{\bf 1943}: McCullock and Pitts introduced the linear threshold ``neuron''.
+{\bf 1943}: McCullock and Pitts introduced the {\color{red} linear threshold ``neuron''}. Words in red are important --- we will discuss them in detail in this class.
 
 \vfill
 {\bf 1962}: Rosenblatt applies a ``Hebbian'' learning rule.  Novikoff proved the perceptron convergence theorem.
@@ -30,7 +31,7 @@ The Perceptrons book greatly discourages work in artificial neural networks.  Sy
 
 \slide{80s Renaissance}
 
-{\bf 1980}: Fukushima introduces the neocognitron (a form of CNN)
+{\bf 1980}: Fukushima introduces the neocognitron --- a form of {\color{red} convolutional neural Network or CNN}.  CNNs created the deep revolution in 2012.
 
 \vfill
 {\bf 1984}: Valiant defines PAC learnability and stimulates learning theory. Wins the Turing Award in 2010.
@@ -39,17 +40,17 @@ The Perceptrons book greatly discourages work in artificial neural networks.  Sy
 {\bf 1985}: Hinton and Sejnowski introduce the Boltzman machine
 
 \vfill
-{\bf 1986}: Rummelhart, Hinton and Williams demonstrate empirical success with backpropagation (itself dating back to 1961).
+{\bf 1986}: Rummelhart, Hinton and Williams demonstrate empirical success with {\color{red} backpropagation} (itself dating back to 1961).
 
 \slide{90s and 00s: Research In the Shadows}
 
-{\bf 1997}: Schmidhuber et al. introduce LSTMs
+{\bf 1997}: Schmidhuber et al. introduce LSTMs (a form of {\color{red} recurrent neural network or RNN}).
 
 \vfill
-{\bf 1998}: LeCunn introduces convolutional neural networks (CNNs) (LeNet).
+{\bf 1998}: LeCunn draws attention to convolutional neural networks (CNNs) (LeNet).
 
 \vfill
-{\bf 2003}: Bengio introduces neural language modeling.
+{\bf 2003}: Bengio introduces {\color{red} neural language modeling}.
 
 \slide{Current Era}
 
@@ -69,13 +70,13 @@ Both developments come out of Hinton's group in Toronto.
 {\bf 2014}: Neural machine translation appears (Seq2Seq models).
 
 \vfill
-Variational auto-encoders (VAEs) appear.
+{\color{red} Variational auto-encoders} (VAEs) appear.
 
 \vfill
-Generative Adversarial Networks (GANs) appear.
+{\color{red} Generative Adversarial Networks} (GANs) appear.
 
 \vfill
-Graph neural networks appear (GNNs) revolutionizing the prediction of molecular properties.
+{\color{red} Graph neural networks appear} (GNNs) revolutionizing the prediction of molecular properties.
 
 \vfill
 Dramatic improvement in computer vision and speech recognition continues.
@@ -85,10 +86,16 @@ Dramatic improvement in computer vision and speech recognition continues.
 {\bf 2015}: Google converts to neural machine translation leading to dramatic improvements.
 
 \vfill
-ResNet (residual connections) appear.  This makes yet another dramatic improvement in computer vision.
+{\color{red} Batch Normalization} appears improving the performance of image classification.
 
 \vfill
-{\bf 2016}: Alphago defeats Lee Sedol.
+{{\color{red} Residual Connections} appear.  This makes yet another dramatic improvement in computer vision.
+
+\vfill
+{\color{red} Diffusion Models} are formulated which becomes important in 2021.
+
+\vfill
+{\bf 2016}: {\color{red} Reinforcement Learning} is used to develop Alphago which defeats Lee Sedol.
 
 \slide{Current Era}
 
@@ -100,18 +107,20 @@ Unsupervised machine translation is demonstrated.
 \vfill
 Progressive GANs demonstrate high resolution realistic face generation.
 
+\vfill
+The {\color{red} Transformer} appears greatly improving language modeling.
+
 \slide{Current Era}
 
-{\bf 2018}: Unsupervised pre-training significantly improves a broad range of NLP tasks including question answering (but dialogue remains unsolved).
+{\bf 2018}: {\color{red} Unsupervised pre-training} significantly improves a broad range of NLP tasks including question answering (but dialogue remains unsolved).
+
+{\color{red} Contrastive learning} is formulated which ultimately becomes the foundation of various systems.
 
 \vfill
 AlphaFold revolutionizes protein structure prediction.
 
-\vfill
-Style GANs lead to yet another dramatic imrpovement in generation of face images.
-
 \vfill{\bf 2019}:
-Vector quantized VAEs (VQ-VAE) demstrate that VAEs can be competative with GANs for high-resolution image generation.
+{\color{red} Vector quantized VAEs (VQ-VAE)} demstrate that VAEs can be competative with GANs for high-resolution image generation.
 
 \vfill
 Super-human performance is achieved on the GLUE natural langauge understanding benchmark.
@@ -119,10 +128,13 @@ Super-human performance is achieved on the GLUE natural langauge understanding b
 \slide{Current Era}
 
 \vfill{\bf 2020}:
-GPT-3 writes a fake blog post that landed in the No. 1 spot on Hacker News.
+A neural langauge model (GPT-3) writes a fake blog post that landed in the No. 1 spot on Hacker News.
 
 \slide{Natural Language Understanding}
 
+Unsuperfived pre-training leads to dramatic improvements on benchmarks for language understanding.
+
+\vfill
 GLUE: General Language Understanding Evaluation
 
 \vfill
@@ -130,7 +142,7 @@ GLUE: General Language Understanding Evaluation
 \centerline{\normalsize ArXiv 1804.07461}
 \centerline{\includegraphics[width= 7in]{\images/GLUE}}
 
-\slide{BERT and GLUE}
+\slideplain{BERT and GLUE}
 
 \centerline{\includegraphics[width= 7in]{\images/GLUELeader}}
 
@@ -180,7 +192,7 @@ VQ-VAE-2, Razavi et al. June, 2019
 \slide{Wav2vec 2.0, June 2020, Facebook}
 
 \vfill
-Trained on 53k hours of unlabeled audio (no text) they convert speech to a sequence of discrete quantized vectors they call ``pseudo-text units''.
+Trained on 53k hours of unlabeled audio (no text) they use {\color{red} contrastive learning} to convert speech to a sequence of discrete {\color{red} quantized vectors} they call ``pseudo-text units''.
 
 \vfill
 By training on only one hour of human-transcribed audio, and using the Wav2vec transcription into pseudo-text, the outperform the previous state of the
@@ -192,7 +204,7 @@ art in word error rate for 100 hours of human-transcribed text.
 Generative Spoken Language Model (GSLM)
 
 \vfill
-They then train a generative model of the sequences of pseudo-text units learned from unlabeled audio.
+Using a form of {\color{red} VQ-VAE} They then train a generative model of the sequences of pseudo-text units learned from unlabeled audio.
 
 
 \vfill
@@ -204,7 +216,7 @@ from speech alone.
 
 \slide{Codex, July 2021, OpenAI}
 
-This is a language model trained on code, including comments, from public repositories.
+Using an {\color{red} unsupersided pretrained language model} they fine-tune on code, including comments, from public repositories.
 
 \vfill
 Starting from an English prompt Codex continues with code --- a form of automatic programming.
@@ -217,7 +229,7 @@ Copilot may supplant Stack Overflow for finding out how to do x in language y.
 
 \slide{CLIP, January 2021, OpenAI}
 
-CLIP: Contrastive Language-Image Pre-training.
+CLIP: {\color{red} Contrastive} Language-Image Pre-training.
 
 \vfill
 Trained on images and associated text (such as image captions or hypertext links to images) CLIP computes embeddings of text and embeddings of images
@@ -253,7 +265,7 @@ The name DALL$\cdot$E is simply some kind of homage to the painter Dali and the 
 Both versions of DALL$\cdot$E uses CLIP's co-embeddings of images and text.
 
 \vfill
-Given text, DALL$\cdot$E generates an image.
+Given text, DALL$\cdot$E generates an image using a {\color{red} diffusion model}.
 
 \slide{DALL$\cdot$E-1 Zero-Shot Image Rendering from Language}
 
@@ -269,7 +281,7 @@ DALL$\cdot$E-2 uses diffusion models.  Although originally defined in 2015, they
 
 \slide{Chain of Thought Prompting, January 2022}
 
-Give examples of ``chains of thought'' for few shot learning of reasoning steps.
+Give examples of {\color{red} ``chains of thought''} for few shot learning of reasoning steps.
 
 \slide{Naive Prompting}
 
@@ -303,6 +315,27 @@ from new applications of established architectures.
 
 \vfill
 This course will focus on general, architectural, ideas.
+
+\slide{Architectural Ideas}
+
+\begin{itemize}
+\item {\color{red} Linear Threshold ``neuron''}
+\item {\color{red} Convolutional Neural Network or CNN}
+\item {\color{red} Backpropagation}
+\item {\color{red} Recurrent Neural Network or RNN}
+\item {\color{red} Neural Language Modeling}
+\item{\color{red} Variational Auto-Encoders (VAEs)}
+\item{\color{red} Generative Adversarial Networks (GANs)}
+\item{\color{red} Graph Neural Networks}
+\item{\color{red} Batch Normalization}
+\item{\color{red} Residual Connections}
+\item {\color{red} Diffusion Models}
+\item{\color{red} Reinforcement Learning}
+\item {\color{red} The Transformer}
+\item {\color{red} Unsupervised pre-training}
+\item {\color{red} Contrastive Learning}
+\item {\color{red} Prompting}
+\end{itemize}
 
 \slideplain{END}
 

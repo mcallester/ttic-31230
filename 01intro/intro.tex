@@ -6,14 +6,19 @@
 {\Huge
   \centerline{\bf TTIC 31230,  Fundamentals of Deep Learning}
   \vfill
-  \centerline{David McAllester, Winter 2019}
+  \centerline{David McAllester, Autumn 2020}
   \vfill
-  \centerline{\bf The Fundamental Equations of Deep Learning}
+  \centerline{\bf The History of Deep Learning}
+  \vfill
+  \centerline{\bf  and Moore's Law of AI}
+
+\vfill
+\vfill
 
 
 \slide{Early History}
 
-{\bf 1943}: McCullock and Pitts introduced the linear threshold ``neuron''.
+{\bf 1943}: McCullock and Pitts introduced the {\color{red} linear threshold ``neuron''}. Words in red are important --- we will discuss them in detail in this class.
 
 \vfill
 {\bf 1962}: Rosenblatt applies a ``Hebbian'' learning rule.  Novikoff proved the perceptron convergence theorem.
@@ -26,7 +31,7 @@ The Perceptrons book greatly discourages work in artificial neural networks.  Sy
 
 \slide{80s Renaissance}
 
-{\bf 1980}: Fukushima introduces the neocognitron (a form of CNN)
+{\bf 1980}: Fukushima introduces the neocognitron --- a form of {\color{red} convolutional neural Network or CNN}.
 
 \vfill
 {\bf 1984}: Valiant defines PAC learnability and stimulates learning theory. Wins the Turing Award in 2010.
@@ -35,17 +40,17 @@ The Perceptrons book greatly discourages work in artificial neural networks.  Sy
 {\bf 1985}: Hinton and Sejnowski introduce the Boltzman machine
 
 \vfill
-{\bf 1986}: Rummelhart, Hinton and Williams demonstrate empirical success with backpropagation (itself dating back to 1961).
+{\bf 1986}: Rummelhart, Hinton and Williams demonstrate empirical success with {\color{red} backpropagation} (itself dating back to 1961).
 
 \slide{90s and 00s: Research In the Shadows}
 
-{\bf 1997}: Schmidhuber et al. introduce LSTMs
+{\bf 1997}: Schmidhuber et al. introduce LSTMs (a form of {\color{red} recurrent neural network or RNN}).
 
 \vfill
-{\bf 1998}: LeCunn introduces convolutional neural networks (CNNs) (LeNet).
+{\bf 1998}: LeCunn draws attention to convolutional neural networks (CNNs) (LeNet).
 
 \vfill
-{\bf 2003}: Bengio introduces neural language modeling.
+{\bf 2003}: Bengio introduces {\color{red} neural language modeling}.
 
 \slide{Current Era}
 
@@ -65,13 +70,13 @@ Both developments come out of Hinton's group in Toronto.
 {\bf 2014}: Neural machine translation appears (Seq2Seq models).
 
 \vfill
-Variational auto-encoders (VAEs) appear.
+{\color{red} Variational auto-encoders} (VAEs) appear.
 
 \vfill
-Generative Adversarial Networks (GANs) appear.
+{\color{red} Generative Adversarial Networks} (GANs) appear.
 
 \vfill
-Graph neural networks appear (GNNs) revolutionizing the prediction of molecular properties.
+{\color{red} Graph neural networks appear} (GNNs) revolutionizing the prediction of molecular properties.
 
 \vfill
 Dramatic improvement in computer vision and speech recognition continues.
@@ -81,7 +86,10 @@ Dramatic improvement in computer vision and speech recognition continues.
 {\bf 2015}: Google converts to neural machine translation leading to dramatic improvements.
 
 \vfill
-ResNet (residual connections) appear.  This makes yet another dramatic improvement in computer vision.
+{\color{red} Batch Normalization} appears improving the performance of image classification.
+
+\vfill
+{{\color{red} Residual Connections} appear.  This makes yet another dramatic improvement in computer vision.
 
 \vfill
 {\bf 2016}: Alphago defeats Lee Sedol.
@@ -96,15 +104,18 @@ Unsupervised machine translation is demonstrated.
 \vfill
 Progressive GANs demonstrate high resolution realistic face generation.
 
+\vfill
+The {\color{red} Transformer} appears greatly improving language modeling.
+
 \slide{Current Era}
 
-{\bf 2018}: Unsupervised pre-training significantly improves a broad range of NLP tasks including question answering (but dialogue remains unsolved).
+{\bf 2018}: {\color{red} Unsupervised pre-training} significantly improves a broad range of NLP tasks including question answering (but dialogue remains unsolved).
 
 \vfill
 AlphaFold revolutionizes protein structure prediction.
 
 \vfill{\bf 2019}:
-Vector quantized VAEs (VQ-VAE) demstrate that VAEs can be competative with GANs for high-resolution image generation.
+{\color{red} Vector quantized VAEs (VQ-VAE)} demstrate that VAEs can be competative with GANs for high-resolution image generation.
 
 \vfill
 Super-human performance is achieved on the GLUE natural langauge understanding benchmark.
@@ -127,7 +138,7 @@ GLUE: General Language Understanding Evaluation
 \centerline{\includegraphics[width= 9in]{\images/SuperLeader}}
 
 \slidetwo{Generative Adversarial Nets (GANs)}{Goodfellow et al., 2014}
-\centerline{\includegraphics[width = 9in]{/users/davidmcallester/tex/images/GAN2014}}
+\centerline{\includegraphics[width = 9in]{../images/GAN2014}}
 
 
 \slide{Moore's Law of AI}
@@ -147,7 +158,7 @@ ArXiv 1406.2661, 1511.06434, 1607.07536, 1710.10196, 1812.04948
 
 \slide{Variational Auto Encoders (VAEs, 2015)}
 
-\centerline{\includegraphics[width = 4in]{/users/davidmcallester/tex/images/VariationalFaces}}
+\centerline{\includegraphics[width = 4in]{../images/VariationalFaces}}
 \centerline{[Alec Radford, 2015]}
 
 \slide{VAEs in 2019}
@@ -159,7 +170,7 @@ VQ-VAE-2, Razavi et al. June, 2019
 
 \slide{VAEs in 2019}
 
-\centerline{\includegraphics[width = 10in]{/users/davidmcallester/tex/images/VQ-VAE21}}
+\centerline{\includegraphics[width = 10in]{../images/VQ-VAE21}}
 
 \vfill
 VQ-VAE-2, Razavi et al. June, 2019
