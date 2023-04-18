@@ -16,6 +16,18 @@
 Assume that probability distributions $P(y)$ are discrete with $\sum_y\;P(y) = 1$.
 
 \bigskip
+{\bf Problem 0: Backprogation through a ReLU linear threshold unit.}
+Consider the computation
+\begin{eqnarray*}
+  y & = & \sigma(w^\top x) \\
+  \ell & = & {\cal L}(y)
+\end{eqnarray*}
+for $w,x \in R^d$ with $\sigma(z) = \max(z,0)$ (the ReLU activation)
+and for ${\cal L}(y)$ an arbitrary function (a loss function).  Let $w_i$ denote the $i$th component of the weight vector $w$.
+Give an expression for $\frac{\partial \ell}{\partial w_i}$ as a function of $\frac{d{\cal L}(y)}{dy}$.
+    
+
+\bigskip
 {\bf Problem 1: Joint Entropy and Conditional Entropy}
 We define conditional entropy $H(y|x)$ as follows
 $$H(y|x) = E_{x,y} \;-\log P(y|x).$$
