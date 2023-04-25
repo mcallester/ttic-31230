@@ -12,6 +12,27 @@
 \medskip
 \centerline{\bf Backpropagation  Problems}
 
+\bigskip
+~{\bf Problem 0:} The KL-divergence between two discrete distributions is defined by
+$$KL(P,Q) = E_{x \sim P} \ln \frac{P(x)}{Q(x)}$$
+We will show later in the class that $KL(P,Q) \geq 0$ for any $P$ and $Q$.
+
+The Cross Entropy $H(P,Q)$ is defined by
+
+$$H(P,Q) = E_{x \sim P} - \ln Q(x)$$
+
+When $P$ is a population distribution and $Q$ is a model distribution this is the cross entropy loss.
+
+The entropy of a distribution is defined by
+$$H(P) = E{x \sim P}\;-\ln P(x)$$
+
+Show the following.
+
+$$H(P,Q) \geq H(P)$$
+
+$$H(P,P) = H(P)$$
+
+Explain why these facts are important when training a model to minimize cross entropy loss.
 
 \bigskip
 ~{\bf Problem 1:  Backpropagation through softmax.} Consider the following softmax.
