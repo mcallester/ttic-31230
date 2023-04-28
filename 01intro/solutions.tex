@@ -27,7 +27,7 @@ Give an expression for $\frac{\partial \ell}{\partial w_i}$ as a function of $\f
   There are various correct ways of writing the answer.  The following corresponds to a backpropagation computation.
   \begin{eqnarray*}
     \frac{d\ell}{dy} & = & \frac{d{\cal L}(y)}{dy} \\
-    \frac{d\ell}{dw_i} & = & \frac{d\ell}{dy} \frac{dy}{dw_i} \;\;=\;\; \frac{d\ell}{dy}\; x_i\mathbf{1}[x_i \geq 0]
+    \frac{d\ell}{dw_i} & = & \frac{d\ell}{dy} \frac{dy}{dw_i} \;\;=\;\; \frac{d\ell}{dy}\; x_i\mathbf{1}[w_ix_i \geq 0]
   \end{eqnarray*}
   }
       
