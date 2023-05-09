@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -144,7 +144,7 @@ The source code is sometimes called a {\bf computational graph}.  I prefer to ca
 The framework automatically computes $\nabla_\Phi \; {\cal L}_\Phi(\tuple{x,y})$
 where $\Phi = (W^0,\;b^0,\;W^1,\;b^1)$.
 
-\slide{\bf Frameworks Automate Stochastic Gradient Descent (SGD)}
+\slide{\bf Frameworks Automate {\color{red} Stochastic} Gradient Descent (SGD)}
 
 $$\Phi^* = \argmin_\Phi E_{z \sim \mathrm{Train}} \; {\cal L}_\Phi(z)$$
 
@@ -159,7 +159,7 @@ $$\Phi^* = \argmin_\Phi E_{z \sim \mathrm{Train}} \; {\cal L}_\Phi(z)$$
     \begin{itemize}
     \item draw $z \sim \mathrm{Train}$ at random.
       \vfill
-    \item $\Phi \;\;\minuseq\;\; \eta \nabla_\Phi\;{\cal L}_\Phi(z)$
+    \item {\color{red} $\Phi \;\;\minuseq\;\; \eta \nabla_\Phi\;{\cal L}_\Phi(z)$}
     \end{itemize}
 \end{enumerate}
 
