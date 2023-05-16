@@ -107,7 +107,10 @@ increase exponentially with depth. {\bf Exploding Gradients.}
 \centerline{Batch Normalization}
 
 \vfill
-\centerline{Highway Architectures (Residual Connections and Gated RNNs)}
+\centerline{Residual Connections}
+
+\vfill
+\centerline{Gated RNNs}
 
 \slide{Methods for Maintaining Gradients}
 
@@ -119,7 +122,7 @@ increase exponentially with depth. {\bf Exploding Gradients.}
 \centerline{\bf Initialization}
 \vfill
 
-\slide{Xavier Initialization}
+\slide{He Initialization}
 
 Initialize a weight matrix (or tensor) to preserve zero-mean unit variance distributions.
 
@@ -127,16 +130,17 @@ Initialize a weight matrix (or tensor) to preserve zero-mean unit variance distr
 If we assume $x_i$ has zero mean and unit variance then we want
 
 \vfill
-$$y_j = \sum_{j=0}^{N-1} x_i w_{i,j}$$
+
+$$y_j = \sum_{i=0}^{N-1} x_i w_{i,j}$$
 
 \vfill
 to have zero mean and unit variance.
 
 \vfill
-Xavier initialization randomly draws $w_{i,j}$ from a uniform distribution on the interval $\left(-\sqrt{\frac{3}{N}},\;\sqrt{\frac{3}{N}}\right)$.
+{\color{red} He initialization randomly draws $w_{i,j}$ from  ${\cal N}(0,1/N)$}
 
 \vfill
-Assuming independence this gives zero mean and unit variance for $y_j$.
+Assuming independence we have that $\sum_{j = 0}^{N-1} x_iw_{i,j}$ has zero mean and unit variance.
 
 \slide{}
 \centerline{\bf Batch Normalization}
@@ -227,7 +231,7 @@ Here $\hat{\mu}$ and $\hat{\sigma}$ should be computed only after earlier normal
 \vfill
 \eject
 ~ \vfill
-\centerline{\bf Highway Architectures (Skip Connections)}
+\centerline{\bf Skip Connections}
 \vfill
 \vfill
 
@@ -321,6 +325,7 @@ $${\color{red} y = \tilde{x} + R(x)}$$
 \vfill
 Where $\tilde{x}$ is either $x$ or a version of $x$ adjusted to match the shape of $R(x)$.
 
+\ignore{
 \slide{DenseNet}
 
 For {\color{red} $u[I]$} and {\color{red} $v[J]$} we let {\color{red} $(u;w)[I+J]$} denote vector concatenation.
@@ -329,6 +334,7 @@ $$(u;v)[k] = \left\{\begin{array}{l} u[k]\;\mbox{for $k < I$} \\ v[k-I] \;\mbox{
 
 \vfill
 $$\mbox{for}\;b,x,y\;\;L_{\color{red} \ell + 1}[b,x,y,J_{\color{red} \ell} + J_{\color{red} R}] = L_\ell[b,x,y,J_{\color{red} \ell}];R[b,x,y,J_{\color{red} R}]$$
+}
 
 \slide{Deep Residual Networks}
 

@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -115,17 +115,6 @@ If the input is padded but the output is not padded then $\Delta x$ and $\Delta 
 
 \centerline{\includegraphics[width = 8.0in]{\images/VGG}}
 
-
-\slide{Reducing Spatial Dimensions: Max Pooling}
-
-\centerline{\includegraphics[width = 2.5in]{\images/Convolution}}
-
-\vfill
-$$L_{{\ell+1}}[b,{\color{red}x},{\color{red}y},i] = {\color{red} \max_{\Delta x, \Delta y}}\; L_{{\ell}}[b,{\color{red} s*x} + \Delta x,\; {\color{red} s*y} + \Delta y,\; i]$$
-
-\vfill
-This is typically done with a stride greater than one so that the image dimension is reduced.
-
 \slide{Reducing Spatial Dimensions: Strided Convolution}
 
 We can move the filter by a ``stride'' $s$ for each spatial step.
@@ -138,6 +127,15 @@ $$\hspace{-1em}\sigma\left(W[\Delta X, \Delta Y, I, j] L_{{\ell}}[b,{\color{red}
 \vfill
 For strides greater than 1 the spatial dimention is reduced.
 
+\slide{Reducing Spatial Dimensions: Max Pooling}
+
+\centerline{\includegraphics[width = 2.5in]{\images/Convolution}}
+
+\vfill
+$$L_{{\ell+1}}[b,{\color{red}x},{\color{red}y},i] = {\color{red} \max_{\Delta x, \Delta y}}\; L_{{\ell}}[b,{\color{red} s*x} + \Delta x,\; {\color{red} s*y} + \Delta y,\; i]$$
+
+\vfill
+This is typically done with a stride greater than one so that the image dimension is reduced.
 
 \slide{Fully Connected (FC) Layers}
 
@@ -176,15 +174,23 @@ conv2d({\bf input, weight, bias, stride, padding, dilation, groups})
 \medskip
 {\bf groups} – split input into groups. Default: 1
 
+\slide{Dilation and Grouping}
+
+Dilation is used for ``hypercolumns'' where higher layers have the same spatial dimension as the input but each spatial location in a higher layer
+is a whole-image representation of a region of the input image.
+
 \vfill
-Dilation and grouping are discussed in a separate unit.
+Grouping reduces the computation by limiting the inputs to a feature to be values in the same ``group'' as the input.
+
+\vfill
+Dilation and grouping are rarely used today.
 
 \slide{Modern Trends}
 
 Modern Convolutions use 3X3 filters.  This is faster and has fewer parameters.  Expressive power is preserved by increasing depth with many stride 1 layers.
 
 \vfill
-Max pooling and dilation seem to have disappeared.
+Max pooling has disappeared.
 
 \vfill
 ResNet and resnet-like architectures are now dominant.

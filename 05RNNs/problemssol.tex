@@ -330,7 +330,7 @@ For a fixed $k$ we have that $W^Q[k,I,J]$ and $W^K[k,I,J]$ are matrices.  We wan
 $h_1^\top \tilde{W}^Q h_2$ where $h_1$ and $h_2$ are vectors and $\tilde{W}^Q$ is a matrix.
 You need write this matrix $\tilde{W}^Q$ in terms of the matrices for $W^Q$ and $W^K$.  But write your final answer in Einstein notation with $k$ as the first index.
 
-\solution{
+\ignore{
   This is easier to do in vector-matrix notation for a fixed k.  But it can also be done entirely in Einstein notation:
   \begin{eqnarray*}
     & = & \softmax_{t_2} \left[\frac{1}{\sqrt{I}}\;(L_\ell(t_1,J_1)W^Q[k,I,J_1])\;\;(W^K[k,I,J_2]L_\ell(t_1,J_2))\right] \\
@@ -347,7 +347,7 @@ You need write this matrix $\tilde{W}^Q$ in terms of the matrices for $W^Q$ and 
 {\bf (b) 5pts} Part (a) shows that we can replace the key and query matrix with a single query matrix without any loss of expressive power.  If we eliminate the key matrix in this way
 what is the resulting number of query matrix parameters for a given layer and how does this compare to the number of key-query matrix parameters for a given layer in the original transformer version.
 
-\solution{
+\ignore{
   The original version uses $2(I \times J)$ key-query matrix parameters for each head.  If we use only the single query matrix we use $J^2$ parameters for each head.  These are the same for $I = J/2$.
 }
 

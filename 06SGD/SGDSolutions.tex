@@ -1,5 +1,5 @@
 \documentclass{article}
-\input ../../preamble
+\input ../preamble
 \parindent = 0em
 
 %\newcommand{\solution}[1]{}
@@ -110,7 +110,7 @@ $$\hat{\mu} = \frac{1}{N}\;\sum_{t=1}^N x_t$$
 If the input sequence is constant with $x_t = c$ for all $t \geq 1$, what is $\lim_{t \rightarrow \infty}\;y_t$?  Give a derivation of your answer
 (Hint: you do not need to compute a closed form solution for $y_t$).
 
-\solution{
+\ignore{
 
   The limit $y_\infty$ must satisfy
   $$y_\infty = \left(1-\frac{1}{N}\right)y_\infty + c$$
@@ -120,7 +120,7 @@ If the input sequence is constant with $x_t = c$ for all $t \geq 1$, what is $\l
 \medskip
 (b) $y_t$ is an exponential moving average of what quantity?
 
-\solution{
+\ignore{
   The update can be rewritten as
   $$y_t = \left(1 - \frac{1}{N}\right)y_{t-1} + \frac{1}{N}(Nx_t)$$
   so $y_t$ is an exponential moving average of $Nx_t$.
@@ -134,7 +134,7 @@ If the input sequence is constant with $x_t = c$ for all $t \geq 1$, what is $\l
   \mu_t & = & \left(1 - \frac{1}{N}\right)\mu_{t-1} + \frac{1}{N}x_t
 \end{eqnarray*}
 
-\solution{
+\ignore{
   $y_t$ is an exponential moving average of $Nx_t$ which equals $N$ times the moving average of $x_t$ so we have
   $$y_t = N \mu_t$$
 }
