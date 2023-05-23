@@ -222,14 +222,14 @@ i.e., that for $z = f(y)$ we have $I(x,z) \leq I(x,y)$.
 }
 
 \bigskip
-{\bf Problem 6. 20 pts}  Consider the distribution on non-negative integers
+{\bf Problem 6.}  Consider the distribution on non-negative integers
 given by$$P(i) = \frac{1}{2^{i+1}}.$$
 
 \medskip
 {\bf (a)} Using $\sum_{i=0}^\infty ar^i = \frac{a}{1-r}$ show that
 $\sum_{i= 0}^\infty\;P(i) = 1$.
 
-\solution{
+\ignore{
   $$\sum_{i = 0}^\infty \frac{1}{2^{i+1}} = \sum_{i =0}^\infty
   \frac{1}{2}\left(\frac{1}{2}\right)^i =
   \frac{\frac{1}{2}}{1-\frac{1}{2}} = 1$$ }
@@ -239,7 +239,7 @@ $\sum_{i= 0}^\infty\;P(i) = 1$.
 compute the numerical value of the entropy $H_2(P)$ for this
 distribution (with your answer in bits).
 
-\solution{
+\ignore{
   \begin{eqnarray*}
     H_2(P) & = & E_i\;\left[-\log_2 P(i)\right] = \sum_{i=0}^\infty P(i)\;\left(-\log_2 \frac{1}{2^{i+1}}\right) \\
     & = & \sum_{i=0}^\infty \frac{1}{2^{i+1}}\;(i+1) \\
@@ -255,14 +255,14 @@ word is a proper prefix of any other code word) and such that expected
 code length $E_{i \sim P} |c(i)|$ equals the entropy in bits you
 calculated in part (b).
 
-\solution{$c(i)$ is the string consisting of $i$ ones followed by a zero.
+\ignore{$c(i)$ is the string consisting of $i$ ones followed by a zero.
   For example $c(0) = 0$ and $c(3) = 1110$.  We then have that $|c(i)|
   = i+1$ so that the expected length is
   $$\sum_{i=0}^\infty P(i) |c(i)| = \sum_{i=0}^\infty P(i) (i+1) =
   \sum_{i=0}^\infty P(i) \left(-\log_2 P(i)\right) = H_2(P) = 2\;\mathrm{bits}$$ }
 
 \bigskip
-{\bf Problem 7. 30 pts}  Problem 2 was on converting probabilities to
+{\bf Problem 7.}  Problem 2 was on converting probabilities to
 codes.  This problem is on converting codes to probabilities.
 Consider any prefx-free code $c(i)$ for the non-negative integers $i$.
 Give a sampling procedure that either returns an integer $i$ or
@@ -278,7 +278,7 @@ $2^{-|c(i)|}$.
   }
 
 \bigskip
-{\bf Problem 8. 30 pts} Shannon's source coding
+{\bf Problem 8.} Shannon's source coding
 theorem states that for any prefix-free code we have
 $$E_{x\sim P} |c(x)| \geq H_2(P)$$
 and for any $P$ there exists a prefix-free code such
@@ -315,10 +315,8 @@ code word.
 $c(x_{i+1})$ satisfying the specified conditions.  Hint: Show that the probability of non-termination
 for the procedure of problem 7 is nonzero.
 
-problem 3.
-
 \solution{First, the probability of nontermination in the procedure
-  defined by problem 3 must be nonzero.  This is because probability
+  defined by problem 7 must be nonzero.  This is because probability
   assigned to $x_i$ by the code can be no larger than than $P(x_i)$
   and hence the probability of returning any $x_j$ with $0 \leq j \leq
   i$ is strictly less than one.  Second, when the sampling procedure fails to terminate it

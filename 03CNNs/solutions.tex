@@ -39,7 +39,7 @@ in computing the convolution on the batch (without any activation function)?
 Write the equation for computing $L_{\ell+1}[b,x,y,t,j]$ from the tensor $L_\ell[B,X,Y,T,I]$.  Your filter should include an index $\Delta t$ and handle a stride $s$ applied
 to both space and time.
 
-\ignore{
+\solution{
   $$L_{\ell + 1}[b,x,y,t,j] = \sum_{\Delta x, \Delta y, \Delta t, i} W[\Delta x, \Delta y, \Delta t, i, j] L_\ell[b, sx+ \Delta x, sy + \Delta y, st + \Delta t, i]$$
   }
 
