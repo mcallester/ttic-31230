@@ -111,7 +111,7 @@ consists of words beneath a given node of the tree.
 If we interpret $k$ has a transformer head, what attention $\alpha({\mbox{\bf dobj}},{\bf prefer},w)$ over the words $w$ attended from the word {\bf prefer} by the head
 {\bf dobj} corresponds to the above dependency parse?
 
-\solution{
+\ignore{
   $$\alpha({\bf dobj},{\bf prefer},w) = \left\{\begin{array}{rl} 1 & \mbox{if $w$ is {\bf flight}} \\ 0 & \mbox{otherwise}\end{array}\right.$$
   }
 
@@ -122,7 +122,7 @@ Define a loss ${\cal L}_{\mathrm{focus}}$ that can be combined with the log loss
 ${\cal L}_{\mathrm{focus}}$ encourages each head to focus on a small number of words.  Write the total loss as a weighted sum of the language model loss ${\cal L}_{\mathrm{LM}}$
 and ${\cal L}_{\mathrm{focus}}$.  You do not need to define ${\cal L}_{\mathrm{LM}}$, just ${\cal L}_\mathrm{focus}$.
 
-\solution{
+\ignore{
   \begin{eqnarray*}
     {\cal L}_{\mathrm{total}} & = & {\cal L}_{\mathrm{LM}} + \lambda {\cal L}_{\mathrm{focus}} \\
     \\
@@ -141,7 +141,7 @@ and ${\cal L}_{\mathrm{focus}}$.  You do not need to define ${\cal L}_{\mathrm{L
 The loss ${\cal L}_{\mathrm{near}}$ should be ``robust'' in the sense that it has a maximum value that is independent of the length $T$ of the transformer
 window.  This should allow some ``outlier'' long distance attentions which are needed for coreference.
 
-\solution{
+\ignore{
   \begin{eqnarray*}
     {\cal L}_{\mathrm{total}} & = & {\cal L}_{\mathrm{LM}} + \lambda {\cal L}_{\mathrm{near}} \\
     \\
@@ -155,7 +155,7 @@ window.  This should allow some ``outlier'' long distance attentions which are n
 {\bf (d)} State the ``universalty assumption'' under which the ``loss shaping'' terms of {\bf (b)} and ${\bf (c)}$ above only hurts the langauge modeling performance.  Also give a plausibility argument
 that these terms might help in practice.
 
-\solution{The universality assumption is that the model parameters will be be optimized so as to find the actual minimum of the loss on the population distribution.  In that case
+\ignore{The universality assumption is that the model parameters will be be optimized so as to find the actual minimum of the loss on the population distribution.  In that case
   the loss shaping terms can only hurt performance.  If, on the other hand, the training does not find the optimal parameters on the population then it seems plausible that the loss shaping terms might help with the optimization or the generalization.}
   
 
@@ -324,13 +324,13 @@ of $X$, $Y$, $J$ and $K$ (we have that $I$ and $U$ are both less than $J$).
 Notice that here the shape of $W^Q$ and $W^K$ are both $[K,I,J]$.  We typically have $I < J$ which makes the inner product in the last line an inner product of lower dimensional vectors.
 
 \medskip
-{\bf(a) 20 pts} Give an equation computing a tensor $\tilde{W}^Q[K,J,J]$ computed from $W^Q$ and $W^K$ such that the attention $\alpha(k,t_1,t_2)$ can be written as
+{\bf(a)} Give an equation computing a tensor $\tilde{W}^Q[K,J,J]$ computed from $W^Q$ and $W^K$ such that the attention $\alpha(k,t_1,t_2)$ can be written as
 $$\alpha_{\ell+1}(k,t_1,t_2) = \softmax_{t_2}\;\left[L_\ell[t_1,J_1]\tilde{W}^Q[k,J_1,J_2]L_\ell[t_2,J_2]\right]$$
 For a fixed $k$ we have that $W^Q[k,I,J]$ and $W^K[k,I,J]$ are matrices.  We want a matrix $\tilde{W}^Q[k,J,J]$ such that the attention can be written in matrix notation as
 $h_1^\top \tilde{W}^Q h_2$ where $h_1$ and $h_2$ are vectors and $\tilde{W}^Q$ is a matrix.
 You need write this matrix $\tilde{W}^Q$ in terms of the matrices for $W^Q$ and $W^K$.  But write your final answer in Einstein notation with $k$ as the first index.
 
-\ignore{
+\solution{
   This is easier to do in vector-matrix notation for a fixed k.  But it can also be done entirely in Einstein notation:
   \begin{eqnarray*}
     & = & \softmax_{t_2} \left[\frac{1}{\sqrt{I}}\;(L_\ell(t_1,J_1)W^Q[k,I,J_1])\;\;(W^K[k,I,J_2]L_\ell(t_1,J_2))\right] \\
@@ -344,10 +344,10 @@ You need write this matrix $\tilde{W}^Q$ in terms of the matrices for $W^Q$ and 
 }
 
 \medskip
-{\bf (b) 5pts} Part (a) shows that we can replace the key and query matrix with a single query matrix without any loss of expressive power.  If we eliminate the key matrix in this way
+{\bf (b)} Part (a) shows that we can replace the key and query matrix with a single query matrix without any loss of expressive power.  If we eliminate the key matrix in this way
 what is the resulting number of query matrix parameters for a given layer and how does this compare to the number of key-query matrix parameters for a given layer in the original transformer version.
 
-\ignore{
+\solution{
   The original version uses $2(I \times J)$ key-query matrix parameters for each head.  If we use only the single query matrix we use $J^2$ parameters for each head.  These are the same for $I = J/2$.
 }
 
