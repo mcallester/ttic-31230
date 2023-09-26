@@ -51,7 +51,7 @@ The Perceptrons book greatly discourages work in artificial neural networks.  Sy
 \vfill
 {\bf 2003}: Bengio introduces {\color{red} neural language modeling}.
 
-\slide{Current Era}
+\slide{Current Era: 2012-13}
 
 {\bf 2012}: Alexnet dominates the Imagenet computer vision challenge.
 
@@ -64,7 +64,7 @@ Both developments come out of Hinton's group in Toronto.
 \vfill
 {\bf 2013}: Refinement of AlexNet continues to dramatically improve computer vision.
 
-\slide{Current Era}
+\slide{2014}
 
 {\bf 2014}: Neural machine translation appears (Seq2Seq models).
 
@@ -80,7 +80,7 @@ Both developments come out of Hinton's group in Toronto.
 \vfill
 Dramatic improvement in computer vision and speech recognition continues.
 
-\slide{Current Era}
+\slide{2015-16}
 
 {\bf 2015}: Google converts to neural machine translation leading to dramatic improvements.
 
@@ -96,7 +96,7 @@ Dramatic improvement in computer vision and speech recognition continues.
 \vfill
 {\bf 2016}: {\color{red} Reinforcement Learning} is used to develop Alphago which defeats Lee Sedol.
 
-\slide{Current Era}
+\slide{2017}
 
 {\bf 2017}: AlphaZero learns both go and chess at super-human levels in a mater of hours entirely form self-play and advances computer go far beyond human abilities.
 
@@ -109,9 +109,9 @@ Progressive GANs demonstrate high resolution realistic face generation.
 \vfill
 The {\color{red} Transformer} appears greatly improving language modeling.
 
-\slide{Current Era}
+\slide{2018}
 
-{\bf 2018}: {\color{red} Unsupervised pre-training} significantly improves a broad range of NLP tasks including question answering.
+{\color{red} Unsupervised pre-training} significantly improves a broad range of NLP tasks including question answering.
 
 \vfill
 
@@ -160,7 +160,7 @@ GLUE: General Language Understanding Evaluation
 
 \centerline{\includegraphics[width= 6in]{\images/GLUELeader}}
 
-\slide{Wav2vec 2.0, June 2020, Facebook}
+\slide{June 2020: Wav2vec 2.0, Facebook}
 
 \vfill
 Trained on 53k hours of unlabeled audio (no text) they use {\color{red} contrastive learning} to convert speech to a sequence of discrete {\color{red} quantized vectors} they call ``pseudo-text units''.
@@ -170,7 +170,7 @@ By training on only one hour of human-transcribed audio, and using the Wav2vec t
 art in word error rate for 100 hours of human-transcribed text.
 
 
-\slide{GLSM, February 2021, Facebook}
+\slide{February 2021: GLSM,  Facebook}
 
 Generative Spoken Language Model (GSLM)
 
@@ -185,20 +185,8 @@ This model can continue speech from a speech prompt in much the same way that GP
 Semantic and grammatical structure in a ``unit language model'' is recovered
 from speech alone.
 
-\slide{Codex, July 2021, OpenAI}
 
-Using an {\color{red} unsupersided pretrained language model} they fine-tune on code, including comments, from public repositories.
-
-\vfill
-Starting from an English prompt Codex continues with code --- a form of automatic programming.
-
-\vfill
-There is a published version (58 authors) and a production version that powers {\bf GitHub Copilot}.
-
-\vfill
-Copilot may supplant Stack Overflow for finding out how to do x in language y.
-
-\slide{CLIP, January 2021, OpenAI}
+\slide{January 2021: CLIP, OpenAI}
 
 CLIP: {\color{red} Contrastive} Language-Image Pre-training.
 
@@ -209,7 +197,7 @@ Trained on images and associated text (such as image captions or hypertext links
 \vfill
 This is done with contrastive learning.
 
-\slide{CLIP, January 2021, OpenAI}
+\slide{CLIP}
 
 The model computes a probability of text given the co-embedding of the image.
 
@@ -244,6 +232,19 @@ Given text, DALL$\cdot$E generates an image using a {\color{red} diffusion model
 \slide{DALL$\cdot$E-2}
 
 \centerline{\includegraphics[height= 5in]{\images/DALLE2}}
+
+\slide{July 2021: Codex, OpenAI}
+
+Using an {\color{red} unsupersided pretrained language model} they fine-tune on code, including comments, from public repositories.
+
+\vfill
+Starting from an English prompt Codex continues with code --- a form of automatic programming.
+
+\vfill
+There is a published version (58 authors) and a production version that powers {\bf GitHub Copilot}.
+
+\vfill
+Copilot may supplant Stack Overflow for finding out how to do x in language y.
 
 \slide{January 2022: Chain of Thought Prompting}
 
@@ -288,7 +289,7 @@ and people find ways to ``jailbreak'' GPT4 into alternate and even malevolent pe
 \vfill
 Concerns over AI safety grows. Not everyone is concerned.
 
-\slide{Current Developments}
+\slide{September 2023}
 
 DALL$\cdot$E-3 has just been announced.
 
@@ -297,6 +298,17 @@ ChatGPT continues to evolve. There is a new blog post from OpenAI today (Sept 26
 
 \vfill
 Significant advances in speech recognition and speech generation continue.
+
+\slide{Open Problems}
+
+{\bf The MathZero Problem:} Since the development of AlphaZero people have been asking if the same thing could be done for the ``game'' of mathematics.
+
+\vfill
+{\bf The Autoformalization Problem:} This is the problem of automatically formalizing and verifying published proofs in mathematics possibly discovering legitimate gaps in the proofs where they exist.
+
+\vfill
+{\bf The Proof Assistant Problem:} This is the more modest goal of improving the level of automation in formal verification systems.  The system
+most widely adopted by the mathematics community is LEAN based on dependent type theory.
 
 \slide{Application Advancements vs. Architecture Advancements}
 
