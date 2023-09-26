@@ -120,49 +120,14 @@ The {\color{red} Transformer} appears greatly improving language modeling.
 \vfill
 AlphaFold revolutionizes protein structure prediction.
 
-\vfill{\bf 2019}:
-{\color{red} Vector quantized VAEs (VQ-VAE)} demstrate that VAEs can be competative with GANs for high-resolution image generation.
-
-\vfill
-Super-human performance is achieved on the GLUE natural langauge understanding benchmark.
-
-\slide{Current Era}
-
-\vfill{\bf 2020}:
-A neural langauge model (GPT-3) writes a fake blog post that landed in the No. 1 spot on Hacker News.
-
-\slide{Natural Language Understanding}
-
-Unsuperfived pre-training leads to dramatic improvements on benchmarks for language understanding.
-
-\vfill
-GLUE: General Language Understanding Evaluation
-
-\vfill
-
-\centerline{\normalsize ArXiv 1804.07461}
-\centerline{\includegraphics[width= 7in]{\images/GLUE}}
-
-\slideplain{BERT and GLUE}
-
-\centerline{\includegraphics[width= 7in]{\images/GLUELeader}}
-
-\slide{BERT and SuperGLUE}
-
-\centerline{\includegraphics[width= 9in]{\images/SuperLeader}}
-
-\slidetwo{Generative Adversarial Nets (GANs)}{Goodfellow et al., 2014}
-\centerline{\includegraphics[width = 9in]{\images/GAN2014}}
-
-
-\slide{Moore's Law of AI}
-\centerline{\includegraphics[height = 4.5in]{\images/GoodfellowInvited1}}
+\slide{Progress on GANS}
+\centerline{\includegraphics[height = 4.0in]{\images/GoodfellowInvited1}}
 
 ArXiv 1406.2661, 1511.06434, 1607.07536, 1710.10196, 1812.04948
 
 \centerline{Goodfellow, ICLR 2019 Invited Talk}
 
-\slide{GANs for Imagenet}
+\slide{Progress on GANs}
 
 \centerline{\includegraphics[height = 5.0in]{\images/GoodfellowInvited2}}
 
@@ -175,7 +140,7 @@ ArXiv 1406.2661, 1511.06434, 1607.07536, 1710.10196, 1812.04948
 \centerline{\includegraphics[width = 4in]{\images/VariationalFaces}}
 \centerline{[Alec Radford, 2015]}
 
-\slide{VAEs in 2019}
+\slide{2019: Vector Quantized VAEs}
 
 \centerline{\includegraphics[width = 8in]{\images/VQ-VAE22}}
 
@@ -189,6 +154,11 @@ VQ-VAE-2, Razavi et al. June, 2019
 \vfill
 VQ-VAE-2, Razavi et al. June, 2019
 
+\slide{2019: Natural Language Understanding}
+
+GLUE: General Language Understanding Evaluation
+
+\centerline{\includegraphics[width= 6in]{\images/GLUELeader}}
 
 \slide{Wav2vec 2.0, June 2020, Facebook}
 
@@ -257,11 +227,7 @@ One can classify an image by comparing the probabilities that the model assigns 
 
 \centerline{\includegraphics[height= 5in]{\images/CLIP1}}
 
-\slidetwo{DALL$\cdot$E, January 2021, OpenAI}{DALL$\cdot$E-2, April 2022}
-
-DALL$\cdot$E-3 has been announced.
-
-\vfill
+\slidetwo{January 2021: DALL$\cdot$E, OpenAI}{April 2021: DALL$\cdot$E-2}
 
 The name DALL$\cdot$E is simply some kind of homage to the painter Dali and the Disney character WALL$\cdot$E.
 
@@ -279,11 +245,7 @@ Given text, DALL$\cdot$E generates an image using a {\color{red} diffusion model
 
 \centerline{\includegraphics[height= 5in]{\images/DALLE2}}
 
-\slide{Diffusion Models}
-
-DALL$\cdot$E-2 uses diffusion models.  Although originally defined in 2015, they have become very prominent in the last year.
-
-\slide{Chain of Thought Prompting, January 2022}
+\slide{January 2022: Chain of Thought Prompting}
 
 Give examples of {\color{red} ``chains of thought''} for few shot learning of reasoning steps.
 
@@ -291,23 +253,50 @@ Give examples of {\color{red} ``chains of thought''} for few shot learning of re
 
 \centerline{\includegraphics[height= 5in]{\images/ChainofThought1}}
 
-\slide{Chain of Thought Prompting, January 2022}
+\slide{Chain of Thought Prompting}
 
 \centerline{\includegraphics[height= 5in]{\images/ChainofThought2}}
 
-\slide{Step by Step Prompting, June 2022}
+\slide{June 2022: Step by Step Prompting}
 
 It turns out that adding the simple instruction ``take it step by step'' elicits powerful chain of thought reasoning in GPT-3.
 
-\slide{Humanoid Soccer, September 2022, Deep Mind}
+\slide{September 2022: Humanoid Soccer, Deep Mind}
 
 Deep mind demonstrated two-on-two humanoid soccer in simulation (MuJoCo).
 
 \vfill
-This a startling advance in the state of the art in humanoid humanoid control.
+This a startling advance in the state of the art in humanoid control.
 
 \vfill
 It also continues Deep Mind's effort in reinforcement learning.
+
+\slide{March 2023: GPT-4 is Unveiled}
+
+Dramatic improvement in conversational abilities and apparent understanding of common sense language meaning.
+
+\vfill
+Training involves ``instruction training'' and ``reinforcement learning with human feedback'' (RLHF).
+
+\vfill
+Most technical details are proprietary.
+
+\vfill
+GPT-4 shows both a tendency to ``hallucinate'', presenting fiction as fact,
+and people find ways to ``jailbreak'' GPT4 into alternate and even malevolent personalities 
+
+\vfill
+Concerns over AI safety grows. Not everyone is concerned.
+
+\slide{Current Developments}
+
+DALL$\cdot$E-3 has just been announced.
+
+\vfill
+ChatGPT continues to evolve. There is a new blog post from OpenAI today (Sept 26, 2023).
+
+\vfill
+Significant advances in speech recognition and speech generation continue.
 
 \slide{Application Advancements vs. Architecture Advancements}
 
@@ -315,7 +304,7 @@ Advancements in the general principles of learning are having applications over 
 
 \vfill
 When considering Moore's law of AI it seems worth distinguishing architectural advancements (new general learning methods)
-from new applications of established architectures.
+from new applications of established architectures or fine tuning of known methods.
 
 \vfill
 This course will focus on general, architectural, ideas.
@@ -331,12 +320,13 @@ This course will focus on general, architectural, ideas.
 \item{\color{red} Variational Auto-Encoders (VAEs)}
 \item{\color{red} Generative Adversarial Networks (GANs)}
 \item{\color{red} Graph Neural Networks}
-\item{\color{red} Batch Normalization}
+\item{\color{red} Normalization Layers}
 \item{\color{red} Residual Connections}
 \item {\color{red} Diffusion Models}
 \item{\color{red} Reinforcement Learning}
 \item {\color{red} The Transformer}
-\item {\color{red} Unsupervised pre-training}
+\item {\color{red} Unsupervised Pretraining}
+\item{\color{red} Vector Quantization}
 \item {\color{red} Contrastive Learning}
 \item {\color{red} Prompting}
 \end{itemize}
