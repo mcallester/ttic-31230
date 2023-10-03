@@ -33,7 +33,7 @@ The indeces of tensors generally have types such as ``batch index'', ``x coordin
 \centerline{\includegraphics[width = 5.0in]{\images/VGG}}
 
 \vfill
-A layer in a CNN has ``shape'' $L[b,x,y,n]$ where $b$ is a batch intex, $n$ is a nueron index, and $x$ and $y$ specify a spacial locotation.
+A layer in a CNN has ``shape'' {\color{red} $L[b,x,y,n]$} where $b$ is a batch intex, $n$ is a nueron index, and $x$ and $y$ specify a spacial locotation.
 
 \slide{Advantages of Einstein Notation}
 
@@ -63,7 +63,7 @@ We will use a modified form of Einstein notation where captial letters are used 
 Frameworks (and NumPy) use C-order (row-major) in larying out a tensor in memory.
 
 \vfill
-The vector $L[b,x,y,N]$ denotes a continuous block of memory.
+The vector $L[b,x,y,N]$ denotes a contiguous block of memory.
 
 \vfill
 The $b$th batch layer $L[b,X,Y,N]$ also denotes a contiguous block of memory.
@@ -81,6 +81,23 @@ y = x^\top\;W & \;\;\;\equiv \;\;\; & y[j] = \sum_i \;W[i,j]x[i] \\
 & \;\;\;\equiv \;\;\; & y[j] = W[I,j]x[I]
 \end{eqnarray*}
 
+\slide{Convolution}
+\vfill
+\centerline{\includegraphics[width = 8.0in]{\images/VGG}}
+
+\slideplain{A Convolution Layer}
+\newcommand{\nin}{n_{\mathrm{in}}}
+\newcommand{\nout}{n_{\mathrm{out}}}
+
+\centerline{\includegraphics[width = 4.0in]{\images/Convolution}}
+\centerline{$K[\nout,\Delta x,\Delta y,\nin]$\hspace{6ex}$L_{{\ell}}[b,x,y,\nin]$\hspace{6ex}$L_{{\ell+1}}[b,x,y,\nout]$}
+\centerline{\large River Trail Documentation}
+
+\begin{eqnarray*}
+ & &  L_{{\ell+1}}[b,x,y,\nout] \\
+ \\
+  & = &   \sigma\left(K[\nout,\Delta X, \Delta Y,N_{\mathrm{in}}]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, N_{\mathrm{in}}] - B[\nout]\right)
+\end{eqnarray*}
 
 \slide{CNN Imagenet Classification}
 
@@ -89,20 +106,6 @@ y = x^\top\;W & \;\;\;\equiv \;\;\; & y[j] = \sum_i \;W[i,j]x[i] \\
 \vfill
 \centerline{\includegraphics[height=4.2in]{\images/IVLSRC}}
 2016 was 3.0\%, 2017 was 2.25\%, 2020 was 1.3\%
- 
-\slideplain{A Convolution Layer}
-\newcommand{\nin}{n_{\mathrm{in}}}
-\newcommand{\nout}{n_{\mathrm{out}}}
-
-\centerline{\includegraphics[width = 2.5in]{\images/Convolution}}
-\centerline{$K[\nout,\Delta x,\Delta y,\nin]$\hspace{6ex}$L_{{\ell}}[b,x,y,n]$\hspace{6ex}$L_{{\ell+1}}[b,x,y,n]$}
-\centerline{\large River Trail Documentation}
-
-\begin{eqnarray*}
- & &  L_{{\ell+1}}[b,x,y,\nout] \\
- \\
-  & = &   \sigma\left(K[\nout,\Delta X, \Delta Y,N_{\mathrm{in}}]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, N_{\mathrm{in}}] - B[\nout]\right)
-\end{eqnarray*}
 
 \slide{2D CNN in PyTorch}
 
