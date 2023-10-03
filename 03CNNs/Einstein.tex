@@ -26,27 +26,51 @@ Writing indeces explicitly improves the clarity of the notation at the expense o
 \vfill
 This course will focus on conceptual understanding rather than framework implementations.  For conceptual understanding Einstein notation seems preferable.
 
+\slide{Advantages of Einstein Notation}
 
-\slide{Einstein Notation}
-
-Einstein notation improves tensor equations for tensors with many indeces.
+The indeces of tensors generally have types such as ``batch index'', ``x coordinate'', ``y coordinate'' and  ``neuron index''.
 
 \vfill
-However, we start by considering just vectors and matrices.
+\centerline{\includegraphics[width = 5.0in]{\images/VGG}}
+
+\vfill
+A layer in a CNN has ``shape'' $L[b,x,y,n]$ where $b$ is a batch intex, $n$ is a nueron index, and $x$ and $y$ specify a spacial locotation.
+
+\slide{Advantages of Einstein Notation}
+
+A layer in a CNN has shape $L[b,x,y,n]$.
+
+\vfill
+Writing the indeces explicitily typically makes the meaning of indeces clear and avoids having to remember the somewhat arbitrary order of the indeces (the order matters for
+efficiency of memory access --- discussed later).
+
+\slide{Einstein Notation}
 
 \vfill
 We will use a modified form of Einstein notation where captial letters are used to denote slices of a tensor.  For example:
 
 \vfill
 \begin{itemize}
-\item $M[i,j]$ denotes one element of the matrix $M$.
-\item $M[i,J]$ denotes the $i$th row of $M$.
-\item $M[I,j]$ denotes the $j$th collumn of $M$.
-\item $M[I,J]$ denotes the full matrix $M$.
+
+\item $L[b,x,y,n]$ denotes a single (scalar) number.
+\vfill
+\item $L[b,x,y,N]$ denotes a vector of neuron values.
+\vfill
+\item $L[b,X,Y,N]$ denotes the entire layer of the $b$th batch element.
 \end{itemize}
 
 \slide{Einstein Notation}
-Repeated capital letters in a product of tensors denote summation over those letters.
+
+Frameworks (and NumPy) use C-order (row-major) in larying out a tensor in memory.
+
+\vfill
+The vector $L[b,x,y,N]$ denotes a continuous block of memory.
+
+\vfill
+The $b$th batch layer $L[b,X,Y,N]$ also denotes a contiguous block of memory.
+
+\slide{Einstein Notation}
+I will use repeated capital letters in a product of tensors to denote summation over those letters.
 
 \vfill
 \begin{eqnarray*}
