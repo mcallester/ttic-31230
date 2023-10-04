@@ -33,7 +33,7 @@ The indeces of tensors generally have types such as ``batch index'', ``x coordin
 \centerline{\includegraphics[width = 5.0in]{\images/VGG}}
 
 \vfill
-A layer in a CNN has ``shape'' {\color{red} $L[b,x,y,n]$} where $b$ is a batch intex, $n$ is a nueron index, and $x$ and $y$ specify a spacial locotation.
+A layer in a CNN has ``shape'' {\color{red} $L[b,x,y,n]$} where $b$ is a batch intex, $n$ is a neuron index, and $x$ and $y$ specify a spacial locotation.
 
 \slide{Advantages of Einstein Notation}
 
@@ -60,16 +60,19 @@ We will use a modified form of Einstein notation where captial letters are used 
 
 \slide{Einstein Notation}
 
-Frameworks (and NumPy) use C-order (row-major) in larying out a tensor in memory.
+Frameworks (and NumPy) use C-order (row-major) in laying out a tensor in memory.
 
 \vfill
 The vector $L[b,x,y,N]$ denotes a contiguous block of memory.
 
 \vfill
-The $b$th batch layer $L[b,X,Y,N]$ also denotes a contiguous block of memory.
+The $b$th batch layer $L[b,X,Y,N]$ also denotes a (larger) contiguous block of memory.
+
+\vfill
+Vector and matrix operations on contiguous memory better utilize the memory hierarchy (caching).
 
 \slide{Einstein Notation}
-I will use repeated capital letters in a product of tensors to denote summation over those letters.
+Following Einstein I will use repeated capital letters in a product of tensors to denote summation over those letters.
 
 \vfill
 \begin{eqnarray*}
@@ -81,31 +84,75 @@ y = x^\top\;W & \;\;\;\equiv \;\;\; & y[j] = \sum_i \;W[i,j]x[i] \\
 & \;\;\;\equiv \;\;\; & y[j] = W[I,j]x[I]
 \end{eqnarray*}
 
+
+\slide{Einstein Notation}
+\vfill
+For vectors $x$ and $y$ and matricies $A$, $B$, and $C$ we have
+
+\begin{eqnarray*}
+y = Ax &\;\;\;\equiv\;\;\; & y[i] = A[i,J]x[J] \\
+\\
+y = x^\top\;A & \;\;\;\equiv \;\;\; & y[j] = A[I,j]x[I] \\
+\\
+A = B^\top C & \;\;\; \equiv \;\;\; & A[i,j] = B[K,i]C[K,j]
+\end{eqnarray*}
+
+\vfill
+In Einstein notation we never use transpose.
+
 \slide{Convolution}
 \vfill
-\centerline{\includegraphics[width = 8.0in]{\images/VGG}}
+\centerline{\includegraphics[width = 6.0in]{\images/VGG}}
 
-\slideplain{A Convolution Layer}
+\vfill
+A layer is a tensor shape $L(b,x,y,n)$.
+
+\vfill
+I will refer to the index $n$ as a ``neuron''. The index $n$ is also called
+a ``feature'' or ``channel''.
+
+\slide{Convolution}
+\vfill
+\centerline{\includegraphics[width = 6.0in]{\images/VGG}}
+
+\vfill
+The input image (for each batch element) has three ``neurons'' (Red, Green, Blue).
+
+\vfill
+In VGG (above) the input image is $224\times224\times3$ (for each batch element).  The next two layers are $224\times224\times64$.
+
+\slide{Convolution}
+\vfill
+\centerline{\includegraphics[width = 6.0in]{\images/VGG}}
+
+A given neuron (index) $n$ occurs in every batch element and every position $x$, $y$ in the tensor $L(b,x,y,n)$.
+
+\vfill
+Each occurance of that neuron uses the same computation rule for compurting its response.
+
+\slide{Convolution}
+\vfill
+\centerline{\includegraphics[width = 6.0in]{\images/VGG}}
+
+A given neuron (index) $n$ occurs in every batch element and every position $x$, $y$ in the tensor $L(b,x,y,n)$.
+
+\vfill
+The ``receptive field'' of an occurance of neuron $n$ at position $x$, $y$ is a region in the previous layer centered at
+$x$ and $y$.
+
+
+\slide{A Convolution Layer}
 \newcommand{\nin}{n_{\mathrm{in}}}
 \newcommand{\nout}{n_{\mathrm{out}}}
 
 \centerline{\includegraphics[width = 4.0in]{\images/Convolution}}
-\centerline{$K[\nout,\Delta x,\Delta y,\nin]$\hspace{6ex}$L_{{\ell}}[b,x,y,\nin]$\hspace{6ex}$L_{{\ell+1}}[b,x,y,\nout]$}
-\centerline{\large River Trail Documentation}
+\centerline{$K_{\ell+1}[\nout,\Delta x,\Delta y,\nin]$\hspace{6ex}$L_{{\ell}}[b,x,y,\nin]$\hspace{6ex}$L_{{\ell+1}}[b,x,y,\nout]$}
 
 \begin{eqnarray*}
  & &  L_{{\ell+1}}[b,x,y,\nout] \\
  \\
-  & = &   \sigma\left(K[\nout,\Delta X, \Delta Y,N_{\mathrm{in}}]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, N_{\mathrm{in}}] - B[\nout]\right)
+  & = &   \sigma\left(K_{\ell+1}[\nout,\Delta X, \Delta Y,N_{\mathrm{in}}]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, N_{\mathrm{in}}] - B[\nout]\right)
 \end{eqnarray*}
-
-\slide{CNN Imagenet Classification}
-
-1000 kinds of objects.
-
-\vfill
-\centerline{\includegraphics[height=4.2in]{\images/IVLSRC}}
-2016 was 3.0\%, 2017 was 2.25\%, 2020 was 1.3\%
 
 \slide{2D CNN in PyTorch}
 
@@ -159,7 +206,7 @@ $L'_{{\ell}} = \mathrm{Padd}(L_{{\ell}},\;p)$
 \begin{eqnarray*}
  & &  L_{{\ell+1}}[b,x,y,\nout] \\
  \\
-  & = &   \sigma\left(K[\nout,\Delta X, \Delta Y,N_{\mathrm{in}}]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, N_{\mathrm{in}}] - B[\nout]\right)
+  & = &   \sigma\left(K_{\ell+1}[\nout,\Delta X, \Delta Y,N_{\mathrm{in}}]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, N_{\mathrm{in}}] - B[\nout]\right)
 \end{eqnarray*}
 
 \vfill
@@ -179,7 +226,7 @@ We can move the filter by a ``stride'' $s$ for each spatial step.
 \begin{eqnarray*}
  & &  L_{{\ell+1}}[b,{\color{red}x,y},\nout] \\
  \\
-  & = &   \sigma\left(K[\nout,\Delta X, \Delta Y,N_{\mathrm{in}}]\; L_{{\ell}}[b,{\color{red} s*x} + \Delta X, {\color{red} s*y} + \Delta Y, N_{\mathrm{in}}] - B[\nout]\right)
+  & = &   \sigma\left(K_{\ell+1}[\nout,\Delta X, \Delta Y,N_{\mathrm{in}}]\; L_{{\ell}}[b,{\color{red} s*x} + \Delta X, {\color{red} s*y} + \Delta Y, N_{\mathrm{in}}] - B[\nout]\right)
 \end{eqnarray*}
 }
 
@@ -300,7 +347,7 @@ more space but faster.
 \begin{eqnarray*}
   & & \tilde{L}_{{\ell+1}}[b,x,y,n] \\
   \\
-  & = & \left(\sum_{\Delta x, \Delta y, i} K[\Delta x, \Delta y, i, n] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[n]
+  & = & \left(\sum_{\Delta x, \Delta y, i} K_{\ell+1}[\Delta x, \Delta y, i, n] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[n]
   \end{eqnarray*}
 
 \vfill
@@ -313,16 +360,16 @@ $$\tilde{L}_{{\ell}}[b,x,y,\Delta x,\Delta y,i] = L_{{\ell}}[b,x+\Delta x,y+\Del
 \begin{eqnarray*}
   & & \tilde{L}_{{\ell+1}}[b,x,y,n] \\
   \\
-  & = & \left(\sum_{\Delta x, \Delta y, i} K[\Delta x, \Delta y, i, n] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[n] \\
+  & = & \left(\sum_{\Delta x, \Delta y, i} K_{\ell+1}[\Delta x, \Delta y, i, n] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[n] \\
   \\
       & = & \left(\sum_{\Delta x, \Delta y, i} \begin{array}{l}
                                               \tilde{L}_{{\ell}}[b,x,y,\Delta x,\Delta y,i]
-                                              * K[\Delta x, \Delta y, i, n] \\
+                                              * K_{\ell+1}[\Delta x, \Delta y, i, n] \\
   \end{array}\right) + B[n] \\
   \\
     & = & \left(\sum_{(\Delta x, \Delta y, i)} \begin{array}{l}
                                               \tilde{L}_{{\ell}}[(b,x,y),(\Delta x,\Delta y,i)]
-                                              * K[(\Delta x, \Delta y, i), n] \\
+                                              * K_{\ell+1}[(\Delta x, \Delta y, i), n] \\
                                            \end{array}\right) + B[n]
 \end{eqnarray*}
 
