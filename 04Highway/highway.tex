@@ -113,13 +113,13 @@ For CNNs we convert a tensor $L[b,x,y,n]$ to $\tilde{L}[b,x,y,n]$ as follows.
 \slideplain{Layer Normalization}
 
 \begin{eqnarray*}
-  \hat{L}[b,n] & = & \frac{1}{XY} \sum_{b,x,y}\;L[b,x,y,n] \\
+  \hat{L}[b,n] & = & \frac{1}{XY} \sum_{x,y}\;L[b,x,y,n] \\
   \\
   \\
-  \hat{\sigma}[b,n] & = & \sqrt{\frac{1}{XY-1} \sum_{b,x,y} (L[b,x,y,n]-\hat{L}[b,n])^2} \\
+  \hat{\sigma}[b,n] & = & \sqrt{\frac{1}{XY-1} \sum_{x,y} (L[b,x,y,n]-\hat{L}[b,n])^2} \\
   \\
   \\
-  \tilde{L}[b,x,y,n]& = & \frac{L[b,x,y,n] - \hat{L}[b,n]}{\hat{\sigma}[n]}
+  \tilde{L}[b,x,y,n]& = & \frac{L[b,x,y,n] - \hat{L}[b,n]}{\hat{\sigma}[b,n]}
 \end{eqnarray*}
 
 \slideplain{Adding an Affine Transformation}
