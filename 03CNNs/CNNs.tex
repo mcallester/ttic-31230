@@ -87,7 +87,7 @@ y = x^\top\;W & \;\;\;\equiv \;\;\; & y[j] = \sum_i \;W[i,j]x[i] \\
 
 \slide{Einstein Notation}
 \vfill
-For vectors $x$ and $y$ and matricies $A$, $B$, and $C$ we have
+For vectors $x$ and $y$ and matrices $A$, $B$, and $C$ we have
 
 \begin{eqnarray*}
 y = Ax &\;\;\;\equiv\;\;\; & y[i] = A[i,J]x[J] \\
@@ -335,43 +335,5 @@ s[1000] & = & \relu(\mathrm{FC}(L_{10},\Phi_s)) \;\;\mbox{class scores}
 2016 was 3.0\%, 2017 was  2.25\%, 2020 was 1.3\%
  
 \slideplain{END}
-
-\slideplain{Image to Column (Im2C)}
-
-Reduce convolution to matrix multiplication
-
-\vfill
-more space but faster.
-
-\vfill
-\begin{eqnarray*}
-  & & \tilde{L}_{{\ell+1}}[b,x,y,n] \\
-  \\
-  & = & \left(\sum_{\Delta x, \Delta y, i} K_{\ell+1}[\Delta x, \Delta y, i, n] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[n]
-  \end{eqnarray*}
-
-\vfill
-We make a bigger tensor $\tilde{L}$ with two additional indeces.
-
-$$\tilde{L}_{{\ell}}[b,x,y,\Delta x,\Delta y,i] = L_{{\ell}}[b,x+\Delta x,y+\Delta y,i]$$
-
-\slideplain{Image to Column (Im2C)}
-
-\begin{eqnarray*}
-  & & \tilde{L}_{{\ell+1}}[b,x,y,n] \\
-  \\
-  & = & \left(\sum_{\Delta x, \Delta y, i} K_{\ell+1}[\Delta x, \Delta y, i, n] *L_{{\ell}}[b,x + \Delta x,\; y + \Delta y,\; i]\right) + B[n] \\
-  \\
-      & = & \left(\sum_{\Delta x, \Delta y, i} \begin{array}{l}
-                                              \tilde{L}_{{\ell}}[b,x,y,\Delta x,\Delta y,i]
-                                              * K_{\ell+1}[\Delta x, \Delta y, i, n] \\
-  \end{array}\right) + B[n] \\
-  \\
-    & = & \left(\sum_{(\Delta x, \Delta y, i)} \begin{array}{l}
-                                              \tilde{L}_{{\ell}}[(b,x,y),(\Delta x,\Delta y,i)]
-                                              * K_{\ell+1}[(\Delta x, \Delta y, i), n] \\
-                                           \end{array}\right) + B[n]
-\end{eqnarray*}
-
 }
 \end{document}

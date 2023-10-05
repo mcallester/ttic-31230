@@ -9,8 +9,10 @@
   \bigskip
   \centerline{David McAllester}
   \vfill
-  \centerline{Trainability}
+  \centerline{Archiectural Elements That Improve SGD}
   \vfill
+  \vfill
+  \centerline{ReLu}
   \vfill
   \centerline{Initialization}
   \vfill
@@ -20,25 +22,6 @@
   \vfill
   \centerline{Gated RNNs}
 
-\slide{The Expressive Power of DNNs}
-
-Linear Threshold units generalize logical operations.
-
-\vfill
-Consider Boolean Values $P,Q$ --- numbers that are either close to 0 or close to 1.
-
-\vfill
-\begin{eqnarray*}
-P \wedge Q & \approx & \sigma(100*P + 100* Q -150) \\
-\\
-P \vee Q & \approx & \sigma(100*P + 100* Q -50) \\
-\\
-\neg P & \approx & \sigma(100*(1-P) - 50)
-\end{eqnarray*}
-
-\vfill
-DNNs generalize digital circuits.
-
 \slide{DNNs are Expressive and Trainable}
 
 {\color{red} Universality Assumption:} DNNs are universally expressive (can model any function) and trainable (the desired function can be found by SGD).
@@ -47,28 +30,13 @@ DNNs generalize digital circuits.
 Universal trainability is clearly false but can still guide architecture design.
 
 \vfill
-Equally expressive architectures differ in trainability.  This lecture is on trainability.
-
-\slide{}
-
-\centerline{\bf Vanishing and Exploding Gradients}
-\vfill
-\vfill
-
-\slide{Activation Function Saturation}
-
-Consider the sigmoid activation function $1/(1+ e^{-x})$.
+Equally expressive architectures differ in trainability.
 
 \vfill
-\centerline{\includegraphics[width= 4.0in]{../images/sigmoid2}}
-
-
-\vfill
-The gradient of this function is quite small for $|x| > 4$.
+We will consider architectural elements that improve SGD.
 
 \vfill
-In deep networks backpropagation can go through many sigmoids and
-the gradient can ``vanish''
+Very deep networks are particularly difficult for SGD.
 
 \slide{Activation Function Saturation}
 
@@ -78,75 +46,60 @@ $\mathrm{Relu}(x) = \max(x,0)$
 \centerline{\includegraphics[width= 4.0in]{../images/relu}}
 
 \vfill
-The Relu does not saturate at positive inputs (good) but is completely saturated at negative inputs (bad).
-
-\vfill
-Alternate variations of Relu still have small gradients at negative inputs.
+The Relu does not saturate at positive inputs.
 
 \slide{Repeated Multiplication by Network Weights}
 
-Consider a deep CNN.
-
-$$L_{i+1} = \mathrm{Relu}(\mathrm{Conv}(\Phi_i,L_i))$$
+Consider
 
 \vfill
-For $i$ large, $L_i$ has been multiplied by many weights.
+$$y = \sum_i w[i]x[i]  \;\;\;= \;\;\; W[I]x[I]$$
 
 \vfill
-If the weights are small then the neuron values, and hence the weight gradients, decrease exponentially with depth. {\bf Vanishing Gradients.}
+If the weights are large the activations will grow exponenetially in depth.
 
 \vfill
-If the weights are large, and the activation functions do not saturate, then the neuron values, and hence the weight gradients,
-increase exponentially with depth. {\bf Exploding Gradients.}
+If the weights are small the actvations will become exonentially small.
 
-\slide{Methods for Maintaining Gradients}
+\slide{Repeated Multiplication by Network Weights}
 
-\centerline{Initialization}
+Exploding activations cause exploding gradients.
+
+\begin{eqnarray*}
+y  & \pluseq & w[i]x[i] \\
+\\
+w.grad & \pluseq & y.grad \; x[i]
+\end{eqnarray*}
 
 \vfill
-\centerline{Batch Normalization}
-
-\vfill
-\centerline{Residual Connections}
-
-\vfill
-\centerline{Gated RNNs}
-
-\slide{Methods for Maintaining Gradients}
-
-\centerline{\includegraphics[width = 9in]{../images/DepthSpectrum}}
-
-\centerline{\large Kaiming He}
-
-\slide{}
-\centerline{\bf Initialization}
-\vfill
+The size of $w[i].\grad$ is proportional to $x[i]$
 
 \slide{He Initialization}
 
-Initialize a weight matrix (or tensor) to preserve zero-mean unit variance distributions.
+Initialize weights to preserve zero-mean unit variance distributions values.
+
+$$y = \sum_i w[i]x[i]$$
 
 \vfill
-If we assume $x_i$ has zero mean and unit variance then we want
+If we assume $x_i$ has zero mean and unit variance then we want $y$
+to have zero mean and unit variance (over random training points).
 
 \vfill
+He initialization randomly draws $w[i]$ from
 
-$$y_j = \sum_{i=0}^{N-1} x_i w_{i,j}$$
+$${\cal N}(0,\sigma^2)\;\;\;\sigma = \sqrt{1/N}$$
+
+\slide{He Initialization}
+
+$$y = \sum_i w[i]x[i]$$
 
 \vfill
-to have zero mean and unit variance.
+$$w[i] \sim {\cal N}(0,\sigma^2)\;\;\;\sigma = \sqrt{1/N}$$
 
 \vfill
-{\color{red} He initialization randomly draws $w_{i,j}$ from  ${\cal N}(0,1/N)$}
+Assuming independence we have that $y$ has zero mean and unit variance.
 
-\vfill
-Assuming independence we have that $\sum_{j = 0}^{N-1} x_iw_{i,j}$ has zero mean and unit variance.
-
-\slide{}
-\centerline{\bf Batch Normalization}
-\vfill
-
-\slide{Normalization}
+\slide{Batch Normalization}
 Given a tensor $x[b,j]$ we define $\tilde{x}[b,j]$ as follows.
 
 \begin{eqnarray*}
@@ -165,40 +118,49 @@ At test time a single fixed estimate of $\mu[j]$ and $\sigma[j]$ is used.
 
 \slide{Spatial Batch Normalization}
 
-For CNNs we convert a tensor $x[b,x,y,j]$ to $\tilde{x}[b,x,y,j]$ as follows.
+For CNNs we convert a tensor $L[b,x,y,n]$ to $\tilde{L}[b,x,y,n]$ as follows.
 
 \begin{eqnarray*}
-  \hat{\mu}[j] & = & \frac{1}{BXY} \sum_{b,x,y}\;x[b,x,y,j] \\
+  \hat{L}[n] & = & \frac{1}{BXY} \sum_{b,x,y}\;L[b,x,y,n] \\
   \\
   \\
-  \hat{\sigma}[j] & = & \sqrt{\frac{1}{BXY-1} \sum_{b,x,y} (x[b,x,y,j]-\hat{\mu}[j])^2} \\
+  \hat{\sigma}[n] & = & \sqrt{\frac{1}{BXY-1} \sum_{b,x,y} (L[b,x,y,n]-\hat{L}[n])^2} \\
   \\
   \\
-  \tilde{x}[b,x,y,j]& = & \frac{x[b,x,y,j] - \hat{\mu}[j]}{\hat{\sigma}[j]}
+  \tilde{L}[b,x,y,n]& = & \frac{L[b,x,y,n] - \hat{L}[n]}{\hat{\sigma}[n]}
 \end{eqnarray*}
 
-\slide{Adding an Affine Transformation}
+\slideplain{Layer Normalization}
 
-$$\breve{x}[b,x,y,j] = \gamma[j] \tilde{x}[b,x,y,j] + \beta[j]$$
+For CNNs we convert a tensor $L[b,x,y,n]$ to $\tilde{L}[b,x,y,n]$ as follows.
+
+\begin{eqnarray*}
+  \hat{L}[b,n] & = & \frac{1}{XY} \sum_{b,x,y}\;L[b,x,y,n] \\
+  \\
+  \\
+  \hat{\sigma}[b,n] & = & \sqrt{\frac{1}{XY-1} \sum_{b,x,y} (L[b,x,y,n]-\hat{L}[b,n])^2} \\
+  \\
+  \\
+  \tilde{L}[b,x,y,n]& = & \frac{L[b,x,y,n] - \hat{L}[b,n]}{\hat{\sigma}[n]}
+\end{eqnarray*}
+
+\slideplain{Adding an Affine Transformation}
+
+$$\breve{L}[b,x,y,n] = \gamma[n] \tilde{L}[b,x,y,n] + \beta[n]$$
 
 \vfill
-Here $\gamma[j]$ and $\beta[j]$ are parameters of the batch normalization.
+Here $\gamma[n]$ and $\beta[n]$ are parameters of the batch normalization.
 
 \vfill
 This allows the batch normlization to learn an arbitrary affine transformation (offset and scaling).
 
 \vfill
-It can even undo the normaliztion.
+The affine transformation can undo the normaliztion but using ReLu activations the normalized value remains independent of scaling the weights and
+bias terms (thresholds) of the layer.
 
 \slide{Batch Normalization}
 
-Batch Normalization appears to be generally useful in CNNs but is not always used.
-
-\vfill
-Not so successful in RNNs.
-
-\vfill
-It is typically used just prior to a nonlinear activation function.
+Spatial Batch Normalization is generally used in CNNs.  Layer normalization is used in the transformer.
 
 \vfill
 It is intuitively justified in terms of ``internal covariate shift'':
