@@ -175,7 +175,7 @@ L_{\color{red} \ell+1}[B,X,Y,N_{\mathrm{out}}] & = & L_{\color{red}\ell}[B,X,Y,N
 
 \slideplain{Residual Connections in CNNs}
 
-The residuyal conneection typically skis over several layers, or in transformers, a complex multi-level unit.
+The residual connection typically skips over several layers, or in transformers, a complex multi-level unit.
 
 \vfill
 {\Large
@@ -202,7 +202,7 @@ Spacial reduction and neuron expansion is done without convolution.
 $$L_{\color{red} \ell+1}[b,x,y,j]  =  \left\{\begin{array}{ll} L_{\color{red} \ell}[b,s*x,s*y,j] & \mbox{for $j < N_{\color{red} \ell}$} \\ 0 & \mbox{otherwise} \end{array}\right.$$
 
 \vfill
-Rsidual connections are still placed around all convlutions.
+Residual connections are still placed around all convolutions.
 
 \slide{Resnet32}
 
@@ -213,7 +213,7 @@ Rsidual connections are still placed around all convlutions.
 \newcommand{\Nout}{N_{\mathrm{out}}}
 \newcommand{\Nin}{N_{\mathrm{in}}}
 
-We reduce the number of features to ${\color{red} K < J}$ before doing the convolution.
+We reduce the number of neurons to ${\color{red} N_{\mathrm{bottle}} < N}$ before doing the convolution.
 
 {\huge
 \begin{eqnarray*}
@@ -221,7 +221,7 @@ U[B,X,Y,N_{\mathrm{bottle}}] & = & \mathrm{Conv}(K^U[N_{\mathrm{bottle}},1,1,\Ni
 \\
 V[B,X,Y,N_{\mathrm{bottle}}] & = & \mathrm{Conv}(K^V[N_{\mathrm{bottle}},3,3,N_\mathrm{bottle}],U[B,X,Y,N_{\mathrm{bottle}}]) \\
 \\
-R[B,X,Y,N] & = & \mathrm{Conv}(K^R[N,1,1,N_{\mathrm{botte}}],V[B,X,Y,N]) \\
+R[B,X,Y,N] & = & \mathrm{Conv}(K^R[N,1,1,N_{\mathrm{bottle}}],V[B,X,Y,N]) \\
 \\
 L_{ \ell+1} & = & L_\ell + R
 \end{eqnarray*}
@@ -271,7 +271,7 @@ We can dampen the effect of exploding gradients by clipping them before applying
 \vfill
 $$W.\mathrm{grad'} = \left\{\begin{array}{l} W.\mathrm{grad} \;\;\;\mbox{if $||W.\mathrm{grad}|| \leq \alpha$} \\
                                                       \\ \\
-                                                      n_{\mathrm{max}} \; W.\mathrm{grad} / ||W.\mathrm{grad}|| \;\; \mbox{otherwise}
+                                                      \alpha \; W.\mathrm{grad} / ||W.\mathrm{grad}|| \;\; \mbox{otherwise}
 \end{array} \right.$$
 
 \vfill
@@ -316,7 +316,7 @@ G_t[b,\nout] & = & \;\;\;\;\sigma(W^{h,G}[\nout,\Nin]h_t[b,\Nin] + W^{x,G}[\nout
 \\
 h_{t+1}[b,n] & = & G_t[b,n]h_t[b,n] + (1-G_t[b,n])R_t[b,n] \\
 \\
- & = & G_t[b,N] \odot h_t[b,N] + (1-G_t[b,N])\odot R_t[b,N]
+h_{t+1}[b,N] & = & G_t[b,N] \odot h_t[b,N] + (1-G_t[b,N])\odot R_t[b,N]
 \end{eqnarray*}
 }
 
