@@ -110,23 +110,22 @@ The generator tries to fool the discriminator.
 \end{eqnarray*}
 
 \vfill
-Assuming universality of both the generator $p_\gen$ and the discriminator $P_\disc$ we have {\color{red} $p_{\gen^*} = \popd$}.
+{\bf Assuming universality (next slide)} of both the generator $p_\gen$ and the discriminator $P_\disc$ we have {\color{red} $p_{\gen^*} = \popd$}.
 
 \vfill
 Note that this involves only discrete cross-entropy.
 
-\slide{GANs}
 
-To make the gradient descent clearer we write
+\slide{The Universality Assumption}
 
-\vfill
-$$E_{\tuple{i,y} \sim \tilde{p}_\gen}\;-\ln P_\disc(i|y)$$
+DNNs are universally expressive (can model any function) and trainable (the desired function can be found by SGD).
 
 \vfill
-as
+Universality assumption is clearly false but is useful.
 
 \vfill
-$$\frac{1}{2} E_{y \sim \popd}\;-\ln P_\disc(1|y) \;\;\;+\;\;\; \frac{1}{2} E_{z \sim {\cal N}(0,I)}\;-\ln P_\disc(-1|y_\gen(z))$$
+The success of GANs (to the extent tht they have been successful) is a tribute to the utility of the universality ssumption.
+
 
 \slidetwo{Generative Adversarial Nets}{Goodfellow et al., June 2014}
 \centerline{\includegraphics[width = 9in]{\images/GAN2014}}
