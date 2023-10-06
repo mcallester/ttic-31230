@@ -38,7 +38,6 @@ to both space and time. Use the repeated index notation for summation.
   $$L_{\ell + 1}[b,x,y,t,\nout] = \sigma(K_{\ell+1}[\nout \Delta X, \Delta Y, \Delta T, \Nin] L_\ell[b, sx+ \Delta X, sy + \Delta Y, st + \Delta T, \Nin]- B[\nout])$$
   }
 
-\ignore{
 \bigskip
 {\bf Problem 3:} Images have translation invariance --- a person detector must look for people at
 various places in the image.  Translation invariance is the motivation for convolution --- all
@@ -51,25 +50,30 @@ treat all places the same.
 
 \medskip
 Consider a batch of input images
-$L_{0,d}[b,x,y,n]$ where $d$ is the spacial dimension of $x$ and $y$, which we assume to be a power of 2, and $n$ ranges over the three color values red, green, blue.
-We start by constructing an ``image pyramid'' $L_{0,2^k}[b,x,y,n]$ for $2^k \leq d$
-where $L_{0,d/{2^k}}[b,x,y,n]$ consists of the input images down-sampled by a factor 2 $k$ times.  For formally,
-the image pyramid $L_{0,d/2}[b,x,y,i]$ is constructed from the input image $L_{0,d}[b,x,y,n]$ by down-sampling
-using pixel averaging.
+$L_{0,d}[b,x,y,n]$ where $d = 2^k$ is the spacial dimension of $x$ and $y$ and $n$ ranges over the three color values red, green, blue.
+To capture scale invariance will compute a set of layers $L_{\ell,d}$ with $0 \leq \ell \leq \ell_{\mathrm{max}}$ and $d$ a power of 2 with $4 \leq d \leq d_{\mathrm{max}}$
+where $d_{\mathrm{max}}$ is the spacial dimention of the input images.  We set $d_{\mathrm{min}} = 4$ so as to allow $3\times 3$ convolution kernels to be applied to
+the lowest spacial resolution. The output layer, say for image classificication, is $L_{\ell_{\mathrm{max}},d_{\mathrm{min}}}[b,x,y,n]$.
+
+\medskip
+We first define $L_{0,d}[b,x,y,n]$
+to be a layer in an ``image pyramid'' constructed by successively down-sampling the images by a factor 2.
 \begin{eqnarray*}
   L_{0,d/2}[b,x,y,n] & = & \frac{1}{4}\left(\begin{array}{l} L_{0,d}[b,2x,2y,n] + L_{0,d}[b,2x+1,2y,n] \\ + L_{0,d}[b,2x,2y+1,n] + L_{0,d}[b,2x+1,2y+1,n]\end{array}\right)
 \end{eqnarray*}
-We will compute a set of layers $L_{\ell,d}[b,x,y,n]$ where $d$ is a power of 2 and $\ell \leq \log_2 d$.
-While we have a quadratic number of layers $L_{\ell,d}[b,x,y,n]$ we will use a linear number of kernels $K_{\ell+1}[\nout,\Delta x,\Delta Y,\nin]$.
-Give an equation for computing $L_{\ell+1,d}[b,x,y,\nout]$ as the result of a linear threshold neuron taking inputs from both
-$L_{\ell,d}[b,x,y,n]$ {\bf and} $L_{\ell,d/2}[b,x,y,n]$ using the same kernel  $K_{\ell+1}[\nout,\Delta x,\Delta Y,\nin]$.
+We next define $L_{\ell,d_{\mathrm{max}}}[b,x,y,n]$ by $3\times 3$ convolutions that do not change the image dimension.
+{\small  $$L_{\ell+1,d_{\mathrm{max}}}[b,x,y,n] = \sigma(K_{\ell+1}[\nout,\Delta X,\Delta Y,\Nin]L_{\ell,d_{\mathrm{max}}}[b,x+\Delta X,y+\Delta Y,\Nin] - B_{\ell+1}[\nout])$$}
+
+For $d < d_{\mathrm{max}}$ give an equation for computing $L_{\ell+1,d}[b,x,y,\nout]$ as the result of a linear threshold neuron taking inputs from both
+$L_{\ell,d}[b,x,y,n]$ {\bf and} $L_{\ell,2d}[b,x,y,n]$ using the same kernel $K_{\ell+1}[\nout,\Delta x,\Delta Y,\nin]$ for both inputs.
 
 \solution{
-  $$L_{\ell+1,d/2}[b,x,y,n] = \sigma\left(\begin{array}{ll}
-    & K_{\ell+1}[\nout,\Delta X,\Delta Y,\Nin]L_{\ell,d/2}[b,x+\Delta X,y+\Delta Y,\Nin] \\
-    + & K_{\ell+1}[\nout,\Delta X,\Delta Y,\Nin]L_{\ell,d}[b,2x+\Delta X,2y+\Delta Y,\Nin] \\
+  $$L_{\ell+1,d}[b,x,y,n] = \sigma\left(\begin{array}{ll}
+    & K_{\ell+1}[\nout,\Delta X,\Delta Y,\Nin]L_{\ell,d}[b,x+\Delta X,y+\Delta Y,\Nin] \\
+    + & K_{\ell+1}[\nout,\Delta X,\Delta Y,\Nin]L_{\ell,2d}[b,2x+\Delta X,2y+\Delta Y,\Nin] \\
     - & B_{\ell+1}[\nout] \end{array}\right)$$
 }
 
-}
+
+
 \end{document}
