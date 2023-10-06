@@ -14,59 +14,52 @@
 \medskip
 \centerline{\bf CNN Problems}
 
-
 In these problems, as in the lecture notes, capital letter indeces are used to indicate subtensors (slices) so that, for example,  $M[I,J]$ denotes a matrix
 while $M[i,j]$ denotes one element of the matrix, $M[i,J]$ denotes the $i$th row, and $M[I,j]$ denotes the $j$th collumn.
 
 \medskip
-Throughout these problems we assume a word embedding matrix $e[W,I]$ where $e[w,I]$ is the word vector for word $w$. We then have that $e[w,I]^\top h[t,I]$
-is the inner product of the word vector $w[w,I]$ and the hidden state vector $h[t,I]$.
-
-\medskip
-We will adopt the convention, similar to true Einstein notation, that repeated capital indeces in a product of tensors are implicitly summed.  We can then write
-the inner product $e[w,I]^\top h[t,I]$ simply as $e[w,I]h[t,I]$ without the need for the (meaningless) transpose operation.
+We also adopt the convention, similar to true Einstein notation, that repeated capital indeces in a product of tensors are implicitly summed.  We can then write
+the inner product $e[w,I]^\top h[t,I]$ as $e[w,I]h[t,I]$.  Using this implicit summation notation we can avoid ever using transpose.
 
 \bigskip
-{\bf Problem 1.}  Consider convolving a filter $W[\Delta x, \Delta y, i,j]$  with thresholds $B[j]$ on a ``data box'' $L[b,x,y,i]$ where $B,\;X,\;Y,\;I, J,\Delta X,\;\Delta Y$
-are the number of possible values for $b$, $x$, $y$, $i$, $j$, $\Delta x$ and $\Delta y$ respectively.
+{\bf Problem 1.}  Consider convolving a kernel $K[\nout,\Delta x, \Delta y,\nin]$  with thresholds $B[\nout]$ on a layer $L[b,x,y,\nin]$ where $B,\;X,\;Y,\Nout, \Nin,\Delta X,\;\Delta Y$
+are the number of possible values for $b$, $x$, $y$, $\nout$, $\nin$, $\Delta x$ and $\Delta y$ respectively.
 How many floating point multiplies are required
 in computing the convolution on the batch (without any activation function)?
 
-\solution{$$BXY\;\Delta X\;\Delta Y \;IJ$$}
+\solution{$$BXY\;\Delta X\;\Delta Y \;\Nout \;\Nin$$}
 
 \bigskip
-{\bf Problem 2:} Suppose that we want a video CNN producing layers of the form $L[b,x,y,t,i]$ which are the same as the layers of an image CNN but with an additional time index.
+{\bf Problem 2:} Suppose that we want a video CNN producing layers of the form $L[b,x,y,t,n]$ which are the same as the layers of an image CNN but with an additional time index.
 Write the equation for computing $L_{\ell+1}[b,x,y,t,j]$ from the tensor $L_\ell[B,X,Y,T,I]$.  Your filter should include an index $\Delta t$ and handle a stride $s$ applied
-to both space and time.
+to both space and time. Use the repeated index notation for summation.
 
 \solution{
-  $$L_{\ell + 1}[b,x,y,t,j] = \sum_{\Delta x, \Delta y, \Delta t, i} W[\Delta x, \Delta y, \Delta t, i, j] L_\ell[b, sx+ \Delta x, sy + \Delta y, st + \Delta t, i]$$
+  $$L_{\ell + 1}[b,x,y,t,\nout] = \sigma(K_{\ell+1}[\nout \Delta X, \Delta Y, \Delta T, \Nin] L_\ell[b, sx+ \Delta X, sy + \Delta Y, st + \Delta T, \Nin]- B[\nout])$$
   }
 
 \bigskip
-{\bf Problem 3.}  Consider a bottleneck multi-layer perceptron (MLP) with residual connections defined as follows where $h[0,J]$ is an input vector and where $I$ is small compared to $J$.
+{\bf Problem 3.} Consider a bottleneck multi-layer perceptron (MLP) with residual connections defined as follows where $N_{\mathrm{bottle}}$ is smaller than $\Nin = \Nout$.
 
 \begin{eqnarray*}
-  b[\ell,I] & = & \relu(W^b[I,J]h[\ell,J]) \\
-  h[\ell+1,J] & = & h[\ell,J] +  \;\relu(W^h[\ell,J,I]b[\ell,I])
+  \tilde{L}_\ell[n_{\mathrm{bottle}}] & = & \relu(W^{b,1}_\ell[n_{\mathrm{bottle}},\Nin]L_\ell[\Nin] - B^{b,1}_\ell[n_{\mathrm{bottle}}]) \\
+  \hat{L}_\ell[\nout] & = & \relu(W^{b,2}_\ell[\nout,N_{\mathrm{bottle}}]\tilde{L}_\ell[N_{\mathrm{bottle}}] - B^{b,2}_\ell[\nout]) \\
+  L_{\ell+1}[n] & = & L_\ell[n] + \hat{L}_\ell[n]
 \end{eqnarray*}
 
-\medskip {\bf (a)} What is the number of multiplications done by this network as a function of the hidden layer dimension $J$, the bottleneck vector dimension $I$ and the number of layers $L$? 
+\medskip {\bf (a)} What is the number of multiplications done by this network as a function of $\Nin = \Nout = N$, $N_{\mathrm{bottle}}$ and the number of layers $L$ (including the input layer)? 
 Under what conditions does this give fewer multiplications than the standard MLP with one matrix between layers?
-(For the tensor $h[L,I]$ we have that $\ell$ ranges from 0 to $L-1$.  We use this as a standard convention for tensor indeces. The input layer has $\ell = 0$ and the final layer has $\ell = L-1$.)
 
 
-\solution{The number of multiplications is 2JI(L-1).  For a standard MLP (with no botleneck) the number of multiplications is $J^2(L-1)$.  The bottleneck layer has fewer multiplications for $I < J/2$.}
+\solution{The number of multiplications is $2NN_{\mathrm{bottle}}(L-1)$.  For a standard MLP (with no botleneck) the number of multiplications is $N^2(L-1)$.  The bottleneck layer has fewer multiplications for $N_{\mathrm{bottle}} < N/2$.}
 
 
-\medskip {\bf (b)} We now consider introducing a multiplicative constant $\gamma$ into the residual connection.
-
+\medskip{\bf (b)} We now consider introducing a multiplicative constant $\gamma$ into the residual connection.
 \begin{eqnarray*}
-  b[\ell,I] & = & \relu(W^b[I,J]h[\ell,J]) \\
-  h[\ell+1,J] & = & \gamma(\;h[\ell,J] +  \;\relu(W^h[\ell,J,I]b[\ell,I])\;)
+  L_{\ell+1}[n] & = & \gamma(L_\ell[n] + \hat{L}_\ell[n])
 \end{eqnarray*}
 
-If the network is initialized such that each of $h[\ell,j]$ and $\relu(W^h[\ell,j,I]b[\ell,I])$ are zero mean and unit variance, and are assummed to be independent, what value of $\gamma$ gives that
+If the network is initialized such that each response of $L_\ell[n]$ and $\hat{L}[n]$ has zero mean and unit variance, and are assummed to be independent, what value of $\gamma$ gives that
 $h[\ell+1,j]$ has zero mean and unit variance.
 
 \solution{$1/\sqrt{2}$}
