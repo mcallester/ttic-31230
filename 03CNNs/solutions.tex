@@ -38,43 +38,11 @@ to both space and time. Use the repeated index notation for summation.
   $$L_{\ell + 1}[b,x,y,t,\nout] = \sigma(K_{\ell+1}[\nout \Delta X, \Delta Y, \Delta T, \Nin] L_\ell[b, sx+ \Delta X, sy + \Delta Y, st + \Delta T, \Nin]- B[\nout])$$
   }
 
+\ignore{
 \bigskip
-{\bf Problem 3.} Consider a bottleneck multi-layer perceptron (MLP) with residual connections defined as follows where $N_{\mathrm{bottle}}$ is smaller than $\Nin = \Nout$.
-
-\begin{eqnarray*}
-  \tilde{L}_\ell[n_{\mathrm{bottle}}] & = & \relu(W^{b,1}_\ell[n_{\mathrm{bottle}},\Nin]L_\ell[\Nin] - B^{b,1}_\ell[n_{\mathrm{bottle}}]) \\
-  \hat{L}_\ell[\nout] & = & \relu(W^{b,2}_\ell[\nout,N_{\mathrm{bottle}}]\tilde{L}_\ell[N_{\mathrm{bottle}}] - B^{b,2}_\ell[\nout]) \\
-  L_{\ell+1}[n] & = & L_\ell[n] + \hat{L}_\ell[n]
-\end{eqnarray*}
-
-\medskip {\bf (a)} What is the number of multiplications done by this network as a function of $\Nin = \Nout = N$, $N_{\mathrm{bottle}}$ and the number of layers $L$ (including the input layer)? 
-Under what conditions does this give fewer multiplications than the standard MLP with one matrix between layers?
-
-
-\solution{The number of multiplications is $2NN_{\mathrm{bottle}}(L-1)$.  For a standard MLP (with no botleneck) the number of multiplications is $N^2(L-1)$.  The bottleneck layer has fewer multiplications for $N_{\mathrm{bottle}} < N/2$.}
-
-
-\medskip{\bf (b)} We now consider introducing a multiplicative constant $\gamma$ into the residual connection.
-\begin{eqnarray*}
-  L_{\ell+1}[n] & = & \gamma(L_\ell[n] + \hat{L}_\ell[n])
-\end{eqnarray*}
-
-If the network is initialized such that each response of $L_\ell[n]$ and $\hat{L}[n]$ has zero mean and unit variance, and are assummed to be independent, what value of $\gamma$ gives that
-$h[\ell+1,j]$ has zero mean and unit variance.
-
-\solution{$1/\sqrt{2}$}
-  
-\medskip
-{\bf (c)} The main advantage of a stack of residual connections is that there is direct additive
-path from the loss to each layer of the stack, including the input layer.  Give a reason why the introduction of the constant $\gamma < 1$ as in part (b)
-might be damaging to the optimization of the lower layers of the residual stack.
-
-\solution{When we introduce $\gamma < 1$ as in (b) the gradient update on the bottom layer is reduced by $\gamma^{L-2}$.  This could harm the learning along the direct connection
-  between the loss and the first layer of the network.}
-
-\bigskip
-{\bf Problem 4:} Images have translation invariance --- a person detector must look for people at various places in the image.  Translation invariance is the motivation for
-convolution --- all places in the image are treated the same.
+{\bf Problem 3:} Images have translation invariance --- a person detector must look for people at
+various places in the image.  Translation invariance is the motivation for convolution --- all
+places in the image are treated the same.
 
 \medskip
 Images also have some degree of scale invariance --- a person detector must look for people of different sizes
@@ -82,36 +50,26 @@ Images also have some degree of scale invariance --- a person detector must look
 treat all places the same.
 
 \medskip
-Consider a batch of images
-$I[b,x,y,c]$ where $c$ ranges over the three color values red, green, blue. We start by constructing an ``image pyramid'' $I_s[x,y,c]$.
-We assume that the original image $I[b,x,y,c]$ has spatial dimensions $2^k$ and construct images $I_s[b,x,y,c]$ with spatial dimensions $2^{k-s}$
-for $0 \leq s \leq k$.  The image pyramid $I_s[b,x,y,i]$ for $0 \leq s \leq k$ is defined by the following equations.
+Consider a batch of input images
+$L_{0,d}[b,x,y,n]$ where $d$ is the spacial dimension of $x$ and $y$, which we assume to be a power of 2, and $n$ ranges over the three color values red, green, blue.
+We start by constructing an ``image pyramid'' $L_{0,2^k}[b,x,y,n]$ for $2^k \leq d$
+where $L_{0,d/{2^k}}[b,x,y,n]$ consists of the input images down-sampled by a factor 2 $k$ times.  For formally,
+the image pyramid $L_{0,d/2}[b,x,y,i]$ is constructed from the input image $L_{0,d}[b,x,y,n]$ by down-sampling
+using pixel averaging.
 \begin{eqnarray*}
-  I_0[b,x,y,c] & = & I[b,x,y,c] \\
-  \\
-  I_{s+1}[b,x,y,c] & = & \frac{1}{4}\left(\begin{array}{l} I_s[b,2x,2y,c] + I_s[b,2x+1,2y,c] \\ + I_s[b,2x,2y+1,c] + I_s[b,2x+1,2y+1,c]\end{array}\right)
+  L_{0,d/2}[b,x,y,n] & = & \frac{1}{4}\left(\begin{array}{l} L_{0,d}[b,2x,2y,n] + L_{0,d}[b,2x+1,2y,n] \\ + L_{0,d}[b,2x,2y+1,n] + L_{0,d}[b,2x+1,2y+1,n]\end{array}\right)
 \end{eqnarray*}
-
-We want to compute a set of layers $L_{\ell,s}[b,x,y,i]$ where $s$ is the scale and $\ell$ is the level of processing with $\ell + s \leq k$ and where
-$L_{\ell,s}[b,x,y,i]$ has spatial dimensions $2^{k-\ell-s}$ (increasing either the processing level or the scale reduces the spatial dimentions by a factor of 2).
-First we set
-$$L_{0,s}[b,x,y,c] = I_s[b,x,y,c].$$
-
-\medskip
-Give an equation for a linear threshold unit to compute $L_{\ell+1,s}[b,x,y,j]$ from $L_{\ell,s}[b,x,y,j]$ {\bf and} $L_{\ell,s+1}[b,x,y,j]$. Use parameters
-$W_{\ell+1,\leftarrow}[\Delta x, \Delta y, i,j]$ for the dependence of $L_{\ell+1,s}$ on $L_{\ell,s+1}$ and
-parameters
-$W_{\ell+1,\uparrow}[\Delta x, \Delta y, i,j]$ for the dependence of $L_{\ell+1,s}$ on $L_{\ell,s}$.  Use $B_{\ell+1}[j]$ for the threshold.
-Note that these parameters do not depend on $s$ --- they are scale invariant.
+We will compute a set of layers $L_{\ell,d}[b,x,y,n]$ where $d$ is a power of 2 and $\ell \leq \log_2 d$.
+While we have a quadratic number of layers $L_{\ell,d}[b,x,y,n]$ we will use a linear number of kernels $K_{\ell+1}[\nout,\Delta x,\Delta Y,\nin]$.
+Give an equation for computing $L_{\ell+1,d}[b,x,y,\nout]$ as the result of a linear threshold neuron taking inputs from both
+$L_{\ell,d}[b,x,y,n]$ {\bf and} $L_{\ell,d/2}[b,x,y,n]$ using the same kernel  $K_{\ell+1}[\nout,\Delta x,\Delta Y,\nin]$.
 
 \solution{
-  $$L_{\ell+1,s}[b,x,y,j] = \sigma\left(\begin{array}{ll}
-      & \sum_{\Delta x,\Delta y,i} W_{\ell+1,\leftarrow}[\Delta x, \Delta y, i,j]L_{\ell,s+1}[b,x+\Delta x,y+\Delta y,i,j] \\
-    + & \sum_{\Delta x,\Delta y,i} W_{\ell+1,\uparrow}\;[\Delta x, \Delta y, i,j]\;L_{\ell,s}\;[b,2x+\Delta x,2y+\Delta y,i,j] \\
-    + & B_{\ell+1}[j] \end{array}\right)$$
+  $$L_{\ell+1,d/2}[b,x,y,n] = \sigma\left(\begin{array}{ll}
+    & K_{\ell+1}[\nout,\Delta X,\Delta Y,\Nin]L_{\ell,d/2}[b,x+\Delta X,y+\Delta Y,\Nin] \\
+    + & K_{\ell+1}[\nout,\Delta X,\Delta Y,\Nin]L_{\ell,d}[b,2x+\Delta X,2y+\Delta Y,\Nin] \\
+    - & B_{\ell+1}[\nout] \end{array}\right)$$
 }
 
-Note: I am not aware of this architecture in the literature.  A somewhat related architecture is ``Feature Pyramid Networks'' arxiv 1612.03144.
-
-
+}
 \end{document}
