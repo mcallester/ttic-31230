@@ -314,9 +314,7 @@ R_t[b,\nout] & = & \mathrm{tanh}(W^{h,R}[\nout,\Nin]h_t[b,\Nin] + W^{x,R}[\nout,
 \\
 G_t[b,\nout] & = & \;\;\;\;\sigma(W^{h,G}[\nout,\Nin]h_t[b,\Nin] + W^{x,G}[\nout,\Nin]x_t[b,\Nin] - B^G[\nout]) \\
 \\
-h_{t+1}[b,n] & = & G_t[b,n]h_t[b,n] + (1-G_t[b,n])R_t[b,n] \\
-\\
-h_{t+1}[b,N] & = & G_t[b,N] \odot h_t[b,N] + (1-G_t[b,N])\odot R_t[b,N]
+h_{t+1}[b,n] & = & G_t[b,n]h_t[b,n] + (1-G_t[b,n])R_t[b,n]
 \end{eqnarray*}
 }
 
