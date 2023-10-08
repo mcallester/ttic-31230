@@ -19,8 +19,6 @@
   \centerline{Normalization}
   \vfill
   \centerline{Residual Connections}
-  \vfill
-  \centerline{Gated RNNs}
 
 \slide{ReLu}
 
@@ -155,8 +153,6 @@ bias terms (thresholds) of the layer.
 \end{minipage}
 
 \anaslideplain{Residual Connections in CNNs}
-\newcommand{\nin}{n_{\mathrm{in}}}
-\newcommand{\nout}{n_{\mathrm{out}}}
 
 \medskip
 \begin{eqnarray*}
@@ -175,10 +171,9 @@ L_{\color{red} \ell+1}[B,X,Y,N_{\mathrm{out}}] & = & L_{\color{red}\ell}[B,X,Y,N
 
 \slideplain{Residual Connections in CNNs}
 
-The residual connection typically skips over several layers, or in transformers, a complex multi-level unit.
+The residual connection typically skips over several layers, or in transformers, a complex multi-level network.
 
 \vfill
-{\Large
 \begin{eqnarray*}
 & & \tilde{L}_{\color{red} \ell+1}[B,X,Y,N_{\mathrm{out}}] \\
 & = & \mathrm{Conv}(K_{\color{red} \ell+1}[N,\Delta X,\Delta Y,N],B_{\color{red} \ell+1}[N],L_{\color{red} \ell}[B,X,Y,N]) \\
@@ -186,8 +181,8 @@ The residual connection typically skips over several layers, or in transformers,
 & & \tilde{L}_{\color{red} \ell+2}[B,X,Y,N] \\
 & = & \mathrm{Conv}(K_{\color{red} \ell+1}[N,\Delta X,\Delta Y,N],B_{\color{red} \ell+1}[N],L_{\color{red} \ell+1}[B,X,Y,N])
 \end{eqnarray*}
-}
 
+\vfill
 \begin{eqnarray*}
 L_{\color{red} \ell+2}[B,X,Y,N] & = & L_{\color{red}\ell}[B,X,Y,N] + \tilde{L}_{\color{red} \ell+2}[B,X,Y,N]
 \end{eqnarray*}
@@ -210,8 +205,6 @@ Residual connections are still placed around all convolutions.
 
 
 \slideplain{Deeper Versions use Bottleneck Residual Paths}
-\newcommand{\Nout}{N_{\mathrm{out}}}
-\newcommand{\Nin}{N_{\mathrm{in}}}
 
 We reduce the number of neurons to ${\color{red} N_{\mathrm{bottle}} < N}$ before doing the convolution.
 
@@ -234,111 +227,6 @@ $${\color{red} y = x + R(x)}$$
 \vfill
 where $R(x)$ has the same shape as $x$.
 
-\slide{}
-\vfill
-\centerline{Recurrent Neural Networks (RNNs)}
-\vfill
-\vfill
-
-\slide{Vanilla RNNs}
-
-
-
-\centerline{\includegraphics[width=3.5in]{../images/RNN}}
-
-\vfill
-
-{\huge
-$${\color{red} h_{t+1}[b,n_{\mathrm{out}}]} = \sigma(W^{h,h}[n_{\mathrm{out}},N_{\mathrm{in}}]h_t[N_{\mathrm{in}}] + W^{h,x}[n_{\mathrm{out}},N_x]x_t[N_x] - B[n_{\mathrm{out}}])$$
-}
-
-\slide{Exploding and Vanishing Gradients}
-
-\vfill
-If we avoid saturation of the activation functions then we get exponentially growing or shrinking eigenvectors of the weight matrix.
-
-\vfill
-Note that if the forward values are bounded by sigmoids or tanh then they cannot explode.
-
-\vfill
-However the gradients can still explode.
-
-\slide{Exploding Gradients: Gradient Clipping}
-
-\vfill
-We can dampen the effect of exploding gradients by clipping them before applying SGD.
-
-\vfill
-$$W.\mathrm{grad'} = \left\{\begin{array}{l} W.\mathrm{grad} \;\;\;\mbox{if $||W.\mathrm{grad}|| \leq \alpha$} \\
-                                                      \\ \\
-                                                      \alpha \; W.\mathrm{grad} / ||W.\mathrm{grad}|| \;\; \mbox{otherwise}
-\end{array} \right.$$
-
-\vfill
-See {\tt torch.nn.utils.clip\_grad\_norm}
-
-\slide{Time as Depth}
-
-\centerline{\includegraphics[width=3.5in]{../images/RNN}}
-
-\vfill
-We would like the RNN to {\color{red} remember and use} information from much earlier inputs.
-
-
-\vfill
-All the issues with depth now occur through time.
-
-\vfill
-However, for RNNs {\color{red} at each time step we use the same model parameters.}
-
-\vfill
-In CNNs {\color{red} at each layer uses its own model parameters.}
-
-\slide{Skip Connections Through Time}
-
-\centerline{\includegraphics[width=3.5in]{../images/RNN}}
-
-\vfill
-We would like to add {\color{red} skip connections through time}.
-
-\vfill
-However, We have to handle the fact that the same model parameters are used at every time step.
-
-\slideplain{Update Gate RNN (UGRNN)}
-\centerline{\includegraphics[width=3.5in]{../images/RNN}}
-
-{\huge
-\vfill
-\begin{eqnarray*}
-R_t[b,\nout] & = & \mathrm{tanh}(W^{h,R}[\nout,\Nin]h_t[b,\Nin] + W^{x,R}[\nout,\Nin]x_t[b,\Nin] - B^R[\nout]) \\
-\\
-G_t[b,\nout] & = & \;\;\;\;\sigma(W^{h,G}[\nout,\Nin]h_t[b,\Nin] + W^{x,G}[\nout,\Nin]x_t[b,\Nin] - B^G[\nout]) \\
-\\
-h_{t+1}[b,n] & = & G_t[b,n]h_t[b,n] + (1-G_t[b,n])R_t[b,n]
-\end{eqnarray*}
-}
-
-\slide{Gated Recurrent Unity (GRU) by Cho et al. 2014}
-
-\centerline{\includegraphics[width=4.0in]{../images/GRU}}
-
-\slide{Long Short Term Memory (LSTM)}
-\centerline{\includegraphics[width=3.5in]{../images/LSTM}}
-
-\centerline{\Large [LSTM: Hochreiter\&Shmidhuber, 1997]}
-
-\slide{UGRNN vs. GRUs vs. LSTMs}
-
-\vfill
-In class projects from previous years, GRUs consistently outperformed LSTMs.
-
-\vfill
-A systematic study [Collins, Dickstein and Sussulo 2016] states:
-
-\begin{quotation}
-  Our results point to the GRU as being the most learnable of gated RNNs for shallow architectures, followed by the UGRNN.
-\end{quotation}
-
 \slide{Improving Trainability}
   \centerline{ReLu}
   \vfill
@@ -347,8 +235,6 @@ A systematic study [Collins, Dickstein and Sussulo 2016] states:
   \centerline{Normalization}
   \vfill
   \centerline{Residual Connections}
-  \vfill
-  \centerline{Gated RNNs}
 
 \slide{END}
 
