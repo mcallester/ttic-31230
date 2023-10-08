@@ -1,0 +1,69 @@
+\input ../SlidePreamble
+\input ../preamble
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Fall 2023}
+  \vfill
+  \centerline{\bf Language Modeling}
+
+\slide{Further Comments on Decoding}
+
+We can sample a translation
+
+$$w_t \sim P(w_t\;|\;\cev{h}_{\mathrm{in}}[0,J],\;w_0,\ldots,w_{t-1})$$
+
+\vfill
+Typically we do a greedy decoding
+
+$$w_t = \argmax_{w_t}\; P(w_t\;|\;\cev{h}_{\mathrm{in}}[0,J],\;w_0,\ldots,w_{t-1})$$
+
+\vfill
+or we might try maximize total probability.
+
+\begin{eqnarray*}
+w_0,\ldots,w_{T_{\mathrm{out}}}
+& = & \argmax_{w_0,\ldots,w_{T_{\mathrm{out}}}} \;P_\Phi\left(w_0,\ldots,w_{T_{\mathrm{out}}} \;|\; \cev{h}_{\mathrm{in}}[0,J]\right)
+\end{eqnarray*}
+
+\slideplain{Greedy Decoding vs. Beam Search}
+
+We would like
+
+\vfill
+$$W_{\mathrm{out}}[T_{\mathrm{out}}]^* = \argmax_{W_{\mathrm{out}}[T_{\mathrm{out}}]}
+P_\Phi(W_{\mathrm{out}}[T_{\mathrm{out}}] \;|\;W_{\mathrm{in}}[T_{\mathrm{in}}])$$
+
+\vfill
+But a greedy algorithm may do well
+
+\vfill
+$$w_t = \argmax_{w_t}\; P_\Phi(w_t\;|\;W_{\mathrm{in}}[T_{\mathrm{in}}],\;w_0,\ldots,w_{t-1})$$
+
+\vfill
+But these are not the same.
+
+\slide{Example}
+
+``Those apples are good'' vs. ``Apples are good''
+
+\vfill
+$$P_\Phi(\mbox{Apples are Good {\tt <eos>}}) > P_\Phi(\mbox{Those apples are good {\tt <eos>}})$$
+
+\vfill
+$$P_\Phi(\mbox{Those}|\varepsilon) > P_\Phi(\mbox{Apples}|\varepsilon)$$
+    
+\slide{Beam Search}
+
+At each time step we maintain a list the $K$ best words and their associated hidden vectors.
+
+\vfill
+This can be used to produce a list of $k$ ``best'' decodings which can then be compared to select
+the most likely one.
+
+\slide{END}
+}
