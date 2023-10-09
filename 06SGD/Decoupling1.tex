@@ -16,15 +16,6 @@
 
 \slide{Temperature}
 
-There is a temperature setting in Open AI's playground for GPT-3.
-
-\vfill
-\centerline{\includegraphics[width = 9in]{\images/GPT3Temperature}}
-
-~ \hfill $\uparrow$
-
-\slide{Temperature}
-
 Physical temperature is a relationship between the energy and probability.
 
 \vfill
@@ -78,20 +69,11 @@ $\beta = \frac{1}{kT}$ is the (inverse) temperature parameter.
 
 In a softmax with a temperature parameter we replace energy $E(x)$ with a score $s(x)$ and drop the negative sign.
 
-$$\softmax_y[y] = \frac{1}{Z}\;e^{\beta s(y)}$$
+\vfill
+$$\softmax_y = \frac{1}{Z}\;e^{\beta s(y)}$$
 
 \vfill
 We can think of the temperature parameter $\beta$ as simply a parameter of this distribution.
-
-\vfill
-The temperature setting in GPT-3 palyground sets $\beta$ for next word selection to be $1/T$ for temperature $T$.
-
-\slide{Temperture}
-
-MCMC sampling typically involves a temperature parameter defining the distribution to be sampled from.
-
-\vfill
-We do not have to worry about this now, it will be discussed in detail later.
 
 \slide{Learning Rate as Temperature}
 
@@ -102,6 +84,10 @@ If we run for a long time at a large learning rate we converge to a noisy (hot) 
 
 \vfill
 At a lower learning rate we converge to a cooler distribution with a lower loss value.
+
+\vfill
+We will later give a stochastic differential equation (SDE) model for SGD and derive a formal
+relationship between the learning rate and the temperature parameter of the Boltzman distribution.
 
 \slide{Learning Rate as Temperature}
 
@@ -127,7 +113,7 @@ Vanilla SGD with minibatching typically uses the following update which defines 
 \end{eqnarray*}
 
 \vfill
-Here $\hat{g}_{b}$ is average gradient over the batch.
+Here $\hat{g}_{b}$ is the average gradient over the batch.
 
 \vfill
 Under this update {\bf increasing the batch size (while holding $\eta$ fixed) reduces the temperature.}
@@ -151,7 +137,7 @@ For batch updates $\Phi_{t+1} = \Phi_t - B\eta_0\; \hat{g}_t$ the temperature is
 
 \slideplain{Making Temperature Independent of $B$}
 
-Recent work has show that using $\eta = B\eta_0$ leads to effective learning with very large (highly parallel)
+In 2017 it was discovered that setting $\eta = B\eta_0$ allows very large (highly parallel)
 batches.
 
 \vfill
