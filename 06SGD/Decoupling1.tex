@@ -65,42 +65,41 @@ $\beta = \frac{1}{kT}$ is the (inverse) temperature parameter.
 \vfill
 ``Hot'' is when $\beta$ is small and ``cold'' is when $\beta$ is large (confusing).
 
-\slide{Temperature}
-
-In a softmax with a temperature parameter we replace energy $E(x)$ with a score $s(x)$ and drop the negative sign.
-
-\vfill
-$$\softmax_y = \frac{1}{Z}\;e^{\beta s(y)}$$
-
-\vfill
-We can think of the temperature parameter $\beta$ as simply a parameter of this distribution.
-
-\slide{Learning Rate as Temperature}
+\slidetwo{Loss as Energy}{Learning Rate as Temperature}
 
 A finite learning rate defines an equalibrium probability distribution (or density) over the model parameters.
 
 \vfill
-If we run for a long time at a large learning rate we converge to a noisy (hot) distribution with a high loss value.
+Each value of the model parameters has an associated loss.
 
 \vfill
-At a lower learning rate we converge to a cooler distribution with a lower loss value.
+The distribution over model parameters defines a distribution over loss.
 
-\vfill
-We will later give a stochastic differential equation (SDE) model for SGD and derive a formal
-relationship between the learning rate and the temperature parameter of the Boltzman distribution.
-
-\slide{Learning Rate as Temperature}
+\slidetwo{Loss as Energy}{Learning Rate as Temperature}
 
 \centerline{\includegraphics[width = 7in]{\images/annealing}}
 
 \vfill
-These Plots are from the original ResNet paper.  Left plot is for CNNs without residual skip connections, the right plot is ResNet.
+Equalibrium energy (loss) distributions at three different temperatures (learning rates).
 
 \vfill
-Thin lines are training error, thick lines are validation error.
+\centerline{\parbox{7in}
+{\Large
+Plots are from the ResNet paper.  Left plot is for CNNs without residual skip connections, the right plot is ResNet. Thin lines are training error, thick lines are validation error. In all cases $\eta$ is reduced twice, each time by a factor of 2.
+}}
+
+\slidetwo{Loss as Energy}{Learning Rate as Temperature}
+
+\centerline{\includegraphics[width = 7in]{\images/annealing}}
 
 \vfill
-In all cases $\eta$ is reduced twice, each time by a factor of 2.
+Equalibrium energy (loss) distributions at three different temperatures (learning rates).
+
+\vfill
+\centerline{\parbox{7in}
+{\Large
+Plots are from the ResNet paper.  Left plot is for CNNs without residual skip connections, the right plot is ResNet. Thin lines are training error, thick lines are validation error. In all cases $\eta$ is reduced twice, each time by a factor of 2.
+}}
 
 \slide{Batch Size and Temperature}
 
