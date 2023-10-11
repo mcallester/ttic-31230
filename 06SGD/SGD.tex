@@ -21,18 +21,18 @@
 
 \slide{Vanilla SGD}
 
-$$\Phi \;\minuseq\; \eta \hat{g}$$
+$$\Phi_{t+1} = \Phi_t - \eta_t \hat{g}$$
 
 \vfill
 \begin{eqnarray*}
-  \hat{g} & = & E_{(x,y) \sim \mathrm{Batch}}\;\nabla_\Phi\;\mathrm{loss}(\Phi,x,y) \\
+  \hat{g} & = & E_{(x,y) \sim \mathrm{Batch}}\;\nabla_\Phi\;{\cal L}(\Phi,x,y) \\
   \\
   \\
-  g & = & E_{(x,y) \sim \mathrm{Pop}}\;\nabla_\Phi\;\mathrm{loss}(\Phi,x,y) \\
+  g & = & E_{(x,y) \sim \mathrm{Pop}}\;\nabla_\Phi\;{\cal L}(\Phi,x,y) \\
 \end{eqnarray*}
 
 \vfill
-\centerline{$\eta$ is the ``learning rate'' hyper-parameter (a parameter not in $\Phi$).}
+\centerline{$\eta_t$ is the learning rate for time $t$.}
 
 
 \slide{Issues}
@@ -45,32 +45,15 @@ $$\Phi \;\minuseq\; \eta \hat{g}$$
 \item {\bf Gradient Drift:(second order structure)} The fact that $g$ changes as the parameters change.
 
   \vfill
-\item {\bf Convergence.} Convergence requires $\eta_t \rightarrow 0$.
+\item {\bf Convergence:} Convergence requires $\eta_t \rightarrow 0$.
 
   \vfill
-  \item {\bf Exploration.} Reducing $\eta$ slowly allows better exploration of model parameters.
+  \item {\bf Exploration:} Reducing $\eta$ slowly allows better exploration of model parameters.
 \end{itemize}
-
-\slide{An Example of Gradient Noise}
-
-Suppose that $y$ is a scalar, and consider
-
-\begin{eqnarray*}
- \mathrm{loss}(\beta,y) & = & \frac{1}{2}(\beta - y)^2 \\
- \\
-  g & = &  \nabla_\beta\;E_{y \sim \mathrm{Pop}}\;\frac{1}{2}(\beta - y)^2 \\
-  \\
-  & = & \beta - E_{y \sim \mathrm{Pop}} \; y \\
-  \\
-  \hat{g} & = &\beta - E_{y \sim \mathrm{Batch}} \;y
-\end{eqnarray*}
-
-\vfill
-Even if $\beta$ is optimal, for a finite batch we will have $\hat{g} \not = 0$.
 
 \slide{The Classical Convergence Theorem}
 
-$$\Phi \;\minuseq \; \eta_t \nabla_\Phi\;\mathrm{loss}(\Phi,x_t,y_t)$$
+$$\Phi \;\minuseq \; \eta_t \nabla_\Phi\;{\cal L}(\Phi,x_t,y_t)$$
 
 \vfill
 For ``sufficiently smooth'' non-negative loss with
@@ -79,8 +62,8 @@ For ``sufficiently smooth'' non-negative loss with
 $$\eta_t \geq 0\;\;\;\;\;\;\;\;\lim_{t \rightarrow \infty} \;\eta_t = 0\;\;\;\;\;\;\;\;\sum_t \eta_t = \infty \;\;\;\;\;\;\sum_t \;\eta_t^2 < \infty$$
 
 \vfill
-we have that the training loss $E_{(x,y) \sim \mathrm{Train}}\; \mathrm{loss}(\Phi,x,t)$ converges to a limit and any limit point of the sequence $\Phi_t$
-is a stationary point in the sense that {\huge  $\nabla_\Phi \; E_{(x,y) \sim \mathrm{Train}} \;\mathrm{loss}(\Phi,x,t) = 0$}.
+we have that the training loss $E_{(x,y) \sim \mathrm{Train}}\; {\cal L}(\Phi,x,t)$ converges to a limit and any limit point of the sequence $\Phi_t$
+is a stationary point in the sense that {\huge  $\nabla_\Phi \; E_{(x,y) \sim \mathrm{Train}} \;{\cal L}(\Phi,x,t) = 0$}.
 
 \vfill
 {\Large
@@ -241,7 +224,135 @@ batches.
 {\bf Accurate, Large Minibatch SGD: Training ImageNet in 1 Hour}, Goyal et al., 2017.
 
 
-\slideplain{Momentum}
+
+\slide{Momentum}
+
+Moment is equivalent to using an exponential moving average (EMA) of the gradient.
+
+\slide{Exponential Moving Average (EMA)}
+Consider a sequence $x_1$, $x_2$, $x_3$, $\ldots$.
+\vfill
+For $t \geq N$, consider the average of the $N$ most recent values.
+$$\overline{x}_t = \frac{1}{N} \;\; \sum_{k = 0}^{N-1}\; x_{t-k}$$
+
+\vfill
+This can be approximated efficiently with
+\begin{eqnarray*}
+\tilde{x}_0 & = & 0 \\
+\\
+\tilde{x}_t & = & \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t
+\end{eqnarray*}
+
+\slide{Exponential Moving Average (EMA)}
+\begin{eqnarray*}
+\tilde{x}_t & = & \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t \\
+\\
+\\
+&= & \frac{1}{N}\sum_{s=1}^t \left[\left(1-\frac{1}{N}\right)^{t-s} x_s\right] \;\;\approx\;\; \frac{1}{N} \sum_{s=1}^t\;e^{-(s-t)/N} \;x_s 
+\end{eqnarray*}
+
+\vfill
+$$\sum_{i=0}^\infty \left(1-\frac{1}{N}\right)^i = N$$
+
+\slide{Deep Learning Convention for EMAs}
+
+In deep learning an exponential moving average
+
+$$\tilde{x}_t = \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t$$
+
+\vfill
+is written as
+
+$$\tilde{x}_t = \beta\tilde{x}_{t-1} + (1-\beta)x_t$$
+
+\vfill
+where
+$$\beta = 1 - 1/N$$
+
+\vfill
+Typical values for $\beta$ are .9, .99 or .999 corresponding to $N$ being 10, 100 or 1000.
+
+\slide{Bias Correction}
+
+Consider a standard moving average.
+
+\begin{eqnarray*}
+\tilde{x}_0 & = & 0 \\
+\\
+\tilde{x}_t & = & \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t
+\end{eqnarray*}
+
+\vfill
+For $t < N$ the average $\tilde{x}_t$ will be strongly biased toward zero.
+
+\slide{Bias Correction}
+
+The following running average maintains the invariant that $\tilde{x}_t$ is exactly the average of $x_1,\ldots,x_t$.
+
+\begin{eqnarray*}
+\tilde{x}_t & = & \left(\frac{t-1}{t}\right)\tilde{x}_{t-1} + \left(\frac{1}{t}\right)x_t \\
+\\
+\\
+& = & \left(1-\frac{1}{t}\right)\tilde{x}_{t-1} + \left(\frac{1}{t}\right)x_t
+\end{eqnarray*}
+
+\vfill
+We now have $\tilde{x}_1 = x_1$ independent of any $x_0$.
+
+\vfill
+But this fails to track a moving average for $t >> N$.
+
+\slide{Bias Correction}
+
+The following avoids the initial bias toward zero while still tracking a moving average.
+
+\begin{eqnarray*}
+\tilde{x}_t & = & \left(1-\frac{1}{\min(N,t)}\right)\tilde{x}_{t-1} + \left(\frac{1}{\min(N,t)}\right)x_t
+\end{eqnarray*}
+
+\vfill
+The published version of Adam has a more subtle form of bias correction which yields the same effect.
+
+\slide{EMA Momentum}
+
+The adaptive momentum (Adam) optimizer uses EMA momentum.
+
+\vfill
+Here we focus on the EMA momentum and discuss adaptation later.
+
+\vfill
+\begin{eqnarray*}
+  \tilde{g}_{t} & = & \left(1-\frac{1}{\min(t,N)}\right)\tilde{g}_{t-1} + \frac{1}{\min(t,N)} \hat{g}_t \\
+  \\             
+  \\
+  \Phi_{t+1} & =  & \Phi_t - \eta\tilde{g}_{t}
+\end{eqnarray*}
+
+\slide{EMA Momentum Is Decoupled From Temperature}
+
+If the time constant of the momentum is short compared to We will adopt the rule of thumb that the temperature is determined by the total effect of a single training gradient $g_{t,b}$.
+
+\vfill
+
+$$\mathrm{Using}\;\;\;\;\; \sum_{i = 0}^\infty \;\frac{1}{N}\left(1 - \frac{1}{N}\right)^i = 1$$
+
+\vfill
+we get that the effect of $\hat{g}_t$ on $\sum_{t=0}^\infty \tilde{g}_t$ equals $\hat{g}_t$.
+
+\vfill
+So for $\Phi_{t+1} =  \Phi_t - N\eta\tilde{g}_t$ the total effect of $g_{t,b}$ is $(N/B)\eta\; g_{t,b}$.
+
+\slide{Momentum}
+
+The theory of momentum is generally given in terms of second order structure and total gradients (GD rather than SGD).
+
+\vfill
+But second order analyses are controversial for SDG in very large dimension.
+
+\vfill
+Still, momentum is widely used in practice.
+
+\slideplain{Momentum in PyTorch Vanilla SGD}
 
 The standard (PyTorch) momentum SGD equations are
 
@@ -253,16 +364,6 @@ The standard (PyTorch) momentum SGD equations are
 
 \vfill
 Here $v$ is velocity, $0 \leq \mu < 1$ represents friction drag and $\eta \hat{g}$ is the acceleration generated by the gradient force.
-
-\slide{Momentum}
-
-The theory of momentum is generally given in terms of second order structure and total gradients (GD rather than SGD).
-
-\vfill
-But second order analyses are controversial for SDG in very large dimension.
-
-\vfill
-Still, momentum is widely used in practice.
 
 \slide{Momentum and Temperature}
 
@@ -290,40 +391,6 @@ Emprical evidence for this setting of $\eta$ is given in
 \vfill
 {\bf Don't Decay the Learning Rate, Increase the Batch Size}, Smith et al., 2018
 
-\slide{Momentum as an Exponential Moving Average (EMA)}
-Consider a sequence $x_1$, $x_2$, $x_3$, $\ldots$.
-\vfill
-For $t \geq N$, consider the average of the $N$ most recent values.
-$$\overline{x}_t = \frac{1}{N} \;\; \sum_{k = 0}^{N-1}\; x_{t-k}$$
-
-\vfill
-This can be approximated efficiently with
-\begin{eqnarray*}
-\tilde{x}_0 & = & 0 \\
-\\
-\tilde{x}_t & = & \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t
-\end{eqnarray*}
-
-\slide{Deep Learning Convention for EMAs}
-
-In deep learning an exponential moving average
-
-$$\tilde{x}_t = \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t$$
-
-\vfill
-is written as
-
-$$\tilde{x}_t = \beta\tilde{x}_{t-1} + (1-\beta)x_t$$
-
-\vfill
-where
-$$\beta = 1 - 1/N$$
-
-\vfill
-Typical values for $\beta$ are .9, .99 or .999 corresponding to $N$ being 10, 100 or 1000.
-
-\vfill
-It will be convenient here to use $N$ rather than $\beta$.
 
 \slide{Momentum as an EMA}
 
@@ -464,47 +531,6 @@ Adam combines momentum and RMSProp (although PyTorch RMSProp also supports momen
 
 \vfill
 Adam also uses ``bias correction'' which probably accounts for it's popularity over RMSProp in practice.
-
-\slide{Bias Correction}
-
-Consider a standard moving average.
-
-\begin{eqnarray*}
-\tilde{x}_0 & = & 0 \\
-\\
-\tilde{x}_t & = & \left(1-\frac{1}{N}\right)\tilde{x}_{t-1} + \left(\frac{1}{N}\right)x_t
-\end{eqnarray*}
-
-\vfill
-For $t < N$ the average $\tilde{x}_t$ will be strongly biased toward zero.
-
-\slide{Bias Correction}
-
-The following running average maintains the invariant that $\tilde{x}_t$ is exactly the average of $x_1,\ldots,x_t$.
-
-\begin{eqnarray*}
-\tilde{x}_t & = & \left(\frac{t-1}{t}\right)\tilde{x}_{t-1} + \left(\frac{1}{t}\right)x_t \\
-\\
-\\
-& = & \left(1-\frac{1}{t}\right)\tilde{x}_{t-1} + \left(\frac{1}{t}\right)x_t
-\end{eqnarray*}
-
-\vfill
-We now have $\tilde{x}_1 = x_1$ independent of any $x_0$.
-
-\vfill
-But this fails to track a moving average for $t >> N$.
-
-\slide{Bias Correction}
-
-The following avoids the initial bias toward zero while still tracking a moving average.
-
-\begin{eqnarray*}
-\tilde{x}_t & = & \left(1-\frac{1}{\min(N,t)}\right)\tilde{x}_{t-1} + \left(\frac{1}{\min(N,t)}\right)x_t
-\end{eqnarray*}
-
-\vfill
-The published version of Adam has a more obscure form of bias correction which yields essentially the same effect.
 
 \slide{Adam (simplified)}
 
