@@ -379,7 +379,7 @@ This choice of momentum  parameterization may be an important reason Adam is pre
 \slide{Adam (Without Bias Correction)}
 
 \begin{eqnarray*}
-{ \tilde{g}_t[i]} & { =} & { \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
+{ \tilde{g}_t[i]} & { =} & { \left(1-\frac{1}{N_s}\right) \tilde{g}_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
 \\
 \\
 { s_t[i]} & { =} & { \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
@@ -398,7 +398,7 @@ While normalization layers normalize the values, gradient normalization normaliz
 \slide{Adam (Centered)}
 
 \begin{eqnarray*}
-{ \tilde{g}_t[i]} & { =} & { \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
+{ \tilde{g}_t[i]} & { =} & { \left(1-\frac{1}{N_s}\right) tilde{g}_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
 \\
 \\
 { s_t[i]} & { =} & { \left(1-\frac{1}{N_s}\right) s_{t-1}[i] + \frac{1}{N_s} \hat{g}_t[i]^2}\;\;\;\mbox{$N_s$ typically 100 or 1000} \\
