@@ -20,30 +20,29 @@
 \vfill
 \centerline{\bf The SGD SDE}
 
-\slide{Diffufion}
+\slide{Diffusion}
 Consider a discrete-time process $z(0),z(1),z(2),z(3),\ldots$ with $z(n)\in \mathbb{R}^d$ defined by
 \begin{eqnarray*}
   z(0) & = & y,\;\;\;y \sim \popd(y) \\
-  z(n) & = & z(n) + \epsilon,\;\;\;\epsilon \sim {\cal N}(0,\sigma^2I)
+  z(n) & = & z(n) + \sigma\epsilon,\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
 \vfill
 We can sample from $z(n)$ using
+
 \begin{eqnarray*}
   z(0) & = & y,\;\;\;y \sim \popd(y) \\
-  z(n) & = & z(0) + \epsilon\sqrt{n} ,\;\;\;\epsilon \sim {\cal N}(0,\sigma^2I)
+  z(n) & = & z(0) + \sigma\epsilon\sqrt{n} ,\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
-\slide{The Diffusion SDE}
+\slide{Diffusion}
 Fix a numerical time step $\Delta t$ and consider a discrete-time process $z(0)$, $z(\Delta t)$, $z(2\Delta t)$, $\ldots$
 
 {\huge
 \begin{eqnarray*}
   z(0) & = & y,\;\;\;y \sim \popd(y) \\
   \\
-  z(t+\Delta t) & = & z(t) + \epsilon,\;\;\;\epsilon\sim {\cal N}(0,\Delta t \sigma^2I) \\
-  \\
-  & = & z(t) + \epsilon\sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,\sigma^2I) \\
+  z(t+\Delta t) & = & z(t) + \sigma\epsilon\sqrt{\Delta t},\;\;\;\epsilon\sim {\cal N}(0,I) \\
 \end{eqnarray*}
 }
 We now take the limit of this numerical simulation as $\Delta t \rightarrow 0$.
@@ -53,10 +52,11 @@ This limit defines a probability measure on the space of functions $z(t)$.
 
 \slide{The Diffusion SDE}
 
-$$z(t+\Delta t) =  z(t) + \epsilon\sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,\sigma^2I)$$
+$$z(t+\Delta t) =  z(t) + \sigma\epsilon\sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)$$
 
-In the limit of arbitrary small time step numerical simulation, this equation holds for any continuous $t \geq 0$
-and any $\Delta t \geq 0$.
+\vfill
+For simple diffusion (Brownian motion) this equation holds for any continuous $t \geq 0$
+and $\Delta t \geq 0$.
 
 \slide{The Langevin SDE}
 
@@ -75,18 +75,18 @@ g(\Phi) & = & \nabla_\Phi\;{\cal L}(\Phi) \\
 In the Langevin SDE we add Gaussian noise to gradient flow.
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & = & \Phi(t) + g(\Phi)\Delta t + \epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,\tau I)
+\Phi(t + \Delta t) & = & \Phi(t) + g\Delta t + \sigma \epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
 \vfill
 We will show that the stationary distribution of Langevin Dynamics models a Bayesian posterior probability distrbution on
-the model parameters where $\beta$ acts as a temperture parameter.
+the model parameters where $\sigma$ acts as a temperture parameter.
 
 
 \slide{The Langevin SDE}
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & = & \Phi(t) + g(\Phi)\Delta t + \epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,\tau I)
+\Phi(t + \Delta t) & = & \Phi(t) + g(\Phi)\Delta t + \sigma\epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
 Let $p(\Phi)$ be an probability density on the parameter space $\Phi$.
@@ -97,7 +97,7 @@ The density $p(\Phi)$ defines a gradient flow and a diffusion flow.
 \begin{eqnarray*}
 \mbox{gradient flow} & = & - p(\Phi)g(\Phi) \\
 \\
-\mbox{diffusion flow} & = & - \frac{1}{2} \;\tau\;\nabla_\Phi(p(\Phi))
+\mbox{diffusion flow} & = & - \frac{1}{2} \;\sigma\;\nabla_\Phi(p(\Phi))
 \end{eqnarray*}
 
 A derivation of the diffusion flow is given in the appendix.
@@ -107,7 +107,7 @@ A derivation of the diffusion flow is given in the appendix.
 \begin{eqnarray*}
 \mbox{gradient flow} & = & - p(\Phi)g(\Phi) \\
 \\
-\mbox{diffusion flow} & = & - \frac{1}{2} \;\tau\;\nabla_\Phi(p(\Phi))
+\mbox{diffusion flow} & = & - \frac{1}{2} \;\sigma\;\nabla_\Phi(p(\Phi))
 \end{eqnarray*}
 
 \vfill
@@ -115,24 +115,41 @@ For the stationary distribution these two flows cancel each other out.
 In one dimention we have
 
 \vfill
-$$\frac{1}{2} \tau \frac{dp}{dx} = - p\frac{d{\cal L}}{dx}$$
+$$\frac{1}{2} \sigma \frac{dp}{dx} = - p\frac{d{\cal L}}{dx}$$
 
 
-\slide{The 1-D Stationary Distribution}
+\slide{The Langevin Stationary Distribution}
 
 \vspace{-2ex}
 \begin{eqnarray*}
-\frac{1}{2} \eta \sigma^2 \frac{dp}{dx} & = & - p\frac{d{\cal L}}{dx} \\
+\frac{1}{2} \sigma \nabla_\Phi\; {p} & = &  = - p\nabla_\Phi {\cal L} \\
 \\
-\frac{dp}{p} & = & \frac{-2d{\cal L}}{\eta\sigma^2} \\
+\nabla_\Phi \left(\frac{1}{2} \sigma \ln p\right) & = &  = \nabla_\Phi (- {\cal L}) \\
 \\
-\ln p & = & \frac{-2{\cal L}}{\eta \sigma^2} + C \\
+\frac{1}{2} \sigma \ln & = & - {\cal L} + C \\
 \\
-{\color{red} p(x)} & = & {\color{red} \frac{1}{Z}\exp\left(\frac{-2{\cal L}(x)}{\eta \sigma^2}\right)}
+{\color{red} p(\Phi)} & {\color{red} =} & {\color{red} \frac{1}{Z}e^{\frac{-2{\cal L}(\Phi)}{\sigma}}}
 \end{eqnarray*}
 
+\slide{The General SDE}
+
+\begin{eqnarray*}
+f(t + \Delta t) &  =  & f(t) + \mu(f,t)\Delta t + \epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,\Sigma(f,t))\\
+\\
+ &  =  & f(t) + \mu(f(t),t)\Delta t + \Sigma(f,t)^{1/2} \epsilon \sqrt{\Delta t}\;\;\;\;(1)
+ \end{eqnarray*}
+
 \vfill
-We get a Gibbs distribution with $\eta$ as temperature!
+This is conventionally written as
+
+$$d f = \mu(f,t)dt + \Sigma(f,t)^{1/2}dB\;\;\;\;(2)$$
+
+\vfill
+where $B$ denotes a Weiner process (simple diffusion aka Brownian motion)
+
+\vfill
+I find (1) more intuitive than (2).
+
 
 \slide{A 2-D Stationary Distribution}
 
