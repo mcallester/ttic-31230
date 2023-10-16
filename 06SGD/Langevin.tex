@@ -89,7 +89,7 @@ the model parameters where $\sigma$ acts as a temperture parameter.
 \Phi(t + \Delta t) & = & \Phi(t) + g(\Phi)\Delta t + \sigma\epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
-Let $p(\Phi)$ be an probability density on the parameter space $\Phi$.
+Let $p(\Phi)$ be a probability density on the parameter space $\Phi$.
 
 \vfill
 The density $p(\Phi)$ defines a gradient flow and a diffusion flow.
@@ -97,59 +97,323 @@ The density $p(\Phi)$ defines a gradient flow and a diffusion flow.
 \begin{eqnarray*}
 \mbox{gradient flow} & = & - p(\Phi)g(\Phi) \\
 \\
-\mbox{diffusion flow} & = & - \frac{1}{2} \;\sigma\;\nabla_\Phi(p(\Phi))
+\mbox{diffusion flow} & = & - \frac{1}{2} \;\sigma^2\;\nabla_\Phi\; p(\Phi)
 \end{eqnarray*}
 
-A derivation of the diffusion flow is given in the appendix.
+\vfill
+The expression for the diffusion flow follows from the Fokker-Plank equation. A derivation of the diffusion flow expression from first princple is given in the appendix.
 
 \slide{The Langevin SDE}
 
 \begin{eqnarray*}
 \mbox{gradient flow} & = & - p(\Phi)g(\Phi) \\
 \\
-\mbox{diffusion flow} & = & - \frac{1}{2} \;\sigma\;\nabla_\Phi(p(\Phi))
+\mbox{diffusion flow} & = & - \frac{1}{2} \;\sigma^2\;\nabla_\Phi(p(\Phi))
 \end{eqnarray*}
 
 \vfill
 For the stationary distribution these two flows cancel each other out.
-In one dimention we have
+In one dimension we have
 
-\vfill
-$$\frac{1}{2} \sigma \frac{dp}{dx} = - p\frac{d{\cal L}}{dx}$$
-
+$$\frac{1}{2} \sigma^2 \nabla_\Phi\; {p} = - p\nabla_\Phi {\cal L}$$
 
 \slide{The Langevin Stationary Distribution}
 
 \vspace{-2ex}
 \begin{eqnarray*}
-\frac{1}{2} \sigma \nabla_\Phi\; {p} & = &  = - p\nabla_\Phi {\cal L} \\
+\frac{1}{2} \sigma^2 \nabla_\Phi\; {p} & = &  = - p\nabla_\Phi {\cal L} \\
 \\
-\nabla_\Phi \left(\frac{1}{2} \sigma \ln p\right) & = &  = \nabla_\Phi (- {\cal L}) \\
+\nabla_\Phi \left(\frac{1}{2} \sigma^2 \ln p\right) & = &  = \nabla_\Phi (- {\cal L}) \\
 \\
-\frac{1}{2} \sigma \ln & = & - {\cal L} + C \\
+\frac{1}{2} \sigma^2 \ln & = & - {\cal L} + C \\
 \\
-{\color{red} p(\Phi)} & {\color{red} =} & {\color{red} \frac{1}{Z}e^{\frac{-2{\cal L}(\Phi)}{\sigma}}}
+{\color{red} p(\Phi)} & {\color{red} =} & {\color{red} \frac{1}{Z}e^{\frac{-2{\cal L}(\Phi)}{\sigma^2}}}
 \end{eqnarray*}
 
-\slide{The General SDE}
+\slide{A Bayesian Interpretation of Langevin Dynamics}
 
+If we incorporate a regulaization into the loss function.
+
+$${\cal L}(\Phi) = E_{(x,y) \sim \train} \left[-\ln P_\Phi(y|x)\right] + \lambda ||\Phi||^2$$
+
+\vfill
+Then the Gibbs distribution
+
+$$p(\Phi)  =  \frac{1}{Z}e^{\frac{-2{\cal L}(\Phi)}{\sigma^2}}$$
+
+\vfill
+can be interprete as a Bayesian posterior density $p(\Phi|\train)$.
+
+
+
+\slide{A General SDE}
+
+{\huge
 \begin{eqnarray*}
-f(t + \Delta t) &  =  & f(t) + \mu(f,t)\Delta t + \epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,\Sigma(f,t))\\
-\\
- &  =  & f(t) + \mu(f(t),t)\Delta t + \Sigma(f,t)^{1/2} \epsilon \sqrt{\Delta t}\;\;\;\;(1)
+x(t + \Delta t) &  =  & f(t) + \mu(x,t)\Delta t + \sigma(x,t)\epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)\;\;\;(1)
  \end{eqnarray*}
-
+}
+\vfill
+Here $\sigma(x,t)$ is a matrix equal to $\Sigma(x,t)^{1/2}$ where $\Sigma = \sigma^2$ is the covarinace matrix of the random variable $\sigma(x,t)\epsilon$.
 \vfill
 This is conventionally written as
 
-$$d f = \mu(f,t)dt + \Sigma(f,t)^{1/2}dB\;\;\;\;(2)$$
+$$dx = \mu(x,t)dt + \sigma(x,t)dB\;\;\;\;(2)$$
 
 \vfill
-where $B$ denotes a Weiner process (simple diffusion aka Brownian motion)
+where $B$ denotes a Weiner process (simple diffusion, aka Brownian motion)
 
 \vfill
-I find (1) more intuitive than (2).
+I find (1) more intuitive than (2) but they are the same thing.
 
+\slide{The SGD SDE}
+
+\slide{The Stationary Distribution}
+
+\begin{eqnarray*}
+\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \epsilon \sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\Sigma)
+\end{eqnarray*}
+
+\vfill
+For an SDE we have a stationary continuous density in parameter space.
+
+\vfill
+We have a probability mass flow due to the loss gradient and a diffusion probability mass flow proportional to the density gradient.
+
+
+\slide{The Stationary Distribution with Constant Gradiant Noise}
+
+We consider the one dimensional case --- a single parameter $x$ --- and a probability density $p(x)$.
+
+\vfill
+We will assume the stationary distribution is limited to a region where the gradient noise is effectively constant.
+
+\vfill
+The gradient flow is equal to $- p(x)g$.
+
+\vfill
+The diffusion flow is  $- \frac{1}{2} \;\eta\sigma^2\;dp(x)/dx$ (see the appendix).
+
+
+\vfill
+For a stationary distribution the sum of the two flows is zero giving.
+
+\vfill
+{\color{red} $$\frac{1}{2} \eta \sigma^2 \frac{dp}{dx} = - p\frac{d{\cal L}}{dx}$$}
+
+
+\slide{The 1-D Stationary Distribution}
+
+\vspace{-2ex}
+\begin{eqnarray*}
+\frac{1}{2} \eta \sigma^2 \frac{dp}{dx} & = & - p\frac{d{\cal L}}{dx} \\
+\\
+\frac{dp}{p} & = & \frac{-2d{\cal L}}{\eta\sigma^2} \\
+\\
+\ln p & = & \frac{-2{\cal L}}{\eta \sigma^2} + C \\
+\\
+{\color{red} p(x)} & = & {\color{red} \frac{1}{Z}\exp\left(\frac{-2{\cal L}(x)}{\eta \sigma^2}\right)}
+\end{eqnarray*}
+
+\vfill
+We get a Gibbs distribution with $\eta$ as temperature!
+
+\slide{A 2-D Stationary Distribution}
+
+Let $p$ be a probability density on two parameters $(x,y)$.
+
+\vfill
+We consider the case where $x$ and $y$ are completely independent with
+$${\cal L}(x,y) = {\cal L}(x) + {\cal L}(y)$$
+
+\vfill
+For completely independent variables we have
+\begin{eqnarray*}
+p(x,y) & = & p(x)p(y) \\
+\\
+&= & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta \sigma_y^2}\right)
+\end{eqnarray*}
+
+\slide{A 2-D Stationary Distribution}
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta \sigma_y^2}\right)
+\end{eqnarray*}
+
+\vfill
+This is not a Gibbs distribution!
+
+\vfill
+It has two different temperature parameters!
+
+\slide{Forcing a Gibbs Distribution}
+
+Suppose we use parameter-specific learning rates $\eta_x$ and $\eta_y$
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta_x \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta_y \sigma_y^2}\right)
+\end{eqnarray*}
+
+Setting $\eta_x = \eta'/\sigma^2_x$ and $\eta_y = \eta'/\sigma^2_y$ gives
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta'} + \frac{-2{\cal L}(y)}{\eta'}\right) \\
+\\
+& = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x,y)}{\eta'}\right)\;\;\;\mathrm{Gibbs!}
+\end{eqnarray*}
+
+\slidetwo{The Case of Locally Constant Noise}
+{and Locally Quadratic Loss}
+
+In this case we can impose a change of coordinates under which the Hessian is the identity matrix.  So without loss of generality we can take the
+Hessian to be the identity.
+
+\vfill
+We can consider the covariance matrix of the vectors $\hat{g}$ in the Hessian-normalized coordinate system.
+
+\slidetwo{The Case of Locally Constant Noise}
+{and Locally Quadratic Loss}
+
+If we assume constant noise covariance in the neighborhood of the stationary distribution then, in the Hessian normalized
+coordinate system, we get a stationary distribution
+$$p(\Phi) \propto \exp\left(-\sum_i \frac{2{\Phi_i^2}}{\eta\sigma_i^2}\right)$$
+
+\vfill
+where $\Phi_i$ is the projection of $\Phi$ onto to a unit vector in the direction of the $i$th eigenvector of the noise covariance matrix and $\sigma^2_i$
+is the corresponding noise eigenvalue (the variance of the $\hat{g}_i$).
+
+\slide{END}
+
+\slide{Appendix: Diffusion Flow}
+
+{\Large
+We consider the one dimensional case. In the SDE formalism we move stochastically from $x$ to $x + \epsilon \sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,\eta\sigma^2)$
+where $\eta$ is the learning rate and $\sigma^2$ is the variance of the random gradients $\hat{g}_{t,b}$.
+
+\vfill
+To avoid confusion between different probability densities we will us $\rho(x)$ for the probability mass distribution in $x$ and use $p_\epsilon(\Psi)$
+for the probability that $\Psi$ holds under a random draw of $\epsilon$.
+
+}
+
+\slide{Appendix: Diffusion Flow}
+{\Large
+
+We move stochastically from $x$ to $x + \epsilon \sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,\eta\sigma^2)$
+
+\vfill
+This is the same as moving stochastically from $x$ to $x + \epsilon\sqrt{\eta}\sigma\sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,1)$.
+
+\vfill
+The quantity of mass transfer in the time interval $\Delta t$ from values above $x$ to values below $x$ is
+
+
+\begin{eqnarray*}
+& & \int_{z = 0}^\infty  \rho(x + z)\;p_\epsilon(\epsilon\sqrt{\eta}\sigma\sqrt{\Delta t} \leq -z) dz  \\
+\\
+& = & \int_{z = 0}^\infty  \rho(x + z)\;p_\epsilon\left(\epsilon \leq \frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz  \\
+\\
+& =  & \int_{z = 0}^\infty \rho(x+z)\;\Phi\left(\frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz
+\end{eqnarray*}
+
+\vfill
+where $\Phi$ is the cummulative function of the Gaussian.
+}
+
+\slide{Appendix: Diffusion Flow}
+{\Large
+
+The quantity of mass transfer in the time interval $\Delta t$ from values above $x$ to values below $x$ is
+
+
+\begin{eqnarray*}
+&  & \int_{z = 0}^\infty \rho(x+z)\;\Phi\left(\frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz
+\end{eqnarray*}
+
+By a change of variables $u = z/(\sqrt{\eta}\sigma\sqrt{\Delta t})$ we get
+
+\begin{eqnarray*}
+&  & \int_{u = 0}^\infty \rho(x+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u)\;\Phi(-u) \sqrt{\eta}\sigma\sqrt{\Delta t}\;du
+\end{eqnarray*}
+
+\vfill
+As $\Delta t \rightarrow 0$ we can use the first order Taylor expansion of the density.
+
+\begin{eqnarray*}
+&  & \sqrt{\eta}\sigma\sqrt{\Delta t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du
+\end{eqnarray*}
+}
+
+\slide{Appendix: Diffusion Flow}
+{\Large
+
+\begin{eqnarray*}
+&  & \sqrt{\eta}\sigma\sqrt{\Delta t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du \\
+\\
+& = & \sqrt{\eta}\sigma\sqrt{\Delta t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) +  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+\end{eqnarray*}
+
+A similar alanysis shows that the mass transfer from lower values to higher values is
+
+\begin{eqnarray*}
+& = & \sqrt{\eta}\sigma\sqrt{\Delta t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) -  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+\end{eqnarray*}
+
+\vfill
+The net mass transfer in the positive $x$ direction is the second minus the first or
+
+\begin{eqnarray*}
+& = & - 2\eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+\end{eqnarray*}
+}
+
+\slide{Appendix: Diffusion Flow}
+{\Large
+
+The net mass transfer in the positive $x$ direction is
+
+\begin{eqnarray*}
+& & - 2\eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+\end{eqnarray*}
+
+\vfill
+Note that the mass transfer is proportional to $\Delta t$.  Dividing by $\Delta t$ gives the flow per unit time.
+
+\vfill
+$$\mbox{Diffusion flow}\;\;= - \alpha \eta\sigma^2 \frac{d\rho(x)}{dx}\;\;\;\;\;\alpha = 2\int_{u=0}^\infty u\Phi(-u) du$$
+
+\vfill
+$\alpha$ can be calculated using integration by parts.
+
+\begin{eqnarray*}
+\alpha & = & 2 \int_{0}^\infty u \Phi(-u)du \\
+& = & \int_{0}^\infty \Phi(-u)du^2 \\
+& = & u^2 \Phi(-u)|_{0}^{\infty}+\int_{0}^\infty u^2 \phi(-u)du \;\;\mbox{where $\phi$ is the Gaussian density} \\
+& = & \int_{0}^\infty u^2 \phi(-u)du\\
+& = & \frac{1}{2}
+\end{eqnarray*}
+
+\slide{Appendix: Diffusion Flow}
+
+We now have that the diffusion flow is
+
+$$\mbox{Diffusion flow}\;\;= - \frac{1}{2}\; \eta\sigma^2 \frac{d\rho(x)}{dx}$$
+
+\vfill
+For dimension larger than 1 we have
+
+\vfill
+$$\mbox{Diffusion flow}\;\;= - \frac{1}{2}\;\eta\Sigma \nabla_x \rho$$
+
+\vfill
+Where $\Sigma = E\;(\hat{g} - g)(\hat{g} - g)^\top$ is the covariance matrix of the gradient noise.
+
+\vfill
+Here we have derived this from first principle but it also follows from the Fokker–Planck equation (see Wikipedia).
+}
+
+\slide{END}
+\end{document}
 
 \slide{A 2-D Stationary Distribution}
 
@@ -348,39 +612,29 @@ But in general we do not have $\Sigma = I$.
 
 \slide{END}
 
-
-\slide{END}
-
 \slide{Appendix: Diffusion Flow}
 
+
+
 {\Large
-We consider the one dimensional case. In the SDE formalism we move stochastically from $x$ to $x + \epsilon \sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,\eta\sigma^2)$
-where $\eta$ is the learning rate and $\sigma^2$ is the variance of the random gradients $\hat{g}_{t,b}$.
+We consider the one dimensional case where we have a function $x(t) \in \mathbb{R}$.  We consider a very small time step $\Delta t$ and consider only the diffusion flow.
+
+\begin{eqnarray*}
+x(t + \Delta t) & = & x(t) + \sigma \epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,1)
+\end{eqnarray*}
 
 \vfill
-To avoid confusion between different probability densities we will us $\rho(x)$ for the probability mass distribution in $x$ and use $p_\epsilon(\Psi)$
-for the probability that $\Psi$ holds under a random draw of $\epsilon$.
-
-}
-
-\slide{Appendix: Diffusion Flow}
-{\Large
-
-We move stochastically from $x$ to $x + \epsilon \sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,\eta\sigma^2)$
-
-\vfill
-This is the same as moving stochastically from $x$ to $x + \epsilon\sqrt{\eta}\sigma\sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,1)$.
+We assume a density $p_x$ of values of $x$ and let $p_\epsilon(\epsilon)$ be the normal distribution ${\cal N}(0,1)$ on $\epsilon$.
 
 \vfill
 The quantity of mass transfer in the time interval $\Delta t$ from values above $x$ to values below $x$ is
 
-
 \begin{eqnarray*}
-& & \int_{z = 0}^\infty  \rho(x + z)\;p_\epsilon(\epsilon\sqrt{\eta}\sigma\sqrt{\Delta t} \leq -z) dz  \\
+& & \int_{z = 0}^\infty  p_x(x + z)\;p_\epsilon(\sigma\epsilon\sqrt{\Delta t} \leq -z) dz  \\
 \\
-& = & \int_{z = 0}^\infty  \rho(x + z)\;p_\epsilon\left(\epsilon \leq \frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz  \\
+& = & \int_{z = 0}^\infty  p_x(x + z)\;p_\epsilon\left(\epsilon \leq \frac{-z}{\sigma\sqrt{\Delta t}}\right) dz  \\
 \\
-& =  & \int_{z = 0}^\infty \rho(x+z)\;\Phi\left(\frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz
+& =  & \int_{z = 0}^\infty p_x(x+z)\;\Phi\left(\frac{-z}{\sigma\sqrt{\Delta t}}\right) dz
 \end{eqnarray*}
 
 \vfill
@@ -394,20 +648,20 @@ The quantity of mass transfer in the time interval $\Delta t$ from values above 
 
 
 \begin{eqnarray*}
-&  & \int_{z = 0}^\infty \rho(x+z)\;\Phi\left(\frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz
+&  & \int_{z = 0}^\infty p_x(x+z)\;\Phi\left(\frac{-z}{\sigma\sqrt{\Delta t}}\right) dz
 \end{eqnarray*}
 
-By a change of variables $u = z/(\sqrt{\eta}\sigma\sqrt{\Delta t})$ we get
+By a change of variables $u = z/(\sigma\sqrt{\Delta t})$ we get
 
 \begin{eqnarray*}
-&  & \int_{u = 0}^\infty \rho(x+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u)\;\Phi(-u) \sqrt{\eta}\sigma\sqrt{\Delta t}\;du
+&  & \int_{u = 0}^\infty p_x(x+\sigma\sqrt{\Delta t}\;u)\;\Phi(-u) \sigma\sqrt{\Delta t}\;du
 \end{eqnarray*}
 
 \vfill
 As $\Delta t \rightarrow 0$ we can use the first order Taylor expansion of the density.
 
 \begin{eqnarray*}
-&  & \sqrt{\eta}\sigma\sqrt{\Delta t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du
+&  & \sigma\sqrt{\Delta t} \int_{u = 0}^\infty \left(p_x(x)+\sigma\sqrt{\Delta t}\;u \frac{dp_x(x)}{dx}\right)\;\Phi(-u)\;du
 \end{eqnarray*}
 }
 
@@ -415,22 +669,22 @@ As $\Delta t \rightarrow 0$ we can use the first order Taylor expansion of the d
 {\Large
 
 \begin{eqnarray*}
-&  & \sqrt{\eta}\sigma\sqrt{\Delta t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du \\
+&  & \sigma\sqrt{\Delta t} \int_{u = 0}^\infty \left(p_x(x)+\sigma\sqrt{\Delta t}\;u \frac{dp_x(x)}{dx}\right)\;\Phi(-u)\;du \\
 \\
-& = & \sqrt{\eta}\sigma\sqrt{\Delta t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) +  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+& = & \sigma\sqrt{\Delta t}\;p_x(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) +  \sigma^2\Delta t \frac{dp_x(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
 \end{eqnarray*}
 
 A similar alanysis shows that the mass transfer from lower values to higher values is
 
 \begin{eqnarray*}
-& = & \sqrt{\eta}\sigma\sqrt{\Delta t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) -  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+& = & \sigma\sqrt{\Delta t}\;p_x(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) -  \sigma^2\Delta t \frac{dp_x(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
 \end{eqnarray*}
 
 \vfill
 The net mass transfer in the positive $x$ direction is the second minus the first or
 
 \begin{eqnarray*}
-& = & - 2\eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+& = & - 2\sigma^2\Delta t \frac{dp_x(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
 \end{eqnarray*}
 }
 
@@ -440,14 +694,14 @@ The net mass transfer in the positive $x$ direction is the second minus the firs
 The net mass transfer in the positive $x$ direction is
 
 \begin{eqnarray*}
-& & - 2\eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
+& & - 2\sigma^2\Delta t \frac{dp_x(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
 \end{eqnarray*}
 
 \vfill
 Note that the mass transfer is proportional to $\Delta t$.  Dividing by $\Delta t$ gives the flow per unit time.
 
 \vfill
-$$\mbox{Diffusion flow}\;\;= - \alpha \eta\sigma^2 \frac{d\rho(x)}{dx}\;\;\;\;\;\alpha = 2\int_{u=0}^\infty u\Phi(-u) du$$
+$$\mbox{Diffusion flow}\;\;= - \alpha \sigma^2 \frac{dp_x(x)}{dx}\;\;\;\;\;\alpha = 2\int_{u=0}^\infty u\Phi(-u) du$$
 
 \vfill
 $\alpha$ can be calculated using integration by parts.
@@ -464,13 +718,13 @@ $\alpha$ can be calculated using integration by parts.
 
 We now have that the diffusion flow is
 
-$$\mbox{Diffusion flow}\;\;= - \frac{1}{2}\; \eta\sigma^2 \frac{d\rho(x)}{dx}$$
+$$\mbox{Diffusion flow}\;\;= - \frac{1}{2}\; \sigma^2 \frac{dp_x(x)}{dx}$$
 
 \vfill
 For dimension larger than 1 we have
 
 \vfill
-$$\mbox{Diffusion flow}\;\;= - \frac{1}{2}\;\eta\Sigma \nabla_x \rho$$
+$$\mbox{Diffusion flow}\;\;= - \frac{1}{2}\;\Sigma \nabla_x p_x$$
 
 \vfill
 Where $\Sigma = E\;(\hat{g} - g)(\hat{g} - g)^\top$ is the covariance matrix of the gradient noise.
