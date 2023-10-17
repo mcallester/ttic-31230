@@ -86,7 +86,7 @@ Since the gradients within each block become non-stochastic, we are back to grad
 Consider a discrete-time process $z(0),z(1),z(2),z(3),\ldots$ with $z(n)\in \mathbb{R}^d$ defined by
 \begin{eqnarray*}
   z(0) & = & y,\;\;\;y \sim \popd(y) \\
-  z(n) & = & z(n) + \sigma\epsilon,\;\;\;\epsilon \sim {\cal N}(0,I)
+  z(n+1) & = & z(n) + \sigma\epsilon,\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
 \vfill
@@ -125,7 +125,7 @@ and $\Delta t \geq 0$.
 Consider gradient flow.
 
 \begin{eqnarray*}
-\frac{d\Phi(t)}{dt} & = & g(\Phi) \\
+\frac{d\Phi(t)}{dt} & = & - g(\Phi) \\
 \\
 g(\Phi) & = & \nabla_\Phi\;{\cal L}(\Phi) \\
 \\
@@ -137,7 +137,7 @@ g(\Phi) & = & \nabla_\Phi\;{\cal L}(\Phi) \\
 In the Langevin SDE we add Gaussian noise to gradient flow.
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & = & \Phi(t) + g\Delta t + \sigma \epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)
+\Phi(t + \Delta t) & = & \Phi(t) - g\Delta t + \sigma \epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
 \vfill
@@ -148,7 +148,7 @@ the model parameters where $\sigma$ acts as a temperature parameter.
 \slide{The Langevin SDE}
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & = & \Phi(t) + g(\Phi)\Delta t + \sigma\epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)
+\Phi(t + \Delta t) & = & \Phi(t) - g(\Phi)\Delta t + \sigma\epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
 Let $p(\Phi)$ be a probability density on the parameter space $\Phi$.
@@ -185,34 +185,92 @@ $$\frac{1}{2} \sigma^2 \nabla_\Phi\; {p} = - p\nabla_\Phi {\cal L}$$
 \begin{eqnarray*}
 \frac{1}{2} \sigma^2 \nabla_\Phi\; {p} & = & - p\nabla_\Phi {\cal L} \\
 \\
+\frac{1}{2} \sigma^2 \frac{\nabla_\Phi\;p}{p} & = & - \nabla_\Phi {\cal L} \\
+\\
 \nabla_\Phi \left(\frac{1}{2} \sigma^2 \ln p\right) & = &  \nabla_\Phi (- {\cal L}) \\
 \\
 \frac{1}{2} \sigma^2 \ln p & = & - {\cal L} + C \\
 \\
-{\color{red} p(\Phi)} & {\color{red} =} & {\color{red} \frac{1}{Z}e^{\frac{-2{\cal L}(\Phi)}{\sigma^2}}}
+{\color{red} p(\Phi)} & {\color{red} =} & {\color{red} \frac{1}{Z}\exp\left(\frac{-2{\cal L}(\Phi)}{\sigma^2}\right)}
 \end{eqnarray*}
 
 \slide{A Bayesian Interpretation of Langevin Dynamics}
 
-If we incorporate a regulaization into the loss function.
-
-$${\cal L}(\Phi) = E_{(x,y) \sim \train} \left[-\ln P_\Phi(y|x)\right] + \lambda ||\Phi||^2$$
-
-\vfill
-Then the Gibbs distribution
-
-$$p(\Phi)  =  \frac{1}{Z}e^{\frac{-2{\cal L}(\Phi)}{\sigma^2}}$$
+{\huge
+$$\train = (x_1,y_1),\ldots,(x_n,y_n)$$
 
 \vfill
-can be interprete as a Bayesian posterior density $p(\Phi|\train)$.
+The parameters $\Phi$ determine $p_\Phi(y|x)$.
+
+\begin{eqnarray*}
+p(\Phi|\train) & = & \frac{p(\Phi)p(\train|\Phi)}{p(\train)} \\
+\\
+\\
+& = & \frac{p(\Phi)p(x_1,\ldots,x_n)p_\Phi(y_1,\ldots,y_n|x_1,\ldots,x_n)}{p(x_1,\ldots,x_n)p_\Phi(y_1,\ldots y_n|x_1,\ldots x_n)} \\
+\\
+\\
+& = & \frac{p(\Phi)p_\Phi(y_1,\ldots,y_n|x_1,\ldots,x_n)}{p(y_1,\ldots y_n|x_1,\ldots x_n)}
+\end{eqnarray*}
+}
+
+\slide{A Bayesian Interpretation of Langevin Dynamics}
+
+$$\train = (x_1,y_1),\ldots,(x_n,y_n)$$
+
+\vfill
+{\huge
+\begin{eqnarray*}
+p(\Phi|\train) & = & \frac{p(\Phi)p_\Phi(y_1,\ldots,y_n|x_1,\ldots,x_n)}{p(y_1,\ldots y_n|x_1,\ldots x_n)}
+\end{eqnarray*}
+}
+
+\vfill
+The denominator does does not depend on $\Phi$ which implies
+
+$$p(\Phi|\train) \propto p(\Phi)\prod_i p_\Phi(y_i|x_i)$$
 
 
+\slide{A Bayesian Interpretation of Langevin Dynamics}
+
+{\huge
+\begin{eqnarray*}
+p(\Phi|\train) & \propto & p(\Phi)\prod_i p_\Phi(y_i|x_i) \\
+\\
+\ln p(\Phi|\train) & = & \frac{1}{n} \sum_i \ln p_\Phi(y_i|x_i) + \frac{1}{n}\ln p(\Phi) + C
+\end{eqnarray*}
+
+Defining
+
+$${\cal L}(\Phi) = \frac{1}{n} \sum_i -\ln p_\Phi(y_i|x_i) - \frac{1}{n} \ln p(\Phi)$$
+
+gives
+
+{\color{red} $$p(\Phi|\train) = \frac{1}{Z}\exp\left(-{\cal L}(\Phi)\right)$$}
+}
+
+
+
+
+
+
+\slide{A Bayesian Interpretation of Langevin Dynamics}
+
+$$p(\Phi|\train) = \frac{1}{Z}e^{-{\cal L}(\Phi)}$$
+
+\vfill
+$$p_{\mathrm{Langevin}}(\Phi) = \frac{1}{Z}\exp\left(\frac{-2{\cal L}(\Phi)}{\sigma^2}\right)$$
+
+\vfill
+Setting $\sigma^2 = 1/2$ gives
+
+\vfill
+$$p_{\mathrm{Langevin}}(\Phi) = p(\Phi|\train)$$
 
 \slide{A General SDE}
 
 {\huge
 \begin{eqnarray*}
-x(t + \Delta t) &  =  & f(t) + \mu(x,t)\Delta t + \sigma(x,t)\epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)\;\;\;(1)
+x(t + \Delta t) &  =  & x(t) + \mu(x,t)\Delta t + \sigma(x,t)\epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)\;\;\;(1)
  \end{eqnarray*}
 }
 \vfill
@@ -236,101 +294,75 @@ We now consider SGD
 $$\Phi_{i+1} = \Phi_i - \eta\hat{g}_i$$
 
 \vfill
-Unlike gradient flow, we now hold $\eta > 0$ fixed.
+We consider $\Phi_i$ and $\Phi_{i+N}$ with $N$ small enough that
+
+$$\Phi_{i+N} \approx \Phi_i$$.
+
+\slide{Gradiant Noise}
+
+$$\hat{g} = g(\Phi) + (\hat{g} - g(\Phi))$$
 
 \vfill
-Holding $\eta > 0$ fixed introduces gradient noise.
+$\hat{g} - g(\Phi)$ has zero mean.
+
+\begin{eqnarray*}
+\Phi_{i+N} & \approx & \Phi_i - \eta N g(\Phi)  - \eta \sum_{j=1}^N (\hat{g}_i - g(\Phi))
+\end{eqnarray*}
 
 \vfill
-Gradient noise is shaped differently from the Brownian motion noise of Langevin dynamics.
+We pick $N$ large enough that $\sum_{j=1}^N (\hat{g}_i - g(\Phi))$ is approximately Gaussian.
+
+\slide{Gradiant Noise}
+
+\begin{eqnarray*}
+\Phi_{i+N} & \approx & \Phi_i - \eta N g(\Phi)  - \eta \sum_{j=1}^N (\hat{g}_i - g(\Phi)) \\
+\\
+& \approx & \Phi_i - \eta N g(\Phi)  - \eta \sqrt{N} \epsilon,\;\;\; \epsilon \sim {\cal N}(0,\Sigma)
+\end{eqnarray*}
+
+\vfill
+Now define $\Delta t = N\eta$ or $N = \Delta t/\eta$.
+
+\begin{eqnarray*}
+\Phi(t+ \Delta t) & \approx & \Phi(t) - g(\Phi)\Delta t +  \eta\epsilon \sqrt{ \Delta t/\eta},\;\;\; \epsilon \sim {\cal N}(0,\Sigma) \\
+\\
+& = & \Phi(t) - g(\Phi)\Delta t +  \sqrt{\eta}\epsilon \sqrt{\Delta t},\;\;\; \epsilon \sim {\cal N}(0,\Sigma)
+\end{eqnarray*}
+
 
 \slide{The SGD SDE}
 
-\vfill
-As in Gradient flow we take ``time'' to be the sum of the learning rates over the updates.
-
-\vfill
-For $N$ steps of SGD we define $\Delta t = N \eta$
-
-\vfill
-We consider $\Delta t$ large enough so that $\Delta t$ corresponds to many SGD updates.
-
-\vfill
-We consider $\Delta t$ small enough so that the gradient estimate distribution does not change over the interval $\Delta t$.
-
-\slide{Modeling Noise}
-
-The mean of $\hat{g}$ is the true gradient $g(\Phi)$.  
-
 \begin{eqnarray*}
-\Delta t & = & \eta N \\
-\Phi(t + \Delta t) &  = & \Phi(t) - \sum_{j=1}^N \eta\hat{g}_i \\
+\Phi(t+ \Delta t) & \approx & \Phi(t) - g(\Phi)\Delta t +  \sqrt{\eta}\epsilon \sqrt{ \Delta t},\;\;\; \epsilon \sim {\cal N}(0,\Sigma) \\
 \\
- &  = & \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i)
-\end{eqnarray*}
-
-\slide{Modeling Noise}
-\begin{eqnarray*}
-\Delta t & = &  \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i)
-\end{eqnarray*}
-
-
-\vfill
-By the central limit theorem $\sum_{j=1}^N (g(\Phi) - \hat{g}_i)$ is approximately Gaussian.
-
-
-\slide{Modeling Noise}
-{\huge
-\begin{eqnarray*}
-\Delta t & = &  \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i)
-\end{eqnarray*}
-
-\vfill
-Let $\sigma(\Phi)$ be the square root of the covariance matrix of the random variable $g-\hat{g}$ at parameter setting $\Phi$.
-
-\vfill
-In one dimension we can approximately sample from $\sum_{i=1}^N (g(\Phi)- \hat{g}_i)$ as
-$$\sigma(\Phi) \epsilon\sqrt{N},\;\;\;\epsilon \sim {\cal N}(0,1)$$
-
-\vfill
-In high dimension this becomes
-$$\sigma(\Phi) \epsilon\sqrt{N},\;\;\;\epsilon \sim {\cal N}(0,I)$$
-}
-
-\slide{The SGD SDE}
-
-If the mean gradient $g(\Phi)$ is approximately constant over the interval $\Delta t = N \eta$ we have
-
-\begin{eqnarray*}
-\Phi(t + \Delta t)  & \approx & \Phi(t) -g(\Phi)\Delta t + \eta \sigma(\Phi) \epsilon\sqrt{N} \\
 \\
-& = & \Phi(t) -g(\Phi)\Delta t + \eta \sigma(\Phi) \epsilon\sqrt{\Delta t/\eta} \\
-\\
-& = & \Phi(t) -g(\Phi)\Delta t + \eta \sigma(\Phi) \epsilon\sqrt{\Delta t}
+& = & \Phi(t) - g(\Phi)\Delta t +  \sqrt{\eta}\sigma(\Phi) \epsilon \sqrt{ \Delta t},\;\;\; \epsilon \sim {\cal N}(0,I) 
 \end{eqnarray*}
 
 \vfill
-This is the SGD SDE
+Here the matrix $\sigma(\Phi)$ is the square root of the covariance matrix $\Sigma(\Phi)$.
 
 \slide{The SGD SDE in One Dimension}
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & = & \Phi(t) -g(\Phi)\Delta t + \eta \sigma(\Phi) \epsilon\sqrt{\Delta t}
+\Phi(t + \Delta t) & = & \Phi(t) -g(\Phi)\Delta t + \sqrt{\eta} \sigma(\Phi) \epsilon\sqrt{\Delta t}
 \end{eqnarray*}
 
+\vfill
 In one dimension, if the the gradient noise $\sigma(\Phi)$ is constant, then the SGD SDE has the same form as Langevin dynamics and we get.
 
 \begin{eqnarray*}
 p(x) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma^2}\right)
 \end{eqnarray*}
 
+\vfill
 This is Gibbs and provides an interpretation of the learning rate as temperature.
 
 
 \slide{The SGD SDE in Higher Dimension}
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & = & \Phi(t) -g(\Phi)\Delta t + \eta \sigma(\Phi) \epsilon\sqrt{\Delta t}
+\Phi(t + \Delta t) & = & \Phi(t) -g(\Phi)\Delta t + \sqrt{\eta} \sigma(\Phi) \epsilon\sqrt{\Delta t}
 \end{eqnarray*}
 
 \vfill
