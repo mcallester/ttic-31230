@@ -11,7 +11,7 @@
 \centerline{David McAllester}
 
 \vfill
-\centerline{\bf Learning Theory I}
+\centerline{\bf Generalization Theory}
 \vfill
 \centerline{\bf The Occam Generalization Guarantee}
 \vfill
@@ -142,6 +142,300 @@ $${\cal L}(h) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{{\cal L}}(h) + \fr
 
 \vfill
 Setting $\lambda = 5$ brings the leading factor to 10/9 which seems sufficiently close to 1 that larger values of $\lambda$ need not be considered.
+
+
+\slide{The PAC-Bayes Guarantee}
+
+Let $p$ be any ``prior'' and $q$ be any ``posterior'' on any  (possibly continuous) model space.
+Define
+\begin{eqnarray*}
+  L(q) & =  &\expectsub{h \sim q}{L(h)} \\
+  \\
+  \hat{L}(q) & =  &\expectsub{h \sim q}{\hat{L}(h)}
+\end{eqnarray*}
+
+
+\vfill
+For any $p$ and any $\lambda > \frac{1}{2}$, with probability
+at least $1-\delta$ over the draw of the training data, the following holds simultaneously for all $q$.
+\vfill
+$$L(q) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{L}(q) + \frac{\lambda \lmax}{N_\mathrm{Train}}\parens{KL(q,p) + \ln \frac{1}{\delta}}}$$
+
+\slide{Adding Noise Simulates Limiting Precision}
+
+Assume $0 \leq {\cal L}(\Phi,x,y) \leq \lmax$.
+
+\vfill
+Define:
+\begin{eqnarray*}
+{\cal L}_\sigma(\Phi) & = & E_{\;(x,y)\sim \pop,\;\epsilon \sim {\cal N}(0,\sigma)^d}\;{{\cal L}(\Phi+\epsilon,x,y)} \\
+\\
+\hat{{\cal L}}_\sigma(\Phi) & = & E_{\;(x,y)\sim \mathrm{Train},\;\epsilon \sim {\cal N}(0,\sigma)^d}\;{{\cal L}(\Phi+\epsilon,x,y)} \\
+\end{eqnarray*}
+
+\vfill
+Theorem: With probability at least $1-\delta$ over the draw of training data the following holds {\bf simultaneously} for all $\Phi$.
+\begin{eqnarray*}
+   {\color{red} {\cal L}_\sigma(\Phi)} & {\color{red} \leq} & {\color{red} \frac{10}{9}\parens{\hat{{\cal L}}_\sigma(\Phi)
+   + \frac{5 \lmax}{N_\mathrm{Train}}\parens{\frac{||\Phi||^2}{2\sigma^2} + \ln \frac{1}{\delta}}}}
+\end{eqnarray*}
+
+\slide{Non-Vacuous Generalization Guarantees}
+
+Model compression has recently been used to achieve ``non-vacuous'' PAC-Bayes generalization guarantees for ImageNet classification
+--- error rate guarantees less than 1.
+
+\vfill
+Non-Vacuous PAC-Bayes Bounds at ImageNet Scale.
+
+\bigskip
+Wenda Zhou, Victor Veitch, Morgane Austern, Ryan P. Adams, Peter Orbanz
+
+\bigskip
+ICLR 2019
+
+\slide{Implicit Regularization}
+
+Any stochastic learning algorithm, such as SGD, determines a stochastic mapping from training data to models.
+
+\vfill
+The algorithm, especially with early stopping, can implicitly incorporate a preference or bias for models.
+
+\slide{Implicit Regularization in Linear Regression}
+
+Linear regression (minimizing the $L_2$ loss of a linear predictor) where we have more parameters than data points
+has many solutions.
+
+\vfill
+But SGD converges to the minimum norm solution ($L_2$-regularized solution) without the need for explicit regularization.
+
+\slide{Implicit Regularization in Linear Regression}
+
+For linear regression SGD maintains the invariant that $\Phi$ is a linear combination of the (small number of) training vectors.
+
+\vfill
+Any zero-loss (squared loss) solution can be projected on the span of training vectors to give a smaller (or no larger) norm solution.
+
+\vfill
+It can be shown that when the training vectors are linearly independent any zero loss solution in the span of the training vectors is a least-norm solution.
+
+\slide{Implict Priors}
+
+Let $A$ be any algorithm mapping a training set $\train$ to a probability density $p(\Phi|\train)$.
+
+\vfill
+For example, the algorithm might be SGD where we add a small amount of noise to the final parameter vector so that $p(\Phi|\train)$ is a smooth density.
+
+\vfill
+But in general we can consider any leaning algorithm that produces a smooth density $p(\Phi|\train)$.
+
+\slide{Implicit Priors}
+
+Drawing $\train$ from $\pop^N$ and $\Phi$ from $P(\Phi|\train)$ defines a joint distribution on $\train$ and $\Phi$.  We can take the marginal distribution on $\Phi$
+to be a prior distribution (independent of any training data).
+
+\vfill
+$$p(\Phi) = E_{\parens{\mathrm{Train} \sim \pop^N}}\;\;p(\Phi\;|\train)$$
+
+\vfill
+It can be shown that the implicit prior $p(\Phi)$ is an optimal prior for the PAC-Bayesian generalization guarantees applied to the algorithm defining $p(\Phi|\train)$
+
+\vfill
+\slide{A PAC-Bayes Analysis of Implicit Regularization}
+
+\begin{eqnarray*}
+{\cal L}(\train) & = & E_{\tuple{x,y} \sim {\color{red}  \pop}, \;\;\Phi \sim p(\Phi|\train)}\;{\cal L}(\Phi,x,y) \\
+\\
+\hat{\cal L}(\train) & = & E_{\tuple{x,y} \sim {\color{red} \train}, \;\;\Phi \sim p(\Phi|\train)}\;{\cal L}(\Phi,x,y)
+\end{eqnarray*}
+
+\slide{A PAC-Bayes Analysis of Implicit Regularization}
+
+With probability at least $1-\delta$ over the draw of $\train$ we have
+\vfill
+{\huge
+\begin{eqnarray*}
+{\cal L}(\train) & \leq & \frac{10}{9}\parens{ \hat{\cal L}(\train) + \frac{5\lmax}{N_\mathrm{Train}}\parens{KL(p(\Phi|\train),p(\Phi)})+ \ln\frac{1}{\delta}} \\
+\\
+\\
+& = & \frac{10}{9}\parens{ \hat{\cal L}(\train) + \frac{5\lmax}{N_\mathrm{Train}}\parens{I(\Phi,\train)+ \ln\frac{1}{\delta}}}
+\end{eqnarray*}
+}
+\vfill
+There is no obvious way to calculate this guarantee.
+
+\vfill
+However, it can be shown that $p(\Phi)$ is the optimal PAC-Bayeisan prior for the given algorithm run on training data data drawn from $\pop^N$.
+
+\slide{Over Confidence and Calibration}
+
+\centerline{\includegraphics[height = 2in]{\images/Early}}
+
+\vfill
+Validation error is larger than training error when we stop.
+
+\vfill
+The model probabilities are tuned on training data statistics.
+
+\vfill
+The probabilities are tuned to an unrealistically low error rate and are therefore over-confident.
+
+\vfill
+This over-confidence occurs before the stopping point and damages validation loss (as opposed to validation error).
+
+\slide{Shrinkage: $L_2$ regularization}
+
+We first give a Bayesian derivation. We put a prior probability on $\Phi$ and maximize the a-posteriori probability (MAP).
+
+\vfill
+{\huge
+\begin{eqnarray*}
+\Phi^* & = & \argmax_\Phi\;p(\Phi | \tuple{x_1,y_1},\ldots,\tuple{x_n,y_n}) \\
+\\
+ & = & \argmax_\Phi\;\frac{p(\Phi,\; \tuple{x_1,y_1},\ldots,\tuple{x_n,y_n})}{p(\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n})} \\
+\\
+ & = & \argmax_\Phi\;p(\Phi,\;\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n})
+ \end{eqnarray*}
+}
+
+\slide{Shrinkage: $L_2$ regularization}
+
+\vfill
+{\huge
+\begin{eqnarray*}
+\Phi^* & = & \argmax_\Phi\;p(\Phi,\;\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n}) \\
+\\
+ & = & \argmax_\Phi \; p(\Phi)\;\prod_i \pop(x_i)P_\Phi(y_i|x_i) \\
+ \\
+  & = & \left(\prod_i p(x_i)\right) \argmax_\Phi \; p(\Phi)\;\prod_i  P_\Phi(y_i|x_i) \\
+ \\
+  & = & \argmax_\Phi \; p(\Phi)\;\prod_i P_\Phi(y_i|x_i)
+ \end{eqnarray*}
+}
+
+\slide{Shrinkage: $L_2$ Regularization}
+
+\begin{eqnarray*}
+\Phi^*   & = & \argmax_\Phi \; p(\Phi)\;\prod_i P_\Phi(y_i|x_i) \\
+\\
+& = & \argmin_\Phi \sum_i - \ln P_\Phi(y_i|x_i) -\ln  p(\Phi)
+\end{eqnarray*}
+
+\vfill
+We now take a Gaussian prior {\color{red} $$p(\Phi) \propto \exp\left(-\frac{||\Phi||^2}{2\sigma^2}\right)$$}
+
+\slide{Shrinkage: $L_2$ Regularization}
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \sum_{i = 1}^n - \ln P_\Phi(y_i|x_i) + \frac{||\Phi||^2}{2\sigma^2}  \\
+\\
+\\
+& = & \argmin_\Phi \frac{1}{N} \left(\sum_{i = 1}^n - \ln P_\Phi(y_i|x_i) + \frac{||\Phi||^2}{2\sigma^2}\right)  \\
+\\
+\\
+& = & \argmin_\Phi \left(E_{\tuple{x,y}\sim \mathrm{Train}}\;-\ln P_\Phi(y|x)\right) + \frac{1}{2N\sigma^2} ||\Phi||^2
+\end{eqnarray*}
+
+\slide{Shrinkage: $L_2$ Regularization}
+
+\begin{eqnarray*}
+  & & \nabla_\Phi \;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{||\Phi||^2}{2N\sigma^2}\right) \\
+  \\
+  \\
+  & = & E_{(x,y) \sim \mathrm{Train}} \;\left(g(\Phi,x,y) + \frac{\Phi}{N\sigma^2}\right)
+\end{eqnarray*}
+
+\vfill
+$$\Phi_{i+1} = \Phi_i - \eta\left(\hat{g}_i  - \frac{1}{N\sigma^2}\Phi_i\right)$$
+
+\vfill
+The last term in the update equation is called ``shrinkage''.
+
+\slide{Decoupling Shrikage and Training Data Size}
+
+The PyTorch parameters are the learning rate $\eta$ and the {\bf weight decay} $\gamma$:
+
+$${\color{red} \Phi_{i+1}} = \Phi_i - \eta\left(\hat{g} + \frac{1}{N\sigma^2}\Phi_i\right)\;\;\;\; = {\color{red} \Phi_i - \eta(\hat{g} - \gamma\Phi_i)}$$
+
+\vfill
+To make SGD with shrinkage robust to changes in training size, batch size, learning rate (temperature) and momentum we can use
+
+\vfill
+{\color{red} $$\eta = (1-\mu)B\eta_0\;\;\;\;\;\;\;\;\;\gamma = \frac{1}{N_{\mathrm{Train}}\sigma^2}$$}
+
+\vfill
+where $\eta_0$ is the robust temperature parameter and $\sigma^2$ is the robust shrinkage parameter.
+
+
+\slide{Ensembles}
+
+Train several models $\mathrm{Ens} = (\Phi_1,\;\ldots,\; \Phi_K)$ from different initializations and/or under different meta parameters.
+
+\vfill
+We define the ensemble model by
+
+$$P_\mathrm{Ens}(y|x) = \frac{1}{K} \sum_k\; P_{\Phi_k}(y|x) = E_k \;P_k(y|x)$$
+
+\vfill
+Ensemble models almost always perform better than any single model.
+
+
+\vfill
+\slide{Ensembles Under Cross Entropy Loss}
+
+\begin{eqnarray*}
+{\cal L}\left(P_\mathrm{Ens}\right) & = & E_{\tuple{x,y} \sim \pop}\;\;-\ln P_\mathrm{Ens}(y|x) \\
+\\
+ & = & E_{\tuple{x,y} \sim \pop}\;\;-\ln E_k P_k(y|x) \\
+\\
+& \leq & E_{\tuple{x,y} \sim \pop} \;E_k\;\;-\ln P_k(y|x) \\
+\\
+& = & E_k\; {\cal L}(P_k)
+\end{eqnarray*}
+
+\slide{Ensembles Under Cross Entropy Loss}
+
+It is important to note that
+
+$$-\ln E_k \;P_k(y|x) \;\;\leq E_k -\ln P_k(y|x)$$
+
+\vfill
+for each individual pair $\tuple{x,y}$.
+
+\vfill
+$\forall z\; f(z) \leq g(z)$ is stronger than $(E_z\;f(z)) \leq (E_z\; g(z))$.
+
+\vfill
+This may explain why in practice an ensemble model is typically better than any single component model.
+
+\slide{Double Descent}
+
+{\huge
+Reconciling modern machine learning practice and the bias-variance trade-off
+
+\bigskip
+Mikhail Belkin, Daniel Hsu, Siyuan Ma, Soumik Mandal, arXiv December 2018.
+
+\vfill
+Deep Double Descent: Where Bigger Models and More Data Hurt
+
+\bigskip
+Preetum Nakkiran, Gal Kaplun, Yamini Bansal, Tristan Yang, Boaz Barak, Ilya Sutskever, ICLR 2020
+}
+
+\slide{Double Descent}
+
+\centerline{\includegraphics[width = 6in]{\images/DoubleDescent1}}
+
+\vfill
+Deep Double Descent: Where Bigger Models and More Data Hurt
+
+\bigskip
+Preetum Nakkiran, Gal Kaplun, Yamini Bansal, Tristan Yang, Boaz Barak, Ilya Sutskever, ICLR 2020
+
+\slide{Double Descent}
+
+\centerline{\includegraphics[width = 8in]{\images/DoubleDescent2}}
 
 \slide{END}
 
