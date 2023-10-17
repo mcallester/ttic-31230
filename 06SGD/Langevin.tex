@@ -9,8 +9,10 @@
 \bigskip
 \centerline{David McAllester, Autumn 2023}
 \vfill
-\centerline{\bf Stochastic Differential Equations (SDEs)}
+\centerline{\bf Continuous Time Models of SGD}
 \vfill
+\vfill
+\centerline{\bf Gradient Flow}
 \vfill
 \centerline{\bf The Diffusion SDE}
 \vfill
@@ -19,6 +21,66 @@
 \centerline{\bf General SDEs}
 \vfill
 \centerline{\bf The SGD SDE}
+
+\slide{Gradient Flow}
+
+Gradient flow is a non-stochastic ({\color{red} deterministic}) model of {\color{red} stochastic} gradient descent (SGD).
+
+\vfill
+Gradient flow is defined by the {\color{red} total gradient} differential equation
+
+$${\color{red} \frac{d \Phi}{d t} = - g(\Phi) \;\;\;\;\;\; g(\Phi) = \nabla_\Phi\; E_{(x,y) \sim \mathrm{Train}}\;{\cal L}(\Phi,x,y)}$$
+
+\vfill
+We let $\Phi(t)$ be the solution to this differential equation satisfying $\Phi(0) = \Phi_{\mathrm{init}}$.
+
+\slide{Gradient Flow}
+$${\color{red} \frac{d \Phi}{d t} = - g(\Phi)}$$
+
+\vfill
+For small values of $\Delta t$ this differential equation can be approximated by
+
+\vfill
+$${\color{red} \Delta \Phi = - g(\Phi)\Delta t}$$
+
+\slide{Time as the Sum of the Learning Rates}
+
+Consider the update.
+
+
+{\color{red} $$\Delta \Phi = - g\Delta t$$}
+
+\vfill
+Here $\Delta t$ has both a natural interpretation as time in a numerical simulation of the flow differential equation.
+
+\vfill
+But it also has a natural interpretation as a learning rate.
+
+\vfill
+This leads to interpreting the sum of the learning rates as ``time'' in SGD.
+
+\slide{Gradient Flow and SGD}
+Consider a sequence of model parameters $\Phi_1$, $\ldots$, $\Phi_N$ produced by SGD with
+$$\Phi_{i+1} = \Phi_i - \eta \hat{g}_i$$
+and where $\hat{g}_i$ is the gradient of the $i$th randomly selected training point.
+
+\vfill
+Take $\eta \rightarrow 0$ and $N \rightarrow \infty$ using $N = t/\eta$.  We will show that in this limit for SGD we have that $\Phi_N$ converges to $\Phi(t)$
+as defined by gradient flow.
+
+\slide{Gradient Flow and SGD}
+For $\Phi_{i+1} = \Phi_i - \eta \hat{g}_i$ we divide $\Phi_1$, $\ldots$, $\Phi_N$ into $\sqrt{N}$ blocks.
+$$(\Phi_1,\dots,\Phi_{\sqrt{N}})\;(\Phi_{\sqrt{N}+1},\ldots,\Phi_{2\sqrt{N}})\;\cdots\;(\Phi_{T-\sqrt{N}+1},\ldots,\Phi_N)$$
+
+\vfill
+For $\eta \rightarrow 0$ and $N = t/\eta$ we have $\eta\sqrt{N} \rightarrow 0$ which implies
+$$\Phi_{\sqrt{N}} \sim \Phi_0 - \eta\sqrt{N} g$$
+where $g$ is the average (non-stochastic)
+gradient.
+
+\vfill
+Since the gradients within each block become non-stochastic, we are back to gradient flow.
+
 
 \slide{Diffusion}
 Consider a discrete-time process $z(0),z(1),z(2),z(3),\ldots$ with $z(n)\in \mathbb{R}^d$ defined by
@@ -80,7 +142,7 @@ In the Langevin SDE we add Gaussian noise to gradient flow.
 
 \vfill
 We will show that the stationary distribution of Langevin Dynamics models a Bayesian posterior probability distrbution on
-the model parameters where $\sigma$ acts as a temperture parameter.
+the model parameters where $\sigma$ acts as a temperature parameter.
 
 
 \slide{The Langevin SDE}
@@ -121,11 +183,11 @@ $$\frac{1}{2} \sigma^2 \nabla_\Phi\; {p} = - p\nabla_\Phi {\cal L}$$
 
 \vspace{-2ex}
 \begin{eqnarray*}
-\frac{1}{2} \sigma^2 \nabla_\Phi\; {p} & = &  = - p\nabla_\Phi {\cal L} \\
+\frac{1}{2} \sigma^2 \nabla_\Phi\; {p} & = & - p\nabla_\Phi {\cal L} \\
 \\
-\nabla_\Phi \left(\frac{1}{2} \sigma^2 \ln p\right) & = &  = \nabla_\Phi (- {\cal L}) \\
+\nabla_\Phi \left(\frac{1}{2} \sigma^2 \ln p\right) & = &  \nabla_\Phi (- {\cal L}) \\
 \\
-\frac{1}{2} \sigma^2 \ln & = & - {\cal L} + C \\
+\frac{1}{2} \sigma^2 \ln p & = & - {\cal L} + C \\
 \\
 {\color{red} p(\Phi)} & {\color{red} =} & {\color{red} \frac{1}{Z}e^{\frac{-2{\cal L}(\Phi)}{\sigma^2}}}
 \end{eqnarray*}
@@ -168,336 +230,8 @@ I find (1) more intuitive than (2) but they are the same thing.
 
 \slide{The SGD SDE}
 
-\slide{The Stationary Distribution}
-
-\begin{eqnarray*}
-\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \epsilon \sqrt{\Delta t}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\Sigma)
-\end{eqnarray*}
-
 \vfill
-For an SDE we have a stationary continuous density in parameter space.
-
-\vfill
-We have a probability mass flow due to the loss gradient and a diffusion probability mass flow proportional to the density gradient.
-
-
-\slide{The Stationary Distribution with Constant Gradiant Noise}
-
-We consider the one dimensional case --- a single parameter $x$ --- and a probability density $p(x)$.
-
-\vfill
-We will assume the stationary distribution is limited to a region where the gradient noise is effectively constant.
-
-\vfill
-The gradient flow is equal to $- p(x)g$.
-
-\vfill
-The diffusion flow is  $- \frac{1}{2} \;\eta\sigma^2\;dp(x)/dx$ (see the appendix).
-
-
-\vfill
-For a stationary distribution the sum of the two flows is zero giving.
-
-\vfill
-{\color{red} $$\frac{1}{2} \eta \sigma^2 \frac{dp}{dx} = - p\frac{d{\cal L}}{dx}$$}
-
-
-\slide{The 1-D Stationary Distribution}
-
-\vspace{-2ex}
-\begin{eqnarray*}
-\frac{1}{2} \eta \sigma^2 \frac{dp}{dx} & = & - p\frac{d{\cal L}}{dx} \\
-\\
-\frac{dp}{p} & = & \frac{-2d{\cal L}}{\eta\sigma^2} \\
-\\
-\ln p & = & \frac{-2{\cal L}}{\eta \sigma^2} + C \\
-\\
-{\color{red} p(x)} & = & {\color{red} \frac{1}{Z}\exp\left(\frac{-2{\cal L}(x)}{\eta \sigma^2}\right)}
-\end{eqnarray*}
-
-\vfill
-We get a Gibbs distribution with $\eta$ as temperature!
-
-\slide{A 2-D Stationary Distribution}
-
-Let $p$ be a probability density on two parameters $(x,y)$.
-
-\vfill
-We consider the case where $x$ and $y$ are completely independent with
-$${\cal L}(x,y) = {\cal L}(x) + {\cal L}(y)$$
-
-\vfill
-For completely independent variables we have
-\begin{eqnarray*}
-p(x,y) & = & p(x)p(y) \\
-\\
-&= & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta \sigma_y^2}\right)
-\end{eqnarray*}
-
-\slide{A 2-D Stationary Distribution}
-
-\begin{eqnarray*}
-p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta \sigma_y^2}\right)
-\end{eqnarray*}
-
-\vfill
-This is not a Gibbs distribution!
-
-\vfill
-It has two different temperature parameters!
-
-\slide{Forcing a Gibbs Distribution}
-
-Suppose we use parameter-specific learning rates $\eta_x$ and $\eta_y$
-
-\begin{eqnarray*}
-p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta_x \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta_y \sigma_y^2}\right)
-\end{eqnarray*}
-
-Setting $\eta_x = \eta'/\sigma^2_x$ and $\eta_y = \eta'/\sigma^2_y$ gives
-
-\begin{eqnarray*}
-p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta'} + \frac{-2{\cal L}(y)}{\eta'}\right) \\
-\\
-& = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x,y)}{\eta'}\right)\;\;\;\mathrm{Gibbs!}
-\end{eqnarray*}
-
-\slidetwo{The Case of Locally Constant Noise}
-{and Locally Quadratic Loss}
-
-In this case we can impose a change of coordinates under which the Hessian is the identity matrix.  So without loss of generality we can take the
-Hessian to be the identity.
-
-\vfill
-We can consider the covariance matrix of the vectors $\hat{g}$ in the Hessian-normalized coordinate system.
-
-\slidetwo{The Case of Locally Constant Noise}
-{and Locally Quadratic Loss}
-
-If we assume constant noise covariance in the neighborhood of the stationary distribution then, in the Hessian normalized
-coordinate system, we get a stationary distribution
-$$p(\Phi) \propto \exp\left(-\sum_i \frac{2{\Phi_i^2}}{\eta\sigma_i^2}\right)$$
-
-\vfill
-where $\Phi_i$ is the projection of $\Phi$ onto to a unit vector in the direction of the $i$th eigenvector of the noise covariance matrix and $\sigma^2_i$
-is the corresponding noise eigenvalue (the variance of the $\hat{g}_i$).
-
-\slide{END}
-
-\slide{Appendix: Diffusion Flow}
-
-{\Large
-We consider the one dimensional case. In the SDE formalism we move stochastically from $x$ to $x + \epsilon \sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,\eta\sigma^2)$
-where $\eta$ is the learning rate and $\sigma^2$ is the variance of the random gradients $\hat{g}_{t,b}$.
-
-\vfill
-To avoid confusion between different probability densities we will us $\rho(x)$ for the probability mass distribution in $x$ and use $p_\epsilon(\Psi)$
-for the probability that $\Psi$ holds under a random draw of $\epsilon$.
-
-}
-
-\slide{Appendix: Diffusion Flow}
-{\Large
-
-We move stochastically from $x$ to $x + \epsilon \sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,\eta\sigma^2)$
-
-\vfill
-This is the same as moving stochastically from $x$ to $x + \epsilon\sqrt{\eta}\sigma\sqrt{\Delta t}$ with $\epsilon \sim {\cal N}(0,1)$.
-
-\vfill
-The quantity of mass transfer in the time interval $\Delta t$ from values above $x$ to values below $x$ is
-
-
-\begin{eqnarray*}
-& & \int_{z = 0}^\infty  \rho(x + z)\;p_\epsilon(\epsilon\sqrt{\eta}\sigma\sqrt{\Delta t} \leq -z) dz  \\
-\\
-& = & \int_{z = 0}^\infty  \rho(x + z)\;p_\epsilon\left(\epsilon \leq \frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz  \\
-\\
-& =  & \int_{z = 0}^\infty \rho(x+z)\;\Phi\left(\frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz
-\end{eqnarray*}
-
-\vfill
-where $\Phi$ is the cummulative function of the Gaussian.
-}
-
-\slide{Appendix: Diffusion Flow}
-{\Large
-
-The quantity of mass transfer in the time interval $\Delta t$ from values above $x$ to values below $x$ is
-
-
-\begin{eqnarray*}
-&  & \int_{z = 0}^\infty \rho(x+z)\;\Phi\left(\frac{-z}{\sqrt{\eta}\sigma\sqrt{\Delta t}}\right) dz
-\end{eqnarray*}
-
-By a change of variables $u = z/(\sqrt{\eta}\sigma\sqrt{\Delta t})$ we get
-
-\begin{eqnarray*}
-&  & \int_{u = 0}^\infty \rho(x+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u)\;\Phi(-u) \sqrt{\eta}\sigma\sqrt{\Delta t}\;du
-\end{eqnarray*}
-
-\vfill
-As $\Delta t \rightarrow 0$ we can use the first order Taylor expansion of the density.
-
-\begin{eqnarray*}
-&  & \sqrt{\eta}\sigma\sqrt{\Delta t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du
-\end{eqnarray*}
-}
-
-\slide{Appendix: Diffusion Flow}
-{\Large
-
-\begin{eqnarray*}
-&  & \sqrt{\eta}\sigma\sqrt{\Delta t} \int_{u = 0}^\infty \left(\rho(x)+\sqrt{\eta}\sigma\sqrt{\Delta t}\;u \frac{d\rho(x)}{dx}\right)\;\Phi(-u)\;du \\
-\\
-& = & \sqrt{\eta}\sigma\sqrt{\Delta t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) +  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
-\end{eqnarray*}
-
-A similar alanysis shows that the mass transfer from lower values to higher values is
-
-\begin{eqnarray*}
-& = & \sqrt{\eta}\sigma\sqrt{\Delta t}\;\rho(x)\left(\int_{u=0}^\infty \Phi(-u)\;du\right) -  \eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
-\end{eqnarray*}
-
-\vfill
-The net mass transfer in the positive $x$ direction is the second minus the first or
-
-\begin{eqnarray*}
-& = & - 2\eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
-\end{eqnarray*}
-}
-
-\slide{Appendix: Diffusion Flow}
-{\Large
-
-The net mass transfer in the positive $x$ direction is
-
-\begin{eqnarray*}
-& & - 2\eta\sigma^2\Delta t \frac{d\rho(x)}{dx} \left(\int_{u=0}^\infty u\Phi(-u) du\right)
-\end{eqnarray*}
-
-\vfill
-Note that the mass transfer is proportional to $\Delta t$.  Dividing by $\Delta t$ gives the flow per unit time.
-
-\vfill
-$$\mbox{Diffusion flow}\;\;= - \alpha \eta\sigma^2 \frac{d\rho(x)}{dx}\;\;\;\;\;\alpha = 2\int_{u=0}^\infty u\Phi(-u) du$$
-
-\vfill
-$\alpha$ can be calculated using integration by parts.
-
-\begin{eqnarray*}
-\alpha & = & 2 \int_{0}^\infty u \Phi(-u)du \\
-& = & \int_{0}^\infty \Phi(-u)du^2 \\
-& = & u^2 \Phi(-u)|_{0}^{\infty}+\int_{0}^\infty u^2 \phi(-u)du \;\;\mbox{where $\phi$ is the Gaussian density} \\
-& = & \int_{0}^\infty u^2 \phi(-u)du\\
-& = & \frac{1}{2}
-\end{eqnarray*}
-
-\slide{Appendix: Diffusion Flow}
-
-We now have that the diffusion flow is
-
-$$\mbox{Diffusion flow}\;\;= - \frac{1}{2}\; \eta\sigma^2 \frac{d\rho(x)}{dx}$$
-
-\vfill
-For dimension larger than 1 we have
-
-\vfill
-$$\mbox{Diffusion flow}\;\;= - \frac{1}{2}\;\eta\Sigma \nabla_x \rho$$
-
-\vfill
-Where $\Sigma = E\;(\hat{g} - g)(\hat{g} - g)^\top$ is the covariance matrix of the gradient noise.
-
-\vfill
-Here we have derived this from first principle but it also follows from the Fokker–Planck equation (see Wikipedia).
-}
-
-\slide{END}
-\end{document}
-
-\slide{A 2-D Stationary Distribution}
-
-Let $p$ be a probability density on two parameters $(x,y)$.
-
-\vfill
-We consider the case where $x$ and $y$ are completely independent with
-$${\cal L}(x,y) = {\cal L}(x) + {\cal L}(y)$$
-
-\vfill
-For completely independent variables we have
-\begin{eqnarray*}
-p(x,y) & = & p(x)p(y) \\
-\\
-&= & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta \sigma_y^2}\right)
-\end{eqnarray*}
-
-\slide{A 2-D Stationary Distribution}
-
-\begin{eqnarray*}
-p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta \sigma_y^2}\right)
-\end{eqnarray*}
-
-\vfill
-This is not a Gibbs distribution!
-
-\vfill
-It has two different temperature parameters!
-
-\slide{Forcing a Gibbs Distribution}
-
-Suppose we use parameter-specific learning rates $\eta_x$ and $\eta_y$
-
-\begin{eqnarray*}
-p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta_x \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta_y \sigma_y^2}\right)
-\end{eqnarray*}
-
-Setting $\eta_x = \eta'/\sigma^2_x$ and $\eta_y = \eta'/\sigma^2_y$ gives
-
-\begin{eqnarray*}
-p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta'} + \frac{-2{\cal L}(y)}{\eta'}\right) \\
-\\
-& = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x,y)}{\eta'}\right)\;\;\;\mathrm{Gibbs!}
-\end{eqnarray*}
-
-\slidetwo{The Case of Locally Constant Noise}
-{and Locally Quadratic Loss}
-
-In this case we can impose a change of coordinates under which the Hessian is the identity matrix.  So without loss of generality we can take the
-Hessian to be the identity.
-
-\vfill
-We can consider the covariance matrix of the vectors $\hat{g}$ in the Hessian-normalized coordinate system.
-
-\slidetwo{The Case of Locally Constant Noise}
-{and Locally Quadratic Loss}
-
-If we assume constant noise covariance in the neighborhood of the stationary distribution then, in the Hessian normalized
-coordinate system, we get a stationary distribution
-$$p(\Phi) \propto \exp\left(-\sum_i \frac{2{\Phi_i^2}}{\eta\sigma_i^2}\right)$$
-
-\vfill
-where $\Phi_i$ is the projection of $\Phi$ onto to a unit vector in the direction of the $i$th eigenvector of the noise covariance matrix and $\sigma^2_i$
-is the corresponding noise eigenvalue (the variance of the $\hat{g}_i$).
-
-\slide{Continuous Time Diffusion (Brownian Motion)}
-
-\begin{eqnarray*}
-  z(0) & = & y,\;\;\;y \sim \popd(y) \nonumber \\
-  z(n\Delta t) & = & z(0) + \epsilon,\;\;\;\epsilon \sim {\cal N}(0,n\Delta t\sigma^2I) \\
-  \\
-  z(t) & = & z(0) + \epsilon,\;\;\;\epsilon \sim {\cal N}(0,t\sigma^2I) \\
-  \\
-  z(t+ \Delta t) & = & z(t) + 
-\end{eqnarray*}
-
-
-
-
-\slide{Holding $\eta$ Fixed}
-
-
-\vfill
-Consider SGD with batch size 1.
+We now consider SGD
 
 $$\Phi_{i+1} = \Phi_i - \eta\hat{g}_i$$
 
@@ -505,30 +239,24 @@ $$\Phi_{i+1} = \Phi_i - \eta\hat{g}_i$$
 Unlike gradient flow, we now hold $\eta > 0$ fixed.
 
 \vfill
-We will still take ``time'' to be the sum of the learning rates over the updates.
+Holding $\eta > 0$ fixed introduces gradient noise.
+
+\vfill
+Gradient noise is shaped differently from the Brownian motion noise of Langevin dynamics.
+
+\slide{The SGD SDE}
+
+\vfill
+As in Gradient flow we take ``time'' to be the sum of the learning rates over the updates.
 
 \vfill
 For $N$ steps of SGD we define $\Delta t = N \eta$
 
-\slide{Holding $\eta$ Fixed}
-
+\vfill
 We consider $\Delta t$ large enough so that $\Delta t$ corresponds to many SGD updates.
 
 \vfill
 We consider $\Delta t$ small enough so that the gradient estimate distribution does not change over the interval $\Delta t$.
-
-\slide{Applying the Central Limit Theorem}
-
-If the mean gradient $g(\Phi)$ is approximately constant over the interval $\Delta t = N \eta$ we have
-
-$$\Phi(t + \Delta t)  \approx \Phi(t) -g(\Phi)\Delta t + \eta \sum_{i=1}^N (g(\Phi) - \hat{g}_i)$$
-
-\vfill
-The random variables in the last term have zero mean.
-
-\vfill
-By the central limit theorem a sum (not the average) of $N$ random vectors will approximate a Gaussian distribution where the variance
-grows like $N$.
 
 \slide{Modeling Noise}
 
@@ -542,7 +270,6 @@ The mean of $\hat{g}$ is the true gradient $g(\Phi)$.
 \end{eqnarray*}
 
 \slide{Modeling Noise}
-
 \begin{eqnarray*}
 \Delta t & = &  \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i)
 \end{eqnarray*}
@@ -551,64 +278,85 @@ The mean of $\hat{g}$ is the true gradient $g(\Phi)$.
 \vfill
 By the central limit theorem $\sum_{j=1}^N (g(\Phi) - \hat{g}_i)$ is approximately Gaussian.
 
-\slide{In One Dimension}
 
-We first consider the case of one parameter (a one dimensional optimization problem) so that $\hat{g}$ is a scalar.
-
-\vfill
-To model the noise as Gaussian we take $\epsilon \sim {\cal N}(0,\sigma^2)$ where $\sigma^2$ is the variance of $\hat{g}$.
-
+\slide{Modeling Noise}
+{\huge
 \begin{eqnarray*}
-\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t + \eta \epsilon \sqrt{N} \\
-\end{eqnarray*}
-
-\slide{In One Dimension}
-
-\begin{eqnarray*}
-\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t +  \eta \epsilon \sqrt{N} \\
-\\
-& = & \Phi(t) -g(\Phi)\Delta t +  \eta \epsilon \sqrt{\frac{\Delta t}{\eta}} \\
-\\
-& = & \Phi(t) -g(\Phi)\Delta t +  \sqrt{\eta} \epsilon \sqrt{\Delta t} \\
-\\
-& = & \Phi(t) -g(\Phi)\Delta t +  \epsilon' \sqrt{\Delta t} \\
+\Delta t & = &  \Phi(t) -g(\Phi)\Delta t + \eta \sum_{j=1}^N (g(\Phi) - \hat{g}_i)
 \end{eqnarray*}
 
 \vfill
-With $\epsilon' \sim {\cal N}(0,\eta \sigma^2)$.
+Let $\sigma(\Phi)$ be the square root of the covariance matrix of the random variable $g-\hat{g}$ at parameter setting $\Phi$.
 
+\vfill
+In one dimension we can approximately sample from $\sum_{i=1}^N (g(\Phi)- \hat{g}_i)$ as
+$$\sigma(\Phi) \epsilon\sqrt{N},\;\;\;\epsilon \sim {\cal N}(0,1)$$
 
-\slide{The Stochastic Differential Equation (SDE)}
+\vfill
+In high dimension this becomes
+$$\sigma(\Phi) \epsilon\sqrt{N},\;\;\;\epsilon \sim {\cal N}(0,I)$$
+}
 
+\slide{The SGD SDE}
+
+If the mean gradient $g(\Phi)$ is approximately constant over the interval $\Delta t = N \eta$ we have
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & \approx & \Phi(t) -g(\Phi)\Delta t +  \epsilon \sqrt{\Delta t} \\
-\epsilon & \sim & {\cal N}(0,\eta\sigma^2)
+\Phi(t + \Delta t)  & \approx & \Phi(t) -g(\Phi)\Delta t + \eta \sigma(\Phi) \epsilon\sqrt{N} \\
+\\
+& = & \Phi(t) -g(\Phi)\Delta t + \eta \sigma(\Phi) \epsilon\sqrt{\Delta t/\eta} \\
+\\
+& = & \Phi(t) -g(\Phi)\Delta t + \eta \sigma(\Phi) \epsilon\sqrt{\Delta t}
 \end{eqnarray*}
 
 \vfill
-We can take this last equation to hold in the limit of arbitrarily small $\Delta t$ in which case we get a continuous time stochastic process.  This process can be written as
+This is the SGD SDE
 
-{\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\sigma^2)$$}
+\slide{The SGD SDE in One Dimension}
 
-\slide{Higher Dimension}
+\begin{eqnarray*}
+\Phi(t + \Delta t) & = & \Phi(t) -g(\Phi)\Delta t + \eta \sigma(\Phi) \epsilon\sqrt{\Delta t}
+\end{eqnarray*}
 
-In the higher dimensional case we get
+In one dimension, if the the gradient noise $\sigma(\Phi)$ is constant, then the SGD SDE has the same form as Langevin dynamics and we get.
 
-{\color{red} $$d\Phi =  -g(\Phi)dt + \epsilon \sqrt{dt}\;\;\;\;\;\; \epsilon \sim {\cal N}(0,\eta\Sigma)$$}
+\begin{eqnarray*}
+p(x) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma^2}\right)
+\end{eqnarray*}
+
+This is Gibbs and provides an interpretation of the learning rate as temperature.
+
+
+\slide{The SGD SDE in Higher Dimension}
+
+\begin{eqnarray*}
+\Phi(t + \Delta t) & = & \Phi(t) -g(\Phi)\Delta t + \eta \sigma(\Phi) \epsilon\sqrt{\Delta t}
+\end{eqnarray*}
 
 \vfill
-Where $\Sigma$ is the covariance matrix of $\hat{g}$.
+This is almost the general case of an SDE.
 
 \vfill
-In one dimension $\Sigma$ is $\sigma^2$.
+Here $g(\Phi)$ is the gradient of a scalar function.  This is not true for a general SDE.
 
 \vfill
-For $g(\Phi) = 0$ and $\Sigma = I$ we get Brownian motion.
+But the matrix $\sigma(\Phi)$ is arbitrary.
 
 \vfill
-But in general we do not have $\Sigma = I$.
+Here the learning rate $\eta$ controls the level of noise but we do not in general have a Gibbs distribution.
 
+
+\slide{The SGD SDE, A Counter Example}
+
+If we have two dimensions $x$ and $y$ where the loss separates as ${\cal L}(x,y) = {\cal L}(x) + {\cal L}(y)$, and the matrix $\sigma(\Phi)$ is constant and diagonal,
+each dimension behaves as an independent one dimensional SGD and we get.
+
+\begin{eqnarray*}
+p(x,y) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma_x^2} + \frac{-2{\cal L}(y)}{\eta \sigma_y^2}\right)
+\end{eqnarray*}
+
+\vfill
+This is not Gibbs.
 
 \slide{END}
 
@@ -712,10 +460,11 @@ $\alpha$ can be calculated using integration by parts.
 & = & u^2 \Phi(-u)|_{0}^{\infty}+\int_{0}^\infty u^2 \phi(-u)du \;\;\mbox{where $\phi$ is the Gaussian density} \\
 & = & \int_{0}^\infty u^2 \phi(-u)du\\
 & = & \frac{1}{2}
-\end{eqnarray*}
+\end{eqnarray*}}
 
 \slide{Appendix: Diffusion Flow}
 
+{\Large
 We now have that the diffusion flow is
 
 $$\mbox{Diffusion flow}\;\;= - \frac{1}{2}\; \sigma^2 \frac{dp_x(x)}{dx}$$
@@ -732,5 +481,7 @@ Where $\Sigma = E\;(\hat{g} - g)(\hat{g} - g)^\top$ is the covariance matrix of 
 \vfill
 Here we have derived this from first principle but it also follows from the Fokker–Planck equation (see Wikipedia).
 }
+
+\slide{END}
 
 \end{document}
