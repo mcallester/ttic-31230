@@ -200,16 +200,16 @@ $$\frac{1}{2} \sigma^2 \nabla_\Phi\; {p} = - p\nabla_\Phi {\cal L}$$
 $$\train = (x_1,y_1),\ldots,(x_n,y_n)$$
 
 \vfill
-The parameters $\Phi$ determine $p_\Phi(y|x)$.
+The parameters $\Phi$ determine $P_\Phi(y|x)$.
 
 \begin{eqnarray*}
 p(\Phi|\train) & = & \frac{p(\Phi)p(\train|\Phi)}{p(\train)} \\
 \\
 \\
-& = & \frac{p(\Phi)p(x_1,\ldots,x_n)p_\Phi(y_1,\ldots,y_n|x_1,\ldots,x_n)}{p(x_1,\ldots,x_n)p_\Phi(y_1,\ldots y_n|x_1,\ldots x_n)} \\
+& = & \frac{p(\Phi)p(x_1,\ldots,x_n)P_\Phi(y_1,\ldots,y_n|x_1,\ldots,x_n)}{p(x_1,\ldots,x_n)P(y_1,\ldots y_n|x_1,\ldots x_n)} \\
 \\
 \\
-& = & \frac{p(\Phi)p_\Phi(y_1,\ldots,y_n|x_1,\ldots,x_n)}{p(y_1,\ldots y_n|x_1,\ldots x_n)}
+& = & \frac{p(\Phi)P_\Phi(y_1,\ldots,y_n|x_1,\ldots,x_n)}{P(y_1,\ldots y_n|x_1,\ldots x_n)}
 \end{eqnarray*}
 }
 
@@ -220,32 +220,34 @@ $$\train = (x_1,y_1),\ldots,(x_n,y_n)$$
 \vfill
 {\huge
 \begin{eqnarray*}
-p(\Phi|\train) & = & \frac{p(\Phi)p_\Phi(y_1,\ldots,y_n|x_1,\ldots,x_n)}{p(y_1,\ldots y_n|x_1,\ldots x_n)}
+p(\Phi|\train) & = & \frac{p(\Phi)P_\Phi(y_1,\ldots,y_n|x_1,\ldots,x_n)}{P(y_1,\ldots y_n|x_1,\ldots x_n)}
 \end{eqnarray*}
 }
 
 \vfill
 The denominator does does not depend on $\Phi$ which implies
 
-$$p(\Phi|\train) \propto p(\Phi)\prod_i p_\Phi(y_i|x_i)$$
+$$p(\Phi|\train) \propto p(\Phi)\prod_i P_\Phi(y_i|x_i)$$
 
 
 \slide{A Bayesian Interpretation of Langevin Dynamics}
 
 {\huge
 \begin{eqnarray*}
-p(\Phi|\train) & \propto & p(\Phi)\prod_i p_\Phi(y_i|x_i) \\
+p(\Phi|\train) & \propto & p(\Phi)\prod_i P_\Phi(y_i|x_i) \\
 \\
-\ln p(\Phi|\train) & = & \frac{1}{n} \sum_i \ln p_\Phi(y_i|x_i) + \frac{1}{n}\ln p(\Phi) + C
+\ln p(\Phi|\train) & = & \sum_i \ln P_\Phi(y_i|x_i) + \ln p(\Phi) + C
 \end{eqnarray*}
 
-Defining
+\vfill
+\begin{eqnarray*}
+\mathrm{Defining}\;\;{\cal L}(\Phi) & = & \frac{1}{n} \sum_i -\ln P_\Phi(y_i|x_i) - \frac{1}{n} \ln p(\Phi) \\
+\\
+& = & E_{(x,y) \sim \train}\left[ -\ln P_\Phi(y|x)\right] - \frac{1}{n} \ln p(\Phi)
+\end{eqnarray*}
 
-$${\cal L}(\Phi) = \frac{1}{n} \sum_i -\ln p_\Phi(y_i|x_i) - \frac{1}{n} \ln p(\Phi)$$
-
-gives
-
-{\color{red} $$p(\Phi|\train) = \frac{1}{Z}\exp\left(-{\cal L}(\Phi)\right)$$}
+\vfill
+\centerline{Gives{\color{red} $~\;\;\;p(\Phi|\train) = \frac{1}{Z}\exp\left(-n{\cal L}(\Phi)\right)$}}
 }
 
 
@@ -255,13 +257,13 @@ gives
 
 \slide{A Bayesian Interpretation of Langevin Dynamics}
 
-$$p(\Phi|\train) = \frac{1}{Z}e^{-{\cal L}(\Phi)}$$
+$$p(\Phi|\train) = \frac{1}{Z}e^{-n{\cal L}(\Phi)}$$
 
 \vfill
 $$p_{\mathrm{Langevin}}(\Phi) = \frac{1}{Z}\exp\left(\frac{-2{\cal L}(\Phi)}{\sigma^2}\right)$$
 
 \vfill
-Setting $\sigma^2 = 1/2$ gives
+Setting $\sigma^2 = \frac{1}{2n}$ gives
 
 \vfill
 $$p_{\mathrm{Langevin}}(\Phi) = p(\Phi|\train)$$
