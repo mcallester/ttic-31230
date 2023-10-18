@@ -241,13 +241,13 @@ p(\Phi|\train) & \propto & p(\Phi)\prod_i P_\Phi(y_i|x_i) \\
 
 \vfill
 \begin{eqnarray*}
-\mathrm{Defining}\;\;{\cal L}(\Phi) & = & \frac{1}{n} \sum_i -\ln P_\Phi(y_i|x_i) - \frac{1}{n} \ln p(\Phi) \\
+\mathrm{Define}\;\;{\cal L}(\Phi) & = & \frac{1}{n} \sum_i -\ln P_\Phi(y_i|x_i) - \frac{1}{n} \ln p(\Phi) \\
 \\
 & = & E_{(x,y) \sim \train}\left[ -\ln P_\Phi(y|x)\right] - \frac{1}{n} \ln p(\Phi)
 \end{eqnarray*}
 
 \vfill
-\centerline{Gives{\color{red} $~\;\;\;p(\Phi|\train) = \frac{1}{Z}\exp\left(-n{\cal L}(\Phi)\right)$}}
+\centerline{This Gives{\color{red} $~\;\;\;p(\Phi|\train) = \frac{1}{Z}\exp\left(-n{\cal L}(\Phi)\right)$}}
 }
 
 
@@ -352,7 +352,7 @@ Here the matrix $\sigma(\Phi)$ is the square root of the covariance matrix $\Sig
 \end{eqnarray*}
 
 \vfill
-In one dimension, if the the gradient noise $\sigma(\Phi)$ is constant, then the SGD SDE has the same form as Langevin dynamics and we get.
+In one dimension, if the gradient noise $\sigma(\Phi)$ is constant, then the SGD SDE has the same form as Langevin dynamics and we get.
 
 \begin{eqnarray*}
 p(x) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}(x)}{ \eta \sigma^2}\right)
