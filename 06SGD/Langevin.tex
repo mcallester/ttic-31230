@@ -395,14 +395,14 @@ This is not Gibbs.
 
 \slide{Langevin-Adaptive SGD}
 
-Consider SGD where the upde dirction is determined by an arbitrary inner-product (symmtetric and positive-definite) matrix $D$.
+Consider SGD where the update dirction is determined by a matrix $D$.
 
-$$\Phi_{i+1} = \Phi_i + \eta D \hat{g}_i$$
+$$\Phi_{i+1} = \Phi_i - \eta D \hat{g}_i$$
 
 $D$ defines a linear map from dual vectors to primal vectrors.
 
 \vfill
-The function has a meaning indepent of the choice of coordinates.
+The function defined by $D$ has a meaning indepent of the choice of coordinates.
 
 
 \slide{Coordinate Independent Formulation of Gradient Noise}
@@ -410,19 +410,19 @@ The function has a meaning indepent of the choice of coordinates.
 We can define the covariance matrix of the noise as
 
 \vfill
-$$\Sigma(\Phi) = E_{\hat{g}}\;\hat{g}\hat{g}_i^\top$$
+$$\Sigma(\Phi) = E_{\hat{g}}\;(\hat{g}-g)(\hat{g}_i-g)^\top$$
 
 \vfill
 The gradient noise covariance matrix $\Sigma(\Phi)$ defines a linear map from the
-primal vectors to dual vectors.
+primal vectors to dual vectors (independent of coordinates).
 
 \vfill
-$$\Sigma(\Phi) \Delta \Phi = E_{\hat{g}}\; \hat{g}(\hat{g}^\top \Delta \Phi)$$
+$$\Sigma(\Phi) \Delta \Phi = E_{\hat{g}}\; (\hat{g}-g)((\hat{g}-g)^\top \Delta \Phi)$$
 
 
 \slide{Solving for $D$ to Get Langevin}
 
-$$\Phi_{i+1} = \Phi_i + \eta D \hat{g}_i$$
+$$\Phi_{i+1} = \Phi_i - \eta D \hat{g}_i$$
 
 \vfill
 Setting $\Delta t = N\eta$ we get
@@ -471,31 +471,31 @@ Detailed Balance:
 \\
 \frac{1}{2} \eta D \Sigma(\Phi)  D \frac{\nabla_\Phi\;p}{p} & = & - D \nabla_\Phi {\cal L} \\
 \\
-\frac{1}{2} \eta D \Sigma(\Phi) D \left(\nabla_\Phi \ln p\right) & = &  D \nabla_\Phi {\cal L}
+\frac{1}{2} \eta D \Sigma(\Phi) D \left(\nabla_\Phi \ln p\right) & = &  - D \nabla_\Phi {\cal L}
 \end{eqnarray*}
 
 \vfill
 Setting {\color{red} $D = \Sigma(\Phi)^{-1}$} gives
 
 \vfill
-$$\frac{1}{2} \eta \Sigma(\Phi)^{-1} \left(\nabla_\Phi \ln p\right) = \Sigma(\Phi)^{-1} \nabla_\Phi {\cal L}$$
+$$\frac{1}{2} \eta \Sigma(\Phi)^{-1} \left(\nabla_\Phi \ln p\right) = - \Sigma(\Phi)^{-1} \nabla_\Phi {\cal L}$$
 
 \slide{The Gibbs distribution}
 
-$$\frac{1}{2} \eta \Sigma(\Phi)^{-1} \left(\nabla_\Phi \ln p\right) = \Sigma(\Phi)^{-1} \nabla_\Phi {\cal L}$$
+$$\frac{1}{2} \eta \Sigma(\Phi)^{-1} \left(\nabla_\Phi \ln p\right) = - \Sigma(\Phi)^{-1} \nabla_\Phi {\cal L}$$
 
 \vfill
-The facors of $\Sigma(\Phi)^{-1}$ now cancel (we can multiply both sides by $\Sigma(\Phi)$) and we get
+The factors of $\Sigma(\Phi)^{-1}$ now cancel (we can multiply both sides by $\Sigma(\Phi)$) and we get
 
 \vfill
-$$\frac{1}{2} \eta \left(\nabla_\Phi \ln p\right)  =  \nabla_\Phi {\cal L}$$
+$$\frac{1}{2} \eta \left(\nabla_\Phi \ln p\right)  =  - \nabla_\Phi {\cal L}$$
 
 \vfill
-This equation is independent of corrdinates.
+This equation is independent of coordinates.
 
 \slide{The Gibbs Distribution}
 
-$$\frac{1}{2} \eta \left(\nabla_\Phi \ln p\right)  =  \nabla_\Phi {\cal L}$$
+$$\frac{1}{2} \eta \left(\nabla_\Phi \ln p\right)  =  - \nabla_\Phi {\cal L}$$
 
 \vfill
 $$p(\Phi) = \frac{1}{Z} \exp\left(\frac{-2{\cal L}(\Phi)}{\eta}\right)$$
@@ -505,7 +505,7 @@ $$p(\Phi) = \frac{1}{Z} \exp\left(\frac{-2{\cal L}(\Phi)}{\eta}\right)$$
 For the adaptive update
 
 \vfill
-$$\Phi_{i+1} = \Phi{i} + \eta \Sigma(\Phi)^{-1} \hat{g}_i$$
+$$\Phi_{i+1} = \Phi_{i} - \eta \Sigma(\Phi)^{-1} \hat{g}_i$$
 
 \vfill
 we have a stationary distribution
