@@ -321,7 +321,7 @@ $$\begin{array}{rrcl}
   \\
   \mathrm{generate:} & w_\mathrm{t_\mathrm{out} + 1} & \sim & P_\Phi(w_{t_\mathrm{out}+1}\;|h_\mathrm{thought},
   h_\mathrm{out}(t_\mathrm{out}),
-  \tilde{h}_\mathrm{out}(t_\mathrm{out})),
+  \tilde{h}_\mathrm{out}(t_\mathrm{out}))
   \end{array}$$
 }
 
@@ -394,6 +394,7 @@ from $t_1$ to $t_2$ with head (label) $k$.
 
 For each head $k$ and position $t$ we compute a key vector and a query vector with dimension $I$ typically smaller than dimension $J$.
 
+{\huge
 \begin{eqnarray*}
 \mathrm{Query}_{\ell+1}[k_\mathrm{head},t,i] & = & W^\mathrm{querry}_{\ell+1}[k_\mathrm{head},i,J]L_\ell[t,J] \\
 \\
@@ -401,6 +402,7 @@ For each head $k$ and position $t$ we compute a key vector and a query vector wi
 \\
 \alpha_{\ell+1}[k_\mathrm{head},t_1,t_2] & = & \softmax_{t_2}\; \frac{1}{\sqrt{I}}\;\mathrm{Query}_{\ell+1}[k_\mathrm{head},t_1,I]\mathrm{Key}_{\ell+1}[k,t_2,I]
 \end{eqnarray*}
+}
 
 \slide{Computing the Self-Attention Layer}
       
@@ -411,7 +413,7 @@ For each head $k$ and position $t$ we compute a key vector and a query vector wi
 \\
 \hat{h}_{\ell+1}[t,C] & = & \tilde{h}_{\ell+1}[0,t,I];\cdots;\tilde{h}_{\ell+1}[K_\mathrm{head}-1,t,I] \\
 \\
-L^{SA}_{\ell+1}[t,j] & = & W^0_{\ell+1}[j,C]h^2[t,C]
+L^{SA}_{\ell+1}[t,j] & = & W^0_{\ell+1}[j,C]\hat{h}_{\ell+1}[t,C]
 \end{eqnarray*}
 
 \vfill
