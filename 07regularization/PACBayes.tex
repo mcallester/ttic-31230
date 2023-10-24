@@ -102,47 +102,49 @@ h^* & = & {\color{red} \argmin_h \hat{\cal L}(h) + \frac{1}{N_\mathrm{Train}}\pa
 
 \slide{Proof}
 
-Define
-$$\epsilon(h) = \sqrt{\frac{2{\cal L}(h)\parens{-\ln \delta P(h)}}{\lmax N_\mathrm{Train}}}.$$
+WLOG take $\lmax = 1$.
+$$\mathrm{Define}\;\;\epsilon(h) = \sqrt{\frac{2{\cal L}(h)\parens{-\ln \delta P(h)}}{N_\mathrm{Train}}}.$$
 
 \vfill
 By the relative Chernov bound we have
 
 \vfill
-$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\frac{\hat{{\cal L}}(h)}{\lmax} \leq \frac{{\cal L}(h)}{\lmax} - \epsilon(h)} \leq e^{-N_\mathrm{Train}\frac{\epsilon(h)^2\lmax}{2{\cal L}(h)}} = \delta P(h).$$
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\left[\hat{{\cal L}}(h) \leq {\cal L}(h) - \epsilon(h)\right] \leq e^{-N_\mathrm{Train}\frac{\epsilon(h)^2}{2{\cal L}(h)}} = \delta P(h).$$
 
 \slide{Proof}
 
-$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\hat{{\cal L}}(h) \leq {\cal L}(h) - \lmax\epsilon(h)} \leq \delta P(h).$$
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\hat{{\cal L}}(h) \leq {\cal L}(h) - \epsilon(h)} \leq \delta P(h).$$
 
 \vfill
-$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\exists h\;\hat{{\cal L}}(h) \leq {\cal L}(h) - \lmax\epsilon(h)} \leq \sum_h \delta P(h) =\delta$$
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\exists h\;\hat{{\cal L}}(h) \leq {\cal L}(h) - \epsilon(h)} \leq \sum_h \delta P(h) =\delta$$
 
 \vfill
-$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\forall h\;{\cal L}(h) \leq \hat{{\cal L}}(h) + \lmax\epsilon(h)} \geq 1- \delta$$
+$$P_{\mathrm{Train} \sim \mathrm{Pop}}\parens{\forall h\;{\cal L}(h) \leq \hat{{\cal L}}(h) + \epsilon(h)} \geq 1- \delta$$
 
 \slide{Proof}
 
-$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \lmax\sqrt{{\cal L}(h)\parens{\frac{2\lmax \parens{- \ln \delta P(h)}}{N_\mathrm{Train}}}}$$
+$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \sqrt{{\cal L}(h)\parens{\frac{2 \parens{- \ln \delta P(h)}}{N_\mathrm{Train}}}}$$
 
 using
 $$\sqrt{ab} = \inf_{\lambda > 0}\;\frac{a}{2\lambda} + \frac{\lambda b}{2}$$
 \vfill
 we get
-$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \frac{{\cal L}(h)}{2\lambda} + \frac{\lambda\lmax\parens{- \ln \delta P(h)}}{N_\mathrm{Train}}$$
+$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \frac{{\cal L}(h)}{2\lambda} + \frac{\lambda\parens{- \ln \delta P(h)}}{N_\mathrm{Train}}$$
 
 \slide{Proof}
-$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \frac{{\cal L}(h)}{2\lambda} + \frac{\lambda\lmax\parens{-\ln \delta P(h)}}{N_\mathrm{Train}}$$
+$${\cal L}(h) \leq \widehat{{\cal L}}(h) + \frac{{\cal L}(h)}{2\lambda} + \frac{\lambda\parens{-\ln \delta P(h)}}{N_\mathrm{Train}}$$
 
 \vfill
 Solving for ${\cal L}(h)$ yields
 
 \vfill
-$${\cal L}(h) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{{\cal L}}(h) + \frac{\lambda\lmax}{N_\mathrm{Train}}\parens{-\ln\delta P(h)}}$$
+$${\cal L}(h) \leq \frac{1}{1-\frac{1}{2\lambda}}\parens{\hat{{\cal L}}(h) + \frac{\lambda}{N_\mathrm{Train}}\parens{-\ln\delta P(h)}}$$
 
 \vfill
-Setting $\lambda = 5$ brings the leading factor to 10/9 which seems sufficiently close to 1 that larger values of $\lambda$ need not be considered.
+Setting $\lambda = 5$ brings the leading factor to 10/9 which seems sufficiently close to 1.
 
+\vfill
+We can then scale the loss by $\lmax$ to get the original form.
 
 \slide{The PAC-Bayes Guarantee}
 
@@ -219,7 +221,7 @@ Any zero-loss (squared loss) solution can be projected on the span of training v
 \vfill
 It can be shown that when the training vectors are linearly independent any zero loss solution in the span of the training vectors is a least-norm solution.
 
-\slide{Implict Priors}
+\slide{Implicit Priors}
 
 Let $A$ be any algorithm mapping a training set $\train$ to a probability density $p(\Phi|\train)$.
 
