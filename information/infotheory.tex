@@ -6,7 +6,7 @@
 {\Huge
   \centerline{\bf TTIC 31230,  Fundamentals of Deep Learning}
   \vfill
-  \centerline{David McAllester, Autumn 2020}
+  \centerline{David McAllester, Autumn 2023}
   \vfill
 \centerline{Some Information Theory}
 
@@ -125,33 +125,35 @@ This is clearly false for deep networks.  {\color{red} But it gives important in
 Consider 
 
 
-$$\Phi^* = \argmin_\Phi \;H(P,Q_\Phi)\;\;\;\;\;(1)$$
+$$\Phi^* = \argmin_\Phi \;H(\pop,Q_\Phi)\;\;\;\;\;(1)$$
 
 \vfill
-$$\Phi^* = \argmin_\Phi \;H(Q_\Phi,P)\;\;\;\;\;(2)$$
+$$\Phi^* = \argmin_\Phi \;H(Q_\Phi,\pop)\;\;\;\;\;(2)$$
 
 \vfill
-For (1) $Q_\Phi$ must cover all of the support of $P$.
+We cannot use (2) because we cannot calculate $\pop(y|x)$.
 
 \vfill
-For (2) $Q_\Phi$ concentrates all mass on the point maximizing $P$.
+In any case, (2) produces mode collapse --- $Q_\Phi$ is concentrated on the most likely values.
 
-    
 \slide{Asymmetry of KL Divergence}
 Consider 
 
 
 \begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi \;KL(P,Q_\Phi) \\
-  & = & \argmin_\Phi\; H(P,Q_\Phi)\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;(1) \\
+  \Phi^* & = & \argmin_\Phi \;KL(\pop,Q_\Phi) \\
+  & = & \argmin_\Phi\; H(\pop,Q_\Phi)\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;(1) \\
   \\
-  \Phi^* & = & \argmin_\Phi \;KL(Q_\Phi,P) \\
-  & = & \argmin_\Phi H(Q_\Phi,P) - H(Q_\Phi)\;\;\;(2)
+  \Phi^* & = & \argmin_\Phi \;KL(Q_\Phi,\pop) \\
+  & = & \argmin_\Phi H(Q_\Phi,\pop) - H(Q_\Phi)\;\;\;(2)
   \end{eqnarray*}
 
 \vfill
-If $Q_\Phi$ is not universally expressive we have that (1) still forces $Q_\Phi$ to cover all of $P$ (or else the KL divergence is infinite)
-while (2) allows $Q_\Phi$ to be restricted to a single mode of $P$ (a common outcome).
+We cannot use (2) because we cannot calculate $\pop(y|x)$.
+
+\vfill
+In any case, in practice (2) tends to produce mode collapse.
+
 
 \slideplain{Proving $KL(P,Q) \geq 0$: Jensen's Inequality}
 
@@ -232,22 +234,6 @@ We have massive data for colorization.
 \vfill
 Colorization is unsupervised structured labeling.
 }
-
-
-\slide{Appendix: The Rearrangement Trick}
-
-\begin{eqnarray*}
-KL(P,Q) & = & E_{x \sim P}\;\left[ \ln \;\frac{P(x)}{Q(x)} \right] \\
-\\
-& = & E_{x \sim P} \left[(- \ln Q(x)) - (- \ln P(x))\right] \\
-\\
-& = & (E_{x\sim P} \;\left[-\ln Q(x)\right]) - (E_{x \sim P}\;\left[-\ln P(x)\right]) \\
-\\
-& = & H(P,Q) - H(P)
-\end{eqnarray*}
-
-\vfill
-In general $E_{x \sim P} \;\ln \left(\prod_i A_i\right) = E_{x \sim P} \;\sum_i \ln A_i$ 
 
 
 \slide{Summary}
