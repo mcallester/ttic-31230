@@ -154,7 +154,7 @@ In practice GANS are evaluated on FID score.
 
 \slide{The Fr\'{e}nchet Inception Score (FID)}
 
-Consider two distributions $P$ and $Q$ on the same set (perhaps distributions or densities on images).
+Consider two distributions $P$ and $Q$ on $\reals^d$ (perhaps two distributions on images).
 
 \vfill
 Generative image models are (still) evaluated using a certain meanure of the ``distance'' between the population distribution
@@ -165,12 +165,21 @@ For GANs we cannot compute the probability of a generated image so we cannot use
 
 \slide{The Fr\'{e}nchet Inception Score (FID)}
 
-The Fr\'{e}nchet distance $F(P,Q)$ can be measure puresly by sampling.
-
-$$\mathrm{F}(p,q) = \inf_{\mu}\;\left(E_{(x,y)\sim \mu} \;||x-y||^2\right)^{\frac{1}{2}}$$
+The Fr\'{e}nchet distance $F(P,Q)$ can be measured (approximately) by sampling.
 
 \vfill
-This is also known as the 2-Wasserstein distance.
+Let $\mu$ range over distributions on pairs $(x,y)$ such that
+
+\begin{eqnarray*}
+\sum_y \mu(x,y) & = & P(x) \\
+\\
+\sum_x \mu(x,y) & = & Q(y)
+\end{eqnarray*}
+
+$$\mathrm{F}(P,Q) = \inf_{\mu}\;\left(E_{(x,y)\sim \mu} \;||x-y||^2\right)^{\frac{1}{2}}$$
+
+\vfill
+This is a form of earth movers distance.  It is also known as the 2-Wasserstein distance.
 
 \slide{The Fr\'{e}nchet Inception Score (FID)}
 
@@ -216,7 +225,7 @@ We assume a corpus of ``image translation pairs'' such as images paired with sem
 
 \centerline{\includegraphics[width = 8.0in]{\images/cGAN0}}
 
-\slide{UNets}
+\slide{U-Nets}
 
 Pix2Pix uses a U-Net.
 
