@@ -12,7 +12,7 @@
 
 \slide{Why Information Theory?}
 
-The fundamental equation involves cross-entropy.
+The fundamental equation of deep learning involves cross-entropy.
 
 \vfill
 Cross-entropy is an information-theoretic concept.
@@ -59,19 +59,6 @@ Theorem: For any $c$ we have {\color{red} $E_{y \sim P}\;|c(y)|  \geq H_2(P)$}.
 \vfill
 Theorem: There exists $c$ with {\color{red} $E_{y \sim P} \;|c(y)| \leq H_2(P) +1$}.
 
-\ignore{
-For any bit string $c$ let $|c|$ be the number of bits in (the length of) $c$.
-\vfill
-Theorem: There exists a coding function $c(y)$ such that for all $y$
-$$|c(y)| \leq (- \log_2\;P(y)) + 1$$
-and therefore
-$$E_y\;|c(y)| \leq H_2(y)+1$$
-
-\vfill
-Theorem: For any coding scheme $c$
-$$E_y |c(y)| \geq H_2(y)$$
-}
-
 \slide{Cross Entropy}
 
 Let $P$ and $Q$ be two distribution on the same set.
@@ -81,12 +68,12 @@ Let $P$ and $Q$ be two distribution on the same set.
 {\color{red} $$\Phi^* = \argmin_\Phi \;H(\pop,P_\Phi)$$}
 
 \vfill
-{\color{red} H(P,Q)} also has a data compression interpretation.
+{\color{red} $H(P,Q)$} can be interpreted as the number of bits used to code draws from $P$ when using an optimal code for $Q$.
 
-\vfill
-{\color{red} $H(P,Q)$} can be interpreted as 1.44 times the number of bits used to code draws from $P$ when using the imperfect code defined by $Q$.
+\vfill We will show
+$$H(P,Q) \geq H(P)$$
 
-\slide{Entropy, Cross Entropy and KL Divergence}
+\slide{KL Divergence}
 
 Let $P$ and $Q$ be two distribution on the same set.
 
@@ -99,61 +86,11 @@ Let $P$ and $Q$ be two distribution on the same set.
 \\
 \mathrm{KL\; Divergence:} & {\color{red} KL(P,Q)} & = & {\color{red} H(P,Q) - H(P)} \\
 \\
-& & = & {\color{red} E_{y \sim P}\;\;\; \ln\;\frac{P(y)}{Q(y)}}
+& & = & {\color{red} E_{y \sim P}\;\;\; - \ln\;\frac{Q(y)}{P(y)}}
 \end{array}$}
 
 \vfill
-We have {\color{red} $H(P,Q) \geq H(P)$} or equivalently {\color{red} $KL(P,Q) \geq 0$}.
-
-\slide{The Universality Assumption}
-
-{\color{red} $$\Phi^* = \argmin_\Phi\;H(\pop,P_\Phi) = \argmin_\Phi\;H(\pop) + KL(\pop,P_\Phi)$$}
-
-\vfill
-Universality assumption: {\color{red} $P_\Phi$ can represent any distribution and $\Phi$ can be fully optimized.}
-
-\vfill
-This is clearly false for deep networks.  {\color{red} But it gives important insights like:}
-
-{\color{red} $$P_{\Phi^*} = \pop$$}
-
-\vfill
-{\color{red} \centerline{This is the motivatation for the fundamental equation.}}
-
-
-\slide{Asymmetry of Cross Entropy}
-Consider 
-
-
-$$\Phi^* = \argmin_\Phi \;H(\pop,Q_\Phi)\;\;\;\;\;(1)$$
-
-\vfill
-$$\Phi^* = \argmin_\Phi \;H(Q_\Phi,\pop)\;\;\;\;\;(2)$$
-
-\vfill
-We cannot use (2) because we cannot calculate $\pop(y|x)$.
-
-\vfill
-In any case, (2) produces mode collapse --- $Q_\Phi$ is concentrated on the most likely values.
-
-\slide{Asymmetry of KL Divergence}
-Consider 
-
-
-\begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi \;KL(\pop,Q_\Phi) \\
-  & = & \argmin_\Phi\; H(\pop,Q_\Phi)\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;(1) \\
-  \\
-  \Phi^* & = & \argmin_\Phi \;KL(Q_\Phi,\pop) \\
-  & = & \argmin_\Phi H(Q_\Phi,\pop) - H(Q_\Phi)\;\;\;(2)
-  \end{eqnarray*}
-
-\vfill
-We cannot use (2) because we cannot calculate $\pop(y|x)$.
-
-\vfill
-In any case, in practice (2) tends to produce mode collapse.
-
+We will show $KL(P,Q) \geq 0$ which implies $H(P,Q) \geq H(P)$.
 
 \slideplain{Proving $KL(P,Q) \geq 0$: Jensen's Inequality}
 
@@ -170,7 +107,7 @@ $$E[f(x)] \geq f(E[x])$$
 \begin{eqnarray*}
   KL(P,Q) & = & \expectsub{y \sim P}{\left[- \ln \frac{Q(y)}{P(y)}\right]} \\
   \\
-  & \geq & - \ln \expectsub{y\sim P}{\frac{Q(y)}{P(y)} \\
+  & \geq & - \ln \expectsub{y\sim P}{\frac{Q(y)}{P(y)}} \\
   \\
   & = & - \ln \sum_y\; P(y) \frac{Q(y)}{P(y)}  \\
   \\
@@ -179,71 +116,56 @@ $$E[f(x)] \geq f(E[x])$$
   & = & 0
 \end{eqnarray*}
 
-\ignore{
-\slideplain{Density Estimation}
 
-Anything that can be done conditionally $P_\Phi(y|x)$ can also be done unconditionally $P_\Phi(y)$.
+
+\slide{Asymmetry of Cross Entropy}
+Consider 
+
+
+$$\Phi^* = \argmin_\Phi \;H(\pop,Q_\Phi)\;\;\;\;\;(1)$$
 
 \vfill
-We have unconditional cross-entropy training.
+$$\Phi^* = \argmin_\Phi \;H(Q_\Phi,\pop)\;\;\;\;\;(2)$$
+
+\vfill
+We cannot use (2) because we cannot calculate $\pop(y)$.
+
+\vfill
+For a synthetic population where $\pop(y)$ is computable (2) produces mode collapse --- $Q_\Phi$ is concentrated on the most likely value of $\pop$.
+
+\slide{Asymmetry of KL Divergence}
+Consider 
+
 
 \begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi \;\;E_{y \sim \mathrm{Pop}}\;\left[  -\ln P_\Phi(y)\right]
-\end{eqnarray*}
+  \Phi^* & = & \argmin_\Phi \;KL(\pop,Q_\Phi) \\
+  & = & \argmin_\Phi\; H(\pop,Q_\Phi)\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;(1) \\
+  \\
+  \Phi^* & = & \argmin_\Phi \;KL(Q_\Phi,\pop) \\
+  & = & \argmin_\Phi H(Q_\Phi,\pop) - H(Q_\Phi)\;\;\;(2)
+  \end{eqnarray*}
 
 \vfill
-This is {\bf distribution modeling} or {\bf density estimation}.
+For a synthetic population where $\pop(y)$ is computable but $P_\Phi$ cannot perfectly model $\pop$, (2) produces mode collapse.
+
+\slide{Conditional Entropy and Mutual Information}
+
+Assume a joint distribution $Q$  on $x$ and $y$.
 
 \vfill
-Density estimation is sometimes equated with {\bf unsupervised learning}.  A primary example is {\bf language modeling}.
-
-\slide{Unsupervised Learning}
-
-\centerline{\includegraphics[width = 8in]{\images/cake}}
-
-
-\slide{Unsupervised Learning}
-
-By ``unsupervised learning'' we will mean learning from {\bf massively available} data.  This is not a mathematical definition.
+conditional entropy:
+$$H(y|x) = E_{(x,y)\sim Q}\;-\ln P(y|x)$$
 
 \vfill
-{\bf Massive}: images, audio, text, video, click-through data.
+mutual information:
+$$I(x,y) = H(y) - H(y|x)$$
 
 \vfill
-{\bf Less Massive}: car control data, stereo image pairs, closed captioned video, captioned images.
-
-\vfill
-{\bf Big}: Manually annotated images or audio.
-
-\vfill
-{\bf Small}: manually annotated text --- parse trees, named entities, semantic roles, coreference, entailment.
-
-\vfill
-{\bf Smallest:} Manually annotated text in an obscure language.
-
-\slide{Colorization}
-
-$$\Phi^* = \argmin_\Phi \expectsub{(x,y) \sim \mathrm{Pop}}{-\ln P_\Phi(y|x)}$$
-
-\vfill
-\centerline{\includegraphics[height=2in]{\images/Colorization}}
-
-\vfill
-We have massive data for colorization.
-
-\vfill
-Colorization is unsupervised structured labeling.
-}
-
+Suppose you dont't know anything about $x$ and $y$. The mutual information $I(x,y)$ is the expectation over a draw of $x$ of
+the number of bits you learn about $y$.
 
 \slide{Summary}
-
-{\color{red} $\Phi^* = \argmin_\Phi\;H(\pop,P_\Phi)$} unconditional
-
-\vfill
-{\color{red} $\Phi^* = \argmin_\Phi\;E_{x \sim \pop}\;H(\pop(y|x),P_\Phi(y|x))$} conditional
-
-\vfill
+      
 \centerline{
   $\begin{array}{lrcl}
 \mathrm{Entropy}: & {\color{red} H(P)} & = & {\color{red} E_{y \sim P}\;\left[-\ln\;P(y)\right]} \\
@@ -252,50 +174,12 @@ Colorization is unsupervised structured labeling.
 \\
 \mathrm{KL\; Divergence:} & {\color{red} KL(P,Q)} & = & {\color{red} H(P,Q) - H(P)} \\
 \\
-& & = & {\color{red} E_{y \sim P}\;\;\; \ln\;\frac{P(y)}{Q(y)}}
+\mathrm{Mutual\; Information:} & {\color{red} I(x,y)} & = & {\color{red} H(y) - H(y|x)}
 \end{array}$}
 
 \vfill
 \centerline{{\color{red} $H(P,Q) \geq H(P),\;\;\;KL(P,Q) \geq 0,\;\;\;\argmin_Q\;H(P,Q) = P$}}
 
+\slide{END}
 
-\ignore{
-\slide{The Rearrangement Trick}
-
-{\huge
-\begin{eqnarray*}
-H(P,Q) & \doteq & E_{x \sim P} \;-\ln Q(x) \\
-\\
-& = & E_{x \sim P}\; -\ln\;\left(P(x)\;\frac{Q(x)}{P(x)}\right) \\
-\\
-& = & E_{x\sim P}\; \left(-\ln P(x) + \ln \frac{P(x)}{Q(x)}\right) \\
-\\
-& = & \left(E_{x\sim P}\; -\ln P(x)\right) + \left(E_{x \sim P(x)} \ln \frac{P(x)}{Q(x)}\right) \\
-\\
-& = & H(P) + KL(P,Q) \\
-\\
-& \geq & H(P)
-\end{eqnarray*}
-}
-}
-
-\ignore{
-\slideplain{Appendix: The Rearrangement Trick}
-
-\begin{eqnarray*}
-\mathrm{ELBO} & = & E_{z \sim P_\Psi(z|y)} \ln \;\frac{P_\Phi(z,y)}{P_\Psi(z|y)} \\
-\\
-\\
- & = & E_{z \sim P_\Psi(z|y)} \ln \;\frac{P_\Phi(z)P_\Phi(y|z)}{P_\Psi(z|y)} \\
-\\
-\\
- & = & E_{z \sim P_\Psi(z|y)} \ln \;\frac{P_\Phi(y)P_\Phi(z|y)}{P_\Psi(z|y)} \\
-\end{eqnarray*}
-
-\vfill
-Each of the last two expressions can be grouped three different ways leading to six ways of writing the ELBO.}
-
-\slideplain{END}
-
-}
 \end{document}

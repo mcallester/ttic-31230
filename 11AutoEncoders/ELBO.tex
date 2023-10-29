@@ -7,126 +7,225 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2022}
+  \centerline{David McAllester, Autumn 2023}
   \vfill
   \vfill
   \centerline{\bf Variational Auto-Encoders (VAEs)}
   \vfill
   \vfill
 
+\slide{Generative AI: Autoregression and GANs}
 
-\slide{Image Compression and Image Generation}
+For an autoregressive language model we can compute $P_\gen(y)$
+and train a generative model by cross-entropy loss.
 
-Suppose that we want to model a population distribution on $y$, for example the distribution of ``natural images''.
-
-\vfill
-Shannon's source coding theorem implies that there exists a coding function with an inverse decoding function such that
-decoding a random string samples an image from the population distribution on images.
+$$\gen^* = \argmin_\gen \;E_{y \sim \pop}\;-\ln P_\gen(y)$$
 
 \vfill
-While we cannot optimally compress images, it can be useful to represent a population distribution on $y$ in terms of a latent (unabserved) variable $z(y)$ loosely analogous to a compressed form.
-
-\slide{The Encoder, Decoder and the Prior}
-
-Consider a probabilistic encoder algorithm $P_\enc(z|y)$ --- perhaps a stochastic image compression algorithm.
+But it is not obvious how to this for continuous signals like sounds and images.
 
 \vfill
-The encoder $P_\enc(z|y)$ defines a joint probability distribution on pairs $(y,z)$.
+GANs replace the cross-entropy loss with an adversarial discrimation loss.
+
+\slide{Generative AI for Continuous Data: Flow Models}
+$$\gen^* = \argmin_\gen \;E_{y \sim \popd(y)}\;-\ln p_\gen(y)$$
 
 \vfill
-We will also introduce a decoder model (decompressor) $P_\dec(y|z)$ and a prior probability model $P_\pri(z)$ which are to be trained
-using a cross-entropy loss to $P(y|z)$ and and $P(z)$ as defined by the encoder.
+Flow-based generative models work with Jacobians over continuous transformations (no ReLUs)
+and can be directly trained with cross-entropy loss.
 
-\slide{The ELBO}
+\vfill
+But flow models have not caught on and we will not cover them.
+
+\slide{Generative AI for Continuous Data: VAEs}
+A variational autoencoder (VAE) is defined by three parts:
+
+\vfill
+\begin{itemize}
+\item An encoder distribution $P_\enc(z|y)$.
+
+\vfill
+\item A ``prior'' distribution $P_\pri(z)$
+
+\vfill
+\item A generator distribution $P_\gen(y|z)$
+\end{itemize}
+
+\vfill
+VAE generation uses $P_\pri(z)$ and $P_\gen(y|z)$ (like a GAN).
+
+\vfill
+VAE training uses a ``GAN inverter'' $P_\enc(z|y)$.
+
+\vfill
+We will rely on expectatin notation and will not distinguish disctrete distributions from densities.
+
+\slide{Cross-Entropy for Continuous Data: $L_2$ Loss}
+
+Define $p_\gen(y|z)$ by
+$$y = \hat{y}_\gen(z) + \sigma\epsilon,\;\;\;\epsilon \sim {\cal N}(0,I)$$
+
+\vfill
+We then get that
+$$- \ln p_\gen(y|z) = \frac{||\hat{y}_\gen(z) - y||^2}{2\sigma^2} + \ln Z(\sigma)$$
+
+\vfill
+For a fixed $\sigma$ we can ignore $\ln Z(\sigma)$ and we get $L_2$ distortion loss.
+
+\slide{Cross-Entropy for Continuous Data: $L_2$ Loss}
+
+$$- \ln p_\gen(y|z) = \frac{||\hat{y}_\gen(z) - y||^2}{2\sigma^2} + \ln Z(\sigma)$$
+
+\vfill
+For all the VAE models we will discuss, cross-entropy loss for continuous distributions
+will be measured by $L_2$ distortion.
+
+\vfill
+When using $L_2$ distortion loss $z$ should nearly specify $y$.
+
+\slide{Diffusion Model Preview}
+
+\vfill
+A diffusion model multi-step (Markovian) VAE where each step adds a small amount of noise.
+
+\vfill
+Each step of a diffusion model is a VAE:
+
+\vfill
+\begin{itemize}
+\item $P_\enc(z|y)$ is defined by adding a small amount of noise to $y$.
+
+\vfill
+\item $P_\pri(z)$ is trained to model the marginal onto $z$ of $\pop(y)P_\enc(z|y)$.
+
+\vfill
+\item A ``denoising'' $\hat{y}_\gen(z)$ is computed by a U-Net.
+\end{itemize}
+
+\vfill
+Here $z$ contains almost all the information in $y$.
+
+\slide{Fixed Encoder Training}
+In a diffusion model the encoder is fixed.
+
+$$\pri^*,\gen^* = \argmin_{\pri,\gen}\;E_{y \sim \pop(y),z \sim \enc(z|y)}\left[-\ln P_\pri(z)P_\gen(y|z)\right]$$
+
+\vfill
+This is a cross-entropy loss from a joint ``population distribution'' $P_{\pop,\enc}(y,z)$ to a model
+distribution $P_{\pri,\gen}(y,z)$.
+
+\vfill
+Assuming universality we get $P_{\pri^*,\gen^*}(z,y) = P_{\pop,\enc}(z,y)$ which implies {\color{red} $P_{\pri^*,\gen^*}(y) = \pop(y)$}.
+
+\slide{Training the Encoder (The Bayesian Interpretation)}
+
+VAEs were originally motivated by a Bayesian interpretation:
+
+\vfill
+\begin{itemize}
+\item $P_\pri(z)$ is the Bayesian prior on hypothesis $z$.
+
+\vfill
+\item $P_\gen(y|z)$ is the propability of the ``evidence'' $y$ given hypothesis $z$.
+
+\vfill
+\item $P_\enc(z|y)$ is a model approximating the Bayesian posterior on hypothesis $z$ given evidence $y$.
+\end{itemize}
+
+\vfill
+The Bayesian motivation is to train $P_\enc(z|y)$ to approximate Bayesian inference.
+
+\slide{Training the Encoder (Bayesian Interpretation)}
+
+$$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;E_{\color{red} y \sim \pop,z\sim P_\enc(z|y)}\;{\cal L}(y,z)$$
+
+\vfill
+\begin{eqnarray*}
+{\cal L}(y,z) & = & - \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}
+\end{eqnarray*}
+
+\vfill
+Here we can hope to train the encoder to capture a causal origin for $y$.
+
+\slide{Training the Encoder (Bayesian Interpretation)}
 
 {\huge
+Consider training $P_\enc$ while holding $P_\pri$ and $P_\gen$ fixed.
 \begin{eqnarray*}
-H(y,z) & = & H(y) + H(z|y) \; = \; H(z) + H(y|z) \\
-\\
-H(y) & = & H(z) + H(y|z) - H(z|y) \\
-\\
-& \leq & CE(P(z),P_\pri(z)) + CE(P(y|z),P_\dec(y|z)) -H_\enc(z|y) \\
-\\
-& = & E_{y\sim \pop, z \sim P_\enc(z|y)}\;-\ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}
-\end{eqnarray*}
-}
+  \enc^* & = & \argmin_\enc \;E_{y \sim \pop(y),z \sim \enc(z|y)}\; - \ln \frac{\color{red} P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)} \\
+  \\
+  & = & \argmin_\enc \;E_{y \sim \pop(y),z \sim \enc(z|y)}\; - \ln \frac{\color{red} P_{\pri,\gen}(y)P_{\pri,\gen}(z|y)}{P_\enc(z|y)} \\
+  \\
+  &= & \argmin_\enc E_{y \sim \pop(y)} \; {\color{red} KL(P_\enc(z|y),P_{\pri,\gen}(z|y))} + E_{y\sim \pop(y)}\left[-\ln P_{\pri,\gen}(y)\right]
+  \end{eqnarray*}
+
 \vfill
-The last line is the (negative) ELBO.  ELBO stands for ``Evidence Lower Bound'' but this terminaology is obscure and unhelpful.
+Training $P_\enc(z|y)$ to equal $P_{\pri,\gen}(z|y)$ can drive the KL term to zero.
 
-
-\slide{The ELBO Loss}
-
-We now interpret the ELBO as a loss on a given value $y$.
-
-{\huge
-\begin{eqnarray*}
-H(y) & \leq & E_{y\sim \pop, z \sim P_\enc(z|y)}\;-\ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)} \\
-\\
-& = & E_{y \sim \pop}\; {\cal L}_E(y) \\
-\\
-\\
-{\cal L}_E(y) & = & E_{ z \sim P_\enc(z|y)}\;-\ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)} \\
-\end{eqnarray*}
+\vfill
+Training $P_\pri(z)$ and $P_\gen(y|z)$ can drive the cross-entropy term to $H(\pop)$.
 }
 
-\slide{A Third Fundamental Equation}
 
-$$\pri^*,\dec^*  = \argmin_{\pri,\dec}\;\;E_{y}\;{\cal L}_E(y)$$
+\slide{The Evidence Lower Bound (ELBO)}
 
-\vfill
-\begin{eqnarray*}
-  & &   E_y\;{\cal L}_E(y) \\
-  \\
-  & = & E_{y \sim \pop,\;z\sim P_\enc(z|y)} \;\; \ln \frac{P_\enc(z|y)}{P_\pri(z)P_\dec(y|z)} \\
-  \\
-  & = & E_y\;\left[-\ln \pop(y)\right] + KL(\pop(y)P_\enc(z|y),\;\;P_\pri(z)P_\dec(y|z)) \\
-  \\
-  & = & H(y) + KL(\pop(y)P_\enc(z|y),\;\;P_\pri(z)P_\dec(y|z))
-\end{eqnarray*}
-
-\slide{The ELBO Loss}
+The previous derivation can be applied to an arbitrary fixed value of $y$ yielding.
 
 \begin{eqnarray*}
-  E_y\;{\cal L}_E(y)
-  & = & H(y) + KL(\pop(y)P_\enc(z|y),\;\;P_\pri(z)P_\dec(y|z))
+\ln P_{\pri,\gen}(y) & \geq  & E_{z \sim P_\enc(z|y)}\; \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)} \\
+\\
+& = & E_{z \sim P_\enc(z|y)}\left[-{\cal L}(y,z)\right]
 \end{eqnarray*}
 
 \vfill
-Minimization occurs when the prior and the docoder satisfy
+A Bayesian thinks of $y$ as ``evidence'' for hypothesis $z$ in the Bayesian model.  This method of training $P_\enc(z|y)$ is called {\color{red} variational Bayesian inference}.
 
 \vfill
-$$P_\pri(z)P_\dec(y|z) = \pop(y)P_\enc(z|y)$$
+Under the Bayesian interpretation the negative of the VAE loss is called {\color{red} the evidence lower bound (ELBO)}    .
 
+\slide{Training the Ecoder: Posterior Collapse}
 
-\slide{The ELBO Loss}
+$$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;E_{\color{red} y \sim \pop,z\sim P_\enc(z|y)}\;{\cal L}(y,z)$$
+
+\vfill
 \begin{eqnarray*}
-  E_y\;{\cal L}_E(y)
-  & = & H(y) + KL(\pop(y)P_\enc(z|y),\;\;P_\pri(z)P_\dec(y|z))
+{\cal L}(y,z) & = & - \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}
 \end{eqnarray*}
 
 \vfill
-Minimizing gives
-$$P_\pri(z)P_\dec(y|z) = \pop(y)P_\enc(z|y) = P(y,z)$$
+The objective is fully optimized whenever
 
 \vfill
-and hence
-$${\cal L}_E(y) = \;\;E_z\;\ln \frac{P(z|y)}{P(z,y)} = E_z\;\ln \frac{P(z,y)/P(y)}{P(z,y)}\;\; = -\ln \pop(y)$$
-\vfill
-After optimization one can interpret ${\cal L}_E(y)$ as $-\ln \pop(y)$.
+$$P_\pri(z)P_\gen(y|z) = \pop(y)P_\enc(z_y)$$
 
-\slide{Optimizing the Encoder}
+\slide{Training the Ecoder: Posterior Collapse}
 
-Although in princile the encoder need not be trained, it is sometimes jointly optimized with the prior and the decoder.
+Under the Bayesian interpretation we would like $z$ to provide useful information about (a causal origin of) $y$.
 
 \vfill
-$$\pri^*,\dec^*,\enc^* = \argmin_{\pri,\dec,\enc}\;\;E_{y,{\color{red} z\sim P_\enc(z|y)}}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
+However the objective function only produces
+$$P_\pri(z)P_\gen(y|z) = \pop(y)P_\enc(z|y)$$
 
 \vfill
-This is necessary if want to interpret $z$ as some kind of ``understanding'' of the distribution on $y$ that facilitates representing the prior and the decoder.
+If the cross-entropy loss is measured by $L_2$ distortion we need $z$ to nearly specify $y$.
 
-\slide{Optimizing the Encoder}
+\vfill
+However, for discrete models, such as langauge models, we can campute $P_\gen(y|z)$ even if $z$ carries no information about $y$.
 
-$$\pri^*,\dec^*,\enc^* = \argmin_{\pri,\dec,\enc}\;\;E_{y,{\color{red} z\sim P_\enc(z|y)}}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
+
+\slide{Training the Ecoder: Posterior Collapse}
+
+$$P_\pri(z)P_\gen(y|z) = \pop(y)P_\enc(z|y)$$
+
+\vfill
+For language models training the encoder allows the encoder to ignore $y$.
+
+\vfill
+This is called ``posterior collapse''.
+
+\slide{Optimizing the Encoder: The Reparameterization Trick}
+
+$$\enc^* = \argmin_{\enc}\;\;E_{y\sim \pop(y),{\color{red} z\sim P_\enc(z|y)}}\;\left[- \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]$$
 
 \vfill
 Gradient descent on the encoder parameters must take into account the fact that we are sampling from the encoder.
@@ -135,35 +234,35 @@ Gradient descent on the encoder parameters must take into account the fact that 
 To handle this we sample noise $\epsilon$ from a fixed noise distribution and replace $z$ with a determinstc function $z_\enc(y,\epsilon)$
 
 \vfill
-$$\enc^*,\pri^*,\dec^* = \argmin_{\enc,\pri,\dec}\;\;E_{y,{\color{red} \epsilon,z=z_\enc(y,\epsilon)}}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
+$$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;\;E_{y,{\color{red} \epsilon,z=z_\enc(y,\epsilon)}}\;\left[- \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]$$
 
 \slide{The Re-Parameterization Trick}
 
-$$\enc^*,\pri^*,\dec^* = \argmin_{\enc,\pri,\dec}\;\;E_{y,{\color{red} \epsilon,z=z_\enc(y,\epsilon)}}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]$$
+$$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;\;E_{y,{\color{red} \epsilon,z=z_\enc(y,\epsilon)}}\;\left[- \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]$$
 
 \vfill
 To get gradients we must have that $z_\enc(y,\epsilon)$ is a smooth function of the encoder parameters and all probabilties must be a smooth function of $z$.
 
 \vfill
-Most commonly $\epsilon \in R^d$ with $\epsilon \sim {\cal N}(0,I)$ and
-$$z^i_\enc(y,\epsilon) = \hat{z}^i_\enc(y) + \sigma^i\epsilon^i.$$
+Commonly we use 
+$$\epsilon \sim {\cal N}(0,I),\;\;\;z_\enc(y,\epsilon) = \hat{z}_\enc(y) + \sigma\epsilon$$
 
 \vfill
 Optimizing the encoder is tricky for discrete $z$.  Discrete $z$ is handled effectively in EM algorithms and in VQ-VAEs.
 
 \slide{EM is Alternating Optimization of the ELBO Loss}
 
-Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_{\pri,\dec}(z|y)$ is samplable and computable.
-EM alternates exact optimization of $\enc$ and the pair $(\pri,\dec)$ in:
-$$\mbox{VAE:}\;\;\;\;\;\;\; {\color{red} \pri^*,\dec^*} = \argmin_{\color{red} \pri,\dec} \min_{\color{red} \enc} E_{y,\;z \sim P_{\color{red} \enc}(z|y)}\;\;- \ln \frac{P_{\color{red} \pri,\dec}(z,y)}{P_{\color{red} \enc}(z|y)}$$
+Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_{\pri,\gen}(z|y)$ is samplable and computable.
+EM alternates exact optimization of $\enc$ and the pair $(\pri,\gen)$ in:
+$$\mbox{VAE:}\;\;\;\;\;\;\; {\color{red} \pri^*,\gen^*} = \argmin_{\color{red} \pri,\gen} \min_{\color{red} \enc} E_{y,\;z \sim P_{\color{red} \enc}(z|y)}\;\;- \ln \frac{P_{\color{red} \pri,\gen}(z,y)}{P_{\color{red} \enc}(z|y)}$$
 
 \vfill
-$$\mbox{EM:}\;\;\;\;\;\; {\color{red} \pri^{t+1},\dec^{t+1}} =  \argmin_{\color{red} \pri,\dec}\;\;\;\;E_{y,\;z \sim P_{\color{red} \pri^t,\dec^t}(z|y)}\; - \ln P_{\color{red} \pri,\dec}(z,y)$$
+$$\mbox{EM:}\;\;\;\;\;\; {\color{red} \pri^{t+1},\gen^{t+1}} =  \argmin_{\color{red} \pri,\gen}\;\;\;\;E_{y,\;z \sim P_{\color{red} \pri^t,\gen^t}(z|y)}\; - \ln P_{\color{red} \pri,\gen}(z,y)$$
 
 \vfill
 \centerline{\hspace{1em} Inference \hspace{6em} Update \hspace{2.5em}~}
 \centerline{(E Step) \hspace{6em} (M Step) ~}
-\centerline{ $P_\enc(z|y) = P_{\pri^{\color{red} t},\dec^{\color{red} t}}(z|y)$ \hspace{2.5em} Hold $P_\enc(z|y)$ fixed \hspace{0em}~}
+\centerline{ $P_\enc(z|y) = P_{\pri^{\color{red} t},\gen^{\color{red} t}}(z|y)$ \hspace{2.5em} Hold $P_\enc(z|y)$ fixed \hspace{0em}~}
 
 \slide{END}
 
