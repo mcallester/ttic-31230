@@ -77,11 +77,10 @@ For a fixed $\sigma$ we can ignore $\ln Z(\sigma)$ and we get $L_2$ distortion l
 $$- \ln p_\gen(y|z) = \frac{||\hat{y}_\gen(z) - y||^2}{2\sigma^2} + \ln Z(\sigma)$$
 
 \vfill
-For all the VAE models we will discuss, cross-entropy loss for continuous distributions
-will be measured by $L_2$ distortion.
+When using $L_2$ distortion loss $z$ should nearly specify $y$.
 
 \vfill
-When using $L_2$ distortion loss $z$ should nearly specify $y$.
+This is true in each step of a diffusion model.
 
 \slide{Diffusion Model Preview}
 
@@ -135,7 +134,7 @@ VAEs were originally motivated by a Bayesian interpretation:
 \vfill
 The Bayesian motivation is to train $P_\enc(z|y)$ to approximate Bayesian inference.
 
-\slide{Training the Encoder (Bayesian Interpretation)}
+\slide{Training the Encoder}
 
 $$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;E_{\color{red} y \sim \pop,z\sim P_\enc(z|y)}\;{\cal L}(y,z)$$
 
@@ -147,7 +146,7 @@ $$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;E_{\color{red} y \sim \pop,z\
 \vfill
 Here we can hope to train the encoder to capture a causal origin for $y$.
 
-\slide{Training the Encoder (Bayesian Interpretation)}
+\slide{Training the Encoder}
 
 {\huge
 Consider training $P_\enc$ while holding $P_\pri$ and $P_\gen$ fixed.
@@ -183,7 +182,7 @@ A Bayesian thinks of $y$ as ``evidence'' for hypothesis $z$ in the Bayesian mode
 \vfill
 Under the Bayesian interpretation the negative of the VAE loss is called {\color{red} the evidence lower bound (ELBO)}    .
 
-\slide{Training the Ecoder: Posterior Collapse}
+\slide{Degrees of Freedom}
 
 $$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;E_{\color{red} y \sim \pop,z\sim P_\enc(z|y)}\;{\cal L}(y,z)$$
 
@@ -196,9 +195,12 @@ $$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;E_{\color{red} y \sim \pop,z\
 The objective is fully optimized whenever
 
 \vfill
-$$P_\pri(z)P_\gen(y|z) = \pop(y)P_\enc(z_y)$$
+{\color{red} $$P_\pri(z)P_\gen(y|z) = \pop(y)P_\enc(z_y)$$}
 
-\slide{Training the Ecoder: Posterior Collapse}
+\vfill
+Any joint distribution on $(y,z)$ optimizes the bound provided that the marginal on $y$ is $\pop$.
+
+\slide{Posterior Collapse}
 
 Under the Bayesian interpretation we would like $z$ to provide useful information about (a causal origin of) $y$.
 
@@ -207,23 +209,15 @@ However the objective function only produces
 $$P_\pri(z)P_\gen(y|z) = \pop(y)P_\enc(z|y)$$
 
 \vfill
-If the cross-entropy loss is measured by $L_2$ distortion we need $z$ to nearly specify $y$.
+For language models the generator can assign a meaningful probability to a block of text $y$ independent of $z$.
 
 \vfill
-However, for discrete models, such as langauge models, we can campute $P_\gen(y|z)$ even if $z$ carries no information about $y$.
-
-
-\slide{Training the Ecoder: Posterior Collapse}
-
-$$P_\pri(z)P_\gen(y|z) = \pop(y)P_\enc(z|y)$$
-
-\vfill
-For language models training the encoder allows the encoder to ignore $y$.
+When we train a sentence encoder (a thought vector) as the latent valriable of a language model VAE we can get a constant (zero) thought vector.
 
 \vfill
 This is called ``posterior collapse''.
 
-\slide{Optimizing the Encoder: The Reparameterization Trick}
+\slide{The Reparameterization Trick}
 
 $$\enc^* = \argmin_{\enc}\;\;E_{y\sim \pop(y),{\color{red} z\sim P_\enc(z|y)}}\;\left[- \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]$$
 
@@ -236,7 +230,7 @@ To handle this we sample noise $\epsilon$ from a fixed noise distribution and re
 \vfill
 $$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;\;E_{y,{\color{red} \epsilon,z=z_\enc(y,\epsilon)}}\;\left[- \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]$$
 
-\slide{The Re-Parameterization Trick}
+\slide{The Reparameterization Trick}
 
 $$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;\;E_{y,{\color{red} \epsilon,z=z_\enc(y,\epsilon)}}\;\left[- \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]$$
 
@@ -249,6 +243,20 @@ $$\epsilon \sim {\cal N}(0,I),\;\;\;z_\enc(y,\epsilon) = \hat{z}_\enc(y) + \sigm
 
 \vfill
 Optimizing the encoder is tricky for discrete $z$.  Discrete $z$ is handled effectively in EM algorithms and in VQ-VAEs.
+
+\slide{The KL-divergence Optimization}
+\vfill
+\begin{eqnarray*}
+{\cal L}(y) & = & E_{z \sim P_\enc(z|y)}\left[ - \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right] \\
+\\
+& = & {\color{red} KL(P_\enc(z|y),P_\pri(z))} + E_{z \sim P_\enc(z|y)}\left[- \ln P_\gen(y|z)\right] \\
+\\
+\\
+&=& {\color{red} \frac{||\hat{z}_\enc(y) - \hat{z}_\pri||^2}{2\sigma^2}} + E_\epsilon\;\frac{||y - \hat{y}_\gen(\hat{z}_\enc(y) + \epsilon)||^2}{2\sigma^2}
+\end{eqnarray*}
+
+\vfill
+A closed-form expression for the KL term avoids sampling noise.
 
 \slide{EM is Alternating Optimization of the ELBO Loss}
 
