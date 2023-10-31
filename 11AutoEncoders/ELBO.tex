@@ -84,10 +84,14 @@ This is true in each step of a diffusion model.
 
 \slide{Diffusion Model Preview}
 
-\vfill
-A diffusion model multi-step (Markovian) VAE where each step adds a small amount of noise.
+\centerline{\includegraphics[width = 7in]{\images/DiffSequence}}
+
 
 \vfill
+A diffusion model multi-step (Markovian) VAE where each encoder step adds a small amount of noise.
+
+\slide{Diffusion Model Preview}
+
 Each step of a diffusion model is a VAE:
 
 \vfill
@@ -228,21 +232,17 @@ Gradient descent on the encoder parameters must take into account the fact that 
 To handle this we sample noise $\epsilon$ from a fixed noise distribution and replace $z$ with a determinstc function $z_\enc(y,\epsilon)$
 
 \vfill
-$$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;\;E_{y,{\color{red} \epsilon,z=z_\enc(y,\epsilon)}}\;\left[- \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]$$
+$$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;\;E_{y,{\color{red} \epsilon,z=\hat{z}_\enc(y)+\sigma\epsilon}}\;\left[- \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]$$
 
 \slide{The Reparameterization Trick}
 
-$$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;\;E_{y,{\color{red} \epsilon,z=z_\enc(y,\epsilon)}}\;\left[- \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]$$
+$$\enc^*,\pri^*,\gen^* = \argmin_{\enc,\pri,\gen}\;\;E_{y,{\color{red} \epsilon,z=\hat{z}_\enc(y)+\sigma\epsilon}}\;\left[- \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]$$
 
 \vfill
-To get gradients we must have that $z_\enc(y,\epsilon)$ is a smooth function of the encoder parameters and all probabilties must be a smooth function of $z$.
+To get gradients we must have that $\hat{z}_\enc(y)$ is a differentiable function of the encoder parameters.
 
 \vfill
-Commonly we use 
-$$\epsilon \sim {\cal N}(0,I),\;\;\;z_\enc(y,\epsilon) = \hat{z}_\enc(y) + \sigma\epsilon$$
-
-\vfill
-Optimizing the encoder is tricky for discrete $z$.  Discrete $z$ is handled effectively in EM algorithms and in VQ-VAEs.
+Optimizing the encoder is tricky for discrete $z$.  Discrete $z$ is handled effectively in EM algorithms and general vector quantization (VQ) methods.
 
 \slide{The KL-divergence Optimization}
 \vfill

@@ -11,60 +11,103 @@
   \centerline{David McAllester, Autumn 2022}
   \vfill
   \vfil
-  \centerline{Progressive VAEs}
+  \centerline{Markovian VAEs}
   \vfill
   \vfill
 
-\slide{Progressive VAEs}
-These slides on progressive VAES were written``gedanken'' (as a thought experiment) while teaching deep learning
-in 2021.
+\slide{Markovian VAEs}
+
+A diffusion models computes and inverts a sequence
 
 \vfill
-The original motivation for progressive VAEs was to provide a theoretically clean approach to a multi-layer VQ-VAEs.
+\centerline{\includegraphics[width = 7in]{\images/DiffSequence}}
 
 \vfill
-However, this formulation of progressive VAEs will be useful in understanding diffusion models (currently very popular).
-
-
-
-\slide{Progressive VAEs}
-
-We consider a VAE with layers of latent variables $z_1,\dots,z_{L}$ and a population distribution on an observable variable $y$.
+So does an autoregressive language model
 
 \vfill
-The encoder will define $P_\enc(z_1|y)$ and $P_\enc(z_{\ell+1}|z_\ell)$.
+{\huge
+\centerline{{\color{red} [Sally talked to John]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red} [Sally talked to]}
+$\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally]}}
+}
+
+
+\slide{Markovian VAEs}
+
+
+\centerline{\includegraphics[width = 7in]{\images/DiffSequence}}
 
 \vfill
-The decoder will define $P_\dec(z_{\ell-1}|z_\ell)$ and $P_\dec(y|z_1)$.
+{\huge
+\centerline{{\color{red} [Sally talked to John]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red} [Sally talked to]}
+$\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally]}}
+}
 
 \vfill
-Following VQ-VAE, we will train the encoder and the decoder independent of any prior.
+\centerline{$z_0 \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_L$}
+
+\slide{Markovian VAEs}
+\centerline{$z_0 \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_L$}
 
 \vfill
-We then train a prior on the top layer latent variable.  The top level prior and decoder allow us to sample $y$ from the model.
+{\bf Encoder}: $\pop(z_0)$ and $P_\enc(z_{\ell+1}|z_\ell)$.
 
-\slide{Phase One Training}
-
-We train a encoders and decoders $\enc_1,\dec_1$, $\ldots$, $\enc_L,\dec_L$ where the distribution on $z_1,\ldots,Z_L$ is defined by $y$ and the encoder.
-
-$$\enc_1^*,\dec_1^* =\argmin_{\enc_1,\dec_1}\;E_{y,z_1} \left[-\ln P_{\dec_1}(y|z_1)\right]$$
 
 \vfill
-$$\enc_{\ell+1}^*,\dec_{\ell+1}^* = \argmin_{\enc_{\ell+1},\dec_{\ell+1}}\;E_{z_\ell,z_{\ell+1}}\;\left[-\ln P_{\dec_{\ell+1}}(z_{\ell-1}|z_\ell)\right]$$
+{\bf Generator}: $P_\pri(z_L)$ $P_\gen(z_{\ell-1}|z_\ell)$.
 
 \vfill
-If these encoders and decoders share parameters the shared parameters are influenced by all of the above training losses (this observation was added
-after seeing DALLE-2's diffision model).
+The encoder and the decoder define distributions $P_\enc(z_0,\ldots,z_L)$ and $P_\gen(z_0,\ldots,z_N)$ respectively.
 
-\slide{Phase Two Training}
+\slide{VAE Review}
 
-$$\pri^*   =  \argmin_{\pri}\;E_{z_L}\left[-\ln P_\pri(z_L)\right]$$
+A variational autoencoder (VAE) has only $z_0$ (previously written $y$) and $z_1$ (previously written $z$).
 
-\vfill
-Because of the autonomy of the encoder, the universality assumption implies that we get a perfect model of the population distribution on $y$.
+\begin{eqnarray*}
+P_\enc(z_0,z_1) & = & \pop(z_0)P_\enc(z_1|z_0) \\
+\\
+P_\gen(z_0,z_1) & = & P_\pri(z_1)P_\gen(z_0|z_1)
+\end{eqnarray*}
 
-\vfill
-Given the prior and the decoder we can sample images.
+
+\slide{The Single Layer ELBO}
+
+{\huge
+
+\begin{eqnarray*}
+ H(z_0) & = & E_\enc\left[ -\ln \frac{P_\enc(z_0)P_\enc(z_1|z_0)}{P_\enc(z_1|z_0)}\right] \\
+  \\
+  \\
+  & = & E_\enc\left[-\ln \frac{P_{\color{red} \enc}(z_1)P_{\color{red} \enc}(z_0|z_1)}{P_\enc(z_1|z_0)}\right] \\
+  \\
+  \\
+  & {\color{red} \leq} & E_\enc\left[ -\ln \frac{P_{\color{red} \gen}(z_1)P_{\color{red} \gen}(z_0|z_1)}{P_\enc(z_1|z_0)}\right] \;\;\mbox{cross-entropy bounds entropy} \\
+  \\
+  \\
+  & = & E_\enc\;\;KL(P_\enc(z_1|z_0),\;P_{\gen}(z_1)) + E_\enc[-\ln P_{ \gen}(z_0|z_1)]
+\end{eqnarray*}
+}
+
+\slide{The Markovian ELBO}
+
+{\Large
+\begin{eqnarray*}
+H(z_0) & = & E_\enc\left[- \ln\frac{P_\enc(z_0)P_\enc(z_1,\ldots,z_L|z_0)}{P_\enc(z_1,\ldots,z_L|z_0)}\right]\\
+  \\
+  \\
+  & = & E_\enc\left[ - \ln\frac{P_{\color{red} \enc}(z_0|z_1)P_{\color{red} \enc}(z_1|z_2)\cdots P_{\color{red} \enc}(z_{L-1}|z_L)P_{\color{red} \enc}(z_L)}
+  {P_\enc(z_1|z_2,z_0)\cdots P_\enc(z_{L-1}|z_L,z_0)P_\enc(z_L|z_0)}\right] \\
+   \\
+   \\
+  & {\color{red} \leq} & E_\enc\left[ - \ln\frac{P_{\color{red} \gen}(z_0|z_1)P_{\color{red} \gen}(z_1|z_2)\cdots P_{\color{red} \gen}(z_{L-1}|z_L)P_{\color{red} \gen}(z_L)}
+  {P_\enc(z_1|z_2,z_0)\cdots P_\enc(z_{L-1}|z_L,z_0)P_\enc(z_L|z_0)}\right] \\
+\\
+\\
+ & = & \left\{\begin{array}{l}E_\enc\;[-\ln P_\gen(z_0|z_1)]
+                             \\ \\ + \sum_{i=2}^L  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,z_0),\;P_\gen(z_{i-1}|z_i)) \\
+                             \\ + E_\enc\; KL(P_\enc(Z_L|z_0),p_\gen(Z_L))\end{array}\right.
+\end{eqnarray*}
+}
 
 \slide{END}
 

@@ -9,33 +9,10 @@
   \bigskip
   \centerline{David McAllester, Winter 2021}
   \vfill
-  \centerline{\bf Gaussian Models}
-  \vfill
-  \centerline{\bf and The Parels of Differential Entropy}
+  \centerline{\bf Differential Entropy}
   \vfill
 \vfill
 \vfill
-
-\slide{Gaussian VAEs}
-
-\vfill
-\begin{eqnarray*}
-\mbox{VAE:}\;\;\;\pri^*,\dec^*,\enc^* &  = & \argmin_{\pri,\dec,\enc}\;E_{y,z}  \;- \ln \frac{p_\pri(z)p_\dec(y|z)}{p_\enc(z|y)} \\
-\end{eqnarray*}
-
-\vfill
-All models are Gaussian densities.
-
-\vfill
-{\huge 
-\begin{eqnarray*}
-p_\pri(z[i]) & \propto & \exp((z[i]-\mu_\pri[i])^2/2\sigma^2_\pri[i])\\
-\\
-p_\enc(z[i]|y) & \propto & \exp((z[i]-\hat{z}_\enc(y)[i])^2/2\sigma^2_\enc(y)[i])\\
-\\
-p_\dec(y[i]|z) & \propto & \exp((y[i]-\hat{y}_\dec(z)[i])^2/2\sigma_\dec^2(z)[i])\\
-\end{eqnarray*}
-}
 
 \slide{Differential Entropy}
 
@@ -87,7 +64,7 @@ H({\cal N}(0,\sigma^2)) & = & E_{x \sim {\cal N}(0,\sigma^2)} \left[ -\ln \left(
 
 \slide{Sensitivity to the Choice of Units}
 
-$$H(N(0,\sigma)) = C + \ln \sigma$$
+$$H({\cal N}(0,\sigma^2)) = C + \ln \sigma$$
 
 \vfill
 Differential entropy depends on the choice of units --- a distributions on lengths will have a different entropy
@@ -97,17 +74,16 @@ when measuring in inches than when measuring in feet.
 
 Consider the unsupervised training objective.
 
-$$\pri^*,\dec^* = \argmin_{\pri,\dec} E_{y \sim \mathrm{train}}\;-\ln p_{\pri,dec}(y)$$
+$$\Phi^* = \argmin_{\Phi} E_{y \sim \mathrm{train}}\;-\ln p_\Phi(y)$$
 
 \vfill
 The training set is finite (discrete).
 
 \vfill
-For each $y$ the density $p_{\pri,dec}(y)$ can go to infinity.
+For each $y \in \train$ the density $p_\Phi(y)$ can go to infinity.
 
 \vfill
 This will drive the cross-entropy training loss to $-\infty$.
-
 
 \slide{Differential Entropy Can Be Considered Infinite}
 
@@ -152,7 +128,6 @@ I(x,y) & = & E \;\ln \frac{P(x,y)}{P(x)P(y)} \\
 }
 Intuitively, how much does $x$ know about $y$?
 
-
 \slide{Differential Mutual Information}
 
 \begin{eqnarray*}
@@ -175,26 +150,19 @@ $$I(x,z) \leq I(x,y)$$
 
 \slide{Continuous Cross-Entropy as Distortion}
 
-For a Gaussian VAE on images we typically have
+Assume that $\train$ is a set of pairs $(x,y)$ with $y \in R^d$.
+
+\vfill
+Define $P_{\train,\sigma}$ by
+$$(x,y + \sigma\epsilon), \;(x,y) \sim \train, \epsilon \sim {\cal N}(0,I)$$
+
+\vfill
+Define $P_{\Phi,\sigma}(y|x)$ by
+$$(\hat{y}_\Phi(x) + \epsilon),\;\; \epsilon \sim {\cal N}(0,I)$$
 
 {\huge
 \begin{eqnarray*}
-\pri^*,\dec^*, \enc^* & = & \argmin_{\pri,\dec,\enc}\; E_{y,z}\;\; - \ln \frac{p_\pri(z)p_\dec(y|z)}{p_\enc(z|y)}  \\
-\\
-p_\dec(y|z) & = & \frac{1}{Z}\;\exp(-||y-\hat{y}_\dec(z)||^2/2\sigma^2) \\
-\\
-\pri^*,\dec^*, \enc^* & = & \argmin_{\pri,\dec,\enc}\; E_{y,z}\;\; KL(p_\enc(z|y),p_\pri(z))  \;{\color{red} +\; \frac{1}{2\sigma^2}||y-\hat{y}_\dec(z)||^2 + d\ln \sigma}
-\end{eqnarray*}
-}
-
-The KL divergence term is not problematic. The problematic differential cross-entropy term can just be thought of as a weighted $L_2$ distortion.  We typically take $\sigma$ to be a hyper-parameter rather than optimize it in SGD.
-
-\slide{Continuous Cross-Entropy as Distortion}
-
-
-{\huge
-\begin{eqnarray*}
-\pri^*,\dec^*, \enc^* & = & \argmin_{\pri,\dec,\enc}\; E_{y,z}\;\; KL(p_\enc(z|y),p_\pri(z)) \;{\color{red} +\; \lambda\;\mathrm{Dist}(y,\hat{y}_\dec(z))}
+\Phi^* & = & \argmin_{\Phi}\; KL(p_\train(z|y),p_\pri(z)) \;{\color{red} +\; \lambda\;\mathrm{Dist}(y,\hat{y}_\dec(z))}
 \end{eqnarray*}
 }
 
