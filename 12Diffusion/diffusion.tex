@@ -8,279 +8,297 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Autumn 2022}
+  \centerline{David McAllester, Autumn 2023}
   \vfill
   \vfil
-  \centerline{Diffusion Model Basics}
+  \centerline{The Mathematics of Diffusion Models}
   \vfill
+  \centerline{McAllester, arXiv 2023}
+    \vfill
   \vfill
 
 \slidetwo{Denoising Diffusion Probabilistic Models (DDPM)}{Ho, Jain and Abbeel, June 2020}
 
 \centerline{\includegraphics[width = 4in]{\images/DiffCeleb}}
 
+\slide{The Diffusion SDE}
+\centerline{\includegraphics[width = 2in]{\images/DiffSequence}}
 
-\slide{Markovian VAEs}
-
-A diffusion model (DDPM) is a Markovian VAE.
-
-\vfill
-We model $y$ with a latent variable $z =(z_0,z_1,\dots,z_{L})$.
-
-\vfill
-The encoder is defined by $z_0 = y$ and $P_\enc(z_\ell|z_{\ell-1})$.
-
-\vfill
-The prior is defined by $P_\pri(z_L)$ and $P_{\pri}(z_{\ell-1}|z_{\ell})$ and subsumes the decoder as $P_\pri(z_0|z_1)$.
-
-\slide{Markovian VAEs}
-
-We model $y$ with a latent variable $z =(z_0,z_1,\dots,z_{L})$.
-
-\vfill
-The encoder is defined by $z_0 = y$ and $P_\enc(z_\ell|z_{\ell-1})$.
-
-\vfill
-The prior is defined by $P_\pri(z_L)$ and $P_{\pri}(z_{\ell-1}|z_{\ell})$.
-
-\vfill
-We can generate $y$ by sampling from the prior.
-
-\slide{Denoising Diffusion Probabilistic Models (DDPM)}
-
-We model $y$ with a latent variable $z =(z_0,z_1,\dots,z_{L})$ with $z_0 = y$.
-
-\vfill
-In a DDPM we have that $z_\ell$ is the result of adding noise to the given image $y$.
-
-\centerline{\includegraphics[width = 7in]{\images/DiffSequence}}
-
-
-\slide{DDPM SDE}
-
-The DDPM stochastic differential equation (SDE) provides the formal motivation for DDPM models.
-
-\vfill
-{\bf For the DDPM SDE one can show analytically that the true reverse process probabilities  $P(z_{\ell-1}|z_\ell)$ (as defined by the forward process)
-are Gaussians with a known variance.}
-
-\vfill
-This implies that in the SDE limit we can model any population {\bf exactly} by a model in which $P(z_{\ell-1}|z_\ell)$ is taken to be Gaussian.
-
-\slide{DDPM SDE}
-
-To formulate the DDPM SDE we will use the same $\sigma$ at all levels.
-
-$$\mathrm{for}\;\ell \geq 1\;\;\;\;z_\ell = \sqrt{1-\sigma^2}\;z_{\ell-1} + \sigma \epsilon\;\;\;\;\epsilon \sim {\cal N}(0,I)$$
-
-\vfill
-This is designed so that if $z_{\ell-1}$ has unit variance in each dimension then $z_{\ell}$ also has unit variance in each dimension.
-
-\vfill
-$z_0 = y$ is scaled so that each coordinate is in the interval $[0,1]$ so that all $z_\ell$ have approximately unit variance.
-
-\slide{DDPM SDE}
-
-$$\mathrm{for}\;\ell \geq 1\;\;\;\;z_\ell = \sqrt{1-\sigma^2}\;z_{\ell-1} + \sigma \epsilon\;\;\;\;\epsilon \sim {\cal N}(0,I)$$
-
-\vfill
-Unit Variance is desired because in implementations the same prior network is used
-for all levels and it is then important that $z_\ell$ has the same scale and variance for all $\ell$.
-
-\slide{DDPM SDE}
-
-Because a sum of independent Gaussians is also a Gaussian, we can sample $z_{\ell}$ directly from $z_0$.
-
-$$\mathrm{define}\;\;\;\alpha = \sqrt{1-\sigma^2}$$
-
-\vfill
-$$z_{\ell} = \alpha^\ell z_0 + \sqrt{1-\alpha^{2\ell}} \;\epsilon\;\;\;\epsilon \sim {\cal N}(0,I)$$
-
-\vfill
-The variance of the noise term follows from the fact that $z_{\ell}$ has unit variance in each dimention when $z_{\ell-1}$ does.
-
-\slide{DDPM SDE}
-
-We select the endpoint $L$ such that $z_L$ is essentially all noise.
-
-$$z_{L} = \alpha^L z_0 + \sqrt{1-\alpha^{2L}} \;\epsilon\;\;\;\epsilon \sim {\cal N}(0,I)$$
-
-\vfill
-For some limit $\delta$ we select $L$ to be the least integer satisfying
-
-\begin{equation}
-\label{eq:L}
-\alpha^L = \sqrt{1-\sigma^2}^L < \delta
-\end{equation}
-
-\vfill
-The stochastic differential equation is defined by simultaneously taking $\sigma \rightarrow 0$ and $L \rightarrow \infty$ while satisfying (\ref{eq:L}).
-
-\slide{DDPM SDE}
-
+Consider a discrete time process $z(0),z(\Delta t),z(2\Delta t),z(3\Delta t),\ldots$
+{\huge
 \begin{eqnarray*}
-z_t& = & e^{-t}z_0 + \sqrt{1 - e^{-2t}}\;\epsilon_1 \\
-\\
-\Delta z & = & - z_t \Delta t + \sqrt{2\Delta t} \epsilon_2
+  z(0) & = & y,\;\;\;y \sim \pop(y) \\
+  \\
+  z(t+\Delta t) & = & z(t) + \sqrt{\Delta t}\; \epsilon,\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
+}
+A sum of two Gaussians is a Gaussian whose {\bf variance} is the sum of the two variances.
+$$z(t+n\Delta t) = z(t) + \sqrt{n\Delta t}\; \epsilon,\;\;\;\epsilon \sim {\cal N}(0,I)$$
+Here $\sqrt{n \Delta t}$ is the {\bf standard deviation} of the added noise.
 
-\vfill
-A first observation is that for infinitisimal $\Delta t$ we have that $\Delta t$  is infinitesmal compared to $\sqrt{2\Delta t}$.  {\bf Hence the
-distribution $P(\Delta z|z_{t},\Delta t)$ is Gaussian with variance $\sigma = \sqrt{2\Delta t}$ and with mean infinitesimal with respect to the variance.}
 
-\slide{DDPM SDE}
+\slide{The Diffusion SDE}
+The stochastic differential equation is the limit as the discrete step size $\Delta t$ goes to zero.
 
-\begin{eqnarray*}
-z_\ell& = & \sqrt{1 - \sigma^2}\;z_{\ell-1} + \sigma\;\epsilon \\
-\end{eqnarray*}
+{\huge
+\begin{eqnarray}
+  z(0) & = & y,\;\;\;y \sim \pop(y) \nonumber \\
+  \nonumber \\
+  z(t+\Delta t) & = & z(t) + \sqrt{\Delta t}\; \epsilon,\;\;\;\epsilon \sim {\cal N}(0,I) \label{forward}
+\end{eqnarray}
+}
 
-As we take $\sigma \rightarrow  0$ we can rewrite $\sqrt{1-\sigma^2}$ using the first order Taylor expansion of the square root function.
+In this limit equation (\ref{forward}) holds for all $t$ and $\Delta t$.
 
-\begin{eqnarray*}
-z_\ell & = &  \left(1 - \frac{1}{2}\sigma^2\right)\;z_{\ell-1} + \sigma\;\epsilon \\
-\\
-\Delta z & = &  - \frac{1}{2}\sigma^2\;z_{\ell-1} + \sigma\;\epsilon
-\end{eqnarray*}
+\slide{The Markovian ELBO}
 
-\slide{DDPM SDE}
+For a Markovian VAE we have
+{\Large
+\begin{eqnarray}
+  - \ln \pop(y) & = & - \ln\frac{P_\enc(z_N)P_\enc(z_{N-1}|z_N)\cdots P_\enc(z_1|z_2)P_\enc(y|z_1)}{P_\enc(z_N|y)P_\enc(z_{N-1}|z_N,y)\cdots P_\enc(z_1|z_2,y)} \nonumber\\
+  \nonumber \\
+  & = & \left\{\begin{array}{l} KL(P_\enc(z_N|y),\;P_\enc(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\enc(z_{i-1}|z_i)) \\ \\ - E_\enc\;[\ln P_\enc(y|z_1)] \end{array}\right. \label{Markov-eq} \\
+  \nonumber\\
+  H(y) & \leq & \left\{\begin{array}{l} E_\enc\;KL(P_\enc(z_N|y),\;p_\gen(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;p_\gen(z_{i-1}|z_i)) \\ \\ - \ln p_\gen(y|z_1) \end{array}\right. \;\;\;~\label{Markov-ELBO}
+\end{eqnarray}
+}Here we focus on (\ref{Markov-eq}) rather than (\ref{Markov-ELBO}).  We will first derive exact expressions rather than inequalities.
 
-$$\Delta z  =   - \frac{1}{2}\sigma^2\;z_{\ell-1} + \sigma\;\epsilon$$
 
-\vfill
-Here we are taking $\sigma \rightarrow 0$ which means that the second order term $(1/2)\sigma^2 z_\ell$ is infintesimal compared to the noise term
-$\sigma \epsilon$.  This is the hallmark of a stochastic differential equation.
-
-\vfill
-Here $\Delta z$ is distributed as a Gaussian with variance $\sigma$ and an infinitesimal mean (relative to its variance).  The mean is infinitesimal compared to the variance,
-the mean accumulutes over the (very large) sequence $z_0,\ldots, z_L$.
-
-\slide{Rewriting the ELBO}
-We will derive the structure of the prior by optimizing the ELBO loss.
-
-\vfill
-The following is a standard reformulation of the ELBO loss that is valid for all Markovian VAEs.
+\slide{Exact Equalities}
 
 {\huge
 \begin{eqnarray*}
-H(z_0) & \leq & E_{y,z}\; -\ln \frac{p_\pri(z_0,\ldots,z_L)}{p_\enc(z_1,\ldots,z_L|z_0)}
-\\
-\\
-\\
-& = & E_{y,z} -\ln p_\pri(z_L) - \sum_{\ell \geq 1} \frac{\ln p_\pri(z_{\ell-1}|z_\ell)}{\ln p_\enc(z_\ell|z_{\ell-1})}
+  - \ln \pop(y) & = & \left\{\begin{array}{l} KL(P_\enc(z_N|y),\;P_\enc(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\enc(z_{i-1}|z_i)) \\ \\ - E_\enc\;[\ln P_\enc(y|z_1)] \end{array}\right.
+  \end{eqnarray*}
+}
+
+\slide{Reverse-Time Probabilities}
+
+In the limit of small $\Delta t$ it is possible to derive the following.
+
+\vfill
+\begin{eqnarray*}
+  p(z(t - \Delta t)|z(t),y) & = & {\cal N}\left(\begin{array}{l}z(t) + \frac{\Delta t(y - z(t))}{t},\;\; \Delta t I\end{array}\right) \\
+  \\
+  \\
+  p(z(t - \Delta t)|z(t)) & = & {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E[y|t,z(t)] - z(t))}{t}, \;\; \Delta t I\end{array}\right)
+\end{eqnarray*}
+
+
+\slide{The Reverse-Diffusion SDE}
+
+$$p(z(t - \Delta t)|z(t)) = {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E[y|t,z(t)] - z(t))}{t}, \Delta t I\end{array}\right)$$
+
+\vfill
+This equation defines a reverse-diffusion SDE which we can write as
+
+{\huge
+$$z(t - \Delta t) = z(t) + \left(\frac{E[y|t,z(t)] - z(t)}{t}\right)\Delta t + \sqrt{\Delta t} \epsilon,\;\;\epsilon \sim {\cal N}(0,I)$$
+}
+
+\slide{KL-Divergence}
+{\huge
+\begin{eqnarray*}
+  - \ln \pop(y) & = & \left\{\begin{array}{l} KL(P_\enc(z_N|y),\;P_\enc(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\enc(z_{i-1}|z_i)) \\ \\ - E_\enc\;[\ln P_\enc(y|z_1)] \end{array}\right.
+  \end{eqnarray*}
+
+\vfill
+For two Gaussian distributions with the same isotropic covariance we have
+
+\vfill
+$$KL\left(\begin{array}{l}{\cal N}(\mu_1,\sigma^2 I), \\ {\cal N}(\mu_2,\sigma^2 I) \end{array}\right) = \frac{||u_1 -\mu_2||^2}{2\sigma^2}$$
+}
+
+\slide{KL-Divergence}
+\begin{eqnarray*}
+  - \ln \pop(y) & = & \left\{\begin{array}{l} KL(P_\enc(z_N|y),\;P_\enc(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\enc(z_{i-1}|z_i)) \\ \\ - E_\enc\;[\ln P_\enc(y|z_1)] \end{array}\right.
+\end{eqnarray*}
+
+\vfill
+\begin{eqnarray*}
+  p(z(t - \Delta t)|z(t),y) & = & {\cal N}\left(\begin{array}{l}z(t) + \frac{\Delta t(y - z(t))}{t},\;\; \Delta t I\end{array}\right) \\
+  \\
+  \\
+  p(z(t - \Delta t)|z(t)) & = & {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E[y|t,z(t)] - z(t))}{t}, \;\; \Delta t I\end{array}\right)
+\end{eqnarray*}
+
+\slide{KL-Divergences}
+{\huge
+\begin{eqnarray*}
+  p(z(t - \Delta t)|z(t),y) & = & {\cal N}\left(\begin{array}{l}z(t) + \frac{\Delta t(y - z(t))}{t},\;\; \Delta t I\end{array}\right) \\
+  \\
+  \\
+  p(z(t - \Delta t)|z(t)) & = & {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E[y|t,z(t)] - z(t))}{t}, \;\; \Delta t I\end{array}\right)
+\end{eqnarray*}
+
+\vfill
+\begin{eqnarray*}
+  KL\left(\begin{array}{l}p(z(t-\Delta t)|z(t),y), \\p(z(t-\Delta  t)|z(t))\end{array}\right)
+  & = & \left(\frac{||y-E[y|t,z(t)]||^2\Delta t^2}{2t^2\Delta t}\right) \\
+  \\
+  \\
+  & =  & \left(\frac{||y-E[y|t,z(t)]||^2}{2t^2}\right) \Delta t
 \end{eqnarray*}
 }
 
+\slide{KL-Divergences}
+\begin{eqnarray*}
+  - \ln \pop(y) & = & \left\{\begin{array}{l} KL(P_\enc(z_N|y),\;P_\enc(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\enc(z_{i-1}|z_i)) \\ \\ - E_\enc\;[\ln P_\enc(y|z_1)] \end{array}\right. \\
+  \\
+  \\
+  & = & \sum_{i = 2}^N  \left(\frac{||y-E[y|t,z(t)]||^2}{2t^2}\right) \Delta t + E_\enc\;[- \ln P_\enc(y|z_1)] \\
+  & & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;t = i\Delta t
+\end{eqnarray*}
 
-\slide{Rewriting the ELBO}
+\slide{Passing to the Integral}
+
+\begin{eqnarray*}
+- \ln \popd(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{z(t)|y}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ + \;E_{z(t_0)|y}[-\ln p(y|z(t_0))]\end{array}\right. \\
+\\
+\\
+  H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ +\;H(y|z(t_0))\end{array}\right.
+\end{eqnarray*}
+
+\slide{Mutual Information}
 
 {\huge
 \begin{eqnarray*}
-H(z_0) & \leq & E_{y,z} -\ln p_\pri(z_L) - \sum_{1 \leq \ell \leq L } \ln \frac{p_\pri(z_{\ell-1}|z_\ell)}{p_\enc(z_\ell|z_{\ell-1})} \\
-\\
-& = & E_{y,z} -\ln p_\pri(z_L) - \sum_{1 \leq \ell\leq L } \ln \frac{p_\pri(z_{\ell-1}|z_\ell)}{p_\enc(z_\ell|z_{\ell-1},z_0)} \\
-\\
-& = & E_{y,z} -\ln p_\pri(z_L) - \sum_{1 \leq \ell\leq L } \ln \frac{p_\pri(z_{\ell-1}|z_\ell)p(z_{\ell-1}|z_0)}{p_\enc(z_\ell,z_{\ell-1}|z_0)} \\
-\\
-& = & E_{y,z} -\ln p_\pri(z_L) - \sum_{1 \leq \ell\leq L } \ln \frac{p_\pri(z_{\ell-1}|z_\ell)p_\enc(z_{\ell-1}|z_0)}{p_\enc(z_{\ell-1}|z_\ell,z_0)p_\enc(z_\ell|z_0)}
+  H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ +\;H(y|z(t_0))\end{array}\right. \\
+  \\
+  \\
+  H(y) - H(y|z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\
+  \\
+  \\
+  I(y,z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] 
 \end{eqnarray*}
+
+\vfill
+This is the information minimum mean squared error relation (I-MMSE) relation [Guo et al. 2005].
 }
 
-\slide{Rewriting the ELBO}
+\slide{Estimating $E[y|t,z(t)]$}
 
-{\huge
+$$z(t - \Delta t) = z(t) + \left(\frac{E[y|t,z(t)] - z(t)}{t}\right)\Delta t + \epsilon\sqrt{\Delta t},\;\;\epsilon \sim {\cal N}(0,I)$$
+
+\vfill
+We can train a denoising network $\hat{y}(t,z)$ to estimate $E[y|t,z(t)]$ using
+
+\vfill
+$$\hat{y}^* = \argmin_{\hat{y}} E_t \;E \;(\hat{y}(t,z) - y)^2$$
+
+\vfill
+Assuming universality
+
+\vfill
+$$\hat{y}^*(t,z) = E[y|t,z(t)]$$
+
+\slide{Estimating $E[y|t,z(t)]$}
+In practice it is better to train the denoising network on values of the same scale.
+
+\vfill
+If the population values are scaled so as to have scale 1, then the scale of $z(t)$ is $\sqrt{1+t}$.
+$$\hat{y}^* = \argmin_{\hat{y}} E_{t,z(t)} \; (\hat{y}(t,z/\sqrt{1+t}) - y)^2$$
+
+\vfill
+We then have
+$$E[y|t,z(t)] = \hat{y}^*(t,z/\sqrt{1+t}))$$
+
+\slide{The Fokker-Plack Anaylysis (The Score Function)}
+
+For $\epsilon \sim {\cal N}(0,I)$ a general SDE can be written as
 \begin{eqnarray*}
-H(z_0) & \leq & E_{y,z} -\ln p_\pri(z_L) - \sum_{1 \leq \ell\leq L } \ln \frac{p_\pri(z_{\ell-1}|z_\ell)}{p_\enc(z_{\ell-1}|z_\ell,z_0)}
-- \ln \frac{p_\pri(z_{\ell-1}|z_0)}{p_\enc(z_\ell|z_0)} \\
+z(t+\Delta t) & = & z(t) + \mu(z(t),t)\Delta t + \; \sigma(z(t),t)\epsilon\sqrt{\Delta t} \\
 \\
-& = & E_{y,z} -\ln \frac{p_\pri(z_L)}{p_\enc(z_L|z_0)} - \sum_{{\color{red} 2} \leq \ell \leq L} \ln \frac{p_\pri(z_{\ell-1}|z_\ell)}{p_\enc(z_{\ell-1}|z_\ell,z_0)} - \ln p_\pri(z_0|z_1) \\
-\\
-\\
-& = & {\color{red} E_{y,z} \left\{\begin{array}{l}KL(p_\enc(z_L|z_0),p_\pri(z_L)) \\
-\\
-+ \sum_{2 \leq \ell \leq L} KL(p_\enc(z_{\ell-1}|z_\ell,z_0),p_\pri(z_{\ell-1}|z_\ell)) \\
-\\
-- \ln p_\pri(z_0|z_1) \end{array} \right.}
+dz & = & \mu(z(t),t)dt + \; \sigma(z(t),t)dB
 \end{eqnarray*}
+
+\vfill
+The diffusion process is the special case of Brownian motion
+\begin{eqnarray*}
+z(t + \Delta t) & = & z(t) + \epsilon \sqrt{\Delta t} \\
+dz & = & dB
+\end{eqnarray*}
+
+\slide{The Fokker-Planck Equation}
+
+Let $P_t(z)$ be the probability that $z(t) = z$.
+
+$$\frac{\partial P_t(z)}{\partial t} = - \nabla \cdot\left(\begin{array}{l}\mu(z(t),t)P_t(z) \\ \\ - \frac{1}{2}\sigma^2(z(t),t) \nabla_z P_t(z)\end{array}\right)$$
+
+\vfill
+For the special case of diffusion we have
+
+$$\frac{\partial P_t(z)}{\partial t} = - \nabla \cdot\left(-\frac{1}{2}\nabla_z P_t(z)\right)$$
+
+\slide{The Score Function}
+
+$$\frac{\partial P_t(z)}{\partial t} = - \nabla \cdot\left(\begin{array}{l}\mu(z(t),t)P_t(z) \\ \\ - \frac{1}{2}\sigma^2(z(t),t) \nabla_z P_t(z)\end{array}\right)$$
+
+\vfill
+$$\frac{\partial P_t(z)}{\partial t} = - \nabla \cdot\left(-\frac{1}{2}\nabla_z P_t(z)\right)$$
+
+\vfill
+$$\frac{\partial P_t(z)}{\partial t} = - \nabla \cdot\left[\left(-\frac{1}{2}\nabla_z \ln P_t(z)\right)P_t(z)\right]$$
+
+\slide{The Score Function}
+
+$$\frac{\partial P_t(z)}{\partial t} = - \nabla \cdot\left[\left(-\frac{1}{2}\nabla_z \ln P_t(z)\right)P_t(z)\right]$$
+
+\vfill
+$\ln P_t(z)$ is the score function.
+
+\vfill
+The time evolution of $P_t(z)$ can be written as the result of {\bf deterministic} flow given by
+
+$$\frac{dz}{dt} = - \frac{1}{2}\nabla_z \ln p_t(z)$$
+
+\slide{Deterministic Denoising}
+
+Following the deterministic flow backward in time samples from the population!
+
+$$z(t-\Delta t) = z(t) + \frac{1}{2} \nabla_z \ln p_t(z) \Delta t$$
+
+\vfill
+No noise!
+
+\slide{Solving for the Score Function}
+
+{\Large
+\begin{eqnarray*}
+  P_t(z) & = & E_y \;P_t(z|y) \\
+  \\
+  & = & \;E_y\;\frac{1}{Z(t)} e^{-\frac{||z-y||^2}{2t}} \\
+  \\
+  \nabla_z P_t(z) & = & E_y \;P_t(z|y)\; (y-z)/t \\
+  \\
+ & \vdots & \\
+  \\
+  & = & P_t(z)\frac{E[y|t,z]-z}{t}
+  \end{eqnarray*}
 }
 
-\slide{Using The Gaussian Model}
+ {\color{red}
+ $$\nabla_z \ln P_t(z)  = \frac{E[y|t,z]-z}{t}$$
+ }
 
-The ELBO loss is optimized by
+This is Tweedie's formula, Robbins 1956.
 
-$$\pri^*(z_{\ell-1}|z_\ell)  = \argmin_\pri\;E_{y,z}\;\ln  \frac{\;p_\enc(z_{\ell-1}|z_\ell,y)}{p_\pri(z_{\ell-1}|z_\ell)}$$
+\slide{Stochastic vs. Deterministic Denoising}
 
-In the DDPM SDE both distributions are Gaussians with variance $\sigma$.  The KL divergence then becomes.
-
-$$\pri^* = \argmin_\pri \;\sum_\ell \;E_{y,z}\;\frac{||\mu_\pri(z_{\ell-1}|z_\ell) - \mu_\enc(z_{\ell-1}|z_\ell,y)||^2}{2\sigma^2}$$
-
-\slide{Setting the Variance to $\sigma$ in the prior.}
-
-$$\pri^* = \argmin_\pri \;\sum_\ell \;E_{y,z}\;\frac{||\mu_\pri(z_{\ell-1}|z_\ell) - \mu_\enc(z_{\ell-1}|z_\ell,y)||^2}{2\sigma^2}$$
-
-$$\pri^* = \argmin_{\pri}\;\;\sum_\ell\;E_{z_0,\ell,z_{\ell-1},z_\ell} \;\;\frac{||\mu_\pri(\ell,z_\ell) - z_{\ell-1}||^2}{2\sigma^2}$$
-
-\vfill
-The natural thing now is to train $\mu_\pri(\ell,z_\ell)$ to predict $z_{\ell-1}$.
-
-\slide{Reducing the Prior's Dependence on $\ell$.}
-
-We have already reduced the prior's dependence on $\ell$ by making $z_\ell$ have unit variance for all $\ell$.
-
-\vfill
-But additional dependence on $\ell$ can still be removed.
-
-\vfill
-First we solve for $z_{\ell-1}$ in terms of $z_\ell$ and $\epsilon$.
-
-{\huge
-$$z_\ell = \sqrt{1-\sigma^2_\ell}\;z_{\ell-1} + \sigma \epsilon\;\;\;\;\epsilon \sim {\cal N}(0,I)$$
-
-\vfill
-$$z_{\ell-1} = \frac{1}{\sqrt{1-\sigma^2}}(z_\ell - \sigma \epsilon)$$
-
-\vfill
-$$\mu_\pri(\ell,z_\ell) = \frac{1}{\sqrt{1-\sigma^2}}\left(z_\ell - \sigma\; \epsilon_\pri(\ell,z_\ell)\right)$$
-}
-
-\vfill
-Here $\epsilon_\pri(\ell,z_\ell)$ is a trained network whose target value has the same behavior at all levels of $\ell$.
-
-\slide{An $\epsilon$-Prior}
-
-$$\mu_\pri(\ell,z_\ell) = \frac{1}{\sqrt{1-\sigma^2}}\left(z_\ell - \sigma\; \epsilon_\pri(\ell,z_\ell)\right)$$
-
-\vfill
-However, SGD on the loss $\left|\left|z_{\ell-1} - \mu_\pri(\ell,z_\ell)\right|\right|^2$ now scales the SGD gradients on $\Phi$ differently for different $\ell$.
-
-\vfill
-We effectively have different learning rates for different $\ell$.
-
-\slide{Training the $\epsilon$-Prior}
-
-To make the scale of the SGD gradients independent of $\ell$ we use the following loss.
-
-\vfill
-$$\Phi^* = \argmin_{\Phi}
-\left\{\begin{array}{l}\;E_{z_0,\ell,z_{\ell-1},\epsilon \sim {\cal N}(0,I)}\; \\
+\begin{eqnarray*}
+z(t - \Delta t) & = & z(t) + \left(\frac{E[y|t,z(t)] - z(t)}{t}\right)\Delta t + \epsilon\sqrt{\Delta t} \\
 \\
-~\;\;\;\;\left|\left|\epsilon - \epsilon_\pri\left(\ell,z_\ell(z_{\ell-1}),\ell)\right)\right|\right|^2
-\end{array}\right.$$
+\\
+z(t -\Delta t) & = & z(t) + \frac{1}{2}\left(\frac{E[y|t,z(t)] - z(t)}{t}\right)\Delta t
+\end{eqnarray*}
 
-\vfill
-We now repeatedly sample $z_0$, $\ell$, $z_{\ell-1}$ and $\epsilon$ and do gradient updates on $\Phi$.
+\slide{Interpolating Stochastic and Deterministic}
+One can show that for $\lambda \in [0,1]$ the following also samples from the population.
 
-\slide{$\epsilon$-Prior Architecture}
+\begin{eqnarray*}
+z(t -\Delta t) & = & z(t) + \frac{1+\lambda}{2}\left(\frac{E[y|t,z(t)] - z(t)}{t}\right)\Delta t + \lambda \epsilon\sqrt{\Delta t}
+\end{eqnarray*}
 
-The $\epsilon$-decoder is a U-Net.
-
-\centerline{\includegraphics[width = 8in]{\images/U-NET}}
-
-\slide{Generating Faces}
-
-\centerline{\includegraphics[width = 3.5in]{\images/DiffCeleb}}
-
-\vfill
-But this is ``mearly'' a face generator. DALLE and DALLE-2 do text-conditioned image generation.  Also, here we are using $L = 1000$.
 \slide{END}
 }
 \end{document}
