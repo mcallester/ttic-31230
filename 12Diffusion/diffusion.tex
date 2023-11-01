@@ -13,7 +13,7 @@
   \vfil
   \centerline{The Mathematics of Diffusion Models}
   \vfill
-  \centerline{McAllester, arXiv 2023}
+  \centerline{McAllester, arXiv January 2023}
     \vfill
   \vfill
 
@@ -32,45 +32,63 @@ Consider a discrete time process $z(0),z(\Delta t),z(2\Delta t),z(3\Delta t),\ld
   z(t+\Delta t) & = & z(t) + \sqrt{\Delta t}\; \epsilon,\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 }
+
 A sum of two Gaussians is a Gaussian whose {\bf variance} is the sum of the two variances.
 $$z(t+n\Delta t) = z(t) + \sqrt{n\Delta t}\; \epsilon,\;\;\;\epsilon \sim {\cal N}(0,I)$$
 Here $\sqrt{n \Delta t}$ is the {\bf standard deviation} of the added noise.
 
+\slide{SDE Notation}
+In these slides $\epsilon$ will always be a random variable drawn from ${\cal N}(0,I)$.
+
+\vfill
+This correspods to ``$dB$'' in the more standard way of writing SDEs.
+
+{\huge
+\begin{eqnarray*}
+  z(t+\Delta t) & = & z(t) + \mu(z,t)\Delta t + \sigma(z,t)\epsilon\sqrt{\Delta t} \\
+  \\
+  dz & = & \mu(z,t)dt + \sigma(z,t)dB
+\end{eqnarray*}
+}
+
+\vfill
+While the expression in terms of $\Delta t$ is more verbose, it seems clearer to me.
 
 \slide{The Diffusion SDE}
 The stochastic differential equation is the limit as the discrete step size $\Delta t$ goes to zero.
+
+\vfill
+For the diffusion process (Brownian motion) we have
 
 {\huge
 \begin{eqnarray}
   z(0) & = & y,\;\;\;y \sim \pop(y) \nonumber \\
   \nonumber \\
-  z(t+\Delta t) & = & z(t) + \sqrt{\Delta t}\; \epsilon,\;\;\;\epsilon \sim {\cal N}(0,I) \label{forward}
+  z(t+\Delta t) & = & z(t) + \epsilon\sqrt{\Delta t} \label{forward}
 \end{eqnarray}
 }
 
-In this limit equation (\ref{forward}) holds for all $t$ and $\Delta t$.
-
-\slide{The Markovian ELBO}
-
-For a Markovian VAE we have
-{\Large
-\begin{eqnarray}
-  - \ln \pop(y) & = & - \ln\frac{P_\enc(z_N)P_\enc(z_{N-1}|z_N)\cdots P_\enc(z_1|z_2)P_\enc(y|z_1)}{P_\enc(z_N|y)P_\enc(z_{N-1}|z_N,y)\cdots P_\enc(z_1|z_2,y)} \nonumber\\
-  \nonumber \\
-  & = & \left\{\begin{array}{l} KL(P_\enc(z_N|y),\;P_\enc(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\enc(z_{i-1}|z_i)) \\ \\ - E_\enc\;[\ln P_\enc(y|z_1)] \end{array}\right. \label{Markov-eq} \\
-  \nonumber\\
-  H(y) & \leq & \left\{\begin{array}{l} E_\enc\;KL(P_\enc(z_N|y),\;p_\gen(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;p_\gen(z_{i-1}|z_i)) \\ \\ - \ln p_\gen(y|z_1) \end{array}\right. \;\;\;~\label{Markov-ELBO}
-\end{eqnarray}
-}Here we focus on (\ref{Markov-eq}) rather than (\ref{Markov-ELBO}).  We will first derive exact expressions rather than inequalities.
 
 
-\slide{Exact Equalities}
+\vfill
+For diffusion we get that (\ref{forward}) holds for all $t$ and $\Delta t$.
 
-{\huge
-\begin{eqnarray*}
-  - \ln \pop(y) & = & \left\{\begin{array}{l} KL(P_\enc(z_N|y),\;P_\enc(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\enc(z_{i-1}|z_i)) \\ \\ - E_\enc\;[\ln P_\enc(y|z_1)] \end{array}\right.
-  \end{eqnarray*}
-}
+\slide{Probability Notation}
+
+In these slides unsubscripted probability notation, such as
+
+\vfill
+$$P(z(t+\Delta t)|z(t)),$$
+
+\vfill
+or a conditiional expectation such as
+
+\vfill
+$$E[f(y)|z(t)] = E_{y \sim P(y|z_t)}[f(y)],$$
+
+\vfill
+refer the joint probability distribution on $y$ and the (continuous) function $z(t)$
+defined by the diffusion process.
 
 \slide{Reverse-Time Probabilities}
 
@@ -94,86 +112,6 @@ This equation defines a reverse-diffusion SDE which we can write as
 
 {\huge
 $$z(t - \Delta t) = z(t) + \left(\frac{E[y|t,z(t)] - z(t)}{t}\right)\Delta t + \sqrt{\Delta t} \epsilon,\;\;\epsilon \sim {\cal N}(0,I)$$
-}
-
-\slide{KL-Divergence}
-{\huge
-\begin{eqnarray*}
-  - \ln \pop(y) & = & \left\{\begin{array}{l} KL(P_\enc(z_N|y),\;P_\enc(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\enc(z_{i-1}|z_i)) \\ \\ - E_\enc\;[\ln P_\enc(y|z_1)] \end{array}\right.
-  \end{eqnarray*}
-
-\vfill
-For two Gaussian distributions with the same isotropic covariance we have
-
-\vfill
-$$KL\left(\begin{array}{l}{\cal N}(\mu_1,\sigma^2 I), \\ {\cal N}(\mu_2,\sigma^2 I) \end{array}\right) = \frac{||u_1 -\mu_2||^2}{2\sigma^2}$$
-}
-
-\slide{KL-Divergence}
-\begin{eqnarray*}
-  - \ln \pop(y) & = & \left\{\begin{array}{l} KL(P_\enc(z_N|y),\;P_\enc(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\enc(z_{i-1}|z_i)) \\ \\ - E_\enc\;[\ln P_\enc(y|z_1)] \end{array}\right.
-\end{eqnarray*}
-
-\vfill
-\begin{eqnarray*}
-  p(z(t - \Delta t)|z(t),y) & = & {\cal N}\left(\begin{array}{l}z(t) + \frac{\Delta t(y - z(t))}{t},\;\; \Delta t I\end{array}\right) \\
-  \\
-  \\
-  p(z(t - \Delta t)|z(t)) & = & {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E[y|t,z(t)] - z(t))}{t}, \;\; \Delta t I\end{array}\right)
-\end{eqnarray*}
-
-\slide{KL-Divergences}
-{\huge
-\begin{eqnarray*}
-  p(z(t - \Delta t)|z(t),y) & = & {\cal N}\left(\begin{array}{l}z(t) + \frac{\Delta t(y - z(t))}{t},\;\; \Delta t I\end{array}\right) \\
-  \\
-  \\
-  p(z(t - \Delta t)|z(t)) & = & {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E[y|t,z(t)] - z(t))}{t}, \;\; \Delta t I\end{array}\right)
-\end{eqnarray*}
-
-\vfill
-\begin{eqnarray*}
-  KL\left(\begin{array}{l}p(z(t-\Delta t)|z(t),y), \\p(z(t-\Delta  t)|z(t))\end{array}\right)
-  & = & \left(\frac{||y-E[y|t,z(t)]||^2\Delta t^2}{2t^2\Delta t}\right) \\
-  \\
-  \\
-  & =  & \left(\frac{||y-E[y|t,z(t)]||^2}{2t^2}\right) \Delta t
-\end{eqnarray*}
-}
-
-\slide{KL-Divergences}
-\begin{eqnarray*}
-  - \ln \pop(y) & = & \left\{\begin{array}{l} KL(P_\enc(z_N|y),\;P_\enc(z_N)) \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\enc(z_{i-1}|z_i)) \\ \\ - E_\enc\;[\ln P_\enc(y|z_1)] \end{array}\right. \\
-  \\
-  \\
-  & = & \sum_{i = 2}^N  \left(\frac{||y-E[y|t,z(t)]||^2}{2t^2}\right) \Delta t + E_\enc\;[- \ln P_\enc(y|z_1)] \\
-  & & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;t = i\Delta t
-\end{eqnarray*}
-
-\slide{Passing to the Integral}
-
-\begin{eqnarray*}
-- \ln \popd(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{z(t)|y}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ + \;E_{z(t_0)|y}[-\ln p(y|z(t_0))]\end{array}\right. \\
-\\
-\\
-  H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ +\;H(y|z(t_0))\end{array}\right.
-\end{eqnarray*}
-
-\slide{Mutual Information}
-
-{\huge
-\begin{eqnarray*}
-  H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ +\;H(y|z(t_0))\end{array}\right. \\
-  \\
-  \\
-  H(y) - H(y|z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\
-  \\
-  \\
-  I(y,z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] 
-\end{eqnarray*}
-
-\vfill
-This is the information minimum mean squared error relation (I-MMSE) relation [Guo et al. 2005].
 }
 
 \slide{Estimating $E[y|t,z(t)]$}
@@ -202,6 +140,137 @@ $$\hat{y}^* = \argmin_{\hat{y}} E_{t,z(t)} \; (\hat{y}(t,z/\sqrt{1+t}) - y)^2$$
 \vfill
 We then have
 $$E[y|t,z(t)] = \hat{y}^*(t,z/\sqrt{1+t}))$$
+
+
+\slide{Computing Bits per Channel (or Perplexity)}
+
+For any Markovian VAE we have
+
+\vfill
+{\Large
+\begin{eqnarray}
+  - \ln \pop(y) & = & - \ln\frac{P(z_N)P(z_{N-1}|z_N)\cdots P(z_1|z_2)P(y|z_1)}{P(z_N|y)P(z_{N-1}|z_N,y)\cdots P(z_1|z_2,y)} \nonumber\\
+  \nonumber \\
+  \nonumber \\
+  H(y) & = & \left\{\begin{array}{l} E[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \\ \\ +\;E[\ln -P(y|z_1)] \end{array}\right. \label{Markov-eq} \\
+  \nonumber\\
+  \nonumber\\
+  & \leq & \left\{\begin{array}{l} E[KL(P(z_N|y),\;P_\gen(z_N))] \\ \\ + \sum_{i=2}^N  \; E[KL(P(z_{i-1}|z_i,y),\;P_\gen(z_{i-1}|z_i))] \\ \\ E[- \ln P_\gen(y|z_1)] \end{array}\right. \;\;\;~\label{Markov-ELBO}
+\end{eqnarray}
+}
+
+\slide{KL-Divergence}
+
+{\huge
+\begin{eqnarray*}
+  H(y) & = & \left\{\begin{array}{l} E[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \\ \\ +\;E[\ln -P(y|z_1)] \end{array}\right.
+  \end{eqnarray*}
+
+\vfill
+For two Gaussian distributions with the same isotropic covariance we have
+
+\vfill
+$$KL\left(\begin{array}{l}{\cal N}(\mu_1,\sigma^2 I), \\ {\cal N}(\mu_2,\sigma^2 I) \end{array}\right) = \frac{||u_1 -\mu_2||^2}{2\sigma^2}$$
+}
+
+\slide{KL-Divergence}
+{\huge
+\begin{eqnarray*}
+  H(y) & = & \left\{\begin{array}{l} E[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \\ \\ +\;E[\ln -P(y|z_1)] \end{array}\right.
+\end{eqnarray*}
+
+\vfill
+\begin{eqnarray*}
+  p(z(t - \Delta t)|z(t),y) & = & {\cal N}\left(\begin{array}{l}z(t) + \frac{\Delta t(y - z(t))}{t},\;\; \Delta t I\end{array}\right) \\
+  \\
+  \\
+  p(z(t - \Delta t)|z(t)) & = & {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E[y|t,z(t)] - z(t))}{t}, \;\; \Delta t I\end{array}\right)
+\end{eqnarray*}
+}
+
+\slide{KL-Divergences}
+{\huge
+\begin{eqnarray*}
+  p(z(t - \Delta t)|z(t),y) & = & {\cal N}\left(\begin{array}{l}z(t) + \frac{\Delta t(y - z(t))}{t},\;\; \Delta t I\end{array}\right) \\
+  \\
+  \\
+  p(z(t - \Delta t)|z(t)) & = & {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E[y|t,z(t)] - z(t))}{t}, \;\; \Delta t I\end{array}\right)
+\end{eqnarray*}
+
+\vfill
+\begin{eqnarray*}
+  KL\left(\begin{array}{l}p(z(t-\Delta t)|z(t),y), \\p(z(t-\Delta  t)|z(t))\end{array}\right)
+  & = & \left(\frac{||y-E[y|t,z(t)]||^2\Delta t^2}{2t^2\Delta t}\right) \\
+  \\
+  \\
+  & =  & \left(\frac{||y-E[y|t,z(t)]||^2}{2t^2}\right) \Delta t
+\end{eqnarray*}
+}
+
+\slide{KL-Divergences}
+\begin{eqnarray*}
+  H(y) & = & \left\{\begin{array}{l} E[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \\ \\ +\;E[\ln -P(y|z_1)] \end{array}\right.
+  \\
+  \\
+  \\
+  & = & \sum_{i = 2}^N  \left(\frac{||y-E[y|t,z(t)]||^2}{2t^2}\right) \Delta t + E\;[- \ln P(y|z_1)] \\
+  & & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;t = i\Delta t
+\end{eqnarray*}
+
+\slide{KL-Divergences}
+\begin{eqnarray*}
+  H(y) - H(y|z_1) & = & \left\{\begin{array}{l} E[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \end{array}\right.
+  \\
+  \\
+  & = & I[y,z_1] \\
+  \\
+  \\
+  &\leq & 
+  \\
+  & = & \sum_{i = 2}^N  \left(\frac{||y-E[y|t,z(t)]||^2}{2t^2}\right) \Delta t + E\;[- \ln P(y|z_1)] \\
+  & & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;t = i\Delta t
+\end{eqnarray*}
+
+\slide{Passing to the Integral}
+
+\begin{eqnarray*}
+H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{z(t)|y}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ + \;E_{z(t_0)|y}[-\ln p(y|z(t_0))]\end{array}\right. \\
+\\
+\\
+  H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ +\;H(y|z(t_0))\end{array}\right.
+\end{eqnarray*}
+
+\slide{Mutual Information}
+
+{\huge
+\begin{eqnarray*}
+  H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ +\;H(y|z(t_0))\end{array}\right. \\
+  \\
+  \\
+  H(y) - H(y|z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\
+  \\
+  \\
+  I(y,z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] 
+\end{eqnarray*}
+
+\vfill
+This is the information minimum mean squared error relation (I-MMSE) relation [Guo et al. 2005].
+}
+
+\slide{Computing Bits per Channel}
+
+{\huge
+\begin{eqnarray*}
+  I(y,z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - {\color{red}E}[y|t,z(t)]||^2}{2t^2}\right]  \\
+  \\
+  \\
+  \\
+  & \leq & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - {\color{red}\hat{E}}[y|t,z(t)]||^2}{2t^2}\right]
+\end{eqnarray*}
+
+\vfill
+This is the information minimum mean squared error relation (I-MMSE) relation [Guo et al. 2005].
+}
 
 \slide{The Fokker-Plack Anaylysis (The Score Function)}
 
