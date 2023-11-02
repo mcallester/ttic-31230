@@ -44,29 +44,29 @@ $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rig
 }
 
 \vfill
-\centerline{$z_0 \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_L$}
+\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
 
 \slide{Markovian VAEs}
-\centerline{$z_0 \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_L$}
+\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
 
 \vfill
-{\bf Encoder}: $\pop(z_0)$ and $P_\enc(z_{\ell+1}|z_\ell)$.
+{\bf Encoder}: $\pop(y)$, $P_\enc(z_1|y)$, and $P_\enc(z_{\ell+1}|z_\ell)$.
 
 
 \vfill
-{\bf Generator}: $P_\pri(z_L)$ $P_\gen(z_{\ell-1}|z_\ell)$.
+{\bf Generator}: $P_\pri(z_N)$, $P_\gen(z_{\ell-1}|z_\ell)$, $P_\gen(y|z_1)$.
 
 \vfill
-The encoder and the decoder define distributions $P_\enc(z_0,\ldots,z_L)$ and $P_\gen(z_0,\ldots,z_N)$ respectively.
+The encoder and the decoder define distributions $P_\enc(y,\ldots,z_N)$ and $P_\gen(y,\ldots,z_N)$ respectively.
 
 \slide{VAE Review}
 
-A variational autoencoder (VAE) has only $z_0$ (previously written $y$) and $z_1$ (previously written $z$).
+A variational autoencoder (VAE) has only $y$ and $z$.
 
 \begin{eqnarray*}
-P_\enc(z_0,z_1) & = & \pop(z_0)P_\enc(z_1|z_0) \\
+P_\enc(y,z) & = & \pop(y)P_\enc(z|y) \\
 \\
-P_\gen(z_0,z_1) & = & P_\pri(z_1)P_\gen(z_0|z_1)
+P_\gen(y,z) & = & P_\pri(z)P_\gen(y|z)
 \end{eqnarray*}
 
 
@@ -75,16 +75,16 @@ P_\gen(z_0,z_1) & = & P_\pri(z_1)P_\gen(z_0|z_1)
 {\huge
 
 \begin{eqnarray*}
- H(z_0) & = & E_\enc\left[ -\ln \frac{P_\enc(z_0)P_\enc(z_1|z_0)}{P_\enc(z_1|z_0)}\right] \\
+ H_\pop(y) & = & E_\enc\left[ -\ln \frac{P_\enc(y)P_\enc(z|y)}{P_\enc(z|y)}\right] \\
   \\
   \\
-  & = & E_\enc\left[-\ln \frac{P_{\color{red} \enc}(z_1)P_{\color{red} \enc}(z_0|z_1)}{P_\enc(z_1|z_0)}\right] \\
+  & = & E_\enc\left[-\ln \frac{P_{\color{red} \enc}(z)P_{\color{red} \enc}(y|z)}{P_\enc(z|y)}\right] \\
   \\
   \\
-  & {\color{red} \leq} & E_\enc\left[ -\ln \frac{P_{\color{red} \gen}(z_1)P_{\color{red} \gen}(z_0|z_1)}{P_\enc(z_1|z_0)}\right] \;\;\mbox{cross-entropy bounds entropy} \\
+  & {\color{red} \leq} & E_\enc\left[ -\ln \frac{P_{\color{red} \gen}(z)P_{\color{red} \gen}(y|z)}{P_\enc(z|y)}\right] \;\;\mbox{cross-entropy bounds entropy} \\
   \\
   \\
-  & = & E_\enc\;\;KL(P_\enc(z_1|z_0),\;P_{\gen}(z_1)) + E_\enc[-\ln P_{ \gen}(z_0|z_1)]
+  & = & E_\enc\;\;KL(P_\enc(z|y),\;P_{\gen}(z)) + E_\enc[-\ln P_{ \gen}(y|z)]
 \end{eqnarray*}
 }
 
@@ -92,20 +92,20 @@ P_\gen(z_0,z_1) & = & P_\pri(z_1)P_\gen(z_0|z_1)
 
 {\Large
 \begin{eqnarray*}
-H(z_0) & = & E_\enc\left[- \ln\frac{P_\enc(z_0)P_\enc(z_1,\ldots,z_L|z_0)}{P_\enc(z_1,\ldots,z_L|z_0)}\right]\\
+H(y) & = & E_\enc\left[- \ln\frac{P_\enc(y)P_\enc(z_1,\ldots,z_N|y)}{P_\enc(z_1,\ldots,z_N|y)}\right]\\
   \\
   \\
-  & = & E_\enc\left[ - \ln\frac{P_{\color{red} \enc}(z_0|z_1)P_{\color{red} \enc}(z_1|z_2)\cdots P_{\color{red} \enc}(z_{L-1}|z_L)P_{\color{red} \enc}(z_L)}
-  {P_\enc(z_1|z_2,z_0)\cdots P_\enc(z_{L-1}|z_L,z_0)P_\enc(z_L|z_0)}\right] \\
+  & = & E_\enc\left[ - \ln\frac{P_{\color{red} \enc}(y|z_1)P_{\color{red} \enc}(z_1|z_2)\cdots P_{\color{red} \enc}(z_{N-1}|z_N)P_{\color{red} \enc}(z_N)}
+  {P_\enc(z_1|z_2,y)\cdots P_\enc(z_{N-1}|z_N,y)P_\enc(z_N|y)}\right] \\
    \\
    \\
-  & {\color{red} \leq} & E_\enc\left[ - \ln\frac{P_{\color{red} \gen}(z_0|z_1)P_{\color{red} \gen}(z_1|z_2)\cdots P_{\color{red} \gen}(z_{L-1}|z_L)P_{\color{red} \gen}(z_L)}
-  {P_\enc(z_1|z_2,z_0)\cdots P_\enc(z_{L-1}|z_L,z_0)P_\enc(z_L|z_0)}\right] \\
+  & {\color{red} \leq} & E_\enc\left[ - \ln\frac{P_{\color{red} \gen}(y|z_1)P_{\color{red} \gen}(z_1|z_2)\cdots P_{\color{red} \gen}(z_{N-1}|z_N)P_{\color{red} \gen}(z_N)}
+  {P_\enc(z_1|z_2,y)\cdots P_\enc(z_{N-1}|z_N,y)P_\enc(z_N|y)}\right] \\
 \\
 \\
- & = & \left\{\begin{array}{l}E_\enc\;[-\ln P_\gen(z_0|z_1)]
-                             \\ \\ + \sum_{i=2}^L  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,z_0),\;P_\gen(z_{i-1}|z_i)) \\
-                             \\ + E_\enc\; KL(P_\enc(Z_L|z_0),p_\gen(Z_L))\end{array}\right.
+ & = & \left\{\begin{array}{l}E_\enc\;[-\ln P_\gen(y|z_1)]
+                             \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\gen(z_{i-1}|z_i)) \\
+                             \\ + E_\enc\; KL(P_\enc(Z_N|y),p_\gen(Z_N))\end{array}\right.
 \end{eqnarray*}
 }
 
