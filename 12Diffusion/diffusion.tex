@@ -17,10 +17,18 @@
     \vfill
   \vfill
 
-\slidetwo{Denoising Diffusion Probabilistic Models (DDPM)}{Ho, Jain and Abbeel, June 2020}
+\slide{Diffusion Models}
 
-\centerline{\includegraphics[width = 4in]{\images/DiffCeleb}}
+\centerline{Deep unsupervised learning using nonequilibrium thermodynamics}
+\centerline{Sohl-Dickstein et al., 2015.}
 
+\vfill
+\centerline{Denoising Diffusion Probabilistic Models (DDPM)}
+\centerline{Ho, Jain and Abbeel, June 2020}
+
+
+\vfill
+\centerline{\includegraphics[width = 2.5in]{\images/DiffCeleb}}
 
 \slide{Markovian VAEs}
 
@@ -260,11 +268,22 @@ $$\hat{y}^* = \argmin_{\hat{y}} E_{t,z(t)} \; (\hat{y}(t,z/\sqrt{1+t}) - y)^2$$
 \hat{E}[y|t,z(t)] & = & \hat{y}^*(t,z/\sqrt{1+t})) \\
 \end{eqnarray*}
 
-\slide{KL-Divergence}
+\slide{$\hat{y}(t,z)$ is a U-Net}
+
+\vfill
+In practice $\hat{y}(t,z)$ is computed with a U-Net.
+
+\vfill
+\centerline{\includegraphics[width = 6in]{\images/U-NET}}
+
+\vfill
+The U-Nets themselves seem closely related to Markovian VAEs.
+
+\slide{Computing (or Bounding) Entropy}
 
 {\huge
 \begin{eqnarray*}
-  H(y) & = & \left\{\begin{array}{l} E[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \\ \\ +\;E[\ln -P(y|z_1)] \end{array}\right.
+  H(y) & = & \left\{\begin{array}{l} E_y[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E_{y,z_i}[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \\ \\ +\;E_{y,z_1}[\ln -P(y|z_1)] \end{array}\right.
   \end{eqnarray*}
 
 \vfill
@@ -274,10 +293,10 @@ For two Gaussian distributions with the same isotropic covariance we have
 $$KL\left(\begin{array}{l}{\cal N}(\mu_1,\sigma^2 I), {\cal N}(\mu_2,\sigma^2 I) \end{array}\right) = \frac{||u_1 -\mu_2||^2}{2\sigma^2}$$
 }
 
-\slide{KL-Divergence}
+\slide{Computing (or Bounding) Entropy}
 {\huge
 \begin{eqnarray*}
-  H(y) & = & \left\{\begin{array}{l} E[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \\ \\ +\;E[\ln -P(y|z_1)] \end{array}\right.
+  H(y) & = & \left\{\begin{array}{l} E_y[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E_{y,z_i}[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \\ \\ +\;E_{y,z_1}[\ln -P(y|z_1)] \end{array}\right.
 \end{eqnarray*}
 
 \vfill
@@ -285,17 +304,17 @@ $$KL\left(\begin{array}{l}{\cal N}(\mu_1,\sigma^2 I), {\cal N}(\mu_2,\sigma^2 I)
   P(z(t - \Delta t)|z(t),y) & = & {\cal N}\left(\begin{array}{l}z(t) + \frac{\Delta t(y - z(t))}{t},\;\; \Delta t I\end{array}\right) \\
   \\
   \\
-  P(z(t - \Delta t)|z(t)) & = & {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E[y|t,z(t)] - z(t))}{t}, \;\; \Delta t I\end{array}\right)
+  P(z(t - \Delta t)|z(t)) & = & {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E_y[y|t,z(t)] - z(t))}{t}, \;\; \Delta t I\end{array}\right)
 \end{eqnarray*}
 }
 
-\slide{KL-Divergences}
+\slide{Computing (or Bounding) Entropy}
 {\huge
 \begin{eqnarray*}
   P(z(t - \Delta t)|z(t),y) & = & {\cal N}\left(\begin{array}{l}z(t) + \frac{\Delta t(y - z(t))}{t},\;\; \Delta t I\end{array}\right) \\
   \\
   \\
-  P(z(t - \Delta t)|z(t)) & = & {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E[y|t,z(t)] - z(t))}{t}, \;\; \Delta t I\end{array}\right)
+  P(z(t - \Delta t)|z(t)) & = & {\cal N}\left(\begin{array}{l} z(t) + \frac{\Delta t(E_{y,z_i}[y|t,z(t)] - z(t))}{t}, \;\; \Delta t I\end{array}\right)
 \end{eqnarray*}
 
 \vfill
@@ -308,13 +327,13 @@ $$KL\left(\begin{array}{l}{\cal N}(\mu_1,\sigma^2 I), {\cal N}(\mu_2,\sigma^2 I)
 \end{eqnarray*}
 }
 
-\slide{KL-Divergences}
+\slide{Computing (or Bounding) Entropy}
 \begin{eqnarray*}
-  H(y) & = & \left\{\begin{array}{l} E[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \\ \\ +\;E[\ln -P(y|z_1)] \end{array}\right.
+  H(y) & = & \left\{\begin{array}{l} E_y[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E_{y,z_i}[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \\ \\ +\;E_{y,z_1}[\ln -P(y|z_1)] \end{array}\right.
   \\
   \\
   \\
-  & = & \sum_{i = 2}^N  \left(\frac{||y-E[y|t,z(t)]||^2}{2t^2}\right) \Delta t + E\;[- \ln P(y|z_1)] \\
+  & = & \sum_{i = 2}^N  \left(\frac{||y-E[y|t,z(t)]||^2}{2t^2}\right) \Delta t + E_{y,z_1}[- \ln P(y|z_1)] \\
   & & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;t = i\Delta t
 \end{eqnarray*}
 
@@ -344,7 +363,7 @@ H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{z(t)|y}\;\left[\f
 This is the information minimum mean squared error relation (I-MMSE) relation [Guo et al. 2005].
 }
 
-\slide{Computing Bits per Channel}
+\slide{Bounding Entropy}
 
 {\huge
 \begin{eqnarray*}
@@ -443,25 +462,15 @@ z(t -\Delta t) & = & z(t) + \frac{1}{2}\left(\frac{E[y|t,z(t)] - z(t)}{t}\right)
 \end{eqnarray*}
 
 \slide{Interpolating Stochastic and Deterministic}
-One can show that for $\lambda \in [0,1]$ the following also samples from the population.
+One can show that for {\color{red} $\lambda \in [0,1]$} the following also samples from the population.
 
 \begin{eqnarray*}
-z(t -\Delta t) & = & z(t) + \frac{1+\lambda}{2}\left(\frac{E[y|t,z(t)] - z(t)}{t}\right)\Delta t + \lambda \epsilon\sqrt{\Delta t}
+z(t -\Delta t) & = & z(t) + \frac{1+{\color{red} \lambda}}{2}\left(\frac{E[y|t,z(t)] - z(t)}{t}\right)\Delta t + {\color{red} \lambda} \epsilon\sqrt{\Delta t}
 \end{eqnarray*}
 
 
-\slide{$\hat{y}(t,z)$ is a U-Net}
-
-\vfill
-In practice $\hat{y}(t,z)$ is computed with a U-Net.
-
-\vfill
-\centerline{\includegraphics[width = 6in]{\images/U-NET}}
-
-\vfill
-The U-Nets themselves seem closely related to Markovian VAEs.
-
 \slide{END}
 }
+
 \end{document}
 

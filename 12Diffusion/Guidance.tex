@@ -1,0 +1,270 @@
+\input ../SlidePreamble
+\input ../preamble
+\usepackage{cancel}
+
+\begin{document}
+
+{\Huge
+
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+  \bigskip
+  \centerline{David McAllester, Autumn 2023}
+  \vfill
+  \vfil
+  \centerline{\bf Adjusting Generation}
+  \vfill
+  \centerline{\bf Temperature and Guidance}
+  \vfill
+  \vfill
+
+\slide{Temperature-Adjusted Generation}
+\begin{eqnarray*}
+\mbox{Training:}\;\;\;\Phi^* & = & \argmin_\Phi E_{(x,y) \sim \pop}[-\ln P_\Phi(y|x)] \\
+\\
+P_\Phi(y|x) & = & \softmax_y e^{s_\Phi(y|x)} \\
+\\
+\mbox{Generation:}\;\;P^\beta_\Phi(y|x) & = & \softmax_y e^{\beta s_\Phi(y|x)}\;\propto P_\Phi(y)^\beta
+\end{eqnarray*}
+
+\vfill
+In language translation we take $\beta = \infty$ (softmax $\Rightarrow$ argmax).
+
+\vfill
+In language generation from an LLM we take $\beta > 1$.
+
+\slide{Temperature Adjusted Generation for Language}
+
+In practice we use
+
+\begin{eqnarray*}
+P^\beta_\Phi(y_{i+1}\;|\;y_1,\ldots,y_i) & = & \softmax_{y_{i+1}} \beta s_\Phi(y_{i+1}\;|\;y_1,\dots,y_i) \\
+\\
+& \propto &  P_\Phi(y_{i+1}\;|\;y_1,\ldots,y_i)^\beta
+\end{eqnarray*}
+
+\vfill
+This is different from
+
+\vfill
+$$P^\beta_\Phi(y_1,\ldots,y_N) \propto P_\Phi(y_1,\ldots,y_N)^\beta$$
+
+\slide{Temperature-Adjusted Generation for Language}
+
+For language generation $\beta = 1$ tends to yield rambling and incoherent text.
+
+\vfill
+On the other hand $\beta = \infty$ generates repetition.
+
+\vfill
+We look for a Goldilocks $\beta$.
+
+\vfill
+An alternative to temperature-adjusted generation is top-P sampling, also called nucleus sampling, which is similar in structure and performance.
+
+\vfill
+There is a literature on generation adjustment for language.
+
+\slide{Temperature-Adjusted Reverse-Diffusion}
+
+{\huge
+
+$$z(t - \Delta t) = z(t) + \left(\frac{\hat{E}_\Phi[y|t,z(t)] - z(t)}{t}\right)\Delta t + \epsilon\sqrt{\frac{\Delta t}{\beta}}$$
+
+
+\vfill
+$$t' = t/\beta$$
+
+\vfill
+$$z(t' - \Delta t') = z(t') + \beta\left(\frac{\hat{E}_\Phi[y|t',z(t')] - z(t')}{t'}\right)\Delta t' + \epsilon\sqrt{\Delta t'}$$
+
+\vfill
+As with language generation, this is not the same as $P^\beta_\Phi(y) \propto P_\Phi(y)^\beta$
+}
+
+\slide{Classifier-Guidance}
+
+\centerline{Diffusion Models Beat GANs on Image Synthesis}
+\centerline{Dharwali and Nichol, May 2021}
+
+\vfill
+For imagenet class-conditional image generation $P_\Psi(y|x)$ they utilize an imagenet classification model $P_\Psi(x|y)$.
+
+\vfill
+They train a diffusion model for unconditional imagenet generation $P_\Phi(y)$.
+
+\vfill
+They note that
+
+$$P(y|x) = \frac{P(y)P(x|y)}{P(x)} \propto P(y)P(x|y)$$
+
+\slide{Classifier-Guidance}
+
+For generation they modify the reverse-diffusion process so as to intuitively approximate
+
+\vfill
+$$P^\gamma_{\Phi,\Psi}(y|x) = \softmax_y s_\Phi(y)+ \gamma s_\Psi(x|y)$$
+
+\vfill
+$\gamma$ is called the strength of the guidance.
+
+\vfill
+{\huge $$z(t - \Delta t) = z(t) + \beta\left(\frac{\hat{E}_\Phi[y|t,z(t)] + - z(t)}{t} + \gamma s_\Psi(x|y)\right)\Delta t + \epsilon\sqrt{\Delta t}$$}
+
+\vfill
+I have included $\beta$ as a parameter because the relative size of the linear drift and noise is a natural parameter of reverse-diffusion.
+
+
+\slide{Classifier-Guidance}
+
+\vfill
+$$z(t - \Delta t) = z(t) + \beta\left(\frac{\hat{E}_\Phi[y|t,z(t)] - z(t)}{t} + \gamma s_\Psi(x|z(t))\right)\Delta t + \epsilon\sqrt{\Delta t}$$
+
+\vfill
+Note that this uses an {\bf unconditional} model $P_\Phi(y)$ implicitly defined by $\hat{E}_\Phi[y|t,z(t)]$.
+
+\vfill
+This is different from, but motivated by,
+$$P^{\beta,\gamma}_{\Phi,\Psi}(y|x) \propto P_\Phi(y)^\beta P_\Psi(x|y)^{\beta + \gamma}$$
+
+\slide{Conditional Diffusion Models}
+
+$$P_\Phi(y\;|\;\mbox{panda bear chemist})$$
+
+\vfill
+\centerline{\includegraphics[width = 2.5 in]{\images/DALLEpanda}}
+
+\vfill
+\centerline {Train $\hat{E}_\Phi[y|t,z(t),{\color{red} x}]$}
+
+\slide{Classifier-Free Guidance (Self-Guidance)}
+
+\centerline{Classifier-Free Diffusion Guidance}
+\centerline{Ho and Salimans, December 2021 (NeurIPS workshop)}
+\begin{eqnarray*}
+\mbox{Training:}\;\;\;\Phi^* & = & \argmin_\Phi E_{(x,y) \sim \pop}[-\ln P_\Phi(y|x)] \\
+\\
+P_\Phi(y|x) & = & \softmax_y e^{s_\Phi(y|x)}
+\end{eqnarray*}
+
+\vfill
+We introduce a special $x$-value $\emptyset$ and arrange that
+
+\vfill
+{\color{red} $$\pop(y|\emptyset) = \pop(y).$$}
+
+\slide{Guidance}
+
+They modify the reverse-diffusion process to intuitively approximate
+$$P^\beta_\Phi(y|x) = \softmax_y e^{\beta({\color{red} s_\Phi(y|x)} - (1-1/\beta){\color{red} s_\Phi(y|\emptyset)})},\;\;\beta \geq 1$$
+
+\vfill
+For $\beta = 1$ we have no adjustment.
+
+$$P^1_\Phi(y|x) = \softmax_y e^{s_\Phi(y|x)}$$
+
+\vfill
+For $\beta >> 1$ (used in practice) we have.
+
+$$P^\beta_\Phi(y|x) \approx \softmax_y e^{\color{red} \beta(s_\Phi(y|x) - s_\Phi(y|\emptyset))}$$
+
+\slide{Guidance}
+
+
+$$P^\beta_\Phi(y|x) = \softmax_y e^{\beta(s_\Phi(y|x) - s_\Phi(y|\emptyset))}\;\;\propto \;\;      \left(\frac{P_\Phi(y|x)}{P_\Phi(y|\emptyset)}\right)^\beta$$
+
+\vfill
+
+\vfill
+{\huge $$z(t - \Delta t) = z(t) + \left(\frac{{\color{red} \beta(\hat{E}_\Phi[y|t,z(t),x] - \hat{E}_\Phi[y|t,z(t),\emptyset])} - z_t}{t}\right)\Delta t + \epsilon\sqrt{\Delta t}$$}
+
+\slide{Guidance}
+
+$$P^\beta_\Phi(y|x) \;\;\propto \;\;  \left(\frac{P_\Phi(y|x)}{P_\Phi(y|\emptyset)}\right)^\beta$$
+
+\vfill
+Ho and Salimans motivate this from Classifier Guidance and
+
+\vfill
+{\huge \begin{eqnarray*}
+P(x|y) & \propto & \frac{P(y|x)}{P(y)}
+\end{eqnarray*}}
+
+\vfill
+But this is false.
+
+\vfill
+{\huge $$P(x|y) = \frac{P(x)P(y|x)}{P(y)} \;\cancel{\propto}\;\frac{P(y|x)}{P(y)}$$}
+
+\slide{Guidance}
+
+{\huge $$z(t - \Delta t) = z(t) + \beta\left(\frac{{\color{red} (\hat{E}_\Phi[y|t,z(t),x] - \hat{E}_\Phi[y|t,z(t),\bf{blurry}])} - z_t}{t}\right)\Delta t + \epsilon\sqrt{\Delta t}$$}
+
+\vfill
+This will make the generated image sharper.
+
+\slide{A More General Formulation}
+
+Consider a Markovian VAE with deterministic encoder $z_{1,\enc}(y)$ and $z_{i+1,\enc}(z_i)$ and where $z_{N,\enc}(z_{N-1})$ is a constant $\emptyset$.
+
+\vfill
+This holds for language models but also seems reasonable for a StyleGAN inverter (long story).
+
+\vfill
+This is an enormous simplification (a good thing).
+
+{\huge
+$$\enc^*,\gen^* = \argmin_{\enc,\gen} \;E_y[- \ln (P_\gen(y|z_1)P_\gen(z_1|z_2)\cdots P_\gen(z_{N-1}|\emptyset))]$$
+}
+
+\slide{A More General Formulation}
+
+{\huge
+$$\enc^*,\gen^* = \argmin_{\enc,\gen} \;E_y[- \ln (P_\gen(y|z_1)P_\gen(z_1|z_2)\cdots P_\gen(z_{N-1}|\emptyset))]$$
+}
+
+\vfill
+In a language model we generate one word at a time.
+
+\vfill
+But we can also consider the case where $z_i$ is a vector whose dimension is decreasing as $i$ increases.
+
+\vfill
+In this case we can use
+
+$$P_\gen(z_{i-1}|z_i) = \hat{z}_{i-1}(z_i) + \epsilon,\;\;\;\epsilon\sim {\cal N}(0,I)$$
+
+\slide{A More General Formulation}
+
+{\huge
+$$\enc^*,\gen^* = \argmin_{\enc,\gen} \;E_y[- \ln (P_\gen(y|z_1)P_\gen(z_1|z_2)\cdots P_\gen(z_{N-1}|\emptyset))]$$
+}
+
+$$P_\gen(z_{i-1}|z_i) = \hat{z}_{i-1}(z_i) + \epsilon,\;\;\;\epsilon\sim {\cal N}(0,I)$$
+
+$$\enc^*,\gen^* = \argmin_{\enc,\gen} \;E_y\;||y - z_1||^2 + \sum_{i=1}^{N-1} ||z_i - \hat{z}_i(z_{i+1})||^2$$
+
+\slide{Conditional Generation}
+
+Training the encoder and the decoder conditioned on $x$ (as in a language translation model).
+This trains $\hat{z}_{i-1}(z_i,x)$.
+
+\vfill
+For generation we then have
+
+{\huge
+\begin{eqnarray*}
+\mbox{Unadjusted:} \;z_{i-1} & = & \hat{z}_{i-1}(z_i,x) + \epsilon \\
+\\
+\mbox{Temperature Adjusted:}\;\;z_{i-1} & = & \hat{z}_{i-1}(z_i,x) + \frac{1}{\sqrt{\beta}}\;\epsilon \\
+\\
+\mbox{Guidance Adjusted:} \;\;z_{i-1} & = & \hat{z}_{i-1}(z_i,x_\mathrm{good}) - \hat{z}_{i-1}(z_i,x_\mathrm{bad}) + \frac{1}{\sqrt{\beta}}\;\epsilon
+\end{eqnarray*}
+}
+
+\vfill
+Output $z_1$
+
+\slide{END}
+}
+\end{document}
+
