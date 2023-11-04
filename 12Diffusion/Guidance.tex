@@ -21,16 +21,12 @@
 \begin{eqnarray*}
 \mbox{Training:}\;\;\;\Phi^* & = & \argmin_\Phi E_{(x,y) \sim \pop}[-\ln P_\Phi(y|x)] \\
 \\
-P_\Phi(y|x) & = & \softmax_y e^{s_\Phi(y|x)} \\
 \\
-\mbox{Generation:}\;\;P^\beta_\Phi(y|x) & = & \softmax_y e^{\beta s_\Phi(y|x)}\;\propto P_\Phi(y)^\beta
+P_\Phi(y|x) & = & \softmax_y s_\Phi(y|x) \\
+\\
+\\
+\mbox{Desired Generation:}\;\;P^\beta_\Phi(y|x) & = & \softmax_y \beta s_\Phi(y|x)\;\propto P_\Phi(y)^\beta
 \end{eqnarray*}
-
-\vfill
-In language translation we take $\beta = \infty$ (softmax $\Rightarrow$ argmax).
-
-\vfill
-In language generation from an LLM we take $\beta > 1$.
 
 \slide{Temperature Adjusted Generation for Language}
 
@@ -50,6 +46,9 @@ $$P^\beta_\Phi(y_1,\ldots,y_N) \propto P_\Phi(y_1,\ldots,y_N)^\beta$$
 
 \slide{Temperature-Adjusted Generation for Language}
 
+In language translation we take $\beta = \infty$ (softmax $\Rightarrow$ argmax).
+
+\vfill
 For language generation $\beta = 1$ tends to yield rambling and incoherent text.
 
 \vfill
@@ -80,48 +79,33 @@ As with language generation, this is not the same as $P^\beta_\Phi(y) \propto P_
 \centerline{Dharwali and Nichol, May 2021}
 
 \vfill
-For imagenet class-conditional image generation $P_\Psi(y|x)$ they utilize an imagenet classification model $P_\Psi(x|y)$.
+For {\bf class-conditional} generation of imagenet images $P(y|x)$ they train an {\bf unconditional} diffusion image model $P_\Phi(y)$
+and utilize a pretrained imagenet classification model $P_\Psi(x|y)$.
 
 \vfill
-They train a diffusion model for unconditional imagenet generation $P_\Phi(y)$.
-
 \centerline{\includegraphics[width = 4in]{\images/DiffGAN}}
 
 \slide{Classifier Guidance}
 
 They note that
 
+\vfill
 $$P(y|x) = \frac{P(y)P(x|y)}{P(x)} \propto P(y)P(x|y)$$
 
 \vfill
 For generation they modify the reverse-diffusion process so as to intuitively approximate
 
-\vfill
-$$P^\gamma_{\Phi,\Psi}(y|x) = \softmax_y s_\Phi(y)+ \gamma s_\Psi(x|y)$$
-
-\vfill
-$\gamma$ is called the strength of the guidance.
+$$P^{\beta,\gamma}_{\Phi,\Psi}(y|x) = \softmax_y \beta(s_\Phi(y)+ \gamma s_\Psi(x|y)) \; \propto \;P_\Phi(y)^\beta P_\Psi(x|y)^{\beta + \gamma}$$
 
 \slide{Classifier Guidance}
 
-
-$$P^\gamma_{\Phi,\Psi}(y|x) = \softmax_y s_\Phi(y)+ \gamma s_\Psi(x|y)$$
-
-\vfill
-{\huge $$z(t - \Delta t) = z(t) + \left(\frac{\hat{E}_\Phi[y|t,z(t)] + - z(t)}{t} + \gamma s_\Psi(x|y)\right)\Delta t + \frac{1}{\sqrt{\beta}}\;\epsilon\sqrt{\Delta t}$$}
-
-\vfill
-I have included $\beta$ as a parameter because the relative size of the linear drift and noise is a natural parameter of reverse-diffusion.
-
-\slide{Classifier Guidance}
-
-{\huge $$z(t - \Delta t) = z(t) + \left(\frac{\hat{E}_\Phi[y|t,z(t)] + - z(t)}{t} + \gamma s_\Psi(x|y)\right)\Delta t + \frac{1}{\sqrt{\beta}}\;\epsilon\sqrt{\Delta t}$$}
-
-\vfill
-Note that this uses an {\bf unconditional} model $P_\Phi(y)$ implicitly defined by $\hat{E}_\Phi[y|t,z(t)]$.
+{\huge $$z(t - \Delta t) = z(t) + \left(\frac{\hat{E}_\Phi[y|t,z(t)] - z(t)}{t} + {\color{red} \gamma} s_\Psi(x|z(t))\right)\Delta t
++ \frac{1}{\sqrt{\color{red} \beta}}\;\epsilon\sqrt{\Delta t}$$}
 
 \vfill
 This is different from, but motivated by,
+
+\vfill
 $$P^{\beta,\gamma}_{\Phi,\Psi}(y|x) \propto P_\Phi(y)^\beta P_\Psi(x|y)^{\beta + \gamma}$$
 
 \slide{Conditional Diffusion Models}
@@ -141,7 +125,7 @@ $$P_\Phi(y\;|\;\mbox{panda bear chemist})$$
 \begin{eqnarray*}
 \mbox{Training:}\;\;\;\Phi^* & = & \argmin_\Phi E_{(x,y) \sim \pop}[-\ln P_\Phi(y|x)] \\
 \\
-P_\Phi(y|x) & = & \softmax_y e^{s_\Phi(y|x)}
+P_\Phi(y|x) & = & \softmax_y s_\Phi(y|x)
 \end{eqnarray*}
 
 \vfill
@@ -152,9 +136,9 @@ We introduce a special $x$-value $\emptyset$ and arrange that
 
 \slide{Guidance}
 
-For $\beta > 0$ They modify the reverse-diffusion process to intuitively approximate
-$$P^\beta_\Phi(y|x) = \softmax_y e^{\beta s_\Phi(y|x) - (\beta-1)s_\Phi(y|\emptyset)} \;\;\propto
-\frac{P_\Phi(y|x)^\beta}{P_\Phi(y|\emptyset)^{\beta-1}}$$
+For $\beta > 0$ they modify the reverse-diffusion process to intuitively approximate
+$$P^\beta_\Phi(y|{\color{red} x}) = \softmax_y  \beta s_\Phi(y|{\color{red} x}) - (\beta-1)s_\Phi(y|{\color{red} \emptyset}) \;\;\propto
+\frac{P_\Phi(y|{\color{red} x})^\beta}{P_\Phi(y|{\color{red} \emptyset})^{\beta-1}}$$
 
 \vfill
 For $\beta = 1$ we have no adjustment.
@@ -164,22 +148,22 @@ $$P^1_\Phi(y|x) = P_\Phi(y|x)$$
 \vfill
 For $\beta >> 1$ (used in practice) we have.
 
-$$P^\beta_\Phi(y|x) \approx \softmax_y e^{\beta(s_\Phi(y|x) - s_\Phi(y|\emptyset))} \;\propto\; \left(\frac{P_\Phi(y|x)}{P_\Phi(y|\emptyset)}\right)^\beta$$
+$$P^\beta_\Phi(y|{\color{red} x}) \approx \softmax_y \beta(s_\Phi(y|{\color{red} x}) - s_\Phi(y|{\color{red} \emptyset})) \;\propto\; \left(\frac{P_\Phi(y|{\color{red} x})}{P_\Phi(y|{\color{red} \emptyset})}\right)^\beta$$
 
 \slide{Guidance}
 
 
-$$P^\beta_\Phi(y|x) = \softmax_y e^{\beta(s_\Phi(y|x) - s_\Phi(y|\emptyset))}\;\;\propto \;\;      \left(\frac{P_\Phi(y|x)}{P_\Phi(y|\emptyset)}\right)^\beta$$
+$$P^\beta_\Phi(y|{\color{red} x}) = \softmax_y \beta(s_\Phi(y|{\color{red} x}) - s_\Phi(y|{\color{red} \emptyset}))\;\;\propto \;\;      \left(\frac{P_\Phi(y|{\color{red} x})}{P_\Phi(y|{\color{red} \emptyset})}\right)^\beta$$
 
 \vfill
 
 \vfill
-{\huge $$z(t - \Delta t) = z(t) + \left(\frac{{\color{red}(\hat{E}_\Phi[y|t,z(t),x] - \hat{E}_\Phi[y|t,z(t),\emptyset])} - z_t}{t}\right)\Delta t
+{\huge $$z(t - \Delta t) = z(t) + \left(\frac{(\hat{E}_\Phi[y|t,z(t),{\color{red} x}] - \hat{E}_\Phi[y|t,z(t),{\color{red} \emptyset}]) - z_t}{t}\right)\Delta t
 + \frac{1}{\sqrt{\beta}}\;\epsilon\sqrt{\Delta t}$$}
 
 \slide{Guidance}
 
-$$P^\beta_\Phi(y|x) \;\;\propto \;\;  \left(\frac{P_\Phi(y|x)}{P_\Phi(y|\emptyset)}\right)^\beta$$
+$$P^\beta_\Phi(y|{\color{red} x}) \;\;\propto \;\;  \left(\frac{P_\Phi(y|{\color{red} x})}{P_\Phi(y|{\color{red} \emptyset})}\right)^\beta$$
 
 \vfill
 Ho and Salimans motivate this from Classifier Guidance and
@@ -197,7 +181,7 @@ But this is false.
 
 \slide{Guidance}
 
-{\huge $$z(t - \Delta t) = z(t) + \left(\frac{{\color{red} (\hat{E}_\Phi[y|t,z(t),x] - \hat{E}_\Phi[y|t,z(t),\bf{blurry}])} - z_t}{t}\right)\Delta t
+{\huge $$z(t - \Delta t) = z(t) + \left(\frac{(\hat{E}_\Phi[y|t,z(t),{\color{red} x}] - \hat{E}_\Phi[y|t,z(t),{\color{red} \mathrm{blurry}}]) - z_t}{t}\right)\Delta t
 + \frac{1}{\sqrt{\beta}}\;\epsilon\sqrt{\Delta t}$$}
 
 \vfill
@@ -205,13 +189,14 @@ This will make the generated image sharper.
 
 \slide{A More General Formulation}
 
-Consider a Markovian VAE with deterministic encoder $z_{1,\enc}(y)$ and $z_{i+1,\enc}(z_i)$ and where $z_{N,\enc}(z_{N-1})$ is a constant $\emptyset$.
+Consider a Markovian VAE with deterministic encoder $z_1(y)$ and $z_{i+1}(z_i)$ and where $z_N(z_{N-1})$ is a constant $\emptyset$.
 
 \vfill
-This holds for language models but also seems reasonable for a StyleGAN inverter (long story).
+This holds for language models but also seems reasonable for image VAEs provided that a stochastic generator
+is trained in conjunction with the encoder (I claim).
 
 \vfill
-This is an enormous simplification (a good thing).
+Deterministic encoding yields an enormous simplification (a good thing).
 
 {\huge
 $$\enc^*,\gen^* = \argmin_{\enc,\gen} \;E_y[- \ln (P_\gen(y|z_1)P_\gen(z_1|z_2)\cdots P_\gen(z_{N-1}|\emptyset))]$$
@@ -227,7 +212,10 @@ $$\enc^*,\gen^* = \argmin_{\enc,\gen} \;E_y[- \ln (P_\gen(y|z_1)P_\gen(z_1|z_2)\
 In a language model we generate one word at a time.
 
 \vfill
-But we can also consider the case where $z_i$ is a vector whose dimension is decreasing as $i$ increases.
+But we can also consider the case where $z_i$ is a vector whose dimension is (slightly) decreasing as $i$ increases.
+
+\vfill
+Instead of adding one word at a time we add a small number of numbers (dimensions) at a time.
 
 \vfill
 In this case we can use
