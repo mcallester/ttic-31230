@@ -68,20 +68,13 @@ There is a literature on generation adjustment for language.
 
 {\huge
 
-$$z(t - \Delta t) = z(t) + \left(\frac{\hat{E}_\Phi[y|t,z(t)] - z(t)}{t}\right)\Delta t + \epsilon\sqrt{\frac{\Delta t}{\beta}}$$
-
-
-\vfill
-$$t' = t/\beta$$
-
-\vfill
-$$z(t' - \Delta t') = z(t') + \beta\left(\frac{\hat{E}_\Phi[y|t',z(t')] - z(t')}{t'}\right)\Delta t' + \epsilon\sqrt{\Delta t'}$$
+$$z(t - \Delta t) = z(t) + \left(\frac{\hat{E}_\Phi[y|t,z(t)] - z(t)}{t}\right)\Delta t + \frac{1}{\sqrt{\beta}}\;\epsilon\sqrt{\Delta t}$$
 
 \vfill
 As with language generation, this is not the same as $P^\beta_\Phi(y) \propto P_\Phi(y)^\beta$
 }
 
-\slide{Classifier-Guidance}
+\slide{Classifier Guidance}
 
 \centerline{Diffusion Models Beat GANs on Image Synthesis}
 \centerline{Dharwali and Nichol, May 2021}
@@ -92,13 +85,15 @@ For imagenet class-conditional image generation $P_\Psi(y|x)$ they utilize an im
 \vfill
 They train a diffusion model for unconditional imagenet generation $P_\Phi(y)$.
 
-\vfill
+\centerline{\includegraphics[width = 4in]{\images/DiffGAN}}
+
+\slide{Classifier Guidance}
+
 They note that
 
 $$P(y|x) = \frac{P(y)P(x|y)}{P(x)} \propto P(y)P(x|y)$$
 
-\slide{Classifier-Guidance}
-
+\vfill
 For generation they modify the reverse-diffusion process so as to intuitively approximate
 
 \vfill
@@ -107,17 +102,20 @@ $$P^\gamma_{\Phi,\Psi}(y|x) = \softmax_y s_\Phi(y)+ \gamma s_\Psi(x|y)$$
 \vfill
 $\gamma$ is called the strength of the guidance.
 
+\slide{Classifier Guidance}
+
+
+$$P^\gamma_{\Phi,\Psi}(y|x) = \softmax_y s_\Phi(y)+ \gamma s_\Psi(x|y)$$
+
 \vfill
-{\huge $$z(t - \Delta t) = z(t) + \beta\left(\frac{\hat{E}_\Phi[y|t,z(t)] + - z(t)}{t} + \gamma s_\Psi(x|y)\right)\Delta t + \epsilon\sqrt{\Delta t}$$}
+{\huge $$z(t - \Delta t) = z(t) + \left(\frac{\hat{E}_\Phi[y|t,z(t)] + - z(t)}{t} + \gamma s_\Psi(x|y)\right)\Delta t + \frac{1}{\sqrt{\beta}}\;\epsilon\sqrt{\Delta t}$$}
 
 \vfill
 I have included $\beta$ as a parameter because the relative size of the linear drift and noise is a natural parameter of reverse-diffusion.
 
+\slide{Classifier Guidance}
 
-\slide{Classifier-Guidance}
-
-\vfill
-$$z(t - \Delta t) = z(t) + \beta\left(\frac{\hat{E}_\Phi[y|t,z(t)] - z(t)}{t} + \gamma s_\Psi(x|z(t))\right)\Delta t + \epsilon\sqrt{\Delta t}$$
+{\huge $$z(t - \Delta t) = z(t) + \left(\frac{\hat{E}_\Phi[y|t,z(t)] + - z(t)}{t} + \gamma s_\Psi(x|y)\right)\Delta t + \frac{1}{\sqrt{\beta}}\;\epsilon\sqrt{\Delta t}$$}
 
 \vfill
 Note that this uses an {\bf unconditional} model $P_\Phi(y)$ implicitly defined by $\hat{E}_\Phi[y|t,z(t)]$.
@@ -136,9 +134,9 @@ $$P_\Phi(y\;|\;\mbox{panda bear chemist})$$
 \vfill
 \centerline {Train $\hat{E}_\Phi[y|t,z(t),{\color{red} x}]$}
 
-\slide{Classifier-Free Guidance (Self-Guidance)}
+\slide{Classifier Free Guidance (Self-Guidance)}
 
-\centerline{Classifier-Free Diffusion Guidance}
+\centerline{Classifier Free Diffusion Guidance}
 \centerline{Ho and Salimans, December 2021 (NeurIPS workshop)}
 \begin{eqnarray*}
 \mbox{Training:}\;\;\;\Phi^* & = & \argmin_\Phi E_{(x,y) \sim \pop}[-\ln P_\Phi(y|x)] \\
@@ -154,18 +152,19 @@ We introduce a special $x$-value $\emptyset$ and arrange that
 
 \slide{Guidance}
 
-They modify the reverse-diffusion process to intuitively approximate
-$$P^\beta_\Phi(y|x) = \softmax_y e^{\beta({\color{red} s_\Phi(y|x)} - (1-1/\beta){\color{red} s_\Phi(y|\emptyset)})},\;\;\beta \geq 1$$
+For $\beta > 0$ They modify the reverse-diffusion process to intuitively approximate
+$$P^\beta_\Phi(y|x) = \softmax_y e^{\beta s_\Phi(y|x) - (\beta-1)s_\Phi(y|\emptyset)} \;\;\propto
+\frac{P_\Phi(y|x)^\beta}{P_\Phi(y|\emptyset)^{\beta-1}}$$
 
 \vfill
 For $\beta = 1$ we have no adjustment.
 
-$$P^1_\Phi(y|x) = \softmax_y e^{s_\Phi(y|x)}$$
+$$P^1_\Phi(y|x) = P_\Phi(y|x)$$
 
 \vfill
 For $\beta >> 1$ (used in practice) we have.
 
-$$P^\beta_\Phi(y|x) \approx \softmax_y e^{\color{red} \beta(s_\Phi(y|x) - s_\Phi(y|\emptyset))}$$
+$$P^\beta_\Phi(y|x) \approx \softmax_y e^{\beta(s_\Phi(y|x) - s_\Phi(y|\emptyset))} \;\propto\; \left(\frac{P_\Phi(y|x)}{P_\Phi(y|\emptyset)}\right)^\beta$$
 
 \slide{Guidance}
 
@@ -175,7 +174,8 @@ $$P^\beta_\Phi(y|x) = \softmax_y e^{\beta(s_\Phi(y|x) - s_\Phi(y|\emptyset))}\;\
 \vfill
 
 \vfill
-{\huge $$z(t - \Delta t) = z(t) + \left(\frac{{\color{red} \beta(\hat{E}_\Phi[y|t,z(t),x] - \hat{E}_\Phi[y|t,z(t),\emptyset])} - z_t}{t}\right)\Delta t + \epsilon\sqrt{\Delta t}$$}
+{\huge $$z(t - \Delta t) = z(t) + \left(\frac{{\color{red}(\hat{E}_\Phi[y|t,z(t),x] - \hat{E}_\Phi[y|t,z(t),\emptyset])} - z_t}{t}\right)\Delta t
++ \frac{1}{\sqrt{\beta}}\;\epsilon\sqrt{\Delta t}$$}
 
 \slide{Guidance}
 
@@ -197,7 +197,8 @@ But this is false.
 
 \slide{Guidance}
 
-{\huge $$z(t - \Delta t) = z(t) + \beta\left(\frac{{\color{red} (\hat{E}_\Phi[y|t,z(t),x] - \hat{E}_\Phi[y|t,z(t),\bf{blurry}])} - z_t}{t}\right)\Delta t + \epsilon\sqrt{\Delta t}$$}
+{\huge $$z(t - \Delta t) = z(t) + \left(\frac{{\color{red} (\hat{E}_\Phi[y|t,z(t),x] - \hat{E}_\Phi[y|t,z(t),\bf{blurry}])} - z_t}{t}\right)\Delta t
++ \frac{1}{\sqrt{\beta}}\;\epsilon\sqrt{\Delta t}$$}
 
 \vfill
 This will make the generated image sharper.
@@ -243,7 +244,7 @@ $$P_\gen(z_{i-1}|z_i) = \hat{z}_{i-1}(z_i) + \epsilon,\;\;\;\epsilon\sim {\cal N
 
 $$\enc^*,\gen^* = \argmin_{\enc,\gen} \;E_y\;||y - z_1||^2 + \sum_{i=1}^{N-1} ||z_i - \hat{z}_i(z_{i+1})||^2$$
 
-\slide{Conditional Generation}
+\slide{Conditsheional Generation}
 
 Training the encoder and the decoder conditioned on $x$ (as in a language translation model).
 This trains $\hat{z}_{i-1}(z_i,x)$.
