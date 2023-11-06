@@ -13,7 +13,7 @@
   \vfil
   \centerline{\bf Adjusting Generation}
   \vfill
-  \centerline{\bf Temperature and Guidance}
+  \centerline{\bf Temperature, Guidance, and Majority Voting}
   \vfill
   \vfill
 
@@ -252,6 +252,29 @@ For generation we then have
 
 \vfill
 Output $z_1$
+
+\slide{Adjusted Generation: Majority Voting}
+\newcommand{\answer}{\mathrm{answer}}
+\newcommand{\thought}{\mathrm{thought}}
+\newcommand{\question}{\mathrm{question}}
+\newcommand{\LLM}{\mathrm{LLM}}
+
+{\huge
+\centerline{Self-Consistency Improves Chain Of Thought Reasoning In Language Models}
+\centerline{Wang et al., March 2023}
+}
+\vfill
+The answer is taken to be a majority vote over stochastic chain of thought generation.
+
+\begin{eqnarray*}
+\answer^*(\question) 
+& = & \argmax_{\answer}\\
+\\
+& & \;\;\;\;E_{\thought \sim P_{LLM}({\thought|\question})} \\
+\\
+& & \;\;\;\;\;\;\;\;P_\LLM(\answer|\question;\thought)
+\end{eqnarray*}
+
 
 \slide{END}
 }
