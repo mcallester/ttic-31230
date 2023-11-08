@@ -76,7 +76,7 @@ As with language generation, this is not the same as $P^\beta_\Phi(y) \propto P_
 \slide{Classifier Guidance}
 
 \centerline{Diffusion Models Beat GANs on Image Synthesis}
-\centerline{Dharwali and Nichol, May 2021}
+\centerline{Dhariwal and Nichol, May 2021}
 
 \vfill
 For {\bf class-conditional} generation of imagenet images $P(y|x)$ they train an {\bf unconditional} diffusion image model $P_\Phi(y)$
@@ -99,7 +99,7 @@ $$P^{\beta,\gamma}_{\Phi,\Psi}(y|x) = \softmax_y \beta(s_\Phi(y)+ \gamma s_\Psi(
 
 \slide{Classifier Guidance}
 
-{\huge $$z(t - \Delta t) = z(t) + \left(\frac{\hat{E}_\Phi[y|t,z(t)] - z(t)}{t} + {\color{red} \gamma} s_\Psi(x|z(t))\right)\Delta t
+{\huge $$z(t - \Delta t) = z(t) + \left(\frac{\hat{E}_\Phi[y|t,z(t)] - z(t)}{t} + {\color{red} \gamma} \nabla_z\;s_\Psi(x|z(t))\right)\Delta t
 + \frac{1}{\sqrt{\color{red} \beta}}\;\epsilon\sqrt{\Delta t}$$}
 
 \vfill
