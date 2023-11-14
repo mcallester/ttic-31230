@@ -145,18 +145,57 @@ I(x,y) & \geq & \ln B - \;\;E_{(x,y_1,\ldots,y_B,b)}\left[-\ln P(b|(x,y_1,\ldots
 \vfill
 For CLIP the batch size $B = 2^{15}$ so we can potentially guarantee 15 bits of mutual information.
 
-\slide{Wav2vec 2.0, June 2020, Facebook}
+\slide{Tishby's Information Bottleneck}
+
+\centerline{The Information Bottleneck Method}
+\centerline{Tishby, Pereira and Bialeck, 1999}
 
 \vfill
-Trained on 53k hours of unlabeled audio (no text) they convert speech to a sequence of discrete quantized vectors they call ``pseudo-text units''.
+Design $P_\enc(z|x)$ with the following objective.
 
 \vfill
-By training on only one hour of human-transcribed audio, and using the Wav2vec transcription into pseudo-text, they outperform the previous state of the
-art in word error rate for 100 hours of human-transcribed text.
+$$\enc^* = \argmin_\enc\;I(z,x) - \beta I(z,y)$$
+
+\vfill
+This does not restric $H(z)$.
+
+\slide{Balancing Mutual Information with Encoder Enrtopy}
+
+\vfill
+\begin{eqnarray*}
+\enc^* & = & \argmin_\enc H(\enc(x)) - \beta I(\enc(x),y)\\
+\\
+\\
+& = & \argmin_\enc\;H(\enc(x)) - \beta(H(y) - H(y|\enc(x))) \\
+\\
+\\
+& = & \argmin_\enc\;H(\enc(x)) + \beta H(y|\enc(x))
+\end{eqnarray*}
+
+\slide{Balancing Mutual Information with Encoder Enrtopy}
+
+{\huge
+\begin{eqnarray*}
+& & H(\enc(x)) + \beta H(y|\enc(x)) \\
+\\
+\\
+& = & E_{(x,y) \sim \pop}[\; -\ln P(\enc(x)) + \beta(- \ln P(y|\enc(x))\;] \\
+\\
+\\
+& \leq & E_{(x,y) \sim \pop}[\; -\ln P_\pri(\enc(x)) + \beta(- \ln P_\dec(y|\enc(x))\;] \\
+\end{eqnarray*}
+
+\vfill
+$$\enc^*,\dec^*,\pri^*  =  \argmin_{\enc,\dec,\pri}\;E_{(x,y)\sim \pop}[\; -\ln P_\pri(\enc(x))+ \beta(- \ln P_\dec(y|\enc(x))\;]$$
+}
+
+
+
+
 
 \slide{Autoregressive Image and Voice Modeling}
 
-Strong VAE image modeling was first achieved autoregressive image modeling.
+Strong VAE image modeling was first achieved with autoregressive token modeling.
 
 \vfill
 \centerline{van den Oord, Vinyals and Kavukcuoglu,}
@@ -164,7 +203,7 @@ Strong VAE image modeling was first achieved autoregressive image modeling.
 
 \vfill
 \centerline{\includegraphics[height = 2in]{\images/VQ-OneLayer} 
-\parbox[b]{2.5in}{\huge Token Transformer \\ \\ \\ \\ Tokens-to-Image \\~}}
+\parbox[b]{4.5in}{\huge Token Transformer \\ \\ Image-to-Tokens, Tokens-to-Image \\ \\ \\~}}
 
 \slide{VQ-VAE-2, June 2019}
 
@@ -174,55 +213,11 @@ with VQ-VAE-2}
 \vfill
 \centerline{\includegraphics[width = 8in]{\images/VQ-VAE21}}
 
-
-\slide{DALLE-1, January 2021}
-
-\vfill
-\centerline{\includegraphics[width = 8in]{\images/DALLE1}}
-
-\slide{Parti, June 2022}
-
-\centerline{\huge Scaling Autoregressive Models for Content-Rich Text-to-Image Generation}
-\centerline{\huge Yu et al.}
-
-\vfill
-\centerline{\includegraphics[width = 9in]{\images/Parti}}
-
-
-\slide{CM3Leon, September 2023}
-
-\centerline{\Large Scaling Autoregressive Multi-Modal Models: Pretraining and Instruction Tuning}
-\centerline{\Large Yu et al.}
-
-\vfill
-\centerline{\includegraphics[width = 5.7in]{\images/CM3Leon}}
-
-\slide{GLSM, February 2021, Facebook}
-
-Generative Spoken Language Model (GSLM)
-
-\vfill
-They then train a generative model of the sequences of pseudo-text units learned from unlabeled audio.
-
-
-\vfill
-This model can continue speech from a speech prompt in much the same way that GPT-3 continues text from a text prompt.
-
-\vfill
-Semantic and grammatical structure in a ``unit language model'' is recovered
-from speech alone.
-
-\slide{Voice-Text Language Model (VoxtLM), September 2023}
-
-This is similar to CM3Leon but for voice and text rather than images and text.
-
-\vfill
-Voice is tokenized and then a transformer is used to model sequences that alternate voice and text.
-
-\slide{Tokenization of Images and Voice}
+\slide{VAE Tokenization of Images and Voice}
 
 \centerline{\includegraphics[height = 2in]{\images/VQ-OneLayer} 
-\parbox[b]{2.5in}{\huge Token Transformer \\ \\ \\ \\ Tokens-to-Image \\~}}
+\parbox[b]{4.5in}{\huge Token Transformer \\ \\ Image-to-Tokens, Tokens-to-Image \\ \\ \\~}}
+
 
 \vfill
 Let $y$ range over a population (such as images or sound waves).
@@ -234,7 +229,7 @@ or time window in a sound tensor) and {\color{red} $z_{\enc, p}(y) \in R^d$} is 
 \slide{Vector Quantization (Tokenization)}
 
 \centerline{\includegraphics[height = 2in]{\images/VQ-OneLayer} 
-\parbox[b]{2.5in}{\huge Token Transformer \\ \\ \\ \\ Tokens-to-Image \\~}}
+\parbox[b]{4.5in}{\huge Token Transformer \\ \\ Image-to-Tokens, Tokens-to-Image \\ \\ \\~}}
 
 \vfill
 Assume a finite set of $K$ ``tokens'' where token $k$ has an embedding vector $e(k) \in R^d$.
@@ -311,6 +306,89 @@ Finally we hold the encoder fixed and train the prior $P_\pri(z)$ to be an auto-
 
 \vfill
 \centerline{\includegraphics[height = 2in]{\images/VQ-OneLayer}}
+
+\slide{Tokenization and Gaussian Mixture Models (GMMs)}
+
+Consider modeling $P(y|x)$ with $y \in R^d$
+
+\vfill
+A Gaussian model has the form
+
+\begin{eqnarray*}
+y & = & \hat{y}(x) + \sigma \epsilon,\;\;\;\epsilon \sim {\cal N}(0,I) \\
+\\
+\hat{y} & = & \argmin_{\hat{y}}\; E_{x,y}\;||\hat{y}(x)-y||^2
+\end{eqnarray*}
+
+\slide{Tokenization and Gaussian Mixture Models (GMMs)}
+
+Now consider a tokenizing decoder
+
+\begin{eqnarray*}
+y & = & E_{k\sim P_\dec(k|x)}[\; e(k) + \sigma \epsilon\;],\;\;\;\epsilon \sim {\cal N}(0,I) \\
+\end{eqnarray*}
+
+We get that $P_\dec(y|x)$ is a Gaussian mixture model (GMM).
+
+\vfill
+GMMs are significantly more expressive than single Gaussians.
+
+\vfill
+
+\slide{Wav2Vec 2.0, June 2020, Facebook}
+
+\vfill
+Trained on 53k hours of unlabeled audio (no text) they convert speech to a sequence of discrete quantized vectors they call ``pseudo-text units''.
+
+\vfill
+By training on only one hour of human-transcribed audio, and using the Wav2Vec transcription into pseudo-text, they outperform the previous state of the
+art in word error rate for 100 hours of human-transcribed text.
+
+\slide{DALLE-1, January 2021}
+
+\vfill
+\centerline{\includegraphics[width = 8in]{\images/DALLE1}}
+
+
+\slide{GLSM, February 2021, Facebook}
+
+Generative Spoken Language Model (GSLM)
+
+\vfill
+They then train a generative model of the sequences of pseudo-text units learned from unlabeled audio.
+
+
+\vfill
+This model can continue speech from a speech prompt in much the same way that GPT-3 continues text from a text prompt.
+
+\vfill
+Semantic and grammatical structure in a ``unit language model'' is recovered
+from speech alone.
+
+\slide{Parti, June 2022}
+
+\centerline{\huge Scaling Autoregressive Models for Content-Rich Text-to-Image Generation}
+\centerline{\huge Yu et al.}
+
+\vfill
+\centerline{\includegraphics[width = 9in]{\images/Parti}}
+
+
+\slide{CM3Leon, September 2023}
+
+\centerline{\Large Scaling Autoregressive Multi-Modal Models: Pretraining and Instruction Tuning}
+\centerline{\Large Yu et al.}
+
+\vfill
+\centerline{\includegraphics[width = 5.7in]{\images/CM3Leon}}
+
+
+\slide{Voice-Text Language Model (VoxtLM), September 2023}
+
+This is similar to CM3Leon but for voice and text rather than images and text.
+
+\vfill
+Voice is tokenized and then a transformer is used to model sequences that alternate voice and text.
 
 
 
