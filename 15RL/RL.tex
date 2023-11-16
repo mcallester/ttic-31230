@@ -7,11 +7,9 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Autumn 2020}
+  \centerline{David McAllester, Autumn 2023}
 \vfill
   \centerline{\bf Reinforcement Learning}
-  \vfill
-  \centerline{\bf Value Iteration}
   \vfill
 \vfill
 
@@ -85,7 +83,7 @@ the state distribution in the training data is different from that defined by th
 Imitating experts, such as expert fire eaters, can be dangersous.  ``Don't try this at home''.
 
 \vfill
-Also, it is difficult to exceed expert performance by imitating experts.  But this can happen.
+Also, it is difficult to exceed expert performance by imitating experts.
 
 \slide{Markov Decision Processes (MDPs)}
 
@@ -372,7 +370,7 @@ Sampling runs and computing the above sum over $t$ and $t'$ is Williams' REINFOR
 
 \slidetwo{Optimizing Discrete Decisions}{with Non-Differentiable Loss}
 
-The REINFORCE algorithm is used generally for non-differentiable loss functions.
+The REINFORCE algorithm is (or was) used generally for non-differentiable loss functions.
 
 \vfill
 For example error rate and BLEU score are non-differentiable --- they are defined on the result of discrete decisions.
@@ -403,21 +401,23 @@ We will consider
 \item finally Asynchronous Advantge Actor-Critic Methods (A3C).
 \end{itemize}
 
-\slidetwo{Reducing the Variance over $r_{t'}$}{The Policy Gradient Theorem}
+\slide{Actor-Critic Algorithms}
 
 ``Policy Gradient Methods for
 Reinforcement Learning with Function
-Approximation'' Sutton, McAllester, Singh, Mansour, 2000, cited by 2,841 as of March 2020.
+Approximation''  Mansour, Sutton, McAllester, Singh, 2000, {\color{red} 560} citations in 2018, {\color{red} 3200} citations in 2022.
 
 \vfill
-``Actor-Critic Algorithms'', Konda and Tsitsilas, 2000, cited by 776.
+``Actor-Critic Algorithms'', Konda and Tsitsilas, 2000, {\color{red} 240} citatins in 2018, {\color{red} 4100} citations in 2022.
 
 \vfill
-These two papers both appeared at NeurIPS 2000 and are essentially identical.  The first is just easier to read.
+These two papers both appeared at NeurIPS 2000 and are almost identical.
+The first is easier to read.  The second has additional insights.
 
 
-\slide{Reducing the Variance over $r_{t'}$}
+\slide{Actor-Critic Algorithms}
 
+{\huge
 \begin{eqnarray*}
     \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,t'}\;E_{s_t,a_t,r_{t'}}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} r_{t'}} \\
     \\
@@ -430,10 +430,12 @@ These two papers both appeared at NeurIPS 2000 and are essentially identical.  T
   \\
  Q^\pi(s,a) & = & \expectsub{\pi}{\sum_t\; r_t\;|\;s_0=s,\;a_0=a}
  \end{eqnarray*}
+}
 
-\slideplain{Reducing the Variance over $r_{t'}$}
+\slideplain{An Actor-Critic Theorem}
+
 \begin{eqnarray*}
-  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & \sum_t\;E_{s_t,a_t}\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) {\color{red} Q^{\pi_\Phi}(s_t,a_t)}
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & \sum_t\;E_{s_t,a_t}\; \left(\nabla_\Phi \;\ln {\color{red} \pi_\Phi(a_t|s_t)}\right) {\color{red} Q^{\pi_\Phi}(s_t,a_t)}
 \end{eqnarray*}
 
 \vfill
@@ -443,23 +445,23 @@ These two papers both appeared at NeurIPS 2000 and are essentially identical.  T
 We reduced the variance at the cost of approximating the expected future reward.
 
 
-\slide{The Actor-Critic Algorithm}
+\slide{An Actor-Critic Algorithm}
 \begin{eqnarray*}
-   \nabla_\Phi \;E_{\pi_\Phi}\;R   & \approx & E_{\pi_\Phi} \; \sum_t\; {\color{red} \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_\Theta(s_t,a_t)}
+   \nabla_\Phi \;E_{\pi_\Phi}\;R   & \approx & E_{\pi_\Phi} \; \sum_t\; \left(\nabla_\Phi \;\ln {\color{red} \pi_\Phi(a_t|s_t)}\right) \;\;{\color{red} Q_\Theta(s_t,a_t)}
 \end{eqnarray*}
 
 \vfill
-\centerline{{\color{red} $\pi_\Phi$} is the ``actor'' and {\color{red} $Q_\Theta$} is the ``critic''}
+\centerline{{\color{red} $\pi_\Phi(a|s)$} is the ``actor'' and {\color{red} $Q_\Theta(s,a)$} is the ``critic''}
 
-\slide{The Actor-Critic Algorithm}
+\slide{An Actor-Critic Algorithm}
 
 To get a theorem for following the loss gradient we need
 
 {\huge
 \begin{eqnarray}
-  \Phi^* & = & \argmin_\Phi\left[R\;|\;\pi_\Phi\right] \label{AC1} \\
+  \Phi^* & = & \argmin_\Phi\left[R\;|\;\pi_\Phi\right] \label{AC1} \nn
   \nn
-  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & E\left[ \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_{\Theta^*(\Phi)}(s_t,a_t)\;|\; \pi_\Phi\right] \nn
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & E\left[ \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_{\Theta^*(\Phi)}(s_t,a_t)\;|\; \pi_\Phi\right] \\
   \nn
   \nn
   \Theta^*(\Phi) & = & \argmin_\Theta\; E\left[\sum_t\;\left(Q_\Theta(s_t,a_t) - \sum \!_{t' \geq t}\; r_{t'}\right)^2 \;|\;\pi_\Phi\right] \label{AC2}
@@ -469,7 +471,7 @@ To get a theorem for following the loss gradient we need
 A stationary point is now a Nash equilibrium of a two-player game defined by (\ref{AC1}) and (\ref{AC2}).
 
 
-\slide{Reducing the Variance over $s_t$}
+\slide{An Actor-Critic Theorem}
 
 Thoerem:
 $$\nabla_\Phi \;E_{\pi_\Phi}\; R = \sum_t\;E_{s_t,a_t} \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right)(Q^{\pi_\Phi}(s_t,a_t) - V^{\pi_\Phi}(s_t))$$
@@ -580,9 +582,7 @@ a continuous loss can be defined and the gradient of loss of with respect to a d
 
 \slide{More Videos}
 
-https://www.youtube.com/watch?v=g59nSURxYgk
-
-https://www.youtube.com/watch?v=rAai4QzcYbs
+https://www.youtube.com/watch?v=NI3NQczBWjg
 
 
 \slide{END}
