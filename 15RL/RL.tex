@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -174,6 +174,415 @@ $$V_\infty(s) \doteq \lim_{i \rightarrow \infty}\;V_i(s) = V^*(s)$$
   \\  
   & \leq & \gamma \Delta
 \end{eqnarray*}
+
+
+\slide{Summary}
+
+\begin{itemize}
+\item {\bf A Policy} $\pi$ is a stochastic way of selection an action at a state.
+
+\vfill
+\item {\bf Imitation Learning} (cross entropy imitation of action given state).
+
+\vfill
+\item Imitation Learning is {\bf off-policy}.
+
+\vfill
+\item The {\bf value function} $V^\pi(s)$.
+
+\vfill
+\item {\bf Value Iteration} $V_{i+1}(s) = \argmax_a\;R(s,a) + \gamma E_{s'}\;\gamma V_i(s')$
+\end{itemize}
+
+\slide{The Q Function}
+
+For discounted reward:
+
+\begin{eqnarray*}
+  Q^\pi(s,a) & = & E_\pi\;\sum_t \;\gamma^tr_t \;\;|\; \pi, \; s_0 = s,\;a_0 = a \\
+  \\
+  Q^*(s,a) & = & \sup_\pi \;Q^\pi(s,a) \\
+  \\
+  \pi^*(a|s) & = & \argmax_a\;Q^*(s,a) \\
+  \\
+  Q^*(s,a) & = & R(s,a) + \gamma \expectsub{s' \sim P_T(\cdot|s,a)}{\max_{a'}\; Q^*(s',a')}
+\end{eqnarray*}
+
+\slide{$Q$ Function Iteration}
+
+It is possible to define $Q$-iteration by analogy with value iteration, but this is generally not discussed.
+
+\vfill
+Value iteration is typically done for finite state spaces.  Let $S$ be the number of states and $A$ be the number of actions.
+
+\vfill
+One update of a $Q$ table takes $O(S^2A^2)$ time while one update of value iteration is $O(S^2A)$.
+
+\slide{$Q$-Learning}
+
+When learning by updating the $Q$ function we typically assume a parameterized $Q$ function $Q_\Phi(s,a)$.
+\vfill
+{\bf Bellman Error:}
+{\huge $$\mathrm{Bell}_\Phi(s,a) \doteq \left(Q_\Phi(s,a) - \left(R(s,a) + \gamma\;\expectsub{s' \sim P_T(s'|s,a)}{\max_{a'}\;Q_\Phi(s',a')}\right)\right)^2$$}
+
+{\bf Theorem}: If $\mathrm{Bell}_\Phi(s,a) = 0$ for all $(s,a)$ then the induced policy is optimal.
+
+\vfill
+{\bf Algorithm}: Generate pairs $(s,a)$ from the policy $\argmax_a\;Q_\Phi(s_t,a)$ and repeat
+$$\Phi \;\minuseq\; \eta \nabla_\Phi \;\; \mathrm{Bell}_\Phi(s,a)$$
+
+
+\slide{Issues with $Q$-Learning}
+
+Problem 1: Nearby states in the same run are highly correlated.  This increases the variance of the cumulative gradient updates.
+
+\vfill
+Problem 2: SGD on Bellman error tends to be unstable. Failure of $Q_\Phi$ to model unused actions leads to policy change (exploration).
+But this causes $Q_\Phi$ to stop modeling the previous actions
+which causes the policy to change back ...
+
+\vfill
+To address these problems we can use a {\bf replay buffer}.
+
+\slide{Using a Replay Buffer}
+
+We use a replay buffer of tuples $(s_t,a_t,r_t,s_{t+1})$.
+
+\vfill
+Repeat:
+
+\vfill
+\begin{enumerate}
+
+\item Run the policy $\argmax_a Q_\Phi(s,a)$ to add tuples to the replay buffer.  Remove oldest tuples to maintain a maximum buffer size.
+
+\item {\color{red} $\Psi = \Phi$}
+  
+\item for $N$ times select a random element of the replay buffer and do
+$$\Phi \;\minuseq \; \eta \nabla_\Phi\;(Q_\Phi(s_t,a_t) - (r_t + \gamma \max_{a} Q_{\color{red} \Psi}(s_{t+1},a))^2$$
+\end{enumerate}
+
+\slide{Replay is Off-Policy}
+
+Note that the replay buffer is from a {\bf mixture of policies} and is {\bf off-policy} for $\argmax_a\;Q_\Phi(s,a)$.  This seems to be important for stability.
+
+\vfill
+This seems related to the issue of stochastic vs. deterministic policies.  More on this later.
+
+\slide{Multi-Step $Q$-learning}
+
+$$\Phi \;\minuseq \;\sum_t \nabla_\Phi \left(Q_\Phi(s_t,a_t) - \sum_{\delta = 0}^{D} \gamma^\delta r_{(t+\delta)}\right)^2$$
+
+\slide{Asynchronous $Q$-Learning (Simplified)}
+No replay buffer.
+Many asynchronous threads each repeating:
+\vfill
+
+  \begin{quotation}
+  \noindent $\tilde{\Phi} = \Phi$ (retrieve $\Phi$)\newline \newline
+  \noindent using policy $\argmax_a Q_{\tilde{\Phi}}(s,a)$ compute $$s_t,a_t,r_t,\ldots,s_{t+K},a_{t+K},r_{t+K}$$
+  \newline
+  \noindent {\huge $\Phi \;\minuseq\; \eta \sum_{i=t}^{t+K-D} \nabla_{\tilde{\Phi}}\;\left(Q_{\tilde{\Phi}}(s_i,a_i) - \sum_{\delta = 0}^D \gamma^\delta r_{i+\delta}\right)^2$} (update $\Phi$)
+  \end{quotation}
+
+\slidetwo{Human-level control through deep RL (DQN)}{Mnih et al., Nature, 2015. (Deep Mind)}
+\vfill
+We consider a CNN $Q_\Phi(s,a)$.
+
+\vfill
+\centerline{\includegraphics[width=6in]{\images/DQN}}
+
+\slide{Watch The Video}
+
+https://www.youtube.com/watch?v=V1eYniJ0Rnk
+
+\slide{The REINFORCE Algorithm}
+
+\centerline{\bf Williams, 1992}
+
+\vfill
+REINFORCE is a Policy Gradient Algorithm
+
+\vfill
+We assume a parameterized policy $\pi_\Phi(a|s)$.
+
+\vfill
+$\pi_\Phi(a|s)$ is normalized while $Q_\Phi(s,a)$ is not.
+
+\slide{Policy Gradient Theorem (Episodic Case)}
+
+$$\Phi^* = \argmax_\Phi\; E_{\pi_\Phi} \; R$$
+
+{\huge
+\begin{eqnarray*}
+  \nabla_\Phi \;E_{\pi_\Phi}\;R & = & \sum_{s_0,a_0,s_1,a_1,\ldots,s_T,a_T}\;\;\nabla_\Phi P(s_0,a_0,s_1,a_1,\ldots,s_T,a_T)\;R \\
+  \\
+  \nabla_\Phi \;P(\ldots)R & = & P(S_0){\color{red} \nabla_\Phi \;\pi(a_0)}P(s_1)\pi(a_1) \cdots P(s_T)\pi(a_T)\;R \\
+  & & + P(S_0)\pi(a_0)P(s_1){\color{red} \nabla_\Phi\;\pi(a_1)} \cdots P(s_T)\pi(a_T)\;R \\
+  & & \vdots \\
+  & & + P(S_0)\pi(a_0)P(s_1)\pi(a_1) \cdots P(s_T){\color{red} \nabla_\Phi\;\pi(a_T)}\;R \\
+  \\
+  & = & P(\ldots) \left(\sum_t\;\frac{\nabla_\Phi\;\pi_\Phi(a_t)}{\pi_\Phi(a_t)}\right) R
+\end{eqnarray*}
+}
+
+
+\slide{Policy Gradient Theorem (Episodic Case)}
+\begin{eqnarray*}
+  \nabla_\Phi \;P(\ldots)R  & = & P(\ldots) \left(\sum_t\;\frac{\nabla_\Phi\;\pi_\Phi(a_t|s_t)}{\pi_\Phi(a_t|s_t)}\right) R \\
+  \\
+  \nabla_\Phi \;E_{\pi_\Phi}\;R & = & E_{\pi_\Phi}\;\left(\sum_t\;\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right) R
+\end{eqnarray*}
+
+\slide{Policy Gradient Theorem}
+\begin{eqnarray*}
+ & &   \nabla_\Phi \; E_{\pi_\Phi}\; R \\
+  \\
+  & = & E_{\pi_\Phi}\;\left(\sum_t\;\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right)\;\;R \\
+  \\
+  & = & E_{\pi_\Phi}\; \left(\sum_t\;\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right)\left(\sum_{t} r_{t}\right)  \\
+  \\
+  & = & E_{\pi_\Phi}\; \sum_{t,t'} \nabla_\Phi\;\ln \pi_\Phi(a_{t}|s_{t}) \;\;r_{t'}
+\end{eqnarray*}
+
+
+\slide{Policy Gradient Theorem}
+
+\begin{eqnarray*}
+    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,t'}\;E_{s_t,a_t,r_{t'}}\;\; \nabla_\Phi\;\ln \pi_\Phi(a_{t}|s_{t})\;\;r_{t'}
+    \end{eqnarray*}
+For $t' < t$ we have
+{\huge
+\begin{eqnarray*}
+    E_{r_{t'},s_t,a_t}\;\; r_{t'} \nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)  & =  & E_{r_{t'},s_t}\; r_{t'}  \;\sum_{a_t} \; \pi_\Phi(a_t|s_t)\; \nabla_\Phi\;\ln \pi_\Phi(a_t|s_t) \\
+    \\
+    & =  & E_{r_{t'},s_t}\; r_{t'}  \;\sum_{a_t}\; \nabla_\Phi\; \pi_\Phi(a_t|s_t) \\
+    \\
+    & =  & E_{r_{t'},s_t}\; r_{t'}  \;\nabla_\Phi\; \sum_{a_t}\;\pi_\Phi(a_t|s_t) \\
+    \\
+    & = & 0
+\end{eqnarray*}
+}
+
+\slide{REINFORCE}
+$$\nabla_\Phi \;E_{\pi_\Phi}\;R \;\;\; = \;\;\; E_{\pi_\Phi}\; \sum_{t,\;t' \geq t} \; \left(\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right) \;r_{t'}$$
+
+\vfill
+Sampling runs and computing the above sum over $t$ and $t'$ is Williams' REINFORCE algorithm.
+
+\slidetwo{Optimizing Discrete Decisions}{with Non-Differentiable Loss}
+
+The REINFORCE algorithm is used generally for non-differentiable loss functions.
+
+\vfill
+For example error rate and BLEU score are non-differentiable --- they are defined on the result of discrete decisions.
+
+\vfill
+$$\Phi^* = \argmax_\Phi \;E_{w_1,\ldots,w_n \sim P_\Phi}\;\mathrm{BLEU}$$
+
+
+\slide{REINFORCE}
+$$\nabla_\Phi \;E_{\pi_\Phi}\;R \;\;\; = \;\;\; E_{\pi_\Phi}\; \sum_{t,\;t' \geq t} \; \left(\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right) \;r_{t'}$$
+
+\vfill
+Sampling runs and computing the above sum over $t$ and $t'$ is Williams' REINFORCE algorithm.
+
+\slide{The Variance Issue}
+
+REINFORCE typically suffers from high variance of the gradient samples requiring very small learning rates and very long convergence times.
+
+\begin{eqnarray*}
+    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,\;t'\geq t}\; E_{s_t,a_t,r_{t'}}\; \left(\nabla_\Phi\;\ln \pi_\Phi(a_{t}|s_{t})\right)\;\;r_{t'}
+\end{eqnarray*}
+
+\vfill
+We will consider
+\begin{itemize}
+\item reducing variance due to $r_{t'}$ with Actor-Critic methods.
+\item reducing variance due to  $s_t$ with Advantage Actor-Critic methods.
+\item finally Asynchronous Advantge Actor-Critic Methods (A3C).
+\end{itemize}
+
+\slidetwo{Reducing the Variance over $r_{t'}$}{The Policy Gradient Theorem}
+
+``Policy Gradient Methods for
+Reinforcement Learning with Function
+Approximation'' Sutton, McAllester, Singh, Mansour, 2000, cited by 2,841 as of March 2020.
+
+\vfill
+``Actor-Critic Algorithms'', Konda and Tsitsilas, 2000, cited by 776.
+
+\vfill
+These two papers both appeared at NeurIPS 2000 and are essentially identical.  The first is just easier to read.
+
+
+\slide{Reducing the Variance over $r_{t'}$}
+
+\begin{eqnarray*}
+    \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,t'}\;E_{s_t,a_t,r_{t'}}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} r_{t'}} \\
+    \\
+    \\
+    & = & \sum_{t}\;E_{s_t,a_t}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} \sum_{t' \geq t} E_{r_{t'}\;|\;s_t,a_t}\;r_{t'}} \\
+  \\
+  \\
+  & = & E_{\pi_\Phi} \; \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;{\color{red} Q^{\pi_\Phi}(s_t,a_t)} \\
+  \\
+  \\
+ Q^\pi(s,a) & = & \expectsub{\pi}{\sum_t\; r_t\;|\;s_0=s,\;a_0=a}
+ \end{eqnarray*}
+
+\slideplain{Reducing the Variance over $r_{t'}$}
+\begin{eqnarray*}
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & \sum_t\;E_{s_t,a_t}\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) {\color{red} Q^{\pi_\Phi}(s_t,a_t)}
+\end{eqnarray*}
+
+\vfill
+{\bf The point} is that we can now approximate $Q^{\pi_\Phi}$ with neural network $Q_\Theta$.
+
+\vfill
+We reduced the variance at the cost of approximating the expected future reward.
+
+
+\slide{The Actor-Critic Algorithm}
+\begin{eqnarray*}
+   \nabla_\Phi \;E_{\pi_\Phi}\;R   & \approx & E_{\pi_\Phi} \; \sum_t\; {\color{red} \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_\Theta(s_t,a_t)}
+\end{eqnarray*}
+
+\vfill
+\centerline{{\color{red} $\pi_\Phi$} is the ``actor'' and {\color{red} $Q_\Theta$} is the ``critic''}
+
+\slide{The Actor-Critic Algorithm}
+
+To get a theorem for following the loss gradient we need
+
+{\huge
+\begin{eqnarray}
+  \Phi^* & = & \argmin_\Phi\left[R\;|\;\pi_\Phi\right] \label{AC1} \\
+  \nn
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & E\left[ \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_{\Theta^*(\Phi)}(s_t,a_t)\;|\; \pi_\Phi\right] \nn
+  \nn
+  \nn
+  \Theta^*(\Phi) & = & \argmin_\Theta\; E\left[\sum_t\;\left(Q_\Theta(s_t,a_t) - \sum \!_{t' \geq t}\; r_{t'}\right)^2 \;|\;\pi_\Phi\right] \label{AC2}
+\end{eqnarray}
+}
+
+A stationary point is now a Nash equilibrium of a two-player game defined by (\ref{AC1}) and (\ref{AC2}).
+
+
+\slide{Reducing the Variance over $s_t$}
+
+Thoerem:
+$$\nabla_\Phi \;E_{\pi_\Phi}\; R = \sum_t\;E_{s_t,a_t} \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right)(Q^{\pi_\Phi}(s_t,a_t) - V^{\pi_\Phi}(s_t))$$
+
+\vfill
+$V^{\pi_\Phi}(s) = \expectsub{a \sim \pi_\Phi(a|s)}{Q^{\pi_\Phi}(s,a)}$
+
+\vfill
+$Q^{\pi_\Phi}(s,a) - V^{\pi_\Phi}(s)$ is the ``advantage'' of deterministically using $a$ rather than sampling an action.
+
+\slide{Proof}
+
+We have the following for any function $V(s)$ of states.
+
+\begin{eqnarray*}
+ & & E_{s_t,a_t} \;  \; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ \\
+ & = & E_{s_t} \;  \sum_{a_t} \left(\pi_\Phi(a_t|s_t) \;\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ \\
+ & = & E_{s_t} \;  \sum_{a_t} \left(\nabla_\Phi \pi_\Phi(a_t|s_t)\right) V(s_t) \\
+ \\
+ & = & E_{s_t} \;  V(s_t) \nabla_\Phi \sum_{a_t}\; \pi_\Phi(a_t|s_t) \;=\; 0
+\end{eqnarray*}
+
+
+\slide{The Advantage Actor-Critic Algorithm}
+
+{\huge
+\begin{eqnarray}
+  \Phi^* & = & \argmin_\Phi\left[R\;|\;\pi_\Phi\right] \label{ACA1} \\
+  \nn
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & E\left[ \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;(Q_{\Theta^*(\Phi)}(s_t,a_t) - V_{\Psi^*(\Phi)}(s_t))\;|\; \pi_\Phi\right] \nn
+  \nn
+  \nn
+  \Theta^*(\Phi) & = & \argmin_\Theta\; E\left[\sum_t\;\left(Q_\Theta(s_t,a_t) - \sum \!_{t' \geq t}\; r_{t'}\right)^2 \;|\;\pi_\Phi\right] \label{ACA2} \\
+  \nn
+  \nn
+  \Psi^*(\Phi) & = & \argmin_\Psi\;E\left[\sum_t\;\left(Q_{\Theta^*(\Phi)}(s_t,a_t) - V_\Psi(s_t)\right)^2 \;|\;\pi_\Phi\right] \label{ACA3}
+\end{eqnarray}
+
+We now have a three player game defined by (\ref{ACA1}), (\ref{ACA2}) and (\ref{ACA3}).
+}
+
+\slide{Advantage-Actor-Critic Algorithm}
+\begin{eqnarray*}
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & \approx & E_{\pi_\Phi} \; \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;(Q_\Phi(s_t,a_t) - V_\Phi(s_t))
+\end{eqnarray*}
+
+We can sample an episode and then do
+
+\begin{eqnarray*}
+  \Phi  &\pluseq & \sum_t \eta_1\left(\nabla_{\Phi}\;\ln \pi_{\Phi}(a_i|s_i)\right)(Q_\Phi(s_t,a_t) - V_\Phi(s_t))\\
+  \Phi & \minuseq & \sum_t \eta_2 \;\nabla_{\Phi}\;\left(Q_\Phi(s_t,a_t) - \sum \!_{t' \geq t}\; r_{t'}\right)^2 \\
+  \Phi & \minuseq & \sum_t \eta_3 \;\nabla_{\Phi}\;\left(V_\Phi(s_t) - Q_\Phi(s_t,a)\right)^2 \\
+\end{eqnarray*}
+
+
+\slidetwo{Asynchronous Methods for Deep RL (A3C)}{Mnih et al., Arxiv, 2016 (Deep Mind)}
+
+\begin{quotation}
+  \noindent $\tilde{\Phi} = \Phi$ (retrieve global $\Phi$)\newline
+  \noindent using policy $\pi_{\tilde{\Phi}}$ compute $s_t,a_t,r_t,\ldots,s_{t+K},a_{t+K},r_{t+K}$
+  $$R_i = \sum_{\delta=0}^D \gamma^{i+\delta} r_{(i+\delta)}$$
+  \begin{eqnarray*}
+  \Phi  &\pluseq & \eta \sum_{i=t}^{t+K-D} \left(\nabla_{\tilde{\Phi}}\;\ln \pi_{\tilde{\Phi}}(a_i|s_i)\right)\left(R_i - V_{\tilde{\Phi}}(s_i)\right)\\
+  \Phi & \minuseq & \eta \sum_{i=t}^{t+K-D} \nabla_{\tilde{\Phi}}\;(V_{\tilde{\Phi}}(s_i) - R_i)^2
+  \end{eqnarray*}
+\end{quotation}
+
+\slide{Issue: Policies must be Exploratory}
+
+The optimal policy is deterministic --- $a(s) = \argmax_a Q(s,a)$.
+
+\vfill
+However, a deterministic policy never samples alternative actions.
+
+\vfill
+Typically one forces a random action some small fraction of the time.
+
+
+\slide{Issue: Discounted Reward}
+
+DQN and A3C use discounted reward on episodic or long term problems.
+
+\vfill
+Presumably this is because actions have near term consequences.
+
+\vfill
+This should be properly handled in the mathematics, perhaps in terms of the mixing time of
+the Markov process defined by the policy.
+
+
+\slide{Issue: Discounted Reward}
+
+DQN and A3C use discounted reward on episodic or long term problems.
+
+\vfill
+Presumably this is because actions have near term consequences.
+
+\vfill
+This should be properly handled in the mathematics, perhaps in terms of the mixing time of
+the Markov process defined by the policy.
+
+\slide{Observation: Continuous Actions are Differentiable }
+
+In problems like controlling an inverted pendulum, or robot control generally,
+a continuous loss can be defined and the gradient of loss of with respect to a deterministic policy exists.
+
+\slide{More Videos}
+
+https://www.youtube.com/watch?v=g59nSURxYgk
+
+https://www.youtube.com/watch?v=rAai4QzcYbs
 
 
 \slide{END}
