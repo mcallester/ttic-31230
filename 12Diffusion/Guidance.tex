@@ -187,20 +187,22 @@ But this is false.
 \vfill
 This will make the generated image sharper.
 
-\slide{A More General Formulation}
+\slide{A More General Formulation: Byte VAEs}
 
-Consider a Markovian VAE with deterministic encoder $z_1(y)$ and $z_{i+1}(z_i)$ and where $z_N(z_{N-1})$ is a constant $\emptyset$.
-
-\vfill
-This holds for language models but also seems reasonable for image VAEs provided that a stochastic generator
-is trained in conjunction with the encoder (I claim).
+Consider a Markovian VAE with deterministic encoder $z_1(y)$ and $z_{i+1}(z_i)$ and where $z_N(z_{N-1})$ is a constant (an empty string or the zero vector).
 
 \vfill
-Deterministic encoding yields an enormous simplification (a good thing).
+Deterministic encoding sensible for discrete VAES.  This includes autoregressive language models and ``byte VAES''
 
-{\huge
-$$\enc^*,\gen^* = \argmin_{\enc,\gen} \;E_y[- \ln (P_\gen(y|z_1)P_\gen(z_1|z_2)\cdots P_\gen(z_{N-1}|\emptyset))]$$
-}
+\vfill
+A byte VAE is a numerical Markovian VAE where each $z_i$ is a vector of (discrete) bytes and where the dimensionality of $z_i$
+decreases as $i$ increases.
+
+\vfill
+To computing $z_{i+1}(z_i)$ we can first compute a floating point vector then round each coordinate to the nearest byte.
+
+\vfill
+We can model $-\ln P_\dec(z_{i-1}|z_i)$ as $||z_{i-1} - \hat{z}_{i-1}(z_i)||^2$.
 
 \slide{A More General Formulation}
 

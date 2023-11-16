@@ -199,6 +199,97 @@ and can be directly trained with cross-entropy loss.
 \vfill
 But flow models have not caught on and we will not cover them.
 
+\slide{Markovian VAEs}
+
+
+\centerline{\includegraphics[width = 7in]{\images/DiffSequence}}
+
+\vfill
+{\huge
+\centerline{{\color{red} [Sally talked to John]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red} [Sally talked to]}
+$\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red} []}}
+}
+
+\vfill
+\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
+
+\slide{Markovian VAEs}
+\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
+
+\vfill
+{\bf Encoder}: $\pop(y)$, $P_\enc(z_1|y)$, and $P_\enc(z_{\ell+1}|z_\ell)$.
+
+
+\vfill
+{\bf Generator}: $P_\pri(z_N)$, $P_\gen(z_{\ell-1}|z_\ell)$, $P_\gen(y|z_1)$.
+
+\vfill
+The encoder and the decoder define distributions $P_\enc(y,\ldots,z_N)$ and $P_\gen(y,\ldots,z_N)$ respectively.
+
+
+\slide{Markovian VAEs}
+
+\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
+
+\vfill
+\begin{itemize}
+\item autoregressive models
+
+\vfill
+\item diffusion models
+
+\vfill
+\item Byte VAEs (original here)
+\end{itemize}
+
+
+\slide{Diffusion ELBO}
+
+{\Large
+\begin{eqnarray*}
+H(y) & = & E_\enc\left[- \ln\frac{P_\enc(y)P_\enc(z_1,\ldots,z_N|y)}{P_\enc(z_1,\ldots,z_N|y)}\right]\\
+  \\
+  \\
+  & = & E_\enc\left[ - \ln\frac{P_{\color{red} \enc}(y|z_1)P_{\color{red} \enc}(z_1|z_2)\cdots P_{\color{red} \enc}(z_{N-1}|z_N)P_{\color{red} \enc}(z_N)}
+  {P_\enc(z_1|z_2,y)\cdots P_\enc(z_{N-1}|z_N,y)P_\enc(z_N|y)}\right] \\
+   \\
+   \\
+  & {\color{red} \leq} & E_\enc\left[ - \ln\frac{P_{\color{red} \gen}(y|z_1)P_{\color{red} \gen}(z_1|z_2)\cdots P_{\color{red} \gen}(z_{N-1}|z_N)P_{\color{red} \gen}(z_N)}
+  {P_\enc(z_1|z_2,y)\cdots P_\enc(z_{N-1}|z_N,y)P_\enc(z_N|y)}\right] \\
+\\
+\\
+ & = & \left\{\begin{array}{l}E_\enc\;[-\ln P_\gen(y|z_1)]
+                             \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\gen(z_{i-1}|z_i)) \\
+                             \\ + E_\enc\; KL(P_\enc(Z_N|y),p_\gen(Z_N))\end{array}\right.
+\end{eqnarray*}
+}
+
+\slide{Byte VAEs}
+
+A byte VAE is a numerical Markovian VAE with a deterministic encoder and where each $z_i$ is a vector of bytes.
+
+\vfill
+To computing $z_{i+1}(z_i)$ we first compute a floating point vector {\color{red} $\hat{z}^\enc_i(z_{i-1})$} and then round each coordinate to the nearest byte.
+
+\vfill
+We model  $-\ln P_\gen(z_i|z_{i+1})$ by {\color {red} $||\hat{z}^\enc_i(z_{i-1}) - \hat{z}^\gen_i(z_{i+1})||^2$}.
+
+\vfill
+Although the model is discrete, this gives gradients on both the encoder and the decoder.  This can be viewed as a straight-through gradient on the encoder.
+
+\slide{The Byte VAE ELBO}
+
+\begin{eqnarray*}
+H(y) & \leq & E_{y\sim \pop}\left[- \ln\frac{P_\gen(z_N,z_{N-1},\ldots,z_1,y)}{P_\enc(z_1,\ldots,z_N|y)}\right]\\
+\\
+\\
+& = & E_{y\sim \pop} [- \ln P_\gen(z_N,z_{N-1},\ldots,z_1,y)]
+  \\
+  \\
+  & \approx & E_{y \sim \pop}\;\;{\color{red} ||y - \hat{y}^\gen(z_1)||^2 + \sum_{i=1}^{N-1} ||\hat{z}^\enc_i - \hat{z}^\gen_i(z_{i+1})||^2}
+\end{eqnarray*}
+
+
 \slide{END}
 
 \end{document}

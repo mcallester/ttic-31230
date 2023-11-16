@@ -30,50 +30,6 @@
 \vfill
 \centerline{\includegraphics[width = 2.5in]{\images/DiffCeleb}}
 
-\slide{Markovian VAEs}
-
-A diffusion models computes and inverts a sequence
-
-\vfill
-\centerline{\includegraphics[width = 7in]{\images/DiffSequence}}
-
-\vfill
-So does an autoregressive language model
-
-\vfill
-{\huge
-\centerline{{\color{red} [Sally talked to John]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red} [Sally talked to]}
-$\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally]}}
-}
-
-
-\slide{Markovian VAEs}
-
-
-\centerline{\includegraphics[width = 7in]{\images/DiffSequence}}
-
-\vfill
-{\huge
-\centerline{{\color{red} [Sally talked to John]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red} [Sally talked to]}
-$\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally]}}
-}
-
-\vfill
-\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
-
-\slide{Markovian VAEs}
-\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
-
-\vfill
-{\bf Encoder}: $\pop(y)$, $P_\enc(z_1|y)$, and $P_\enc(z_{\ell+1}|z_\ell)$.
-
-
-\vfill
-{\bf Generator}: $P_\pri(z_N)$, $P_\gen(z_{\ell-1}|z_\ell)$, $P_\gen(y|z_1)$.
-
-\vfill
-The encoder and the decoder define distributions $P_\enc(y,\ldots,z_N)$ and $P_\gen(y,\ldots,z_N)$ respectively.
-
 \slide{The Markovian ELBO}
 
 {\Large
@@ -94,27 +50,6 @@ H(y) & = & E_\enc\left[- \ln\frac{P_\enc(y)P_\enc(z_1,\ldots,z_N|y)}{P_\enc(z_1,
                              \\ + E_\enc\; KL(P_\enc(Z_N|y),p_\gen(Z_N))\end{array}\right.
 \end{eqnarray*}
 }
-
-\slide{Markovian VAEs}
-
-\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
-
-\vfill
-\begin{itemize}
-\item autoregressive models
-
-\vfill
-\item diffusion models
-
-\vfill
-\item StyleGan? (layers of resolution)
-
-\vfill
-\item U-Nets? (layers of resolution)
-\end{itemize}
-
-\vfill
-A grand unified theory (GUT) of generative AI?
 
 \slide{Diffusion Models}
 \centerline{\includegraphics[width = 2in]{\images/DiffSequence}}
@@ -333,30 +268,30 @@ $$KL\left(\begin{array}{l}{\cal N}(\mu_1,\sigma^2 I), {\cal N}(\mu_2,\sigma^2 I)
   \\
   \\
   \\
-  & = & \sum_{i = 2}^N  \left(\frac{||y-E[y|t,z(t)]||^2}{2t^2}\right) \Delta t + E_{y,z_1}[- \ln P(y|z_1)] \\
+  & = & \sum_{i = 2}^N  \left(\frac{E_{y,z(t)}\;||y-E[y|t,z(t)]||^2}{2t^2}\right) \Delta t + E_{y,z_1}[- \ln P(y|z_1)] \\
   & & \;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;\;t = i\Delta t
 \end{eqnarray*}
 
 \slide{Passing to the Integral}
 
 \begin{eqnarray*}
-H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{z(t)|y}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ + \;E_{z(t_0)|y}[-\ln P(y|z(t_0))]\end{array}\right. \\
+H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{y,z(t)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ + \;E_{y,z(t)}[-\ln P(y|z(t_0))]\end{array}\right. \\
 \\
 \\
-  H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ +\;H(y|z(t_0))\end{array}\right.
+  H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{y,z(t)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ +\;H(y|z(t_0))\end{array}\right.
 \end{eqnarray*}
 
 \slide{Mutual Information}
 
 {\huge
 \begin{eqnarray*}
-  H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ +\;H(y|z(t_0))\end{array}\right. \\
+  H(y) & = & \left\{\begin{array}{l}\int_{t_0}^\infty dt \;\; E_{y,z(t)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\ \\ +\;H(y|z(t_0))\end{array}\right. \\
   \\
   \\
-  H(y) - H(y|z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\
+  H(y) - H(y|z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] \\
   \\
   \\
-  I(y,z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] 
+  I(y,z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t)}\;\left[\frac{||y - E[y|t,z(t)]||^2}{2t^2}\right] 
 \end{eqnarray*}
 
 \vfill
@@ -367,11 +302,11 @@ This is the information minimum mean squared error relation (I-MMSE) relation [G
 
 {\huge
 \begin{eqnarray*}
-  I(y,z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - {\color{red}E}[y|t,z(t)]||^2}{2t^2}\right]  \\
+  I(y,z(t_0)) & = & \int_{t_0}^\infty dt \;\; E_{y,z(t)}\;\left[\frac{||y - {\color{red}E}[y|t,z(t)]||^2}{2t^2}\right]  \\
   \\
   \\
   \\
-  & \leq & \int_{t_0}^\infty dt \;\; E_{y,z(t_0)}\;\left[\frac{||y - {\color{red}\hat{E}}[y|t,z(t)]||^2}{2t^2}\right]
+  & \leq & \int_{t_0}^\infty dt \;\; E_{y,z(t)}\;\left[\frac{||y - {\color{red}\hat{E}}[y|t,z(t)]||^2}{2t^2}\right]
 \end{eqnarray*}
 }
 
