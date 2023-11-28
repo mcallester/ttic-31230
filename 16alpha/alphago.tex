@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -153,6 +153,318 @@ $$\Delta \Phi = - \eta \nabla_\Phi \left(V_\Phi(s) - V_{\mathrm{mm}}(s)\right)^2
 \vfill
 This is similar to minimizing a Bellman error between $V_\Phi(s)$ and a rollout estimate of the value of $s$ but where the rollout
 estimate is replaced by a min-max tree search estimate.
+
+
+\slide{The Value and Policy Networks}
+
+The major innovation of AlphaGo and AlphaZero is to use CNNs as evaluation functions.
+
+\vfill
+We have a policy network computing $\pi_\Phi(a|s)$ and a value network computing $V_\Phi(s)$.
+
+\slide{The Value and Policy Networks}
+
+\centerline{$\pi_\Phi(a|s)$ \hspace{.5in} $V_\Phi(s)$}
+\centerline{\includegraphics[height=3.0in]{\images/alphagoArchitecture2}}
+
+\vfill
+In AlphaZero the networks are either 20 block or 40 block ResNets and either separate networks or one dual-headed network.
+
+\slide{Top Level Algorithm}
+
+To play a game (against yourself) select a move at each position.
+
+\vfill
+Each move selection involves growing a tree of possible future positions.
+
+\vfill
+The tree is ``sparse'' in the sense that the children of a node are a (possibly empty) subset of the possible next positions.
+
+\vfill
+The tree is grown by a series of ``simulations''.
+
+\vfill
+Each simulation starts at the root and recursively selects a move at each node until the selected move adds a new node to the tree.
+
+\slide{Simulations}
+
+During a simulation moves are selected by maximizing an upper value as in the UCT algorithm.
+
+\vfill
+Each simulation adds one new node to the tree.
+
+\vfill
+Each simulation returns the value $V_\Phi(s)$ (from the value network) for the newly generated node.
+
+\slide{The Data Structures}
+
+\vfill
+Each node in the tree data structrure stores the following information which is initialized
+by running the value and policy networks on state $s$.
+
+\begin{itemize}
+\item $V_\Phi(s)$ --- the value network value for the position $s$.
+\item The policy probabilities $\pi_\Phi(a|s)$ for each legal action $a$.
+\item The number $N(s,a)$ of simulations that have tried move $a$ from $s$. This is initially zero.
+\item The average $\hat{\mu}(s,a)$ of $V_\Phi(s)$ and the values of the simulations that have
+  tried move $a$ from position $s$.
+\end{itemize}
+
+\slide{Simulations and Upper Confidence Bounds}
+
+In descending into the tree, a simulation selects the move $\argmax_a U(s,a)$ where we have
+
+\vfill
+$$U(s,a) =   \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(a|s)/(1+N(s,a))$$
+
+\vfill
+We have that $U(s,a)$ will typically decrease as $N(s,a)$ increases.
+
+\vfill
+We can think of $U(s,a)$ as an upper confidence bound in the UCT algorithm.
+
+\slide{Root Action Selection}
+
+When the search is completed, we must select a move from the root position to make actual progress in the game.  For this we use a post-search stochastic policy
+
+\vfill
+$$\pi_{s_{\mathrm{root}}}(a) \propto N(s_{\mathrm{root}},a)^\beta$$
+
+\vfill
+where $\beta$ is a temperature hyperparameter.
+
+\slide{Constructing a Replay Buffer}
+
+We run a large number of games.
+
+\vfill
+We construct a replay buffer of triples $(s,\pi_{s},R)$ where
+
+\vfill
+\begin{itemize}
+\item $s$ is a position encountered in a game and hence a root position of a tree search.
+
+\vfill
+\item $\pi_{s}$ is the distribution on $a$ defined by $P(a) \propto N(s,a)^\beta$.
+
+\vfill
+\item $R \in \{-1,1\}$ is the final outcome of the game for the player whoes move it is at position $s$.
+\end{itemize}
+
+\slide{The Loss Function}
+
+\vfill
+Training is done by SGD on the following loss function.
+
+$$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ - \lambda_\pi\log \pi_\Phi(a|s) \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)$$
+
+\vfill
+The replay buffer is periodically updated with new self-play games.
+
+\slide{The AlphaZero Algorithm}
+
+The AlphaZero algorithm is a general RL learning method.  It can be applied to any problem of sequential decision making.
+
+\vfill
+In principle, the AlphaZero algorithm could be applied to the problem of direct optimization of the BLEU score in machine translation.
+
+
+\slide{Training Time}
+
+Single 20 block dual-headed ResNet.
+
+\vfill
+4.9 million Go games of self-play
+
+\vfill
+0.4s thinking time per move
+
+\vfill
+About 8 years of Go thinking time in training was completed in three days
+
+\vfill
+About 1000 fold parallelism.
+
+\slide{Elo Learning Curve for Go}
+
+\centerline{\includegraphics[height = 5in]{\images/alphalearning1}}
+
+\slide{Learning Curve for Predicting Human Go Moves}
+
+\centerline{\includegraphics[height = 5in]{\images/alphalearning2}}
+
+\slide{Ablation Studies}
+
+\centerline{\includegraphics[height=3.0in]{\images/alphagoArchitecture2}}
+
+\vfill
+We evaluate 20 layer networks which are either traditional CNNs or resnet and are either two separate networks or one network with dual heads.
+
+\slide{Ablation Studies}
+
+\centerline{\includegraphics[height = 5in]{\images/alphaablation}}
+
+\slide{Increasing Blocks and Training}
+
+Increasing the number of Resnet blocks from 20 to 40.
+
+\vfill
+Increasing the number of training days from 3 to 40.
+
+\vfill
+Gives a Go Elo rating over 5000.
+
+\slide{Final Go Elo Ratings}
+
+\centerline{\includegraphics[height = 5in]{\images/alpha40}}
+
+\slide{Is Chess a Draw?}
+
+In 2007 Jonathan Schaeffer at the University of Alberta showed that checkers is a draw.
+
+\vfill
+Using alpha-beta and end-game dynamic programming, Schaeffer computed drawing strategies for each player.
+
+\vfill
+This was listed by Science Magazine as one of the top 10 breakthroughs of 2007.
+
+\vfill
+It is generally believed that chess is a draw.  It was even conjectured that Stockfish could not be defeated ...
+
+\slide{AlphaZero vs. Stockfish in Chess}
+
+From white Alpha won 25/50 and lost none.
+
+\vfill
+From black Alpha won 3/50 and lost none.
+
+\vfill
+AlphaZero evaluates 70 thousand positions per second.
+
+\vfill
+Stockfish evaluates 80 million positions per second.
+
+\slide{MuZero}
+
+{\bf Mastering Atari, Go, chess and shogi by planning with a learned model}, Schrittweiser et al., Nature 2020.
+
+\vfill
+Doing a tree search over possible actions requires knowing (or modeling) how a given action changes the state of the system.
+
+\vfill
+For example, tree seach in chess requires knowing how an move changes the state.
+
+\vfill
+MuZero does not assume a known state representation.
+
+\slide{MuZero}
+
+Q-learning and advantage actor-critic do not require the ability to plan ahead (tree search).
+
+\vfill
+But AlphaZero uses Monte-Carlo tree search (MCTS) to ``plan'' into the future.
+
+\vfill
+MuZero uses the sequence of actions and observations as a representation of state.
+
+\vfill
+This matches, but does not improve, playing Go and Chess.
+
+\vfill
+But it improves the performance on Atari games by allowing tree search prior to action selection.
+
+\slide{The Replay Buffer}
+
+A ``state'' is a sequence of observations (the game screen) and actions.
+$$s = (o_1,a_1,\ldots,o_t,a_t)$$
+
+\vfill
+They construct a replay buffer from rollouts using a (learned) action policy.
+
+\vfill
+A replay entry $e$ has the form
+$$e = \left[\;s_t;\;\;a_{t+1},\;r_{t+1},\ldots,a_{t+K},r_{t+K},\;\;v_{t+K+1}\;\right]$$
+
+\vfill
+$r_{t+i}$ is the observed reword ti $t+i$ and $v_{t+K+1}$ is the (learned) value network applied to state $s_{t+K+1}$
+
+\slide{Training}
+
+{\huge
+The training loss function has the form
+
+$$\Phi^* = \argmin_\Phi E_{s \sim \mathrm{Rollout}}\;{\cal L}^\pi(s) + {\cal L}^V(s) +{\cal L}^R(s) + c||\Phi||^2$$
+  
+\vfill
+${\cal L}^\pi$ trains the policy network to predict $a_{t+1}$ (a cross-entropy loss).
+
+\vfill
+${\cal L}^V$ trains the value network to predict $v_{t+K+1}$ (square loss).
+
+\vfill
+${\cal L}^R$ trains the reward network to predict each $r_{t+k}$ (square loss).
+}
+
+\ignore{
+\slide{Results}
+
+\centerline{\includegraphics[height= 4.5in]{\images/muzerochess}}
+
+The orange line is alphazero.
+}
+
+\slide{Results}
+
+\centerline{\includegraphics[height= 4.0in]{\images/muzeroatari}}
+
+{\huge
+  These are human normalized scores averaged over all 57 Atari games.  The orange line is the previous state of the art system.  Solid lines are average scores and dashed lines are median scores.
+}
+
+
+\slide{AlphaStar}
+
+Grandmaster level in StarCraft II using multi-agent reinforcement learning, Nature Oct. 2019, Vinyals et al.
+
+\vfill
+StarCraft:
+
+\begin{itemize}
+\item Players control hundreds of units.
+
+\vfill
+\item Individual actions are selected from $10^{26}$ possibilities (an action is a kind of procedure call with arguments).
+
+\vfill
+\item Cyclic non-transitive strategies (rock-paper-scissors).
+
+\vfill
+\item Imperfect information --- the state is not fully observable.
+\end{itemize}
+
+\slide{The Paper is Vague}
+
+It basically says the following ideas are used:
+
+A policy gradient algorithm, auto-regressive policies, self-attention over the observation history,L STMs, pointer-networks, scatter connections,
+replay buffers, asynchronous advantage actor-critic algorithms, TD($\lambda$) (gradients on value function Bellman error), clipped importance sampling
+(V-trace), a new undefined method they call UPGO that ``moves policies toward trajectories with better than average reward'', a value function
+that can see the opponents observation (training only), a ``$z$ statistic'' stating a high level strategy, 
+supervised learning from human play, 
+a ``league'' of players (next slide).
+
+\slide{The League}
+
+The league has three classes of agents: main (M), main exploiters (E), and league exploiters (L).  M and L play against everybody.
+E plays only against M.
+
+\slide{A Rube Goldberg Contraption?}
+
+\centerline{\includegraphics[height = 5in]{\images/Goldberg}}
+
+\slide{Video}
+
+https://www.youtube.com/watch?v=UuhECwm31dM
 
 \slide{END}
 
