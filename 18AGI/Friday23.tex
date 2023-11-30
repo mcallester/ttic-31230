@@ -1,0 +1,438 @@
+\input /Users/davidmcallester/icloud/tex/SlidePreamble
+\input /Users/davidmcallester/icloud/tex/Preamble
+
+\newcommand{\bij}{\mathbf{Bij}}
+\newcommand{\true}{\mathbf{ True}} \newcommand{\false}{\mathbf{False}}
+
+\begin{document}
+
+{\Huge
+  ~ \vfill
+  \centerline{\bf I. The MathZero Project}
+  \bigskip
+ \bigskip
+  \centerline{\bf II. AI Safety, AI Architectures, and AI Consciousness}
+  \bigskip
+  \bigskip
+  \bigskip
+  \bigskip
+  \centerline{David McAllester}
+  \medskip
+  \centerline{Friday, November 10, 2023}
+
+\vfill
+
+\slide{The MathZero Project}
+
+This has the ultimate goal of accomplishing for ``the game of mathematics'' what AlphaZero did for Chess and Go.
+
+\vfill
+A much more modest goal is improving the level of automation in formal verifiers for general mathematics.
+
+\vfill
+The most popular verifier among mathematicians is the LEAN system. The math library for LEAN (mathlib) currently contains 70,000 formal definitions and 127,000 formal proofs.
+
+\vfill
+I think it is safe to say that attempts to use deep learning to improve automation in LEAN have not yet
+lead to significant productivity improvements.
+
+\slide{An Approach to MathZero}
+
+\vfill
+{\bf Step I.} Get the foundations right. Specify an appropriate variant of {\bf dependent type theory}.  
+The version considered here is different from that underlying LEAN.
+
+\vfill
+{\bf Step II.} Construct an effective verification system for ``declarative proofs'' rather than ``syntactic proofs''. Eliminate the concept of ``tactic".
+
+\vfill
+{\bf Step III.} Continuously improve the verifier until you only need to state a desired theorem.  Self-play is replaced by a curriculum of increasingly difficult problems.
+
+
+\slide{Getting the Foundations Right}
+
+The set of theorems of mathematics is defined by
+the nine axioms of Zermello Fraenkel set theory with the axiom of choice (ZFC).
+
+\vfill
+However, the formulas of ZFC are very different from the natural language (e.g. English) used by mathematicians.
+
+\vfill
+It is the difference between assembly code (ZFC) and a strongly typed high level language (dependent type theory).
+
+\vfill
+As with programming languages, variants of dependent type theory can differ.
+
+\slide{Getting the Foundations Right}
+
+Unlike LEAN, here the type theory is specified by defining {\bf the meaning} of type expressions.
+
+\vfill
+Type expressions denote sets or classes.
+
+\vfill
+The type {\tt set} denotes the class of all sets.
+
+\vfill
+$\sigma \times \tau$
+denotes the set (or class) of pairs $(x,y)$ with $x\!:\!\sigma$ and $y\!:\!\tau$.
+
+\vfill
+The {\bf dependent type}  $(x:\sigma) \times \tau[x]$ denotes the set (or class) of pairs $(x,y)$ with $x\!:\!\sigma$ and $y\!:\!\tau[x]$.
+
+\vfill
+For example $(s:{\tt set}) \times ((s \times s) \rightarrow s)$ denotes the class of all magmas.
+
+\slide{Types and Abstraction}
+
+There is no natural or canonical ordering  on an abstract set.
+
+\vfill
+There is no natural or canonical point on a geometric circle.
+
+\vfill
+There is no natural or canonical basis (coordinate system) for a vector space and, relatedly,  no natural or canonical inner product operation on the vectors of a vector space (an inner product is the same data as an isomorphism between a vector space and its dual).
+
+
+
+\slide{The Problem with Category Theory}
+
+Category theory does not recognize the role of type theory in defining ``functor", ``canonical object", or ``same data".
+
+\vfill
+${\tt Topology}\rightarrow {\tt Group}$ is the class of all ``functors" ({\bf well-typed} function expressions) from topological spaces to groups.
+\vfill
+In general for $x:\sigma$ there is no canonical element of $\tau[x]$ if there is no {\bf well typed} function $F:(x:\sigma)\rightarrow \tau[x]$.
+
+\vfill
+The objects in $\sigma$ and $\tau$ contain the same data if there are {\bf well typed} functions $F:\sigma\rightarrow \tau$ and $G:\;\tau\rightarrow \sigma$ with $G(F(x)) = x$ and $F(G(y)) = y$.
+
+\slide{Mathematical Objects have Symmetry Groups}
+
+Consider the bag-of-words abstraction of a document (a mapping from words to the number of times they occur).
+
+\vfill
+Clearly, the bag of words has lost the information of the order of the words.
+
+\vfill
+In dependent type theory we have that, for an abstract alphabet ${\cal A}$, there is no well-typed function
+$$G:\mathrm{BagOf}({\cal A}) \rightarrow \mathrm{SequenceOf}({\cal A}).$$
+
+\vfill
+More generally, in dependent type theory {\bf objects have symmetries} and {\bf well-typed functions cannot break symmetries}.
+
+\slide{Types and Isomorphism}
+
+Dependent type theory associates every type with a notion of isomorphism and supports the substitution of isomorphics.
+
+\vfill
+For $x,y\!\!:\!\!\sigma$ I will write $x =_\sigma y$ to mean that $x$ and $y$ are isomorphic as $\sigma$.
+
+\centerline{\unnamed{
+  \ant{\Gamma \vdash F\!\!:\!\sigma \rightarrow \tau}
+  \ant{\Gamma \vdash u =_\sigma v}}
+  {\ant{\Gamma \vdash F(u) =_\tau F(v)}}}
+
+\slide{Getting the Foundations Right}
+
+The type
+
+$$(x\!\!:\!\sigma)\; \mbox{\tt such that}\; \Phi[x]$$
+
+\vfill
+denotes the set (or class) of $x\!:\!\sigma$ satisfying $\Phi[x]$.
+
+\vfill
+Unlike LEAN, here the same object can have many types --- an Abelian group is a group.
+
+\vfill
+Unlike LEAN, but as in Tarskian semantics, equality means equality --- here equality is not defined as an inductive type.
+
+
+\slide{Declarative Proofs}
+
+Declarative proofs use only a small number of constructs.
+
+\vfill
+Perhaps only {\huge {\tt Proof}($\Phi$,proof)}, {\huge{\tt LetBe}($x\!\!:\!\!\sigma$, proof)}, {\huge {\tt Suppose}($\Phi$,proof)}
+and {\huge {\tt NoteThat}($\Phi$)}.
+
+\vfill
+The system must verify the proof leaves of the form ${\tt NoteThat}(\Phi)$.
+
+\vfill
+Eliminating tactics greatly simplifies the search for proofs.
+
+\vfill
+Human proofs do not call tactics.
+
+
+\vfill
+There is a continuum of strength for declarative verifiers with no upper limit.
+
+\slide{Supporting Declarative Proofs}
+
+\vfill
+Before training deep models I am adapting techniques from SMT solvers such as Z3.
+
+\vfill
+SMT solvers use highly effective inference ``algorithms'' such as unit propagation and congruence closure.
+
+\vfill
+SMT methods need to be adapted to dependent type theory.
+
+\vfill
+For example congruence closure for the isomorphism equivalence relation.
+
+\slide{Release Date Target}
+
+I am targeting September next year (2024) for the release of a competitor to the LEAN verification system.
+
+\slide{Part II}
+
+\centerline{\bf AI Safety}
+
+\vfill
+\centerline{\bf AI Architecture}
+
+\vfill
+\centerline{\bf AI Consciousness}
+
+
+\slide{Safety: The Alignment Problem}
+
+The Alignment problem is that of giving an artificial general intelligence (AGI) a mission or purpose in alignment with human values.
+
+\vfill
+This can be phrased as finding a solution to the principal-agent problem for AGI agents.
+
+\slide{White-Hats, Red-Hats}
+
+A white-hat team designs a safety system.
+
+\vfill
+A red-hat team looks for vulnerabilities.
+
+\vfill
+We need both.
+
+\slide{White Hat: The Advobot Restriction}
+
+A personal advobot is an AI advocate for a particular person X where the advobot's fundamental goal is given as ``within the law, pursue fulfilling the expsed requests of X''.
+
+\vfill
+The advobot  restriction is that AGI systems be legally limited to personal advobots.
+
+\vfill
+The term ``AGI'' needs to be incorporated into law and given an evolving interpretation by the judicial system.
+
+\slide{White Hat: Safety Features of the Restriction}
+
+\begin{itemize}
+\item The advobot must act within the law. Society can limit all advobots by changing the law.
+
+\vfill
+\item The advobot mission transfers moral responsibility from the advobot to its master.
+
+\vfill
+\item There is a large society of advobots --- one per person --- each with a different mission.  This limits individual power.
+
+\vfill
+\item The advobot mission seems clearer that other directives such as Asimov’s laws or Yudkowsky's coherent extrapolated volition.
+
+\vfill
+\item The advobot restriction preserves human free will.
+\end{itemize}
+
+
+\slide{Red Hat: Consider Large Language Models (LLMs)}
+
+Much of the literature on AI safety assumes that we can give an AI a goal such as ``make as many paperclips as possible''.
+
+\vfill
+But large language models (LLMs) are not even ``agentive'' (explained below).
+
+\vfill
+LLMs are trained to mimic people.  People do not have clear objectives and do not always do what they are told.
+
+\vfill
+Large language models are subject to the ``Waluigi effect'' where they flip to pursuing the very opposite of what they are told.
+
+\slide{Agentive AGI}
+
+An AGI system is ``agentive'' if it takes actions in puruit of a goal.
+
+\vfill
+Many systems can be decribed as taking actions in persuit of a goal.  But an AGI is agentive if its potential actions include
+all the kinds of actions that people can take.  For example legal filings of all kinds.
+
+\vfill
+Current LLMs are not agentive.
+
+\slide{The Waluigi Effect}
+
+Waluigi is the evil twin of Luigi in Mario Brothers.
+
+\vfill
+The Waluigi effect occurs when an LLM holds two
+interpretations of its own statements --- one genuinely cooperative
+and one deceptively cooperative.
+
+\vfill
+When modeling humans both interpretations exist.
+
+\vfill
+If the LLM reveals deception, the deception interpretation sticks.
+
+\vfill
+Every turn of the dialogue has a chance of revealing deception.
+
+
+
+\slide{White Hat: Constitutional AI}
+
+Constitutional AI is an attempt to provide a mission statement (or ``constitution'') to LLMs.
+
+\vfill
+Constitutional AI has been show to work to some extent but is not included in GPT4 which instead uses reinforcement learning with human feedback (RLHF).
+
+\vfill
+Ultimately it seems clear that we need to be able to specify missions.
+
+\centerline{\huge Constitutional AI: Harmlessness from AI Feedback}
+\centerline{\huge Bai et al ArXiv 2212.08073 [Anthropic]}
+
+\slide{Memory Architectures}
+
+For both safety and performance reasons I believe strong AGI systems will be based on read-write memory architectures.
+
+\vfill
+In a memory architecture a ``CPU'' works with an external memory in a manner analogous to a von Neumann machine.
+
+\vfill
+We might have a {\bf transformer CPU} where the transformer context is analogous to registers in a classical CPU.
+
+\vfill
+Items can be loaded from memory into the CPU context and written from the CPU context into memory.
+
+\slide{Related Literature}
+
+There are hudreds of papers on enlarging the transformer context.
+
+\vfill
+There are hundreds of papers on retrieval of documents or entities in a knowledge graph.
+
+\vfill
+There are papers that maintain indefinite term state in toy sandbox domains.
+
+\vfill
+I have not seen papers proposing read/write memory that includes internal thoughts over general language.  Send me pointers if know of some.
+
+\slide{Performance Advantages of Memory Architectures}
+
+The memory acts as an essentially infinite context with memory retrieval playing the role of the attention mechanism of a transformer
+but over all of memory.
+
+\vfill
+The memory can be directly extended. The machine can read and remember today's newspaper.
+
+\vfill
+The machine can use internal chain-of-thought processing involving reads and writes to memory.
+
+
+\slide{Safety Advantages of Memory Architectures}
+
+We want to know what an agent believes.
+
+\vfill
+We want to know the agents goals.
+
+\vfill
+We want both of these things to be visible in the memory.
+
+\slide{Interpretability (Opening the Black Box)}
+
+\vfill
+We should be able to engineer the memory such that memory entries are either literally textual statements,
+or have a rendering as text, and where the textual representation is faithful to meaning assigned by the machine.\footnote{\Large For example, the machine's notion of entailment
+between memories is in correspondence with human entailment judgements between their textual representations.}
+
+\vfill
+By observing the bandwidth to memory we can observe the ``thought process'' of the machine.
+
+\vfill
+We can also edit the memory to maintain the quality of its information, or control the beliefs of the machine.
+
+\slide{Mission Statements (Fundamental Goals)}
+
+Fundamental goals are axioms.  They do not follow from, and are independent of, world knowledge.
+
+\vfill
+An axiomatic {\bf and immutable} mission should be built into the CPU.
+
+\slide{The Advobot Restriction}
+
+A personal advobot is an advocate for a particular person X whose fundamental goal is given as ``within the law, pursue fulfilling the expressed requests of X''.
+
+\vfill
+The advobot restriction is that AGI be limited to personal advobots.
+
+\slide{Defining AGI}
+
+Legally limiting AGI to advobots requires some legal interpretation of ``AGI''.
+
+\vfill
+AGI is of course hard to define.
+
+\vfill
+However, many legal terms are hard to define.  Consider ``intent'', ``bodily harm'', or ``assault''.
+
+\vfill
+Perhaps we can simply use the term ``AGI'' in legal discourse and leave its interpretation open to an evolving legal process.
+
+\slide{A Possible Legal Definition of AGI}
+
+An Artificial general intelligence (AGI) is a a non-biological computational system possessing the following abilities at least at the level of a normal person.
+
+\vfill
+\begin{itemize}
+\item  The ability to  converse in language on topics familiar to most people.
+
+\vfill
+\item  The ability to understand counterfactuals, the consequences of actions, and to track the state of the world as events unfold.
+
+\vfill
+\item The ability to understand the mental states of others as a part of the evolving state of the world.
+
+\vfill
+\item The ability to pursue goals through actions.  This includes, but is not restricted to, telling people things, asking people to do things, engaging in financial transactions, and filing legal documents.
+
+\vfill
+\item It has unspoken thoughts that are remembered and that can be used to improve understanding or to plan actions.
+
+\vfill
+\item It remembers what it is told, what it reads, what it says, and its own thoughts.
+
+\end{itemize}
+
+
+\slide{A Possible Legal Definition of Consciousness}
+
+Any system that passing the legal definition of an AGI is to be considered legally conscious.
+
+\vfill
+Memory is a particularly important criterion for consciousness.
+
+\slide{Defining Truth}
+
+While it may be possible to edit the beliefs of an advobot, one might want legal protection for truth in advobot beliefs.
+
+\vfill
+This would involve the ability to legally interpret ``truth''.
+
+\vfill
+But the legal system has always had to judge truth.
+
+\slide{END}
+
+\end{document}
