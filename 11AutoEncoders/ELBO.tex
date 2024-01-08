@@ -107,7 +107,7 @@ The Bayesian motivation is to train $P_\enc(z|y)$ to approximate Bayesian infere
 \slide{Bayesian Interpretation}
 {\huge
 \begin{eqnarray*}
-\ln P_{\pri,\gen}(y) & =  & \ln \frac{P_{\pri,\gen}(y)P_{\pri,\gen}(z|y)}{P_{\pri,\enc}(z|y)} \\
+\ln P_{\pri,\gen}(y) & =  & \ln \frac{P_{\pri,\gen}(y)P_{\pri,\gen}(z|y)}{P_{\pri,\gen}(z|y)} \\
 \\
 \\
 & = & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\pri,\gen}(y)P_{\pri,\gen}(z|y)}{P_\enc(z|y)}\right] + KL(P_\enc(z|y),P_{\pri,\gen}(z|y)) \\
