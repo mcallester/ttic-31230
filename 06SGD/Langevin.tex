@@ -48,16 +48,15 @@ $${\color{red} \Delta \Phi = - g(\Phi)\Delta t}$$
 Consider the update.
 
 
-{\color{red} $$\Delta \Phi = - g\Delta t$$}
+\begin{eqnarray*}
+d \Phi & = & - g(\Phi)dt \;\;\;\;\;\;\; \mathrm{Gadient~Flow} \\
+\\
+\Phi_{t+\Delta t} & \approx & \Phi_t - g\Delta t \\
+\\
+\Phi_{t+\eta} & \approx & \Phi_t - \eta_t\;\hat{g} \;\;\;\;\;\; \mathrm{SGD} \\
+\end{eqnarray*}
 
-\vfill
-Here $\Delta t$ has both a natural interpretation as time in a numerical simulation of the flow differential equation.
-
-\vfill
-But it also has a natural interpretation as a learning rate.
-
-\vfill
-This leads to interpreting the sum of the learning rates as ``time'' in SGD.
+We will show that as $\eta_t \rightarrow 0$ we have that SGD converges to Gradient Flow.
 
 \slide{Gradient Flow and SGD}
 Consider a sequence of model parameters $\Phi_1$, $\ldots$, $\Phi_N$ produced by SGD with
@@ -82,11 +81,20 @@ gradient.
 Since the gradients within each block become non-stochastic, we are back to gradient flow.
 
 
-\slide{Diffusion}
+\slide{Stochastic Differential Equations (SDEs)}
+
+SDEs are important in deep learning for understanding SGD, incorporating Bayesian priors into SGD,
+and in modern diffusion models.
+
+\vfill
+We will start with the simplest SDE: Brownian motion.  Brownian motion is the SDE used in diffusion models.
+
+\slide{Diffusion Models: Brownian Motion}
+
 Consider a discrete-time process $z(0),z(1),z(2),z(3),\ldots$ with $z(n)\in \mathbb{R}^d$ defined by
 \begin{eqnarray*}
   z(0) & = & y,\;\;\;y \sim \popd(y) \\
-  z(n+1) & = & z(n) + \sigma\delta,\;\;\;\delta \sim {\cal N}(0,I)
+  z(n+1) & = & z(n) + \sigma\epsilon,\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
 \vfill
@@ -94,107 +102,38 @@ We can sample from $z(n)$ using
 
 \begin{eqnarray*}
   z(0) & = & y,\;\;\;y \sim \popd(y) \\
-  z(n) & = & z(0) + \sigma\delta\sqrt{n} ,\;\;\;\delta \sim {\cal N}(0,I)
+  z(n) & = & z(0) + \sigma\epsilon\sqrt{n} ,\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
-\slide{Diffusion}
-Fix a numerical time step $\Delta t$ and consider a discrete-time process $z(0)$, $z(\Delta t)$, $z(2\Delta t)$, $\ldots$
+\slide{Brownian Motion}
+Fix a numerical time step $\Delta t$ and consider a discrete-time process $z(0)$, $z(\Delta t)$, $z(2\Delta t)$, $z(3\Delta t)$ $\ldots$
 
 {\huge
 \begin{eqnarray*}
   z(0) & = & y,\;\;\;y \sim \popd(y) \\
   \\
-  z(t+\Delta t) & = & z(t) + \sigma\delta\sqrt{\Delta t},\;\;\;\delta\sim {\cal N}(0,I) \\
+  z(t+\Delta t) & = & z(t) + \sigma\epsilon\sqrt{\Delta t},\;\;\;\epsilon\sim {\cal N}(0,I) \\
+  \\
+  z(t+n\Delta t) & = & z(t) + \sigma\epsilon\sqrt{n\Delta t},\;\;\;\epsilon\sim {\cal N}(0,I) \\    
 \end{eqnarray*}
 }
 We now take the limit of this numerical simulation as $\Delta t \rightarrow 0$.
 
+In this limit we can sample directly from $z(t)$ using
+
+$$z(t) = y + \sigma\epsilon \sqrt{t}\;\;\;\epsilon \sim {\cal N}(0,I)$$
+
+\slide{Brownian Motion}
+
+We can sample directly from $z(t+\Delta t)$ given $z(t)$ using
+
+$$z(t+\Delta t) =  z(t) + \sigma\epsilon\sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)$$
+
 \vfill
-This limit defines a probability measure on the space of functions $z(t)$.
-
-\slide{The Diffusion SDE}
-
-$$z(t+\Delta t) =  z(t) + \sigma\delta\sqrt{\Delta t},\;\;\;\delta \sim {\cal N}(0,I)$$
-
-\vfill
-For simple diffusion (Brownian motion) this equation holds for any continuous $t \geq 0$
+For Brownian motion this equation holds for any continuous $t \geq 0$.
 and $\Delta t \geq 0$.
 
-\slide{The Langevin SDE}
-
-Consider gradient flow.
-
-\begin{eqnarray*}
-\frac{d\Phi(t)}{dt} & = & - g(\Phi) \\
-\\
-g(\Phi) & = & \nabla_\Phi\;{\cal L}(\Phi) \\
-\\
-{\cal L}(\Phi) & = & E_{(x,y) \sim \pop}\;{\cal L}(\Phi,x,y)
-\end{eqnarray*}
-
-\slide{The Langevin SDE}
-
-In the Langevin SDE we add Gaussian noise to gradient flow.
-
-\begin{eqnarray*}
-\Phi(t + \Delta t) & = & \Phi(t) - g\Delta t + \sigma \delta \sqrt{\Delta t},\;\;\;\delta \sim {\cal N}(0,I)
-\end{eqnarray*}
-
-\vfill
-We will show that the stationary distribution of Langevin Dynamics models a Bayesian posterior probability distrbution on
-the model parameters where $\sigma$ acts as a temperature parameter.
-
-
-\slide{The Langevin SDE}
-
-\begin{eqnarray*}
-\Phi(t + \Delta t) & = & \Phi(t) - g(\Phi)\Delta t + \sigma\delta \sqrt{\Delta t},\;\;\;\delta \sim {\cal N}(0,I)
-\end{eqnarray*}
-
-Let $p(\Phi)$ be a probability density on the parameter space $\Phi$.
-
-\vfill
-The density $p(\Phi)$ defines a gradient flow and a diffusion flow.
-
-\begin{eqnarray*}
-\mbox{gradient flow} & = & - p(\Phi)g(\Phi) \\
-\\
-\mbox{diffusion flow} & = & - \frac{1}{2} \;\sigma^2\;\nabla_\Phi\; p(\Phi)
-\end{eqnarray*}
-
-\vfill
-The expression for the diffusion flow follows from the Fokker-Planck equation. A derivation of the diffusion flow expression from first princple is given in the appendix.
-
-\slide{The Langevin SDE}
-
-\begin{eqnarray*}
-\mbox{gradient flow} & = & - p(\Phi)g(\Phi) \\
-\\
-\mbox{diffusion flow} & = & - \frac{1}{2} \;\sigma^2\;\nabla_\Phi(p(\Phi))
-\end{eqnarray*}
-
-\vfill
-For the stationary distribution these two flows cancel each other out.
-In one dimension we have
-
-$$\frac{1}{2} \sigma^2 \nabla_\Phi\; {p} = - p\nabla_\Phi {\cal L}$$
-
-\slide{The Langevin Stationary Distribution}
-
-\vspace{-2ex}
-\begin{eqnarray*}
-\frac{1}{2} \sigma^2 \nabla_\Phi\; {p} & = & - p\nabla_\Phi {\cal L} \\
-\\
-\frac{1}{2} \sigma^2 \frac{\nabla_\Phi\;p}{p} & = & - \nabla_\Phi {\cal L} \\
-\\
-\frac{1}{2} \sigma^2 \left(\nabla_\Phi \ln p\right) & = &  \nabla_\Phi (- {\cal L}) \\
-\\
-\frac{1}{2} \sigma^2 \ln p & = & - {\cal L} + C \\
-\\
-{\color{red} p(\Phi)} & {\color{red} =} & {\color{red} \frac{1}{Z}\exp\left(\frac{-2{\cal L}(\Phi)}{\sigma^2}\right)}
-\end{eqnarray*}
-
-\slide{A Bayesian Interpretation of Langevin Dynamics}
+\slide{Sampling from a Bayesian Posterior: Langevin Dynamics}
 
 {\huge
 $$\train = (x_1,y_1),\ldots,(x_n,y_n)$$
@@ -250,9 +189,79 @@ p(\Phi|\train) & \propto & p(\Phi)\prod_i P_\Phi(y_i|x_i) \\
 \centerline{This Gives{\color{red} $~\;\;\;p(\Phi|\train) = \frac{1}{Z}\exp\left(-n{\cal L}(\Phi)\right)$}}
 }
 
+\slidetwo{Sampling from a Bayesian Posterior:}{Langevin Dynamics}
+
+Consider gradient flow.
+
+\begin{eqnarray*}
+\frac{d\Phi(t)}{dt} & = & - g(\Phi) \\
+\\
+g(\Phi) & = & \nabla_\Phi\;{\cal L}(\Phi) \\
+\\
+{\cal L}(\Phi) & = & E_{(x,y) \sim \pop}\;{\cal L}(\Phi,x,y)
+\end{eqnarray*}
+
+\slide{The Langevin SDE}
+
+In the Langevin SDE we add Gaussian noise to gradient flow.
+
+\begin{eqnarray*}
+\Phi(t + \Delta t) & = & \Phi(t) - g\Delta t + \sigma \epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)
+\end{eqnarray*}
+
+\vfill
+We will show that the stationary distribution of Langevin Dynamics models a Bayesian posterior probability distrbution on
+the model parameters where $\sigma$ acts as a temperature parameter.
 
 
+\slide{The Langevin SDE}
 
+\begin{eqnarray*}
+\Phi(t + \Delta t) & = & \Phi(t) - g(\Phi)\Delta t + \sigma\epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)
+\end{eqnarray*}
+
+Let $p(\Phi)$ be a probability density on the parameter space $\Phi$.
+
+\vfill
+The density $p(\Phi)$ defines a gradient flow and a diffusion flow.
+
+\begin{eqnarray*}
+\mbox{gradient flow} & = & - p(\Phi)g(\Phi) \\
+\\
+\mbox{diffusion flow} & = & - \frac{1}{2} \;\sigma^2\;\nabla_\Phi\; p(\Phi)
+\end{eqnarray*}
+
+\vfill
+The expression for the diffusion flow follows from the Fokker-Planck equation. A derivation of the diffusion flow expression from first princple is given in the appendix.
+
+\slide{The Langevin SDE}
+
+\begin{eqnarray*}
+\mbox{gradient flow} & = & - p(\Phi)g(\Phi) \\
+\\
+\mbox{diffusion flow} & = & - \frac{1}{2} \;\sigma^2\;\nabla_\Phi(p(\Phi))
+\end{eqnarray*}
+
+\vfill
+For the stationary distribution these two flows cancel each other out.
+In one dimension we have
+
+$$\frac{1}{2} \sigma^2 \nabla_\Phi\; {p} = - p\nabla_\Phi {\cal L}$$
+
+\slide{The Langevin Stationary Distribution}
+
+\vspace{-2ex}
+\begin{eqnarray*}
+\frac{1}{2} \sigma^2 \nabla_\Phi\; {p} & = & - p\nabla_\Phi {\cal L} \\
+\\
+\frac{1}{2} \sigma^2 \frac{\nabla_\Phi\;p}{p} & = & - \nabla_\Phi {\cal L} \\
+\\
+\frac{1}{2} \sigma^2 \left(\nabla_\Phi \ln p\right) & = &  \nabla_\Phi (- {\cal L}) \\
+\\
+\frac{1}{2} \sigma^2 \ln p & = & - {\cal L} + C \\
+\\
+{\color{red} p(\Phi)} & {\color{red} =} & {\color{red} \frac{1}{Z}\exp\left(\frac{-2{\cal L}(\Phi)}{\sigma^2}\right)}
+\end{eqnarray*}
 
 
 \slide{A Bayesian Interpretation of Langevin Dynamics}
@@ -272,7 +281,7 @@ $$p_{\mathrm{Langevin}}(\Phi) = p(\Phi|\train)$$
 
 {\huge
 \begin{eqnarray*}
-x(t + \Delta t) &  =  & x(t) + \mu(x,t)\Delta t + \sigma(x,t)\delta \sqrt{\Delta t},\;\;\;\delta \sim {\cal N}(0,I)\;\;\;(1)
+x(t + \Delta t) &  =  & x(t) + \mu(x,t)\Delta t + \sigma(x,t)\epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)\;\;\;(1)
  \end{eqnarray*}
 }
 \vfill
@@ -320,26 +329,26 @@ We pick $N$ large enough that $\sum_{j=1}^N (\hat{g}_i - g(\Phi))$ is approximat
 \begin{eqnarray*}
 \Phi_{i+N} & \approx & \Phi_i - \eta N g(\Phi)  - \eta \sum_{j=1}^N (\hat{g}_i - g(\Phi)) \\
 \\
-& \approx & \Phi_i - \eta N g(\Phi)  - \eta \sqrt{N} \delta,\;\;\; \delta \sim {\cal N}(0,\Sigma)
+& \approx & \Phi_i - \eta N g(\Phi)  - \eta \sqrt{N} \epsilon,\;\;\; \epsilon \sim {\cal N}(0,\Sigma)
 \end{eqnarray*}
 
 \vfill
 Now define $\Delta t = N\eta$ or $N = \Delta t/\eta$.
 
 \begin{eqnarray*}
-\Phi(t+ \Delta t) & \approx & \Phi(t) - g(\Phi)\Delta t +  \eta\delta \sqrt{ \Delta t/\eta},\;\;\; \delta \sim {\cal N}(0,\Sigma) \\
+\Phi(t+ \Delta t) & \approx & \Phi(t) - g(\Phi)\Delta t +  \eta\epsilon \sqrt{ \Delta t/\eta},\;\;\; \epsilon \sim {\cal N}(0,\Sigma) \\
 \\
-& = & \Phi(t) - g(\Phi)\Delta t +  \sqrt{\eta}\delta \sqrt{\Delta t},\;\;\; \delta \sim {\cal N}(0,\Sigma)
+& = & \Phi(t) - g(\Phi)\Delta t +  \sqrt{\eta}\epsilon \sqrt{\Delta t},\;\;\; \epsilon \sim {\cal N}(0,\Sigma)
 \end{eqnarray*}
 
 
 \slide{The SGD SDE}
 
 \begin{eqnarray*}
-\Phi(t+ \Delta t) & \approx & \Phi(t) - g(\Phi)\Delta t +  \sqrt{\eta}\delta \sqrt{ \Delta t},\;\;\; \delta \sim {\cal N}(0,\Sigma) \\
+\Phi(t+ \Delta t) & \approx & \Phi(t) - g(\Phi)\Delta t +  \sqrt{\eta}\epsilon \sqrt{ \Delta t},\;\;\; \epsilon \sim {\cal N}(0,\Sigma) \\
 \\
 \\
-& = & \Phi(t) - g(\Phi)\Delta t +  \sqrt{\eta}\sigma(\Phi) \delta \sqrt{ \Delta t},\;\;\; \delta \sim {\cal N}(0,I) 
+& = & \Phi(t) - g(\Phi)\Delta t +  \sqrt{\eta}\sigma(\Phi) \epsilon \sqrt{ \Delta t},\;\;\; \epsilon \sim {\cal N}(0,I) 
 \end{eqnarray*}
 
 \vfill
@@ -348,7 +357,7 @@ Here the matrix $\sigma(\Phi)$ is the square root of the covariance matrix $\Sig
 \slide{The SGD SDE in One Dimension}
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & = & \Phi(t) -g(\Phi)\Delta t + \sqrt{\eta} \sigma(\Phi) \delta\sqrt{\Delta t}
+\Phi(t + \Delta t) & = & \Phi(t) -g(\Phi)\Delta t + \sqrt{\eta} \sigma(\Phi) \epsilon\sqrt{\Delta t}
 \end{eqnarray*}
 
 \vfill
@@ -365,7 +374,7 @@ This is Gibbs and provides an interpretation of the learning rate as temperature
 \slide{The SGD SDE in Higher Dimension}
 
 \begin{eqnarray*}
-\Phi(t + \Delta t) & = & \Phi(t) -g(\Phi)\Delta t + \sqrt{\eta} \sigma(\Phi) \delta\sqrt{\Delta t}
+\Phi(t + \Delta t) & = & \Phi(t) -g(\Phi)\Delta t + \sqrt{\eta} \sigma(\Phi) \epsilon\sqrt{\Delta t}
 \end{eqnarray*}
 
 \vfill
@@ -399,7 +408,7 @@ Consider SGD where the update dirction is determined by a matrix $D$.
 
 $$\Phi_{i+1} = \Phi_i - \eta D \hat{g}_i$$
 
-$D$ defines a linear map from dual vectors to primal vectrors.
+$D$ defines a linear map from dual vectors to primal vectors.
 
 \vfill
 The function defined by $D$ has a meaning indepent of the choice of coordinates.
@@ -428,10 +437,10 @@ $$\Phi_{i+1} = \Phi_i - \eta D \hat{g}_i$$
 Setting $\Delta t = N\eta$ we get
 
 
-$$\Phi(t+ \Delta t) = \Phi(t) - Dg \Delta t + \sqrt{\eta}D\delta\sqrt{\Delta t},\;\;\;\delta \sim {\cal N}(0,\Sigma(\Phi))$$
+$$\Phi(t+ \Delta t) = \Phi(t) - Dg \Delta t + \sqrt{\eta}D\epsilon\sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,\Sigma(\Phi))$$
 
 \vfill
-Here the noise vector $\delta$ is a dual vector.
+Here the noise vector $\epsilon$ is a dual vector.
 
 \slide{Solving for $D$}
 
@@ -521,19 +530,19 @@ $$p(\Phi) = \frac{1}{Z} \exp\left(\frac{-2{\cal L}}{\eta}\right)$$
 We consider the one dimensional case where we have a function $x(t) \in \mathbb{R}$.  We consider a very small time step $\Delta t$ and consider only the diffusion flow.
 
 \begin{eqnarray*}
-x(t + \Delta t) & = & x(t) + \sigma \delta \sqrt{\Delta t},\;\;\;\delta \sim {\cal N}(0,1)
+x(t + \Delta t) & = & x(t) + \sigma \epsilon \sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,1)
 \end{eqnarray*}
 
 \vfill
-We assume a density $p_x$ of values of $x$ and let $p_\delta(\delta)$ be the normal distribution ${\cal N}(0,1)$ on $\delta$.
+We assume a density $p_x$ of values of $x$ and let $p_\epsilon(\epsilon)$ be the normal distribution ${\cal N}(0,1)$ on $\epsilon$.
 
 \vfill
 The quantity of mass transfer in the time interval $\Delta t$ from values above $x$ to values below $x$ is
 
 \begin{eqnarray*}
-& & \int_{z = 0}^\infty  p_x(x + z)\;p_\delta(\sigma\delta\sqrt{\Delta t} \leq -z) dz  \\
+& & \int_{z = 0}^\infty  p_x(x + z)\;p_\epsilon(\sigma\epsilon\sqrt{\Delta t} \leq -z) dz  \\
 \\
-& = & \int_{z = 0}^\infty  p_x(x + z)\;p_\delta\left(\delta \leq \frac{-z}{\sigma\sqrt{\Delta t}}\right) dz  \\
+& = & \int_{z = 0}^\infty  p_x(x + z)\;p_\epsilon\left(\epsilon \leq \frac{-z}{\sigma\sqrt{\Delta t}}\right) dz  \\
 \\
 & =  & \int_{z = 0}^\infty p_x(x+z)\;\Phi\left(\frac{-z}{\sigma\sqrt{\Delta t}}\right) dz
 \end{eqnarray*}
