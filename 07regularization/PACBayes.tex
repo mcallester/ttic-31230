@@ -13,9 +13,18 @@
 \vfill
 \centerline{\bf Generalization Theory}
 \vfill
-\centerline{\bf The Occam Generalization Guarantee}
+\centerline{\bf The Occam Guarantee (The Free Lunch Theorem)}
 \vfill
-\centerline{\bf aka: The Free Lunch Theorem}
+\centerline{\bf The PAC-Bayesian Guarantee and the $L_2$ Reguralization Guarantee}
+\vfill
+\centerline{\bf Implicit Regularization}
+\vfill
+\centerline{\bf Calibration}
+\vfill
+\centerline{\bf Ensembles}
+\vfill
+\centelrine{\bf Double Descent}
+
 \vfill
 \vfill
 
@@ -100,7 +109,7 @@ h^* & = & {\color{red} \argmin_h \hat{\cal L}(h) + \frac{5 L_\mathrm{max}}{N_\ma
 h^* & = & {\color{red} \argmin_h \hat{\cal L}(h) + \frac{1}{N_\mathrm{Train}}\parens{- \ln P(h)}}
 \end{eqnarray*}
 
-\slide{Proof}
+\slide{Proof of the Occam Guarantee}
 
 WLOG take $\lmax = 1$.
 $$\mathrm{Define}\;\;\epsilon(h) = \sqrt{\frac{2{\cal L}(h)\parens{-\ln \delta P(h)}}{N_\mathrm{Train}}}.$$
@@ -181,6 +190,74 @@ Theorem: With probability at least $1-\delta$ over the draw of training data the
    {\color{red} {\cal L}_\sigma(\Phi)} & {\color{red} \leq} & {\color{red} \frac{10}{9}\parens{\hat{{\cal L}}_\sigma(\Phi)
    + \frac{5 \lmax}{N_\mathrm{Train}}\parens{\frac{||\Phi||^2}{2\sigma^2} + \ln \frac{1}{\delta}}}}
 \end{eqnarray*}
+
+\slide{Shrinkage: $L_2$ regularization}
+
+\vfill
+{\huge
+\begin{eqnarray*}
+\Phi^* & = & \argmax_\Phi\;p(\Phi,\;\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n}) \\
+\\
+ & = & \argmax_\Phi \; p(\Phi)\;\prod_i \pop(x_i)P_\Phi(y_i|x_i) \\
+ \\
+  & = & \left(\prod_i p(x_i)\right) \argmax_\Phi \; p(\Phi)\;\prod_i  P_\Phi(y_i|x_i) \\
+ \\
+  & = & \argmax_\Phi \; p(\Phi)\;\prod_i P_\Phi(y_i|x_i)
+ \end{eqnarray*}
+}
+
+\slide{Shrinkage: $L_2$ Regularization}
+
+\begin{eqnarray*}
+\Phi^*   & = & \argmax_\Phi \; p(\Phi)\;\prod_i P_\Phi(y_i|x_i) \\
+\\
+& = & \argmin_\Phi \sum_i - \ln P_\Phi(y_i|x_i) -\ln  p(\Phi)
+\end{eqnarray*}
+
+\vfill
+We now take a Gaussian prior {\color{red} $$p(\Phi) \propto \exp\left(-\frac{||\Phi||^2}{2\sigma^2}\right)$$}
+
+\slide{Shrinkage: $L_2$ Regularization}
+
+\begin{eqnarray*}
+\Phi^* & = & \argmin_\Phi \sum_{i = 1}^n - \ln P_\Phi(y_i|x_i) + \frac{||\Phi||^2}{2\sigma^2}  \\
+\\
+\\
+& = & \argmin_\Phi \frac{1}{N} \left(\sum_{i = 1}^n - \ln P_\Phi(y_i|x_i) + \frac{||\Phi||^2}{2\sigma^2}\right)  \\
+\\
+\\
+& = & \argmin_\Phi \left(E_{\tuple{x,y}\sim \mathrm{Train}}\;-\ln P_\Phi(y|x)\right) + \frac{1}{2N\sigma^2} ||\Phi||^2
+\end{eqnarray*}
+
+\slide{Shrinkage: $L_2$ Regularization}
+
+\begin{eqnarray*}
+  & & \nabla_\Phi \;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{||\Phi||^2}{2N\sigma^2}\right) \\
+  \\
+  \\
+  & = & E_{(x,y) \sim \mathrm{Train}} \;\left(g(\Phi,x,y) + \frac{\Phi}{N\sigma^2}\right)
+\end{eqnarray*}
+
+\vfill
+$$\Phi_{i+1} = \Phi_i - \eta\left(\hat{g}_i  - \frac{1}{N\sigma^2}\Phi_i\right)$$
+
+\vfill
+The last term in the update equation is called ``shrinkage''.
+
+\slide{Decoupling Shrikage and Training Data Size}
+
+The PyTorch parameters are the learning rate $\eta$ and the {\bf weight decay} $\gamma$:
+
+$${\color{red} \Phi_{i+1}} = \Phi_i - \eta\left(\hat{g} + \frac{1}{N\sigma^2}\Phi_i\right)\;\;\;\; = {\color{red} \Phi_i - \eta(\hat{g} - \gamma\Phi_i)}$$
+
+\vfill
+To make SGD with shrinkage robust to changes in training size, batch size, learning rate (temperature) and momentum we can use
+
+\vfill
+{\color{red} $$\eta = (1-\mu)B\eta_0\;\;\;\;\;\;\;\;\;\gamma = \frac{1}{N_{\mathrm{Train}}\sigma^2}$$}
+
+\vfill
+where $\eta_0$ is the robust temperature parameter and $\sigma^2$ is the robust shrinkage parameter.
 
 \slide{Non-Vacuous Generalization Guarantees}
 
@@ -300,75 +377,6 @@ We first give a Bayesian derivation. We put a prior probability on $\Phi$ and ma
  \end{eqnarray*}
 }
 
-\slide{Shrinkage: $L_2$ regularization}
-
-\vfill
-{\huge
-\begin{eqnarray*}
-\Phi^* & = & \argmax_\Phi\;p(\Phi,\;\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n}) \\
-\\
- & = & \argmax_\Phi \; p(\Phi)\;\prod_i \pop(x_i)P_\Phi(y_i|x_i) \\
- \\
-  & = & \left(\prod_i p(x_i)\right) \argmax_\Phi \; p(\Phi)\;\prod_i  P_\Phi(y_i|x_i) \\
- \\
-  & = & \argmax_\Phi \; p(\Phi)\;\prod_i P_\Phi(y_i|x_i)
- \end{eqnarray*}
-}
-
-\slide{Shrinkage: $L_2$ Regularization}
-
-\begin{eqnarray*}
-\Phi^*   & = & \argmax_\Phi \; p(\Phi)\;\prod_i P_\Phi(y_i|x_i) \\
-\\
-& = & \argmin_\Phi \sum_i - \ln P_\Phi(y_i|x_i) -\ln  p(\Phi)
-\end{eqnarray*}
-
-\vfill
-We now take a Gaussian prior {\color{red} $$p(\Phi) \propto \exp\left(-\frac{||\Phi||^2}{2\sigma^2}\right)$$}
-
-\slide{Shrinkage: $L_2$ Regularization}
-
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \sum_{i = 1}^n - \ln P_\Phi(y_i|x_i) + \frac{||\Phi||^2}{2\sigma^2}  \\
-\\
-\\
-& = & \argmin_\Phi \frac{1}{N} \left(\sum_{i = 1}^n - \ln P_\Phi(y_i|x_i) + \frac{||\Phi||^2}{2\sigma^2}\right)  \\
-\\
-\\
-& = & \argmin_\Phi \left(E_{\tuple{x,y}\sim \mathrm{Train}}\;-\ln P_\Phi(y|x)\right) + \frac{1}{2N\sigma^2} ||\Phi||^2
-\end{eqnarray*}
-
-\slide{Shrinkage: $L_2$ Regularization}
-
-\begin{eqnarray*}
-  & & \nabla_\Phi \;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{||\Phi||^2}{2N\sigma^2}\right) \\
-  \\
-  \\
-  & = & E_{(x,y) \sim \mathrm{Train}} \;\left(g(\Phi,x,y) + \frac{\Phi}{N\sigma^2}\right)
-\end{eqnarray*}
-
-\vfill
-$$\Phi_{i+1} = \Phi_i - \eta\left(\hat{g}_i  - \frac{1}{N\sigma^2}\Phi_i\right)$$
-
-\vfill
-The last term in the update equation is called ``shrinkage''.
-
-\slide{Decoupling Shrikage and Training Data Size}
-
-The PyTorch parameters are the learning rate $\eta$ and the {\bf weight decay} $\gamma$:
-
-$${\color{red} \Phi_{i+1}} = \Phi_i - \eta\left(\hat{g} + \frac{1}{N\sigma^2}\Phi_i\right)\;\;\;\; = {\color{red} \Phi_i - \eta(\hat{g} - \gamma\Phi_i)}$$
-
-\vfill
-To make SGD with shrinkage robust to changes in training size, batch size, learning rate (temperature) and momentum we can use
-
-\vfill
-{\color{red} $$\eta = (1-\mu)B\eta_0\;\;\;\;\;\;\;\;\;\gamma = \frac{1}{N_{\mathrm{Train}}\sigma^2}$$}
-
-\vfill
-where $\eta_0$ is the robust temperature parameter and $\sigma^2$ is the robust shrinkage parameter.
-
-
 \slideplain{Ensembles}
 
 Train several models $\mathrm{Ens} = (\Phi_1,\;\ldots,\; \Phi_K)$ from different initializations and/or under different meta parameters.
@@ -388,9 +396,9 @@ Ensemble models almost always perform better than any single model.
 \begin{eqnarray*}
 {\cal L}\left(P_\mathrm{Ens}\right) & = & E_{\tuple{x,y} \sim \pop}\;\;-\ln P_\mathrm{Ens}(y|x) \\
 \\
- & = & E_{\tuple{x,y} \sim \pop}\;\;-\ln E_k P_k(y|x) \\
+ & = & E_{\tuple{x,y} \sim \pop}\left[-\ln E_k P_k(y|x)\right] \\
 \\
-& \leq & E_{\tuple{x,y} \sim \pop} \;E_k\;\;-\ln P_k(y|x) \\
+& \leq & E_{\tuple{x,y} \sim \pop} \;E_k\left[-\ln P_k(y|x)\right] \\
 \\
 & = & E_k\; {\cal L}(P_k)
 \end{eqnarray*}
