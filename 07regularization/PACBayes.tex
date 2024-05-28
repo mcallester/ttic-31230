@@ -12,23 +12,21 @@
 
 \vfill
 \centerline{\bf Generalization Theory}
-\vfill
-\centerline{\bf The Occam Guarantee (The Free Lunch Theorem)}
-\vfill
-\centerline{\bf The PAC-Bayesian Guarantee and the $L_2$ Reguralization Guarantee}
-\vfill
-\centerline{\bf Implicit Regularization}
-\vfill
-\centerline{\bf Calibration}
-\vfill
-\centerline{\bf Ensembles}
-\vfill
-\centelrine{\bf Double Descent}
+
+\begin{enumerate}
+\item The Occam Guarantee (The Free Lunch Theorem)
+\item The PAC-Bayesian Guarantee ($L_2$ Regularization)
+\item Implicit Regularization (the Strongest Guarantee)
+\item Calibration
+\item Ensembles
+\item Double Descent
+\item Grokking
+\end{enumerate}
 
 \vfill
 \vfill
 
-\slide{Chomsky vs. Kolmogorov and Hinton}
+\slide{1. The Occam Guarantee}
 
 \includegraphics[width=1.0 in]{\images/Chomsky} \begin{minipage}[b]{8in} Noam Chomsky: 
 Natural language grammar cannot be learned by a universal learning algorithm.
@@ -155,7 +153,7 @@ Setting $\lambda = 5$ brings the leading factor to 10/9 which seems sufficiently
 \vfill
 We can then scale the loss by $\lmax$ to get the original form.
 
-\slide{The PAC-Bayes Guarantee}
+\slide{2. The PAC-Bayes Guarantee}
 
 Let $p$ be any ``prior'' and $q$ be any ``posterior'' on any  (possibly continuous) model space.
 Define
@@ -206,59 +204,6 @@ Theorem: With probability at least $1-\delta$ over the draw of training data the
  \end{eqnarray*}
 }
 
-\slide{Shrinkage: $L_2$ Regularization}
-
-\begin{eqnarray*}
-\Phi^*   & = & \argmax_\Phi \; p(\Phi)\;\prod_i P_\Phi(y_i|x_i) \\
-\\
-& = & \argmin_\Phi \sum_i - \ln P_\Phi(y_i|x_i) -\ln  p(\Phi)
-\end{eqnarray*}
-
-\vfill
-We now take a Gaussian prior {\color{red} $$p(\Phi) \propto \exp\left(-\frac{||\Phi||^2}{2\sigma^2}\right)$$}
-
-\slide{Shrinkage: $L_2$ Regularization}
-
-\begin{eqnarray*}
-\Phi^* & = & \argmin_\Phi \sum_{i = 1}^n - \ln P_\Phi(y_i|x_i) + \frac{||\Phi||^2}{2\sigma^2}  \\
-\\
-\\
-& = & \argmin_\Phi \frac{1}{N} \left(\sum_{i = 1}^n - \ln P_\Phi(y_i|x_i) + \frac{||\Phi||^2}{2\sigma^2}\right)  \\
-\\
-\\
-& = & \argmin_\Phi \left(E_{\tuple{x,y}\sim \mathrm{Train}}\;-\ln P_\Phi(y|x)\right) + \frac{1}{2N\sigma^2} ||\Phi||^2
-\end{eqnarray*}
-
-\slide{Shrinkage: $L_2$ Regularization}
-
-\begin{eqnarray*}
-  & & \nabla_\Phi \;E_{(x,y) \sim \mathrm{Train}}\;\left({\cal L}(\Phi,x,y) + \frac{||\Phi||^2}{2N\sigma^2}\right) \\
-  \\
-  \\
-  & = & E_{(x,y) \sim \mathrm{Train}} \;\left(g(\Phi,x,y) + \frac{\Phi}{N\sigma^2}\right)
-\end{eqnarray*}
-
-\vfill
-$$\Phi_{i+1} = \Phi_i - \eta\left(\hat{g}_i  - \frac{1}{N\sigma^2}\Phi_i\right)$$
-
-\vfill
-The last term in the update equation is called ``shrinkage''.
-
-\slide{Decoupling Shrikage and Training Data Size}
-
-The PyTorch parameters are the learning rate $\eta$ and the {\bf weight decay} $\gamma$:
-
-$${\color{red} \Phi_{i+1}} = \Phi_i - \eta\left(\hat{g} + \frac{1}{N\sigma^2}\Phi_i\right)\;\;\;\; = {\color{red} \Phi_i - \eta(\hat{g} - \gamma\Phi_i)}$$
-
-\vfill
-To make SGD with shrinkage robust to changes in training size, batch size, learning rate (temperature) and momentum we can use
-
-\vfill
-{\color{red} $$\eta = (1-\mu)B\eta_0\;\;\;\;\;\;\;\;\;\gamma = \frac{1}{N_{\mathrm{Train}}\sigma^2}$$}
-
-\vfill
-where $\eta_0$ is the robust temperature parameter and $\sigma^2$ is the robust shrinkage parameter.
-
 \slide{Non-Vacuous Generalization Guarantees}
 
 Model compression has recently been used to achieve ``non-vacuous'' PAC-Bayes generalization guarantees for ImageNet classification
@@ -273,7 +218,7 @@ Wenda Zhou, Victor Veitch, Morgane Austern, Ryan P. Adams, Peter Orbanz
 \bigskip
 ICLR 2019
 
-\slide{Implicit Regularization}
+\slide{3. Implicit Regularization}
 
 Any stochastic learning algorithm, such as SGD, determines a stochastic mapping from training data to models.
 
@@ -346,7 +291,7 @@ There is no obvious way to calculate this guarantee.
 \vfill
 However, it can be shown that $p(\Phi)$ is the optimal PAC-Bayeisan prior for the given algorithm run on training data data drawn from $\pop^N$.
 
-\slide{Over Confidence and Calibration}
+\slide{4. Calibration}
 
 \centerline{\includegraphics[height = 2in]{\images/Early}}
 
@@ -377,7 +322,7 @@ We first give a Bayesian derivation. We put a prior probability on $\Phi$ and ma
  \end{eqnarray*}
 }
 
-\slideplain{Ensembles}
+\slideplain{5. Ensembles}
 
 Train several models $\mathrm{Ens} = (\Phi_1,\;\ldots,\; \Phi_K)$ from different initializations and/or under different meta parameters.
 
@@ -389,14 +334,13 @@ $$P_\mathrm{Ens}(y|x) = \frac{1}{K} \sum_k\; P_{\Phi_k}(y|x) = E_k \;P_k(y|x)$$
 \vfill
 Ensemble models almost always perform better than any single model.
 
-
 \vfill
 \slide{Ensembles Under Cross Entropy Loss}
 
 \begin{eqnarray*}
 {\cal L}\left(P_\mathrm{Ens}\right) & = & E_{\tuple{x,y} \sim \pop}\;\;-\ln P_\mathrm{Ens}(y|x) \\
 \\
- & = & E_{\tuple{x,y} \sim \pop}\left[-\ln E_k P_k(y|x)\right] \\
+ & = & E_{\tuple{x,y} \sim \pop}\left[-\ln E_k\left[ P_k(y|x)\right]\right] \\
 \\
 & \leq & E_{\tuple{x,y} \sim \pop} \;E_k\left[-\ln P_k(y|x)\right] \\
 \\
@@ -407,7 +351,7 @@ Ensemble models almost always perform better than any single model.
 
 It is important to note that
 
-$$-\ln E_k \;P_k(y|x) \;\;\leq E_k -\ln P_k(y|x)$$
+$$-\ln E_k \;P_k(y|x) \;\;\leq E_k \left[-\ln P_k(y|x)\right]$$
 
 \vfill
 for each individual pair $\tuple{x,y}$.
@@ -418,7 +362,7 @@ $\forall z\; f(z) \leq g(z)$ is stronger than $(E_z\;f(z)) \leq (E_z\; g(z))$.
 \vfill
 This may explain why in practice an ensemble model is typically better than any single component model.
 
-\slide{Double Descent}
+\slide{6. Double Descent}
 
 {\huge
 Reconciling modern machine learning practice and the bias-variance trade-off
@@ -446,6 +390,18 @@ Preetum Nakkiran, Gal Kaplun, Yamini Bansal, Tristan Yang, Boaz Barak, Ilya Suts
 \slide{Double Descent}
 
 \centerline{\includegraphics[width = 8in]{\images/DoubleDescent2}}
+
+\slide{7. Grokking}
+
+Power et al. {bf Grokking: Generalization Beyond Overfitting on Small Algorithmic Datasets [ArXiv 2201.02177]
+
+\vfill
+Wang et al. ``Grokked Transformers are Implicit Reasoners:
+A Mechanistic Journey to the Edge of Generalization'' [arXiv 2405.15071]
+
+\vfill
+There is growing evidence that regularization ($L_2$ shrikage) over long runs lead to a ``phase transition''
+reducing generalization loss late in training without improving the training loss.
 
 \slide{END}
 
