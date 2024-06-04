@@ -15,7 +15,7 @@
 \vfill
 
 
-\slide{Modeling Probability Distributions on Images}
+\slidetwo{Continuous Cross Entropy is Problematic}{(When the Entropy is Large)}
 
 Suppose we want to train a model of the probability distribution of natural images using cross-entropy loss.
 
@@ -26,7 +26,7 @@ $$\Phi^* = \argmin_\Phi \;E_{y \sim \popd}\;-\ln p_\Phi(y)$$
 Images are continuous stuctured objects --- a continuous value at every pixel.
 
 \vfill
-It is difficult to build probability models for images (or other continuous structured values)
+It is difficult to build probability models for sounds or images (or other high-entropy continuous densities)
 that both accurately model the distribution and also allow us to calculate $p_\Phi(y)$.
 
 \slide{Generative Adversarial Networks (GANs)}
@@ -81,6 +81,9 @@ For \= $x,y,j,\Delta x,\Delta y, i$ \\
 \>$L_{{\ell+1}}[{\color{red} s*x} + \Delta x, {\color{red} s*y} + \Delta y, i]\; \pluseq \;W[\Delta x, \Delta y, i, j]L_\ell[{\color{red}x},{\color{red}y},j]$
 \end{tabbing}
 
+\vfill
+{\bf Irrelevant Observation:} ConvTranspose follows the ``swap rule'' for computing gradients for a spacially-reducing Conv layer.
+
 \slide{Generative Adversarial Networks (GANs)}
 
 Let $y$ range over images.  We have a generator $p_\Phi$. For $i \in \{-1,1\}$ we define a probability distribution over pairs
@@ -131,11 +134,13 @@ The success of GANs (to the extent that they have been successful) is a tribute 
 
 {\huge
 \begin{eqnarray*}
-  \gen^* & = & \argmax_\gen\;\;\min_\disc\;E_{\tuple{i,y} \sim \tilde{p}_\gen}\;-\ln P_\disc(i|y) \\
+  \gen^* & = & \argmax_\gen\;\;\min_\disc\;E_{\tuple{i,y}}\left[-\ln P_\disc(i|y)\right] \\
   \\
+  & = & \argmax_\gen E_{\tuple{i,y}}\left[-\ln P(i|y)\right] \\
+  \\
+    & = & \argmax_\gen \frac{1}{2}E_{y \sim \pop}\left[-\ln P(1|y)\right] + \frac{1}{2} E_{y \sim p_\gen}\left[-P(-1|y)\right] \\
   \\
   & = & \argmin_\gen \; KL\left(\popd,\frac{\popd+p_\gen}{2}\right)+\;KL\left(p_\gen,\frac{\popd+p_\gen}{2}\right) \\
-  \\
   \\
   \gen^* & = & \argmin_\gen \; {\color{red} \mathrm{JSD}(\popd,p_\gen)}
 \end{eqnarray*}
@@ -157,7 +162,7 @@ In practice GANS are evaluated on FID score.
 Consider two distributions $P$ and $Q$ on $\reals^d$ (perhaps two distributions on images).
 
 \vfill
-Generative image models are (still) evaluated using a certain meanure of the ``distance'' between the population distribution
+Generative image models are (still) evaluated using a certain measure of the ``distance'' between the population distribution
 and the generation distribution.
 
 \vfill
@@ -209,14 +214,38 @@ The rightmost column (yellow boarders) gives the nearest neighbor in the trainin
 
 \centerline{\includegraphics[height = 4.5in]{\images/interp}}
 
-\slide{Conditional GANS}
-In the conditional case we have a population distribution over pairs $\tuple{x,y}$.
+\slide{Conditional Density Estimation with $L_2$ loss}
+
+Consider training a model $P_\Phi$ to predict the next frame in a video from the two previous frames.
 
 \vfill
-For conditional GANs we have a generator $p_\gen(y|x)$ and a discriminator $P_\disc(i|x,y)$
-where $i = 1$ if $y$ the real ``label'' for $x$ and $-1$ if $y$ is generated from $x$.
+$P_\Phi(y_{t+1}|y_t,y_{t+1})$
 
-{\color{red} $$\gen^* = \argmax_\gen\;\;\min_\disc\;E_{\tuple{x,y,i} \sim \tilde{p}_\gen}\;-\ln P_\disc(i|x,y)$$}
+\vfill
+The pair $y_t$ and $y_{t+1}$ give both an image and the motion in the image so predicting
+$y_{t+2}$ is possible.
+
+\slide{Conditional Density Estimation with $L_2$ loss}
+
+Here we can train by $L_2$ loss
+
+$$\Phi^* = \argmin_\Phi ||\hat{y}_\Phi(y_t,y_{t-1}) - y_{t+2}||^2$$
+
+\vfill
+$L_2$ loss is a special case of cross-entropy loss where $P_\phi(y_{t+2}|y_t,y_{t+1})$ is taken to be a Gaussian centered as
+$\hat{y}_\Phi(y_t,y_{t+1})$.
+
+
+\slide{The General Conditional Case}
+
+We now consider a general conditional case we have a population distribution over pairs $\tuple{x,y}$
+where $x$ provides enough information to train the model $\hat{y}_\Phi(y|x)$ by $L_2$ or $L_1$ loss.
+
+\vfill
+For the $L_1$ case we have the following.
+
+\vfill
+$$\Phi^* = \argmin_\Phi ||\hat{y}_\Phi(y_t,y_{t-1}) - y_{t+2}||_1$$
 
 \slidetwo{Image-to-Image Translation (Pix2Pix)}
 {Isola et al., Nov. 2016}
@@ -233,7 +262,7 @@ Pix2Pix uses a U-Net.
 U-Net: Convolutional Networks for Biomedical Image Segmentation, Ronneberger, Fischer and Brox, May 2015.
 
 \vfill
-U-Nets are fundamental to current diffusion models such as DALL$\cdot$E.
+U-Nets are fundamental to current diffusion models.
 
 \slide{Adversarial Discrimination as an Additional Loss}
 
@@ -288,24 +317,6 @@ We want to construct translations between the two classes.
 
 
 In unsupervised machine translation the cycle loss is called {\bf back-translation}.
-
-\slidetwo{Feature Alignment by Discrimination}{Text to Speech (Saito et al. Sept. 2017)}
-
-\centerline{\includegraphics[width = 2.0in]{\images/Txt2spchGAN}}
-
-\vfill
-Minimum Generation Error (MGE) uses {\color{red} perceptual distortion} ---
-a distance between the feature vector of the generated sound wave and the
-feature vector of the original.
-
-\vfill
-{\color{red}Perceptual Naturalness} can be enforced by a feature discrimination loss.
-
-\slidetwo{Adversarial Discriminative Domain Adaptation}{Tzeng et al. Feb. 2017}
-
-\centerline{\includegraphics[width = 4.0in]{\images/AdvDomainAdapt}}
-
-A feature discrimination loss can be used to align source and target features.
 
 \slide{Progressive GANs}
 
@@ -364,7 +375,7 @@ Given an image, can we find a noise vector (a latent vector) that generate a clo
 the given image.  Can we invert the generator?
 
 \vfill
-This appears to be possible with StyleGAN2 but not with the original even though StyleGAN2 produces better images.
+We can invert generated images. But we cannot invert (nearly as accurately) newly sampled natural images.
 
 \vfill
 By measuring the match between an image $y$ and $g(g^{-1}(y))$ we can determine whether $y$ was generated by StyleGAN2.
