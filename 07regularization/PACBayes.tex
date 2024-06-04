@@ -282,7 +282,7 @@ With probability at least $1-\delta$ over the draw of $\train$ we have
 {\cal L}(\train) & \leq & \frac{10}{9}\parens{ \hat{\cal L}(\train) + \frac{5\lmax}{N_\mathrm{Train}}\parens{KL(p(\Phi|\train),p(\Phi)})+ \ln\frac{1}{\delta}} \\
 \\
 \\
-& = & \frac{10}{9}\parens{ \hat{\cal L}(\train) + \frac{5\lmax}{N_\mathrm{Train}}\parens{I(\Phi,\train)+ \ln\frac{1}{\delta}}}
+E_{\train}\; {\cal L}(\train)& \leq & \frac{10}{9}\parens{ E_{\train}\left[\hat{\cal L}(\train)\right] + \frac{5\lmax}{N_\mathrm{Train}}\parens{I(\Phi,\train)+ \ln\frac{1}{\delta}}}
 \end{eqnarray*}
 }
 \vfill
