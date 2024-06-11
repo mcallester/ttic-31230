@@ -5,24 +5,34 @@
 
 {\Huge
 
-  \centerline{\bf TTIC 31230, Fundamentals of Deep
-  Learning} \bigskip \centerline{David McAllester, Autumn
-  2023} \vfill \vfill \centerline{\bf Variational Auto-Encoders
-  (VAEs)} \vfill \vfill
+  \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
 
-\slide{Generative AI: Autoregression and GANs}
+\bigskip
 
-A discrete autoregressive model can both generate samples and compute probabilities.
+\centerline{David McAllester, Autumn  2023}
+
+\vfill \vfill
+
+\centerline{\bf Variational Auto-Encoders  (VAEs)}
+
+\vfill \vfill
+
+\slide{Fundamental Equations of Deep Learning}
+
+\begin{itemize}
+\item Cross Entropy Loss: $\Phi^* = {\color{red} \argmin_\Phi E_{(x,y)\sim \pop}\left[-\ln P_\Phi(y|x)\right]}$.
 
 \vfill
-This allows one to train a generative model by cross-entropy loss.
+\item GAN: $\gen^* = {\color{red} \argmax_{\gen} \min_{\disc} E_{i \sim \{-1,1\}, y \sim P_i}\left[-\ln P_{\disc}(i|y)\right]}$.
 
 \vfill
-But it is not obvious how to train a generative model of images by cross-entropy loss.
-
-\vfill
-{\color{red} The point of a VAE is to replace the adversarial loss of a GAN
-with cross-entropy loss.}
+\item VAE (including diffusion models)
+\begin{eqnarray*}
+& & \pri^*,\gen^*,\enc^* \\
+\\
+& = & {\color{red} \argmin_{\pri,\gen,\enc}\;E_{y \sim \pop,z \sim P_\enc(z|y)}\left[ - \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]}
+\end{eqnarray*}
+\end{itemize}
 
 \slide{Generative AI for Continuous Data: VAEs}
 A variational autoencoder (VAE) is defined by three parts:
@@ -59,22 +69,6 @@ Universality gives
 Hence sampling from $P_{\pri^*}(z)P_{\gen^*}(y|z)$ samples $y$ from the population.
 
 
-\slide{Training the Encoder (the GAN Inverter)}
-
-Define the ELBO loss as follows (acronym described later).
-\begin{eqnarray*}
-{\cal L}(y,z) & = & - \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}
-\end{eqnarray*}
-
-\begin{eqnarray*}
-\enc^*,\pri^*,\gen^* & = & \argmin_{\enc,\pri,\gen}\;E_{\color{red} y \sim \pop,z\sim P_\enc(z|y)}\;{\cal L}(y,z)
-\end{eqnarray*}
-
-\vfill
-For any encoder, universality gives
-
-{\color{red} $$P_{\pri^*}(z)P_{\gen^*}(y|z) = \pop(y)P_\enc(y|z)$$}
-
 \slide{Degrees of Freedom}
 
 {\color{red} $$P_\pri(z)P_\gen(y|z) = \pop(y)P_\enc(z|y)$$}
@@ -82,11 +76,36 @@ For any encoder, universality gives
 \vfill
 Any joint distribution on $(y,z)$ with the desired marginal on $y$ optimizes the bound.
 
-\vfill
-However, if we fix the architecture of $P_\pri(z)P_\gen(y|z)$ to be StyleGAN we can simultaneously train the parameters of the SyleGAN generator
-and the StyleGAN inverter by cross-entropy loss.
+\slide{Bayesian Encoder Training}
 
-\slide{Bayesian Interpretation}
+We consider the case of a probabilitic model with a small number of parameters (by deep learning standards).
+
+\vfill
+For example a Gaussian mixture model (GMM) or a probabilistic context free grammar (PCFG).
+
+\vfill
+Such models impose a strong structural constraint and are far from universal.
+
+\vfill
+For such models we clearly need to train the encoder.  More generally, training the encoder can improve the model
+(reduce an upper bound on $H(y)$).
+
+
+\slide{Training the Encoder (the GAN Inverter)}
+
+Define the ELBO loss as follows (acronym described later).
+\begin{eqnarray*}
+{\cal L}(y,z) & = & - \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}
+\end{eqnarray*}
+
+\vfill
+Recall cross-entropy loss: {\color{red} $H(y) \leq E_{y\sim \pop} \left[ -\ln P_\Phi(y)\right]$}
+
+\vfill
+We will show
+{\color{red} $H(y) \leq E_{y \sim \pop,z \sim P_\enc(z|y)}\;{\cal L}(y,z)$}
+
+\slide{A Bayesian Interpretation}
 
 VAEs were originally motivated by a Bayesian interpretation:
 
@@ -107,13 +126,15 @@ The Bayesian motivation is to train $P_\enc(z|y)$ to approximate Bayesian infere
 \slide{Bayesian Interpretation}
 {\huge
 \begin{eqnarray*}
-\ln P_{\pri,\gen}(y) & =  & \ln \frac{P_{\pri,\gen}(y)P_{\pri,\gen}(z|y)}{P_{\pri,\gen}(z|y)} \\
+H(\pop) & \leq & E_{y\sim \pop} \left[-\ln P_{\pri,\gen}(y)\right] \\
+\\
+\ln P_{\pri,\gen}(y) & =  & \ln \frac{P_{\pri}(z)P_\gen(y|z)}{P_{\pri,\gen}(z|y)} \\
 \\
 \\
-& = & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\pri,\gen}(y)P_{\pri,\gen}(z|y)}{P_\enc(z|y)}\right] + KL(P_\enc(z|y),P_{\pri,\gen}(z|y)) \\
+& = & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\pri}(z)P_\gen(y|z)}{P_\enc(z|y)}\right] + KL(P_\enc(z|y),P_{\pri,\gen}(z|y)) \\
 \\
 \\
-& \geq & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\pri,\gen}(y)P_{\pri,\gen}(z|y)}{P_\enc(z|y)}\right] \\
+& \geq & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\pri}(z)P_\gen(y|z)}{P_\enc(z|y)}\right] \\
 \end{eqnarray*}
 }
 A Bayesian thinks of $y$ as ``evidence'' for hypothesis $z$.
@@ -121,22 +142,34 @@ A Bayesian thinks of $y$ as ``evidence'' for hypothesis $z$.
 \vfill
 {\color{red} $E_{z\sim P_\enc(z|y)}[-{\cal L}(y,z)]$} is called {\color{red} the evidence lower bound (ELBO)}.
 
+
+\slideplain{Expectation Maximization (EM)}
+
+Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_{\pri,\gen}(z|y)$ is samplable and computable.
+EM alternates exact optimization of $\enc$ and the pair $(\pri,\gen)$ in:
+$$\mbox{VAE:}\;\;\;\;\;\;\; {\color{red} \pri^*,\gen^*} = \argmin_{\color{red} \pri,\gen} \min_{\color{red} \enc} E_{y,\;z \sim P_{\color{red} \enc}(z|y)}\;\;- \ln \frac{P_{\color{red} \pri,\gen}(z,y)}{P_{\color{red} \enc}(z|y)}$$
+
+\vfill
+$$\mbox{EM:}\;\;\;\;\;\; {\color{red} \pri^{t+1},\gen^{t+1}} =  \argmin_{\color{red} \pri,\gen}\;\;\;\;E_{y,\;z \sim P_{\color{red} \pri^t,\gen^t}(z|y)}\; - \ln P_{\color{red} \pri,\gen}(z,y)$$
+
+\vfill
+\centerline{\hspace{1em} Inference \hspace{6em} Update \hspace{2.5em}~}
+\centerline{(E Step) \hspace{6em} (M Step) ~}
+\centerline{ $P_\enc(z|y) = P_{\pri^{\color{red} t},\gen^{\color{red} t}}(z|y)$ \hspace{2.5em} Hold $P_\enc(z|y)$ fixed \hspace{0em}~}
+
 \slide{Posterior Collapse}
 
-Under the Bayesian interpretation we would like $z$ to provide useful information about (a causal origin of) $y$.
+
+{\color{red} $$P_\pri(z)P_\gen(y|z) = \pop(y)P_\enc(z|y)$$}
 
 \vfill
-However the objective function only produces
-$$P_\pri(z)P_\gen(y|z) = \pop(y)P_\enc(z|y)$$
+Any joint distribution on $(y,z)$ with the desired marginal on $y$ optimizes the bound.
 
 \vfill
-For language models the generator can assign a meaningful probability to a block of text $y$ independent of $z$.
+This allows the prior and the encoder (the posterior) to both degenerate to having no mutual information with $y$.
 
 \vfill
-When we train a sentence encoder (a thought vector) as the latent valriable of a language model VAE we can get a constant (zero) thought vector.
-
-\vfill
-This is called ``posterior collapse''.
+This often happens in language modeling.
 
 \slide{The Reparameterization Trick}
 
@@ -162,6 +195,8 @@ To get gradients we must have that $\hat{z}_\enc(y,\epsilon)$ is a differentiabl
 Optimizing the encoder is tricky for discrete $z$.  Discrete $z$ is handled effectively in EM algorithms and general vector quantization (VQ) methods.
 
 \slide{The KL-divergence Optimization}
+{\huge
+For Gaussian Models we have
 \vfill
 \begin{eqnarray*}
 {\cal L}(y) & = & E_{z \sim P_\enc(z|y)}\left[ - \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right] \\
@@ -174,32 +209,9 @@ Optimizing the encoder is tricky for discrete $z$.  Discrete $z$ is handled effe
 
 \vfill
 A closed-form expression for the KL term avoids sampling noise.
+}
 
-\slide{EM is Alternating Optimization of the ELBO Loss}
-
-Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_{\pri,\gen}(z|y)$ is samplable and computable.
-EM alternates exact optimization of $\enc$ and the pair $(\pri,\gen)$ in:
-$$\mbox{VAE:}\;\;\;\;\;\;\; {\color{red} \pri^*,\gen^*} = \argmin_{\color{red} \pri,\gen} \min_{\color{red} \enc} E_{y,\;z \sim P_{\color{red} \enc}(z|y)}\;\;- \ln \frac{P_{\color{red} \pri,\gen}(z,y)}{P_{\color{red} \enc}(z|y)}$$
-
-\vfill
-$$\mbox{EM:}\;\;\;\;\;\; {\color{red} \pri^{t+1},\gen^{t+1}} =  \argmin_{\color{red} \pri,\gen}\;\;\;\;E_{y,\;z \sim P_{\color{red} \pri^t,\gen^t}(z|y)}\; - \ln P_{\color{red} \pri,\gen}(z,y)$$
-
-\vfill
-\centerline{\hspace{1em} Inference \hspace{6em} Update \hspace{2.5em}~}
-\centerline{(E Step) \hspace{6em} (M Step) ~}
-\centerline{ $P_\enc(z|y) = P_{\pri^{\color{red} t},\gen^{\color{red} t}}(z|y)$ \hspace{2.5em} Hold $P_\enc(z|y)$ fixed \hspace{0em}~}
-
-\slide{Generative AI for Continuous Data: Flow Models}
-$$\gen^* = \argmin_\gen \;E_{y \sim \popd(y)}\;-\ln p_\gen(y)$$
-
-\vfill
-Flow-based generative models work with Jacobians over continuous transformations (no ReLUs)
-and can be directly trained with cross-entropy loss.
-
-\vfill
-But flow models have not caught on and we will not cover them.
-
-\slide{Markovian VAEs}
+\slide{Hierarchical VAEs}
 
 
 \centerline{\includegraphics[width = 7in]{\images/DiffSequence}}
@@ -213,7 +225,7 @@ $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rig
 \vfill
 \centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
 
-\slide{Markovian VAEs}
+\slide{Hierarchical VAEs}
 \centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
 
 \vfill
@@ -227,7 +239,7 @@ $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rig
 The encoder and the decoder define distributions $P_\enc(y,\ldots,z_N)$ and $P_\gen(y,\ldots,z_N)$ respectively.
 
 
-\slide{Markovian VAEs}
+\slide{Hierarchical VAEs}
 
 \centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
 
@@ -237,13 +249,10 @@ The encoder and the decoder define distributions $P_\enc(y,\ldots,z_N)$ and $P_\
 
 \vfill
 \item diffusion models
-
-\vfill
-\item Byte VAEs (original here)
 \end{itemize}
 
 
-\slide{Diffusion ELBO}
+\slide{Hierarchical (or Diffusion) ELBO}
 
 {\Large
 \begin{eqnarray*}
@@ -263,32 +272,6 @@ H(y) & = & E_\enc\left[- \ln\frac{P_\enc(y)P_\enc(z_1,\ldots,z_N|y)}{P_\enc(z_1,
                              \\ + E_\enc\; KL(P_\enc(Z_N|y),p_\gen(Z_N))\end{array}\right.
 \end{eqnarray*}
 }
-
-\slide{Byte VAEs}
-
-A byte VAE is a numerical Markovian VAE with a deterministic encoder and where each $z_i$ is a vector of bytes.
-
-\vfill
-To computing $z_{i+1}(z_i)$ we first compute a floating point vector {\color{red} $\hat{z}^\enc_i(z_{i-1})$} and then round each coordinate to the nearest byte.
-
-\vfill
-We model  $-\ln P_\gen(z_i|z_{i+1})$ by {\color {red} $||\hat{z}^\enc_i(z_{i-1}) - \hat{z}^\gen_i(z_{i+1})||^2$}.
-
-\vfill
-Although the model is discrete, this gives gradients on both the encoder and the decoder.  This can be viewed as a straight-through gradient on the encoder.
-
-\slide{The Byte VAE ELBO}
-
-\begin{eqnarray*}
-H(y) & \leq & E_{y\sim \pop}\left[- \ln\frac{P_\gen(z_N,z_{N-1},\ldots,z_1,y)}{P_\enc(z_1,\ldots,z_N|y)}\right]\\
-\\
-\\
-& = & E_{y\sim \pop} [- \ln P_\gen(z_N,z_{N-1},\ldots,z_1,y)]
-  \\
-  \\
-  & \approx & E_{y \sim \pop}\;\;{\color{red} ||y - \hat{y}^\gen(z_1)||^2 + \sum_{i=1}^{N-1} ||\hat{z}^\enc_i - \hat{z}^\gen_i(z_{i+1})||^2}
-\end{eqnarray*}
-
 
 \slide{END}
 
