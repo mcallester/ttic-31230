@@ -30,28 +30,20 @@
 \vfill
 \centerline{\includegraphics[width = 2.5in]{\images/DiffCeleb}}
 
-\slide{The Markovian ELBO}
+\slideplain{Diffusion Models}
+\centerline{\includegraphics[width = 5in]{\images/DiffSequence}}
 
-{\Large
+\vfill
+Consider a discrete time process $z(0),z(\Delta t),z(2\Delta t),z(3\Delta t),\ldots$
+{\huge
 \begin{eqnarray*}
-H(y) & = & E_\enc\left[- \ln\frac{P_\enc(y)P_\enc(z_1,\ldots,z_N|y)}{P_\enc(z_1,\ldots,z_N|y)}\right]\\
+  z(0) & = & y,\;\;\;y \sim \pop(y) \\
   \\
-  \\
-  & = & E_\enc\left[ - \ln\frac{P_{\color{red} \enc}(y|z_1)P_{\color{red} \enc}(z_1|z_2)\cdots P_{\color{red} \enc}(z_{N-1}|z_N)P_{\color{red} \enc}(z_N)}
-  {P_\enc(z_1|z_2,y)\cdots P_\enc(z_{N-1}|z_N,y)P_\enc(z_N|y)}\right] \\
-   \\
-   \\
-  & {\color{red} \leq} & E_\enc\left[ - \ln\frac{P_{\color{red} \gen}(y|z_1)P_{\color{red} \gen}(z_1|z_2)\cdots P_{\color{red} \gen}(z_{N-1}|z_N)P_{\color{red} \gen}(z_N)}
-  {P_\enc(z_1|z_2,y)\cdots P_\enc(z_{N-1}|z_N,y)P_\enc(z_N|y)}\right] \\
-\\
-\\
- & = & \left\{\begin{array}{l}E_\enc\;[-\ln P_\gen(y|z_1)]
-                             \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\gen(z_{i-1}|z_i)) \\
-                             \\ + E_\enc\; KL(P_\enc(Z_N|y),p_\gen(Z_N))\end{array}\right.
+  z(t+\Delta t) & = & z(t) + \epsilon\sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 }
 
-\slide{Diffusion Models}
+\slideplain{Diffusion Models}
 \centerline{\includegraphics[width = 2in]{\images/DiffSequence}}
 
 Consider a discrete time process $z(0),z(\Delta t),z(2\Delta t),z(3\Delta t),\ldots$
@@ -69,6 +61,19 @@ $$z(t+n\Delta t) = z(t) + \sqrt{n\Delta t}\; \epsilon,\;\;\;\epsilon \sim {\cal 
 
 \vfill
 Here $\sqrt{n \Delta t}$ is the {\bf standard deviation} of the added noise.
+
+
+
+\slide{Diffusion Models}
+\centerline{\includegraphics[width = 2in]{\images/DiffSequence}}
+
+\vfill
+$$z(t+n\Delta t) = z(t) + \sqrt{n\Delta t}\; \epsilon,\;\;\;\epsilon \sim {\cal N}(0,I)$$
+
+\vfill
+\centerline{\includegraphics[width = 4in]{\images/sqrt}}
+
+\centerline{$z(t)$\hspace{1.5in}$z(t)+n\Delta t$}
 
 \slide{SDE Notation}
 In these slides $\epsilon$ will be a random variable drawn from ${\cal N}(0,I)$.
@@ -126,24 +131,33 @@ $$E[f(y)|z(t)] = E_{y \sim P(y|z_t)}[f(y)],$$
 \vfill
 refer the joint distribution on $y$ and $z(t)$ defined by diffusion.
 
-\slide{Markovian ELBO}
 
-For any Markovian VAE we have
+\slide{The Hierarchical ELBO}
 
-\vfill
 {\Large
-\begin{eqnarray}
-  - \ln \pop(y) & = & - \ln\frac{P(z_N)P(z_{N-1}|z_N)\cdots P(z_1|z_2)P(y|z_1)}{P(z_N|y)P(z_{N-1}|z_N,y)\cdots P(z_1|z_2,y)} \nonumber\\
-  \nonumber \\
-  \nonumber \\
-  H(y) & = & \left\{\begin{array}{l} E[KL(P(z_N|y),\;P(z_N))] \\ \\ + \sum_{i=2}^N  \; E[KL(P(z_{i-1}|z_i,y),\;P(z_{i-1}|z_i))] \\ \\ +\;E[\ln -P(y|z_1)] \end{array}\right. \label{Markov-eq} \\
-  \nonumber\\
-  \nonumber\\
-  & \leq & \left\{\begin{array}{l} E[KL(P(z_N|y),\;P_{\color{red} \gen}(z_N))] \\ \\ + \sum_{i=2}^N  \; E[KL(P(z_{i-1}|z_i,y),\;P_{\color{red} \gen}(z_{i-1}|z_i))] \\ \\ E[- \ln P_{\color{red} \gen}(y|z_1)] \end{array}\right. \;\;\;~\label{Markov-ELBO}
-\end{eqnarray}
+\begin{eqnarray*}
+H(y) & = & E_\enc\left[-\ln\; \frac{P(y)P_\enc(z|y)}{P_\enc(z|y)}\right]\;\;=\;\; E_\enc\left[- \ln\frac{P(y)P_\enc(z_1,\ldots,z_N|y)}{P_\enc(z_1,\ldots,z_N|y)}\right]\\
+\\
+\\
+  & = & E_\enc\left[ - \ln \;\frac{P(y)P_\enc(z_1|y)P_\enc(z_2|z_1)\cdots P_\enc(z_N|z_{N-1})}
+{P_\enc(z_1|y)P_\enc(z_2|z_1)\cdots P_\enc(z_N|z_{N-1})}\right] \\
+\\
+\\
+  & = & E_\enc\left[ - \ln\frac{P_{\color{red} \enc}(y|z_1)P_{\color{red} \enc}(z_1|z_2)\cdots P_{\color{red} \enc}(z_{N-1}|z_N)P_{\color{red} \enc}(z_N)}
+  {P_\enc(z_1|z_2,y)\cdots P_\enc(z_{N-1}|z_N,y)P_\enc(z_N|y)}\right] \\
+\\
+\\
+  & {\color{red} \leq} & E_\enc\left[ - \ln\frac{P_{\color{red} \gen}(y|z_1)P_{\color{red} \gen}(z_1|z_2)\cdots P_{\color{red} \gen}(z_{N-1}|z_N)P_{\color{red} \gen}(z_N)}
+  {P_\enc(z_1|z_2,y)\cdots P_\enc(z_{N-1}|z_N,y)P_\enc(z_N|y)}\right] \\
+\\
+\\
+ & = & \left\{\begin{array}{l}E_\enc\;[-\ln P_\gen(y|z_1)]
+                             \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\gen(z_{i-1}|z_i)) \\
+                             \\ + E_\enc\; KL(P_\enc(Z_N|y),p_\gen(Z_N))\end{array}\right.
+\end{eqnarray*}
 }
 
-\slide{Reverse-Time Probabilities}
+\slideplain{Reverse-Time Probabilities}
 
 In the limit of small $\Delta t$ it is possible to derive the following.
 
@@ -212,7 +226,7 @@ In practice $\hat{y}(t,z)$ is computed with a U-Net.
 \centerline{\includegraphics[width = 6in]{\images/U-NET}}
 
 \vfill
-The U-Nets themselves seem closely related to Markovian VAEs.
+The U-Nets themselves seem closely related to hierarchical VAEs.
 
 \slide{Computing (or Bounding) Entropy}
 
