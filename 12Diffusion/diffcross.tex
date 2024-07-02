@@ -8,62 +8,12 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Autumn 2022}
+  \centerline{David McAllester, Autumn 2023}
   \vfill
   \vfil
   \centerline{Diffusion Image Modeling Timeline}
   \vfill
   \vfill
-
-\slidetwo{Improved Denoising Diffusion Probabilistic Models}
-{Nichol and Dhariwal, February 2021}
-
-\vfill
-This paper provides a method for training an ``uncertainty level'' for each color channel of each pixel.
-
-\vfill
-Later papers in the code base use these uncertainty levels to weight guidance strength for each color channel of each pixel in ``guided diffusion''.
-
-\vfill
-Guided diffusion with channel-level guiding strength is used in DALLE-2.
-
-\slide{Optimizing the ELBO}
-
-For image VAEs the ELBO is refered to as negative log likelihood (or NLL) and is measured in bits per image channel.
-
-\vfill
-\centerline{\includegraphics[width=5in]{\images/DiffNLL}}
-
-
-\slide{Optimizing Per-Channel Prior Variances}
-
-We now introduce a prior network $\sigma_\Psi(z_\ell,\ell) \in R^d$ to give the prior noise level.
-
-$$z_{\ell-1} = f_\Phi(\ell,z_\ell) + {\sigma}_\Psi(z_\ell,\ell)\odot\delta,\;\;\;\;\delta \sim {\cal N}(0,I)$$
-
-\vfill
-The prior noise network $\sigma_\Psi(z_\ell,,\ell) \in R^d$ is trained with the ELBO objective.
-
-\vfill
-This is unneccessary under the stochastic differential equation model of DDPM but improves the ELBO when using a discrete approximation to the differential equation.
-
-
-\slide{Optimizing Per-Channel Prior Variances}
-
-$$z_{\ell-1} = f_\Phi(\ell,z_\ell) + {\sigma}_\Psi(z_\ell,\ell)\odot\delta,\;\;\;\;\delta \sim {\cal N}(0,I)$$
-
-\vfill
-Here $\sigma(z_\ell,\ell)[i]$ expresses a prior uncertainty in $z_{\ell-1}[i]$ given $z_\ell[i]$.
-
-\vfill
-This uncertainty will be larger for pixels in a region with fine random texture than for pixels in a large region a contant value.
-
-\vfill
-The U-Net can distinguish these different regions of the input.
-
-\vfill
-The more uncertain the model at a given pixel, the more guidance should be used in adjusting it.
-
 
 \slidetwo{Diffusion Models Beat GANs on Image Synthesis}{Dharwali and Nichol, May 2021}
 
@@ -84,9 +34,6 @@ Previous approaches, such as StyleGAN, have trained a model (a GAN) for each cla
 
 \vfill
 Here we will train a single model which takes the class label as input.
-
-\vfill
-It seems that this can be made to work for VAEs but not for GANS without an auto-encoder component.
 
 \slide{Conditional Diffusion Models}
 
@@ -111,38 +58,32 @@ We will generate an image by using $P(x|y)$ to ``guide'' generation from the unc
 Guidance will be based on the score-mathching interpretation of diffusion models where
 $\epsilon(z_\ell,\ell)$ is interpreted as $- \nabla_z \ln p(z)$.
 
-\slide{Class-Conditional Generation}
+\slide{Diffusion Image Generation}
 
-{\huge
-\begin{eqnarray*}
-  z_{\ell-1} & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right)\; +\; \tilde{\sigma}_\ell\odot\delta
-\end{eqnarray*}
-}
-
-\vfill
-Score-matching interprets $\epsilon(z_\ell,\ell)$ as $- \nabla_z \ln p(z)$.
-
-\vfill
 $$p(z|x) = \frac{P(z)P(x|z)}{P(x)} \propto p(z)P(x|z)$$
 
 \vfill
 We want a step in direction $\nabla_z\;\ln p(z)P(x|z)$. They use
 
-{\huge
+
 \begin{eqnarray*}
-  \pri(z_\ell,\ell) & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right) \; +\; \tilde{\sigma}_\ell\odot\delta\; + {\color{red} s\tilde{\sigma}\odot\nabla_{z} \ln P(x|z)}
+z(t - \Delta t) & = & z(t) + \eta\left(\nabla_z\ln P_t(z) +  s \nabla_z\;\ln P(x|z)\right)
 \end{eqnarray*}
-}
+
+\vfill
+Here $s$ is called the scale of the guidance.
 
 \slide{Classifier Guidance}
 
-{\huge
 \begin{eqnarray*}
-  \pri(z_\ell,\ell) & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell)\right) \; +\; \tilde{\sigma}_\ell\odot\delta\; + {\color{red} s}\tilde{\sigma}\odot\nabla_{z} \ln P(x|z)
+z(t - \Delta t) & = & z(t) + \eta\left(\nabla_z\ln P_t(z) + s \nabla_z\;\ln P(x|z)\right)
 \end{eqnarray*}
-}
 
-Here $s$ is called the scale of the guidance.
+\vfill
+\begin{eqnarray*}
+{\color{red} \nabla_z \ln P_t(z)}&  {\color{red}  =} & {\color{red}\frac{E[y|t,z]-z}{t}}
+\end{eqnarray*}
+
 
 \vfill
 Empirically it was found that $s > 1$ is needed to get good class-specificity of the generated image.
@@ -152,16 +93,15 @@ However, increasing $s$ decreases diversity so we have a diversity/quality trade
 
 \slide{Other Improvements}
 
-Various architectural choices in the U-Net were optimized based on FID score (not NLL).
+Various architectural choices in the U-Net were optimized.
 
 \vfill
 These improvements are used in DALLE-2.
 
-
 \slidetwo{Classifier-Free Diffusion Guidance}
 {Ho and Salimans, December 2021 (NeurIPS workshop)}
 
-Classification diffusion guidance uses a classifion model $P(x|y)$.
+Classification diffusion guidance uses a classification model $P(x|y)$.
 
 \vfill
 This paper introduces ``classifier-free'' diffusion guidance.
@@ -176,13 +116,10 @@ Classifier-free diffusion guidance is used in DALLE-2.
 \vfill
 The prior then uses
 
-$$\tilde{\epsilon}(z_\ell,\ell,x) = s\epsilon(z_\ell,\ell,x) - (s-1)\epsilon(z_\ell,\ell,\emptyset)$$
-
 \vfill
-where $s \geq 1$ controls the relative weight of the two terms.
-
-\vfill
-DALLE-2 incorporates the channel-level uncertainties $\tilde{\sigma}$ as weights on classifier-free diffusion guidance provided by CLIP.
+\begin{eqnarray*}
+z(t - \Delta t) & = & z(t) + \eta\left(s\nabla_z\ln P_t(z|x) - (s-1) \nabla_z\;\ln P(z|\emptyset)\right)
+\end{eqnarray*}
 
 \slidetwo{Image Super-Resolution via Iterative Refinement}{Saharia, Ho et al., April 2021}
 
@@ -222,8 +159,6 @@ GLIDE compares two forms of diffusion guidance.
 
 \slide{Classifier-free (self-guided) GLIDE}
 
-$$\tilde{\epsilon}(z_\ell,\ell,x) = s\epsilon(z_\ell,\ell,x) - (s-1)\epsilon(z_\ell,\ell,\emptyset)$$
-
 \vfill
 Classifier-free GLIDE does not use CLIP.
 
@@ -238,14 +173,14 @@ The text is transformed to a feature vector by a transformer before being fed to
 
 Let $C_I(y)$ be the CLIP vector for image $y$ and let $C_T(x)$ be the CLIP vector for text $x$.
 
-{\huge
-\begin{eqnarray*}
-z_{\ell-1}  & = & \frac{1}{\sqrt{1-\sigma_\ell^2}}\left(z_\ell - \sigma_\ell\; \epsilon(z_\ell,\ell) + {\color{red} s \tilde{\sigma}\odot\nabla_{z} C_T(x)^\top C_I(z)}\right)\; +\; \tilde{\sigma}_\ell\odot\delta
-\end{eqnarray*}
-}
+\vfill
+CLIP-based Glide approximates uses
 
 \vfill
-Here CLIP is re-trained to handle noised images.
+$$\ln P(z|x) \approx C_T(x)^\top C_I(z)$$
+
+\vfill
+CLIP is re-trained to handle noised images.
 
 \slide{Upsamling}
 
@@ -275,96 +210,19 @@ This figure is misleaning.  The lines in the figure do not correspond to the act
 Let $C_I(y)$ denote the CLIP embedding of image $y$.
 
 \vfill
-$C_I(y)$ is the encoder of an auto-encoder for $y$ given $x$.
+$C_I(y)$ is taken to be the encoder of a VAE for $y$ given $x$.
 
 \vfill
 $P(C_I(y)|x)$ is the optimal prior for this auto-encoder.
 
 \vfill
-$P(y|C_I(y),x)$ is the optimal prior.
+$P(y|C_I(y),x)$ is the optimal decoder.
 
 \vfill
-In DALLE-2 the prior and the prior both see the text $x$.
-
-\slide{Putting it all Together}
-
-We are given text $x$.
-
-\vfill
-Draw $\hat{C}$ from the prior $P(C_I(y)|x)$
-
-\vfill
-Do diffusion decoding with two upsampling models:
-
-\vfill
-\begin{quotation}
-compute $\tilde{z}_{\ell-1}$ using $\hat{\epsilon} = s\epsilon(z_\ell,\ell,x) - (s-1)\epsilon(z_\ell,\ell,\emptyset)$
-\vfill
-$z_{\ell-1} = \hat{z}_{\ell-1} + s'\tilde{\sigma}\odot\nabla_z\;\hat{C}^\top C_I(z)$
-\end{quotation}
-
-\slide{The Prior}
-
-They experiment with two priors $P(C_I(y)|x)$.
-
-\vfill
-An autoregressive model and a conditional diffusion model.
-
-\vfill
-They say both priors use self-guidance.
-
-\slide{The Autoregressive Prior}
-
-First do PCA on the distibution of vectors $C_I(y)$ to reduce their dimensionality from 1024 to 319.
-
-\vfill
-Sort the eigenvectors in decreasing order of eigenvalue.
-
-\vfill
-Quantize each of 319 values into 1024 discrete buckets.
-
-\vfill
-We train a transformer to take the text sequence $x$ followed by the text embedding $C_T(x)$ and to
-and to predict a string of 319 symbols with a vocabulary of size 1024 which can be converted back into the vector $\hat{C}$.
-
-\slide{The Diffusion Prior}
-
-Let $z_\ell$ be the noising of $C_I(y)$ to level $\ell$.  For the prior they train a transformer to take the text string $x$, the text embedding $C_T(x)$, the noised
-image embedding $z_\ell$, and the level $\ell$. A final ``classifier token'' is added to the end of this string and vector computed for that token by the transformer is used as a prediction of $C_I(y)$.
-This predictor $f(x,z_\ell,\ell)$ is trained on the objective
-
-$$f^* = \argmin_f\;E_{x,y,z_\ell,\ell}\; ||f(x,z_\ell,\ell) - C_I(y)||^2$$
-
-\slide{Sampling $\hat{C}$ from the Diffusion Prior}
-
-The paper does not describe the decoding process that computes $z_{\ell-1}$ from $z_\ell$ but the following seems reasonable.
-
-$$z_{\ell-1} = f(x,z_\ell,\ell) +\tilde{\sigma}\delta\;\;\;\;\delta \sim {\cal N}(0,I)$$
-
-\vfill
-They can draw samples of $\hat{C}$ using different values $\delta$
-
-$$z_0 = f(x,z_1,1) + \tilde{\sigma}\delta\;\;\;\delta \sim {\cal N}(0,I)$$
-
-\vfill
-They draw two samples $\hat{C}$ and $\hat{C}'$ and use the one with larger inner product with $C_T(x)$.
-
-\slide{Markovian VAEs}
-
-Diffusion models are a special case of Markovian VAEs.
-
-\vfill
-A Markovian VAE has latent variable $z = (z_0,z_1,\dots,z_{L})$.
-
-\vfill
-It is not clear whether diffusion models are the best way to do this.
-
-\vfill
-It could be that the important idea is simply having large $L$ with
-$I(z_0,z_\ell)$ going from $H(z_0)$ to 0 as $\ell$ goes from $0$ to $L$.
-
+In DALLE-2 the prior and the generator both see the text $x$.
 
 \slide{END}
 }
 \end{document}
+
 
