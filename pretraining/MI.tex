@@ -7,39 +7,139 @@
 {\Huge
   \centerline{\bf TTIC 31230,  Fundamentals of Deep Learning}
   \vfill
-  \centerline{David McAllester, Autumn   2022}
+  \centerline{David McAllester, Autumn   2023}
   \vfill
   \centerline{\bf Contrastive Coding}
   \vfill
-  \centerline{\bf Tokenization}
-  
-  \vfill
-  \centerline{\bf Autoregressive Image and Voice Models}
-  \vfill
   \vfill
 
-\slide{Contrastive Coding for Speech}
-\centerline{\includegraphics[width = 6 in]{\images/CPC}}
-\centerline{\huge van den Oord, Li and Vinyals,}
-\centerline{\huge Representation Learning with Contrastive Predictive Coding, 2018}
+\slide{Review: Cross Entropy Loss}
+
+$${\color{red} \argmin_\Phi E_{(x,y)\sim \pop}\left[-\ln P_\Phi(y|x)\right]}$$
 
 \vfill
-What should we abstract from the past that is relevant to the future?
+Under universality:
 
-\slide{Contrastive Coding for Speech}
-\centerline{\includegraphics[width = 6 in]{\images/CPC}}
+$${\color{red} P_{\Phi^*}(y|x) = P_{\pop}(y|x)}$$
 
-\vfill
-{\bf Unlike VAEs}, contrastive coding is about {\bf capturing mutual information}.
-Intuitively we want to {\bf separate signal from noise} and avoid modeling noise.
+\slide{Review: GANs}
 
-\slide{Contrastive Coding for Speech}
-\centerline{\includegraphics[width = 6 in]{\images/CPC}}
+Generative Adversarial Networks
+Ian J. Goodfellow et al, 2014
 
 \vfill
-We abstract this problem to that of capturing the mutual information between any two arbitrary random variables $x$ and $y$.
+$${\color{red} \argmax_{\gen} \min_{\disc} E_{i \sim \{-1,1\}, y \sim P_i}\left[-\ln P_{\disc}(i|y)\right]}$$
 
-\slide{Contrastive Coding}
+\vfill
+Under Universality:
+
+\vfill
+$${\color{red} P_\gen(y) = P_{\pop}(y)}$$
+
+\slide{Review: VAEs}
+
+Auto-Encoding Variational Bayes, Kingma and Welling, 2013
+
+\vfill
+$${\color{red} \argmin_{\pri,\gen,\enc}\;E_{y \sim \pop,z \sim P_\enc(z|y)}\left[ - \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]}$$
+
+\vfill
+Under Universality:
+
+\vfill
+For for any encoder $\enc$
+
+\vfill
+$${\color{red} P_{\pri^*,\gen^*}(z,y) = P_{\pop,\enc}(z,y)}$$
+
+\vfill
+Under universality the Encoder can be anything (but in practice the encoder matters).
+
+\slide{Review: Hierarchical VAEs (Diffusion Models)}
+
+Denoising Diffusion Probabilistic Models, Ho, Jain, and Abbeel, June 2020.
+
+{\huge
+$${\color{red} \argmin_{\pri,\gen,\enc}\;E_{y \sim \pop,z \sim P_\enc(z|y)}\left[ - \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]}$$
+
+$${\color{red} z = z_1,\ldots,z_N}$$
+
+\vfill
+$${\color{red} P_\enc(z|y) = P_\enc(z_1|y)P_\enc(z_2|z_1)\cdots P_\enc(z_n|z_{N-1})}$$
+
+$${\color{red} P_\dec(y|z) = P_\pri(z_N)P_\pri(z_{N-1}|z_N)\cdots P_\pri(z_1|z_2)P_\dec(y|z_1)}$$
+
+\vfill
+
+For VAEs under universality the encoder can be anything.  For diffusion models it is simply the addition of noise.
+}
+\slide{Contrastive Coding: A Fourth Training Objective}
+
+Representation Learning with Contrastive Predictive Coding,
+Aaron van den Oord, Yazhe Li, Oriol Vinyals, July 2018.
+
+\vfill
+CLIP: Contrastive Language-Image Pre-training, January 2021, OpenAI
+
+
+
+\slide{CLIP Contrastive Coding}
+
+\centerline{\includegraphics[height= 5in]{\images/CLIPTraining}}
+
+\slide{Contrastive Coding: the Fourth Training Objective}
+
+We draw pairs $(I_1,T_1), \ldots (I_B,T_B)$ from the population.
+We then select $b$ uniformly from $1$ to $B$ and construct the tuple $(I_b,T_1,\ldots,T_B,b)$.
+
+\vfill
+We then train a model to predict $b$.
+\vfill
+{\huge
+\begin{eqnarray*}
+\enc_x^*,\enc_y^* & = & \argmin_{\enc_x,\enc_y} \;E_{(x,T_1,\ldots,T_B,b)}\left[-\ln P_{\enc_x,\enc_y}(b|x,T_1,\ldots,T_B)\right]
+\end{eqnarray*}
+
+\begin{eqnarray*}
+P_{\enc_x,\enc_y}(b|x,T_1,\ldots,T_B) & = & \softmax_b\; \enc_x(x)^\top\enc_y(T_b)
+\end{eqnarray*}
+}
+
+\slide{CLIP Contrastive Coding}
+
+In CLIP we make $B^2$ predictions for a batch of size $N = B$
+\centerline{\includegraphics[height= 4in]{\images/CLIPTraining}}
+
+
+\slide{The Mutual Information Contrastive Coding Theorem}
+
+For any distribution on pairs $(x,y)$, with contrastive probabilities computed by
+
+\begin{eqnarray*}
+P(b|I,T_1,\ldots,T_B) & = & \softmax_b\;\enc_I(I),\enc_T(T_b)
+\end{eqnarray*}
+
+{\huge
+\begin{eqnarray*}
+I(\mathrm{Image},\mathrm{Text}) & \geq & \ln B - \;\;E_{(I_b,y_1,\ldots,y_B,b)}\left[-\ln P(b|(I,T_1,\ldots,T_B))\right]
+\end{eqnarray*}
+}
+
+Chen et al., On Variational Bounds of Mutual Information, May 2019.
+
+\slide{CLIP Image Classification}
+
+\centerline{\includegraphics[height= 5in]{\images/CLIPClassifier}}
+
+\slide{Zero-Shot Image Classification}
+
+\centerline{\includegraphics[width = 7in]{\images/CLIP0}}
+
+\slide{Zero-Shot Image Classification}
+
+\centerline{\includegraphics[height= 5in]{\images/CLIP1}}
+
+\slide{An abstract Formulation}
 
  We consider a population distribution on pairs $(x,y)$.
  
@@ -60,65 +160,6 @@ We abstract this problem to that of capturing the mutual information between any
 \item $x = f(z)$ and $y = f(z)$ where $f$ and $g$ are transformation functions on an image $z$ such as  translation, rotation, color shift, or cropping. (augmentation) of $x$. (SimCLR)
 \end{itemize}
 
-\slide{Contrastive Coding}
-
-We draw pairs $(x_1,y_1), \ldots (x_B,y_B)$ from the population.
-We then select $b$ uniformly from $1$ to $B$ and construct the tuple $(x_b,y_1,\ldots,y_B,b)$.
-
-\vfill
-We then train a model to predict $b$.
-\vfill
-{\huge
-\begin{eqnarray*}
-\enc_x^*,\enc_y^* & = & \argmin_{\enc_x,\enc_y} \;E_{(x,y_1,\ldots,y_B,b)}\left[-\ln P_{\enc_x,\enc_y}(b|x,y_1,\ldots,y_B)\right]
-\end{eqnarray*}
-
-\begin{eqnarray*}
-P_{\enc_x,\enc_y}(b|x,y_1,\ldots,y_B) & = & \softmax_b\; \enc_x(x)^\top\enc_y(y_b)
-\end{eqnarray*}
-}
-
-\slide{The Contrastive Coding Theorem}
-
-For any distribution on pairs $(x,y)$, with contrastive probabilities computed by
-
-\begin{eqnarray*}
-P(b|x,y_1,\ldots,y_B) & = & \softmax_b\;s(x,y_b)
-\end{eqnarray*}
-
-we have
-
-{\huge
-\begin{eqnarray*}
-I(x,y) & \geq & \ln B - \;\;E_{(x,y_1,\ldots,y_B,b)}\left[-\ln P(b|(x,y_1,\ldots,y_B))\right]
-\end{eqnarray*}
-}
-
-Chen et al., On Variational Bounds of Mutual Information, May 2019.
-
-\slide{CLIP, January 2021, OpenAI}
-
-CLIP: Contrastive Language-Image Pre-training.
-
-\vfill
-Trained on images and associated text (such as image captions or hypertext links to images) CLIP computes embeddings of text and embeddings of images
-(``co-embeddings'') trained to capture the mutual information between the two.
-
-\slide{CLIP Constrastive Coding}
-
-\centerline{\includegraphics[height= 5in]{\images/CLIPTraining}}
-
-\slide{CLIP Image Classification}
-
-\centerline{\includegraphics[height= 5in]{\images/CLIPClassifier}}
-
-\slide{Zero-Shot Image Classification}
-
-\centerline{\includegraphics[width = 7in]{\images/CLIP0}}
-
-\slide{Zero-Shot Image Classification}
-
-\centerline{\includegraphics[height= 5in]{\images/CLIP1}}
 
 \slide{A Weakness of Contrastive Coding}
 
@@ -145,6 +186,28 @@ I(x,y) & \geq & \ln B - \;\;E_{(x,y_1,\ldots,y_B,b)}\left[-\ln P(b|(x,y_1,\ldots
 \vfill
 For CLIP the batch size $B = 2^{15}$ so we can potentially guarantee 15 bits of mutual information.
 
+
+\slide{Contrastive Coding for Speech}
+\centerline{\includegraphics[width = 6 in]{\images/CPC}}
+\centerline{\huge van den Oord, Li and Vinyals,}
+\centerline{\huge Representation Learning with Contrastive Predictive Coding, 2018}
+
+\vfill
+What should we abstract from the past that is relevant to the future?
+
+\slide{Contrastive Coding for Speech}
+\centerline{\includegraphics[width = 6 in]{\images/CPC}}
+
+\vfill
+{\bf Unlike VAEs}, contrastive coding is about {\bf capturing mutual information}.
+Intuitively we want to {\bf separate signal from noise} and avoid modeling noise.
+
+\slide{Contrastive Coding for Speech}
+\centerline{\includegraphics[width = 6 in]{\images/CPC}}
+
+\vfill
+We abstract this problem to that of capturing the mutual information between any two arbitrary random variables $x$ and $y$.
+
 \slide{Tishby's Information Bottleneck}
 
 \centerline{The Information Bottleneck Method}
@@ -155,242 +218,6 @@ Design $P_\enc(z|x)$ with the following objective.
 
 \vfill
 $$\enc^* = \argmin_\enc\;I(z,x) - \beta I(z,y)$$
-
-\vfill
-This does not restric $H(z)$.
-
-\slide{Balancing Mutual Information with Encoder Enrtopy}
-
-\vfill
-\begin{eqnarray*}
-\enc^* & = & \argmin_\enc H(\enc(x)) - \beta I(\enc(x),y)\\
-\\
-\\
-& = & \argmin_\enc\;H(\enc(x)) - \beta(H(y) - H(y|\enc(x))) \\
-\\
-\\
-& = & \argmin_\enc\;H(\enc(x)) + \beta H(y|\enc(x))
-\end{eqnarray*}
-
-\slide{Balancing Mutual Information with Encoder Enrtopy}
-
-{\huge
-\begin{eqnarray*}
-& & H(\enc(x)) + \beta H(y|\enc(x)) \\
-\\
-\\
-& = & E_{(x,y) \sim \pop}[\; -\ln P(\enc(x)) + \beta(- \ln P(y|\enc(x))\;] \\
-\\
-\\
-& \leq & E_{(x,y) \sim \pop}[\; -\ln P_\pri(\enc(x)) + \beta(- \ln P_\dec(y|\enc(x))\;] \\
-\end{eqnarray*}
-
-\vfill
-$$\enc^*,\dec^*,\pri^*  =  \argmin_{\enc,\dec,\pri}\;E_{(x,y)\sim \pop}[\; -\ln P_\pri(\enc(x))+ \beta(- \ln P_\dec(y|\enc(x))\;]$$
-}
-
-
-
-
-
-\slide{Autoregressive Image and Voice Modeling}
-
-Strong VAE image modeling was first achieved with autoregressive token modeling.
-
-\vfill
-\centerline{van den Oord, Vinyals and Kavukcuoglu,}
-\centerline{Neural Discrete Representation Learning, {\bf 2017}}
-
-\vfill
-\centerline{\includegraphics[height = 2in]{\images/VQ-OneLayer} 
-\parbox[b]{4.5in}{\huge Token Transformer \\ \\ Image-to-Tokens, Tokens-to-Image \\ \\ \\~}}
-
-\slide{VQ-VAE-2, June 2019}
-
-\centerline{Generating Diverse High-Fidelity Images
-with VQ-VAE-2}
-
-\vfill
-\centerline{\includegraphics[width = 8in]{\images/VQ-VAE21}}
-
-\slide{VAE Tokenization of Images and Voice}
-
-\centerline{\includegraphics[height = 2in]{\images/VQ-OneLayer} 
-\parbox[b]{4.5in}{\huge Token Transformer \\ \\ Image-to-Tokens, Tokens-to-Image \\ \\ \\~}}
-
-
-\vfill
-Let $y$ range over a population (such as images or sound waves).
-
-\vfill
-Assume that a given $y$ is encoded as a tensor denoted {\color{red} $z_{\enc,p}(y)$} where $p$ is a ``position in $y$'' (a pixel in an image tensor
-or time window in a sound tensor) and {\color{red} $z_{\enc, p}(y) \in R^d$} is a vector.
-
-\slide{Vector Quantization (Tokenization)}
-
-\centerline{\includegraphics[height = 2in]{\images/VQ-OneLayer} 
-\parbox[b]{4.5in}{\huge Token Transformer \\ \\ Image-to-Tokens, Tokens-to-Image \\ \\ \\~}}
-
-\vfill
-Assume a finite set of $K$ ``tokens'' where token $k$ has an embedding vector $e(k) \in R^d$.
-
-\vfill
-Define $k_{\enc,p}(y)$ by
-$$k_{\enc,p}(y)= \argmin_k\;\frac{1}{2}||z_{\enc,p}(y)-e(k)||^2$$
-
-\slide{Reconstruction Loss}
-
-\centerline{\parbox[b]{1.0in}{\huge $P_\pri(k)$ \\ \\ \\ \\ \\ ~}\includegraphics[height = 2in]{\images/VQ-OneLayer} 
-\parbox[b]{2.5in}{\huge $k_\enc(y)$ \\ \\ \\ \\ $y$ \\~}}
-
-We now have a VAE where the tensor $k_\enc(y)$ is the latent variable.
-
-\vfill
-The encoder and decoder are trained jointly.
-
-\vfill
-The prior is a transformer trained after the encoder and decoder are fully trained.
-
-\slide{Training the Encoder and Decoder}
-\centerline{\parbox[b]{1.0in}{\huge $P_\pri(k)$ \\ \\ \\ \\ \\ ~}\includegraphics[height = 2in]{\images/VQ-OneLayer} 
-\parbox[b]{2.5in}{\huge $k(z_\enc(y))$ \\ \\ \\ \\ $y$ \\~}}
-
-\vfill
-Taking $P_\dec(y|k)$ to be ${\cal N}(\hat{y}_\dec(k),I)$ we get an $L_2$ reconstruction loss.
-
-\vfill
-$${\cal L}_{\mathrm{Rec}} = \frac{1}{2}||\;y - \hat{y}_\dec(e(k(z_\enc(y))))\;||^2$$
-
-\slide{Training the Encoder and Decoder}
-\centerline{\parbox[b]{1.0in}{\huge $P_\pri(k)$ \\ \\ \\ \\ \\ ~}\includegraphics[height = 2in]{\images/VQ-OneLayer} 
-\parbox[b]{2.5in}{\huge $k(z_\enc(y))$ \\ \\ \\ \\ $y$ \\~}}
-
-\vfill
-$${\cal L}_{\mathrm{Rec}} = \frac{1}{2}||\;y - \hat{y}_\dec(e(k(z_\enc(y))))\;||^2$$
-
-\vfill
-Because the tokens are discrete we do not get any gradient on $z_\enc(y)$.
-
-\slide{Straight-Through Gradients}
-\centerline{\parbox[b]{1.0in}{\huge $P_\pri(k)$ \\ \\ \\ \\ \\ ~}\includegraphics[height = 2in]{\images/VQ-OneLayer} 
-\parbox[b]{2.5in}{\huge $k(z_\enc(y))$ \\ \\ \\ \\ $y$ \\~}}
-
-\vfill
-$${\cal L}_{\mathrm{Rec}} = \frac{1}{2}||\;y - \hat{y}_\dec(e(k(z_\enc(y))))\;||^2$$
-
-\vfill{
-$$z_{\enc,p}(y).\grad = \nabla_{e(k(z_{\enc,p}(y)))} {\cal L}_{\mathrm{Rec}}$$
-
-\slide{K-Means Gradients}
-
-We train $z_\enc(y)$ and the token embeddings $e(k)$.
-
-\vfill
-$${\cal L}_{\mathrm{Rec}} = \frac{1}{2}||\;y - \hat{y}_\dec(e(k(z_\enc(y))))\;||^2$$
-
-\vfill{
-$$z_{\enc,p}(y).\grad = \nabla_{e(k(z_{\enc,p}(y)))} {\cal L}_{\mathrm{Rec}}$$
-
-\vfill
-$${\cal L}_{\mathrm{KM}} = \frac{1}{2}||z_{\enc,p}(y) - e(k(z_{\enc,p}))||^2$$
-
-\vfill{
-$$e(k(z_{\enc,p}(y))).\grad \;\pluseq\; \beta \nabla_{e(k(z_{\enc,p}(y)))} {\cal L}_{\mathrm{KM}}$$
-
-\vfill
-$\beta$ is a hyper-parameter that adjust the relative learning rates.
-
-\slide{Transformer Training}
-
-Finally we hold the encoder fixed and train the prior $P_\pri(z)$ to be an auto-regressive model of the symbolic image $k_\enc(s)[X,Y]$.
-
-\vfill
-\centerline{\includegraphics[height = 2in]{\images/VQ-OneLayer}}
-
-\slide{Tokenization and Gaussian Mixture Models (GMMs)}
-
-Consider modeling $P(y|x)$ with $y \in R^d$
-
-\vfill
-A Gaussian model has the form
-
-\begin{eqnarray*}
-y & = & \hat{y}(x) + \sigma \epsilon,\;\;\;\epsilon \sim {\cal N}(0,I) \\
-\\
-\hat{y} & = & \argmin_{\hat{y}}\; E_{x,y}\;||\hat{y}(x)-y||^2
-\end{eqnarray*}
-
-\slide{Tokenization and Gaussian Mixture Models (GMMs)}
-
-Now consider a tokenizing decoder
-
-\begin{eqnarray*}
-y & = & E_{k\sim P_\dec(k|x)}[\; e(k) + \sigma \epsilon\;],\;\;\;\epsilon \sim {\cal N}(0,I) \\
-\end{eqnarray*}
-
-We get that $P_\dec(y|x)$ is a Gaussian mixture model (GMM).
-
-\vfill
-GMMs are significantly more expressive than single Gaussians.
-
-\vfill
-
-\slide{Wav2Vec 2.0, June 2020, Facebook}
-
-\vfill
-Trained on 53k hours of unlabeled audio (no text) they convert speech to a sequence of discrete quantized vectors they call ``pseudo-text units''.
-
-\vfill
-By training on only one hour of human-transcribed audio, and using the Wav2Vec transcription into pseudo-text, they outperform the previous state of the
-art in word error rate for 100 hours of human-transcribed text.
-
-\slide{DALLE-1, January 2021}
-
-\vfill
-\centerline{\includegraphics[width = 8in]{\images/DALLE1}}
-
-
-\slide{GLSM, February 2021, Facebook}
-
-Generative Spoken Language Model (GSLM)
-
-\vfill
-They then train a generative model of the sequences of pseudo-text units learned from unlabeled audio.
-
-
-\vfill
-This model can continue speech from a speech prompt in much the same way that GPT-3 continues text from a text prompt.
-
-\vfill
-Semantic and grammatical structure in a ``unit language model'' is recovered
-from speech alone.
-
-\slide{Parti, June 2022}
-
-\centerline{\huge Scaling Autoregressive Models for Content-Rich Text-to-Image Generation}
-\centerline{\huge Yu et al.}
-
-\vfill
-\centerline{\includegraphics[width = 9in]{\images/Parti}}
-
-
-\slide{CM3Leon, September 2023}
-
-\centerline{\Large Scaling Autoregressive Multi-Modal Models: Pretraining and Instruction Tuning}
-\centerline{\Large Yu et al.}
-
-\vfill
-\centerline{\includegraphics[width = 5.7in]{\images/CM3Leon}}
-
-
-\slide{Voice-Text Language Model (VoxtLM), September 2023}
-
-This is similar to CM3Leon but for voice and text rather than images and text.
-
-\vfill
-Voice is tokenized and then a transformer is used to model sequences that alternate voice and text.
-
-
 
 \slide{END}
 
