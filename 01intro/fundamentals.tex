@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -68,7 +68,7 @@ Multiclass: {\color{red} $Y = \{y_1,\ldots y_k\}$} $k$ manageable.
 \vfill
 Structured: {\color{red} $y$} is a ``structured object'' like a sentence.  Here {\color{red} $|Y|$} is unmanageable.
 
-\slide{Binary Classification}
+\slidetwo{Binary Classification}{Does This Image Contain a Bicycle?}
 
 We have a population distribution over $(x,y)$ with $y \in \{-1,1\}$.
 
@@ -124,7 +124,7 @@ SVM Hinge loss:  {\color{red} $\max(0,1-m)$}
 \vfill
 \centerline{~\hspace{3in} margin {\color{red} $m = 2ys(x),\;\;y \in \{-1,1\}$}}
 
-\slide{Image Classification (Multiclass Classification)}
+\slide{Multiclass Classification (Next Token Prediction)}
 
 We have a population distribution over $(x,y)$ with $y \in \{y_1,\;\ldots,\;y_k\}$.
 
@@ -138,23 +138,32 @@ $$P_\Phi(y|x) = \softmax_y\;s_\Phi(y|x)$$
   & = & {\color{red} \argmin_\Phi\;E_{(x,y) \sim \mathrm{Pop}}\;\left[- \ln P_\Phi(y|x)\right]}
 \end{eqnarray*}
 
-\slide{Machine Translation (Structured Labeling)}
+\slide{Structured Labeling (Machine Translation)}
 
 We have a population of translation pairs $(x,y)$ with $x \in V_x^*$ and $y \in V_y^*$ where
 $V_x$ and $V_y$ are source and target vocabularies respectively.
 
 \vfill
+{\color{red} $$\Phi^* = \argmin_\Phi E_{x,y \sim \pop}\;\left[- \ln P_\Phi(y|x)\right]$$}
+
+\slide{AutoRegresive Models}
+For langage we typically use an {\bf autoregressive model}:
+
+\vfill
 \begin{eqnarray*}
-  P_\Phi(w_{t+1} | x,w_1,\ldots,w_t) & = & \softmax_{w \in V_y \cup \mathrm{<EOS>}} \; s_\Phi(w\;|\;x,w_1,\ldots,w_t) \\
+  P_\Phi(y_{t+1} | x,y_1,\ldots,y_t) & = & \softmax_{y \in V_y \cup \mathrm{<EOS>}} \; s_\Phi(y\;|\;x,y_1,\ldots,y_t) \\
   \\
   P_\Phi(y|x) & = & \prod_{t = 0}^{|y|} \;P_\Phi(y_{t+1}\;|\;x,y_1,\ldots,y_t)
 \end{eqnarray*}
 
 \vfill
 \begin{eqnarray*}
-  \Phi^* & = & \argmin_\Phi \;E_{(x,y) \sim \mathrm{Pop}} \;{\cal L}(x,y,\Phi) \\
-  & = & {\color{red} \argmin_\Phi \;E_{(x,y) \sim \mathrm{Pop}} \;\left[-\ln \;P_\Phi(y|x)\right]}
+  -\ln P(y|x) & = & \sum_{t = 0}^{|y|} \;-\ln P_\Phi(y_{t+1}\;|\;x,y_1,\ldots,y_t)
 \end{eqnarray*}
+
+\slide{Other Models For Structured Labels}
+
+Alternatives to autoregressive models for the structured case include (old school) graphical models and diffusion models.
 
 \slide{Fundamental Equation: Unconditional Form}
 
