@@ -44,12 +44,14 @@ $$z.\mathrm{value} = x.\mathrm{value}*y.\mathrm{value}$$
 
 \vfill
 The backward method for $z$ computes
-
 \begin{eqnarray*}
 x.\grad & \pluseq & z.\grad * y.\mathrm{value} \\
-\\
-y.\grad & \pluseq & z.\grad * x.\mathrm{value}
+y.\grad & \pluseq & x.\mathrm{value} * z.\grad
 \end{eqnarray*}
+
+\vfill
+I call this the {\bf ``swap rule''}.  To get the gradient of $x$ we swap $x$ and $z$.  To get the gradient of $y$ we swap $y$ and $z$.
+The swap rule will also apply to arrays and tensors.
 
 \slide{Handling Arrays}
 
@@ -62,9 +64,10 @@ $$z.\mathrm{value} = 0$$
 $$\mathrm{for}\;i\;\;z.\mathrm{value} \;\pluseq\;x.\mathrm{value}[i]*y.\mathrm{value}[i]$$
 
 \vfill
-The backward method for $z$  treats each $\pluseq$ instruction separately and does.
-$$\mathrm{for}\;i\;\;x.\grad[i] \;\pluseq\;y.\mathrm{value}[i]*z.\grad$$
+The backward method for $z$  treats each $\pluseq$ instruction separately and applies the swap rule.
+$$\mathrm{for}\;i\;\;x.\grad[i] \;\pluseq\;z.\grad * y.\mathrm{value}[i]$$
 $$\mathrm{for}\;i\;\;y.\grad[i] \;\pluseq\;x.\mathrm{value}[i]*z.\grad$$
+
 
 \slide{Handling Arrays}
 Now consider multiplying a vector $x$ by a matrix $W$.
@@ -76,26 +79,9 @@ $$\mathrm{for}\;j\;\;y.\mathrm{value}[j] = 0$$
 $$\mathrm{for}\;i,j\;\;y.\mathrm{value}[j] \;\pluseq\;W.\mathrm{value}[j,i]*x.\mathrm{value}[i]$$
 
 \vfill
-The backward procedure $y.\mathrm{backward}$ treats each individual $\pluseq$ as a scalar product and does
+The backward procedure $y.\mathrm{backward}$ treats each individual $\pluseq$ as a scalar product and applies the swap rule.
 $$\mathrm{for}\;i,j\;\;x.\grad[i] \;\pluseq\;W.\mathrm{value}[j,i]*y.\grad[j]$$
-$$\mathrm{for}\;i,j\;\;W.\grad[j,i] \;\pluseq\;x.\mathrm{value}[i]*y.\grad[j]$$
-
-\slide{A Linear Threshold Layer}
-
-\begin{eqnarray*}
-   s & = & \sigma\left(Wh - B \right)
-\end{eqnarray*}
-
-$$\begin{array}{lrcl}
-\mathrm{for}\;j &  \tilde{s}[j] & = & 0 \\
-\\
-\mathrm{for}\;j,i &  \tilde{s}[j] & \pluseq &  W[j,i]h[i] \\
-\\
-\mathrm{for}\; j & s[j] & = & \sigma(\tilde{s}[j] - B[j])
-\end{array}$$
-
-\vfill
-Backpropagation is also done with loops treating each individual assignment and $\pluseq$ instruction.
+$$\mathrm{for}\;i,j\;\;W.\grad[j,i] \;\pluseq\;y.\grad[j]*x.\mathrm{value}[i]$$
 
 \slide{General Tensor Operations}
 
@@ -107,15 +93,13 @@ $$\begin{array}{rrcl}
 \end{array}$$
 
 \vfill
-has backpropagation loops
+has backpropagation loops given by the swap rule
 
 $$\begin{array}{rrcl}
 \mathrm{for}\;h,i,j,k & A.\grad[h,i,k] & \pluseq & Y.\grad[h,i,j] \;B.\mathrm{value}[h,j,k] \\
 \mathrm{for}\;h,i,j,k & B.\grad[h,j,k] & \pluseq & A.\mathrm{value}[h,i,k]\;Y.\grad[h,i,j]
 \end{array}$$
 
-\vfill
-I call this the ``swap rule''.  To get the gradient of $A$ we swap $A$ and $Y$.  To get the gradient of $B$ we swap $B$ and $Y$.
 \slide{END}
 }
 
