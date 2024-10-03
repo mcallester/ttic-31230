@@ -7,7 +7,7 @@
   
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Autumn 2020}
+  \centerline{David McAllester, Autumn 2024}
   \vfill
   \vfill
   \centerline{\bf Backpropagation for Scalar Source Code}
@@ -54,14 +54,18 @@ $$\begin{array}{lcl}
 For each variable $z$, the derivative $\partial {\cal L}/\partial z$ will get computed in reverse order.
 
 \vfill
+{\huge
 {\color{red}
 $$\begin{array}{lcl}
-(4)\; \partial{\cal L}/\partial r & = & \frac{1}{2\sqrt{r}} \\
-(3)\; \partial{\cal L}/\partial u & = & \partial {\cal L}/\partial r \\
-(3)\; \partial{\cal L}/\partial w & = & \partial {\cal L}/\partial r\\
-(2)\; \partial{\cal L}/\partial y & = &  (2y) * (\partial {\cal L}/\partial w) \\
-(1)\; \partial{\cal L}/\partial x & = & (2x) * (\partial {\cal L}/\partial u)
+(4)\; \partial{\cal L}/\partial r & = & \frac{1}{2\sqrt{r}} \bigskip \\
+\bigskip
+(3)\; \partial{\cal L}/\partial u & = & \frac{\partial{\cal L}}{\partial r}\frac{\partial r}{\partial u} \;=\; \partial {\cal L}/\partial r \\
+\bigskip
+(2)\; \partial{\cal L}/\partial y & = &  \frac{\partial{\cal L}}{\partial w}\frac{\partial w}{\partial y} \;=\; (\partial {\cal L}/\partial w)*(2y) \\
+\bigskip
+(1)\; \partial{\cal L}/\partial x & = & \frac{\partial{\cal L}}{\partial u}\frac{\partial u}{\partial x} \;=\; (\partial {\cal L}/\partial u) * (2x)
 \end{array}$$
+}
 }
 
 \anaslideplain{A More Abstract Example (Still Scalar Values)}
@@ -223,7 +227,7 @@ Values are computed ``forward'' while gradients are computed ``backward''.
   {\color{red} x.\grad} & {\color{red} \pluseq} & {\color{red} y.\grad * ({\partial y}/{\partial x})}
 \end{eqnarray*}
 
-\centerline{$w.\grad$ holds $\frac{\partial {\cal L}}{\partial w}$}
+\centerline{For each variable $w$, $w.\grad$ holds $\frac{\partial {\cal L}}{\partial w}$}
 
 \slide{END}
 }

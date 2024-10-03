@@ -7,7 +7,7 @@
   
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Autumn 2020}
+  \centerline{David McAllester, Autumn 2024}
   \vfill
   \vfill
   \centerline{\bf The Educational Framework (EDF)}
@@ -188,14 +188,14 @@ class Sigmoid:
 \vspace{-3ex}
 \begin{eqnarray*}
   \tilde{y}[b,j] & = & \sum_i\;W[i,j]\;x[b,i] {\color{red}\;\; = xW}  \\
-  y[b,j] & = & \tilde{y}[b,j] - B[j] {\color{red} \;\;=\;\tilde{y} - B}\; \mathrm{(broadcasting)}
+  y[b,j] & = & \tilde{y}[b,j] - C[j] {\color{red} \;\;=\;\tilde{y} - C}\; \mathrm{(broadcasting)}
   \end{eqnarray*}
 
 \vspace{-2ex}
 {\color{red}
 \begin{eqnarray*}
   \tilde{y}.\mathrm{grad}[b,j] &\pluseq & y.\mathrm{grad}[b,j] \\
-  B.\mathrm{grad}[j] & \minuseq & \frac{1}{B} \sum_b\;y.\mathrm{grad}[b,j] \\
+  C.\mathrm{grad}[j] & \minuseq & \frac{1}{B} \sum_b\;y.\mathrm{grad}[b,j] \\
   \\
   x.\mathrm{grad}[b,i] & \pluseq & \sum_j\;\tilde{y}.\mathrm{grad}[b,j]W[i,j] = y.\grad\;W^\top\\
   \\
@@ -236,6 +236,13 @@ class Affine(CompNode):
 
 
 \slide{Procedures in EDF}
+
+Here is a procedure that recusrtively computes a multi-layer perception (MLP).
+
+\vfill
+Phi is a list of affine parameter packages.
+
+\vfill
 
 \begin{verbatim}
 def MLP(Phi,x)

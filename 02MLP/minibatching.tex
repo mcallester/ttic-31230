@@ -1,5 +1,5 @@
-\input ../../SlidePreamble
-\input ../../preamble
+\input ../SlidePreamble
+\input ../preamble
 
 \begin{document}
 
@@ -7,7 +7,7 @@
   
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2020}
+  \centerline{David McAllester, Autumn 2024}
   \vfill
   \vfill
   \centerline{\bf Minibatching: The Batch Index}
@@ -42,13 +42,13 @@ We let $B$ be the number of elements in a single minibatch and let $b$, with $0 
 
 \centerline{$b$--- batch index,\hspace{3em} $i$ --- input feature index}
 \centerline{$j$ --- hidden layer index, \hspace{3em} $\hat{y}$ --- possible label}
-$$\Phi = (W^0[j,i],\;b^0[j],\;W^1[\hat{y},j],\;b^1[\hat{y}])$$
+$$\Phi = (W^0[j,i],\;C^0[j],\;W^1[\hat{y},j],\;C^1[\hat{y}])$$
 
 \vfill
 \begin{eqnarray*}
-  {\color{red} h[b,j]} & = & \sigma\left(\sum_i \left(W^0[j,i] \;{\color{red} x[b,i]}\right) - b^0[j]\right) \\
+  {\color{red} h[b,j]} & = & \sigma\left(\sum_i \left(W^0[j,i] \;{\color{red} x[b,i]}\right) - C^0[j]\right) \\
   \\
-  {\color{red} s[b,\hat{y}]} & = & \sigma\left(\sum_j \left(W^1[\hat{y},j]\;{\color{red} h[b,j]}\right) - b^1[\hat{y}]\right) \\
+  {\color{red} s[b,\hat{y}]} & = & \sigma\left(\sum_j \left(W^1[\hat{y},j]\;{\color{red} h[b,j]}\right) - C^1[\hat{y}]\right) \\
   \\
   {\color{red} P_\Phi[b,\hat{y}]} & = & \softmax_{\hat{y}}\;{\color{red} s[b,\hat{y}]}
 \end{eqnarray*}

@@ -7,7 +7,7 @@
   
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Winter 2022}
+  \centerline{David McAllester, Autumn 2024}
   \vfill
   \vfill
   \centerline{\bf Backpropagation with Arrays and Tensors}
@@ -111,9 +111,11 @@ has backpropagation loops
 
 $$\begin{array}{rrcl}
 \mathrm{for}\;h,i,j,k & A.\grad[h,i,k] & \pluseq & Y.\grad[h,i,j] \;B.\mathrm{value}[h,j,k] \\
-\mathrm{for}\;h,i,j,k & B.\grad[h,j,k] & \pluseq & Y.\grad[h,i,j]\;A.\mathrm{value}[h,i,k]
+\mathrm{for}\;h,i,j,k & B.\grad[h,j,k] & \pluseq & A.\mathrm{value}[h,i,k]\;Y.\grad[h,i,j]
 \end{array}$$
 
+\vfill
+I call this the ``swap rule''.  To get the gradient of $A$ we swap $A$ and $Y$.  To get the gradient of $B$ we swap $B$ and $Y$.
 \slide{END}
 }
 
