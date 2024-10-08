@@ -7,10 +7,10 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Autumn 2023}
+  \centerline{David McAllester, Autumn 2024}
 
     \vfill
-  \centerline{\bf Eintein Notation}
+  \centerline{\bf Einstein Notation}
   \vfill
   \centerline{\bf and Convolutional Neural Networks (CNNs)}
   \vfill
@@ -142,17 +142,16 @@ $x$ and $y$.
 
 
 \slide{A Convolution Layer}
-\newcommand{\nin}{n_{\mathrm{in}}}
-\newcommand{\nout}{n_{\mathrm{out}}}
+%\newcommand{\nin}{n_{\mathrm{in}}}
+%\newcommand{\nout}{n_{\mathrm{out}}}
 
 \centerline{\includegraphics[width = 4.0in]{\images/Convolution}}
-\centerline{$K_{\ell+1}[\nout,\Delta x,\Delta y,\nin]$\hspace{6ex}$L_{{\ell}}[b,x,y,\nin]$\hspace{6ex}$L_{{\ell+1}}[b,x,y,\nout]$}
+{\huge \centerline{$K_{\ell+1}[\nout,\Delta x,\Delta y,\nin]$\hspace{6ex}$L_{{\ell}}[b,x,y,\nin]$\hspace{6ex}$L_{{\ell+1}}[b,x,y,\nout]$}
 
 \begin{eqnarray*}
- & &  L_{{\ell+1}}[b,x,y,\nout] \\
- \\
-  & = &   \sigma\left(K_{\ell+1}[\nout,\Delta X, \Delta Y,N_{\mathrm{in}}]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, N_{\mathrm{in}}] - B[\nout]\right)
+L_{{\ell+1}}[b,x,y,\nout]  & = &   \sigma\left(K_{\ell+1}[\nout,\Delta X, \Delta Y,N_{\mathrm{in}}]\; L_{{\ell}}[b,x + \Delta X, y + \Delta Y, N_{\mathrm{in}}] - B[\nout]\right)
 \end{eqnarray*}
+}
 
 \slide{2D CNN in PyTorch}
 
@@ -210,7 +209,15 @@ $L'_{{\ell}} = \mathrm{Padd}(L_{{\ell}},\;p)$
 \end{eqnarray*}
 
 \vfill
-If the input is padded but the output is not padded then $\Delta x$ and $\Delta y$ are non-negative.
+If the input is padded but the output is not padded then $\Delta x$ and $\Delta y$ can be non-negative.
+
+\slide{Padding}
+
+\centerline{\includegraphics[height = 2.0in]{\images/padding2}}
+\centerline{\large Jonathan Hui}
+
+\vfill
+With $\Delta x$ and $\Delta y$ non-negative the result is in the upper left corner.
 
 \slide{Reducing Spatial Dimention}
 
