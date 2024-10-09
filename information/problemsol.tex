@@ -9,20 +9,66 @@
 
 
 \centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
-\centerline{\bf Problems For Fundamental Equations.}
+\centerline{\bf Problems For Information Theory}
 
 \vfill
 \vfill
 Assume that probability distributions $P(y)$ are discrete with $\sum_y\;P(y) = 1$.
 
 \bigskip
-{\bf Problem 1: Joint Entropy and Conditional Entropy}
+
+{\bf Problem 1. }  This problem is on softmax, entropy and cross entropy.  Let the variable $i$ range over the non-negative integers (0 to $\infty$).
+Consider the following softmax distribution where $\beta> 0$ is an inverse temperature parameter.
+
+$$P(i) = \softmax_i \left[-\beta i\right]$$
+
+{\bf (a)} Give an expression for $P(i)$ in terms of $i$ without using a softmax or infinite sum.  You can use the equality that for $0 < \lambda < 1$ we have
+
+$$\sum_{n=0}^{\infty} \lambda^n = \frac{1}{1-\lambda}$$
+
+\solution{$$P(i) = \frac{e^{-\beta i}}{\sum_{i=0}^\infty e^{-\beta i}} = (1-e^{-\beta})e^{-\beta i}$$}
+
+{\bf (b)} Solve for the entropy of this distribution. You can use the equality that for $0 < \lambda < 1$ we have
+
+$$\sum_{n=0}^{\infty} \;n \lambda^n = \frac{\lambda}{(1-\lambda)^2}$$
+
+\solution{
+
+  \begin{eqnarray*}
+    H(P) & = & E_i\;\left[-\ln P(i)\right] =  \sum_{i=0}^\infty P(i)\;\left( - \;\ln \left((1-e^{-\beta})e^{-\beta i}\right)\right) \\\\
+    & = & \sum_{i=0}^\infty P(i)\;\left(-\ln \left(1-e^{-\beta}\right) + \beta i\right) \\
+    & = & \left(-\ln \left(1-e^{-\beta}\right)\sum_{i=0}^\infty P(i)\right) + \sum_i (1-e^{-\beta})e^{-\beta i} \;\beta i \\
+    & = & - \ln \left(1-e^{-\beta}\right) + \beta(1-e^{-\beta})\;\;\sum_{i=0}^\infty i(e^{-\beta})^i \\
+    & = & - \ln \left(1-e^{-\beta}\right) + \beta(1-e^{-\beta})\;\;\frac{e^{-\beta}}{(1-e^{-\beta})^2} \\
+    & = & - \ln \left(1-e^{-\beta}\right) + \frac{\beta e^{-\beta}}{(1-e^{-\beta})}
+  \end{eqnarray*}
+}
+
+{\bf (c)} Consider a one-hot population distribution defined by $\pop(k) = 1$ and $\pop(i) = 0$ for $i \not = k$.
+What is the cross-entropy $H(\pop,P)$ and KL-divergence $KL(\pop,P)$?  What is the cross-entropy $H(P,\pop)$ and the KL divergence $KL(P,\pop)$?
+
+\solution{
+  \begin{eqnarray*}
+    H(\pop,P) & = & E_{i\sim \pop}\left[ - \ln P(i)\right] \\
+    & = & -\ln P(k) \\
+    & = & -\ln (\;(1-e^{-\beta})e^{-\beta k}\;) \\
+    & = & \beta k - \ln(1-e^{-\beta}) \\
+      \\
+      KL(\pop,P) & = & H(\pop,P) - H(\pop) \\
+      & =& \beta k - \ln (1-e^{-\beta}) - 0 \\
+      \\
+      H(P,\pop) & = & KL(P,\pop) = \infty
+  \end{eqnarray*}
+}
+
+\bigskip
+{\bf Problem 2. Joint Entropy and Conditional Entropy}
 We define conditional entropy $H(y|x)$ as follows
 $$H(y|x) = E_{x,y} \;-\log P(y|x).$$
 Given a distribution $P(x,y)$ show
 $$H(P) = H(x) + H(y|x).$$
 
-\ignore{
+\solution{
 \begin{eqnarray*}
   H(P) & = &  E_{(x,y) \sim P}\;-\ln P(x,y) \\
   \\
@@ -37,7 +83,7 @@ $$H(P) = H(x) + H(y|x).$$
 }
 
 \bigskip
-~{\bf Problem 2: Unmeasurability of KL divergence and Population Entropy} The problem
+~{\bf Problem 3. Unmeasurability of KL divergence and Population Entropy} The problem
 of population density estimation is defined by the following equation.
 $$\Phi^* = \argmin_\Phi\;H(\mathrm{Pop},Q_\Phi) = E_{y \sim \mathrm{Pop}}\;-\ln\;Q_\Phi(y)$$
 This equation is used for language modeling --- estimating the probability distribution over the population of English sentences that appear, say, in the New York Times.
@@ -82,7 +128,7 @@ the conditional (labeling) case (imagenet).
 }
 
 \bigskip
-{\bf Problem 3: Asymmetry of cross entropy and KL-divergene} Consider the objective
+{\bf Problem 5. Asymmetry of cross entropy and KL-divergene} Consider the objective
 \begin{equation}
   \label{revH}
   P^* = \argmin_P\;H(P,Q)
@@ -150,14 +196,14 @@ are minimized at $P = Q$.
 
 
 \bigskip
-{\bf Problem 4. Data Processing Inequality}
+{\bf Problem 6. Data Processing Inequality}
 Prove the data processing inequality that for any function $f$ with $z = f(y)$ we have $H(z) \leq H(y)$.
 
 \medskip
 Warning: This data processing inequality does not apply to contiuous densities.  A function on a continuous density can either expand or shrink the distribution which
 increases or decrease its differential entropy respectively.
 
-\ignore{
+\solution{
   \begin{eqnarray*}
     H(y,z) & = & H(y) + H(z|y) = H(y) \\
     & = & H(z) + H(y|z)
@@ -166,7 +212,7 @@ increases or decrease its differential entropy respectively.
 }
 
 \bigskip
-{\bf Problem 5: Mutual Information} Consider a joint distribution $P(x,y)$ on discrete random variables $x$ and $y$.
+{\bf Problem 7. Mutual Information} Consider a joint distribution $P(x,y)$ on discrete random variables $x$ and $y$.
 We define the marginal distributions $P(x)$ and $P(y)$ as follows.
 \begin{eqnarray*}
   P(x) & = & \sum_y\;P(x,y) \\
@@ -222,14 +268,14 @@ i.e., that for $z = f(y)$ we have $I(x,z) \leq I(x,y)$.
 }
 
 \bigskip
-{\bf Problem 6.}  Consider the distribution on non-negative integers
+{\bf Problem 8. 20 pts}  Consider the distribution on non-negative integers
 given by$$P(i) = \frac{1}{2^{i+1}}.$$
 
 \medskip
 {\bf (a)} Using $\sum_{i=0}^\infty ar^i = \frac{a}{1-r}$ show that
 $\sum_{i= 0}^\infty\;P(i) = 1$.
 
-\ignore{
+\solution{
   $$\sum_{i = 0}^\infty \frac{1}{2^{i+1}} = \sum_{i =0}^\infty
   \frac{1}{2}\left(\frac{1}{2}\right)^i =
   \frac{\frac{1}{2}}{1-\frac{1}{2}} = 1$$ }
@@ -239,7 +285,7 @@ $\sum_{i= 0}^\infty\;P(i) = 1$.
 compute the numerical value of the entropy $H_2(P)$ for this
 distribution (with your answer in bits).
 
-\ignore{
+\solution{
   \begin{eqnarray*}
     H_2(P) & = & E_i\;\left[-\log_2 P(i)\right] = \sum_{i=0}^\infty P(i)\;\left(-\log_2 \frac{1}{2^{i+1}}\right) \\
     & = & \sum_{i=0}^\infty \frac{1}{2^{i+1}}\;(i+1) \\
@@ -255,14 +301,14 @@ word is a proper prefix of any other code word) and such that expected
 code length $E_{i \sim P} |c(i)|$ equals the entropy in bits you
 calculated in part (b).
 
-\ignore{$c(i)$ is the string consisting of $i$ ones followed by a zero.
+\solution{$c(i)$ is the string consisting of $i$ ones followed by a zero.
   For example $c(0) = 0$ and $c(3) = 1110$.  We then have that $|c(i)|
   = i+1$ so that the expected length is
   $$\sum_{i=0}^\infty P(i) |c(i)| = \sum_{i=0}^\infty P(i) (i+1) =
   \sum_{i=0}^\infty P(i) \left(-\log_2 P(i)\right) = H_2(P) = 2\;\mathrm{bits}$$ }
 
 \bigskip
-{\bf Problem 7.}  Problem 2 was on converting probabilities to
+{\bf Problem 9. 30 pts}  Problem 2 was on converting probabilities to
 codes.  This problem is on converting codes to probabilities.
 Consider any prefx-free code $c(i)$ for the non-negative integers $i$.
 Give a sampling procedure that either returns an integer $i$ or
@@ -278,7 +324,7 @@ $2^{-|c(i)|}$.
   }
 
 \bigskip
-{\bf Problem 8.} Shannon's source coding
+{\bf Problem 10. 30 pts} Shannon's source coding
 theorem states that for any prefix-free code we have
 $$E_{x\sim P} |c(x)| \geq H_2(P)$$
 and for any $P$ there exists a prefix-free code such
@@ -315,15 +361,17 @@ code word.
 $c(x_{i+1})$ satisfying the specified conditions.  Hint: Show that the probability of non-termination
 for the procedure of problem 7 is nonzero.
 
+{\bf problem 11.}
+
 \solution{First, the probability of nontermination in the procedure
-  defined by problem 7 must be nonzero.  This is because probability
+  defined by problem 3 must be nonzero.  This is because probability
   assigned to $x_i$ by the code can be no larger than than $P(x_i)$
   and hence the probability of returning any $x_j$ with $0 \leq j \leq
   i$ is strictly less than one.  Second, when the sampling procedure fails to terminate it
   must encoutern an unallocated code word satisfying the given conditions.}
 
 \bigskip
-{\bf Problem 9: The ELBO}
+{\bf Problem 12. The ELBO}
 We consider a model distribution $Q_\Phi(z,y)$ with marginal distribution
 $$Q_\Phi(y) = \sum_z Q_\Phi(z,y).$$
 We are interested in minimizing the unconditional (or unsupervised) cross-entropy of this model.
@@ -372,7 +420,7 @@ as a KL divergence.  Explain why your expression implies that the ELBO is a lowe
 }
 
 \bigskip
-{\bf Problem 10: The Donsker-Varadhan Bound}
+{\bf Problem 13. The Donsker-Varadhan Bound}
 (a) For three distributions $P$, $Q$ and $G$ show the following equality.
 $$KL(P,Q) =  \left(E_{y \sim P} \;\ln \frac{G(y)}{Q(y)}\right) + KL(P,G)$$
 

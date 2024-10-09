@@ -351,5 +351,87 @@ what is the resulting number of query matrix parameters for a given layer and ho
   The original version uses $2(I \times J)$ key-query matrix parameters for each head.  If we use only the single query matrix we use $J^2$ parameters for each head.  These are the same for $I = J/2$.
 }
 
+\bigskip
+
+{\bf Problem 3. (25 pts)} RNNs
+
+Below are the equations defining the update cell of the UGRNN which takes as data inputs $h[B,t-1,I]$ and $x[B,t,K]$ and produces
+$h[B,t,J]$.
+
+\begin{eqnarray*}
+R[b,t,j] & = & \mathrm{tanh}\left(W^{h,R}[j,I]{\color{red} h[b,t\!-\!1,I]} + W^{x,R}[j,K]{\color{red} x[b,t,K]} - B^R[j]\right) \\
+\\
+G^h[b,t,j] & = & \sigma\left(W^{h,G}[j,I]{\color{red} h[b,t\!-\!1,I]} + W^{x,G}[j,K]{\color{red} x[b,t,K]} - B^G[j]\right) \\
+\\
+h[b,t,j] & = & {\color{red} G^h[b,t,j]}h[b,t\!-\!1,j] + {\color{red} (1-G^h[b,t,j])}R[b,t,j]
+\end{eqnarray*}
+
+Here I have written the gate as $G^h$ to emphasize that it is a gate used to define a convex combination of the $h_{t-1}$ and $x_t$ inputs to $h_t$. Modify these equations to use a second gate $G^R$
+which gates inputs to $R$
+so that the input to the activation function (threshold function) producing $R[b,t,j]$ is a convex combination of
+$$W^{h,R}[j,I] h[b,t\!-\!1,I] - B^{h,R}[j]$$
+and
+$$W^{x,R}[j,K] x[b,t,K] - B^{x,R}[j]$$
+where the weighting in the convex combination is given by your new gate $G^R[b,t,j]$.
+This gated RNN is similar to, but different from, a GRU which also has two gates.
+
+\solution{
+  \begin{eqnarray*}
+    G^R[b,t,j] & = & \sigma\left(W^{h,GR}[j,I]{\color{red} h[b,t\!-\!1,I]} + W^{x,GR}[j,K]{\color{red} x[b,t,K]} - B^{GR}R[j]\right) \\
+    \\
+    R[b,t,j] & = & \mathrm{tanh}\left(\begin{array}{l}G^R[b,t,j]\;(W^{h,R}[j,I]{\color{red} h[b,t\!-\!1,I]} - B^{h,R}[j]) \\ \\ +\;\; (1-G^R[b,t,j])\;(W^{x,R}[j,K]{\color{red} x[b,t,K]} - B^{x,R}[j])\end{array}\right) \\
+    \\
+      \\
+      G^h[b,t,j] & = & \sigma\left(W^{h,Gh}[j,I]{\color{red} h[b,t\!-\!1,I]} + W^{x,Gh}[j,K]{\color{red} x[b,t,K]} - B^{Gh}[j]\right) \\
+      \\
+      h[b,t,j] & = & {\color{red} G^h[b,t,j]}h[b,t\!-\!1,j] + {\color{red} (1-G^h[b,t,j])}R[b,t,j]
+\end{eqnarray*}
+    }
+    
+
+\bigskip
+{\bf Problem 4. (25 pts)} The self-attention in the transformer is computed by the following equations.
+
+\begin{eqnarray*}
+\mathrm{Query}_{\ell+1}[k,t,i] & = & W^Q_{\ell+1}[k,i,J]L_\ell[t,J] \\
+\\
+\mathrm{Key}_{\ell+1}[k,t,i] & = &  W^K_{\ell+1}[k,i,J]L_\ell[t,J] \\
+\\
+\alpha_{\ell+1}[k,t_1,t_2] & = & \softmax_{t_2}\; \left[\frac{1}{\sqrt{I}}\;\mathrm{Query}_{\ell+1}[k,t_1,I]\mathrm{Key}_{\ell+1}[k,t_2,I]\right]
+\end{eqnarray*}
+
+Notice that here the shape of $W^Q$ and $W^K$ are both $[K,I,J]$.  We typically have $I < J$ which makes the inner product in the last line an inner product of lower dimensional vectors.
+
+\medskip
+{\bf(a) 20 pts} Give an equation computing a tensor $\tilde{W}^Q[K,J,J]$ computed from $W^Q$ and $W^K$ such that the attention $\alpha(k,t_1,t_2)$ can be written as
+$$\alpha_{\ell+1}(k,t_1,t_2) = \softmax_{t_2}\;\left[L_\ell[t_1,J_1]\tilde{W}^Q[k,J_1,J_2]L_\ell[t_2,J_2]\right]$$
+For a fixed $k$ we have that $W^Q[k,I,J]$ and $W^K[k,I,J]$ are matrices.  We want a matrix $\tilde{W}^Q[k,J,J]$ such that the attention can be written in matrix notation as
+$h_1^\top \tilde{W}^Q h_2$ where $h_1$ and $h_2$ are vectors and $\tilde{W}^Q$ is a matrix.
+You need write this matrix $\tilde{W}^Q$ in terms of the matrices for $W^Q$ and $W^K$.  But write your final answer in Einstein notation with $k$ as the first index.
+
+\solution{
+  This is easier to do in vector-matrix notation for a fixed k.  But it can also be done entirely in Einstein notation:
+  \begin{eqnarray*}
+    & = & \softmax_{t_2} \left[\frac{1}{\sqrt{I}}\;(L_\ell(t_1,J_1)W^Q[k,I,J_1])\;\;(W^K[k,I,J_2]L_\ell(t_1,J_2))\right] \\
+    & = & \softmax_{t_2} \left[\frac{1}{\sqrt{I}}\;\sum_{j_1,j_2,i} L_\ell(t_1,j_1)\;W^Q[k,i,j_1]\;W^K[k,i,j_2]\;L_\ell(t_1,j_2)\right] \\
+    & = & \softmax_{t_2} \left[\sum_{j_1,j_2} L_\ell(t_1,j_1) \; \left(\frac{1}{\sqrt{I}}\; \sum_i \;W^Q[k,i,j_1])\;\;(W^K[k,i,j_2])\right) \;L_\ell(t_1,j_2)\right] \\
+    & = & \softmax_{t_2} \left[\sum_{j_1,j_2} L_\ell(t_1,j_1) \; \tilde{W}^Q[k,j_1,j_2] \;L_\ell(t_1,j_2)\right] \\
+        & = & \softmax_{t_2} \left[L_\ell(t_1,J_1) \; \tilde{W}^Q[k,J_1,J_2] \;L_\ell(t_1,J_2)\right] \\
+    \\
+    \tilde{W}^Q[k,j_1,j_2] & = & \frac{1}{\sqrt{I}}\;W^Q[k,I,j_1]W^k[k,I,j_2]
+    \end{eqnarray*}
+}
+
+\medskip
+{\bf (b) 5pts} Part (a) shows that we can replace the key and query matrix with a single query matrix without any loss of expressive power.  If we eliminate the key matrix in this way
+what is the resulting number of query matrix parameters for a given layer and how does this compare to the number of key-query matrix parameters for a given layer in the original transformer version.
+
+\solution{
+  The original version uses $2(I \times J)$ key-query matrix parameters for each head.  If we use only the single query matrix we use $J^2$ parameters for each head.  These are the same for $I = J/2$.
+}
+
+
+
+
 
 \end{document}

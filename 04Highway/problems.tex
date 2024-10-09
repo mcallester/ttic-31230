@@ -13,6 +13,111 @@
 \centerline{\bf Problems For Trainability.}
 
 \bigskip
+
+{\bf Problem 2. (25 pts)}  Consider a regression problem where we want to predict a scalar value $y$ from a vector $x$.
+Consider the L-layer perceptron for this problem defined by the following equations
+which compute hidden layer vectors $h_1[I], \ldots, h_L[I]$ and predictions $\hat{y}_1, \ldots, \hat{y}_L$ where
+the prediction $\hat{y}_\ell$ is done with a linear regression on the hidden vector $h_\ell[I]$.
+
+\begin{eqnarray*}
+  h_0[i] & = & x[i] \\
+  & \vdots & \\
+  h_{\ell+1}[i] & = & \sigma(W^{h,h}_{\ell+1}[i,I]h_\ell[I] - B^{h,h}_{\ell+1}[i]) \\
+  \hat{y}_{\ell +1} & = & W^{h,p}_{\ell+1}[I]h_{\ell+1}[I]- B^{h,y}_{\ell+1} \\
+  & \vdots & \\
+  \mathrm{Loss} & = & \sum_{\ell = 1}^L (y - \hat{y}_\ell)^2
+\end{eqnarray*}
+
+Each term $(y-\hat{y}_\ell)^2$ is called a ``loss head'' and defines a loss on each prediction $\hat{y}_{\ell}$.
+Note, however, that there is only one scalar loss minimized by SGD which is the sum of the losses of each loss head.
+
+\medskip
+{\bf (a) 7 pts} Explain why these multiple loss terms might improve the ability of SGD to find a useful $L$-layer MLP regrssion $\hat{y}_L$ when $L$ is large.
+
+\solution{
+  SGD on deep networks with the loss term only occuring at the final layer is not generally effective because the lower layers
+  never get meaninful gradients.  Placing loss functions near the lower layers will cause the lower hidden layers to have meaningful
+  gradients and produce informative features.
+}
+
+\medskip
+{\bf (b) 7 pts} As a function of $L$ (ignoring the dimension size $I$) what is the order of run time for the backpropagation procedure.
+Explain your answer.
+
+\solution{It is $O(L)$ --- linear in $L$.  Backpropagation loops over the assignments of the program and takes time proportional to the size of the program.
+  Back-propagation over the final sum of losses produces a gradient for each prediction $\hat{y}_\ell$ which can be used as we back-propagate over the
+  earlier assignments.
+}
+
+\medskip
+{\bf (c) 11 pts} Rewrite the above MLP equations to use residual connections rather than multiple heads.  There are multiple correct solutions differing in minor details.  Pick one that seems
+good to you.
+
+\solution{
+\begin{eqnarray*}
+  h_0[i] & = & x[i] \\
+  & \vdots & \\
+  \tilde{h}_{\ell+1}[i] & = & \sigma(W^{h,h}_{\ell+1}[i,I]h_\ell[I] - B^{h,h}_{\ell+1}[i]) \\
+  h_{\ell+1}[i] & = & \tilde{h}_{\ell+1}[i] + h_\ell[i] \\
+  & \vdots & \\
+  \hat{y} & = & W^{h,y}[I]h_L[I]- B^{h,y} \\
+  \mathrm{Loss} & = & (y - \hat{y})^2
+\end{eqnarray*}
+}
+
+\medskip
+
+{\bf Problem 2. (25 pts)}  Consider a regression problem where we want to predict a scalar value $y$ from a vector $x$.
+Consider the L-layer perceptron for this problem defined by the following equations
+which compute hidden layer vectors $h_1[I], \ldots, h_L[I]$ and predictions $\hat{y}_1, \ldots, \hat{y}_L$ where
+the prediction $\hat{y}_\ell$ is done with a linear regression on the hidden vector $h_\ell[I]$.
+
+\begin{eqnarray*}
+  h_0[i] & = & x[i] \\
+  & \vdots & \\
+  h_{\ell+1}[i] & = & \sigma(W^{h,h}_{\ell+1}[i,I]h_\ell[I] - B^{h,h}_{\ell+1}[i]) \\
+  \hat{y}_{\ell +1} & = & W^{h,p}_{\ell+1}[I]h_{\ell+1}[I]- B^{h,y}_{\ell+1} \\
+  & \vdots & \\
+  \mathrm{Loss} & = & \sum_{\ell = 1}^L (y - \hat{y}_\ell)^2
+\end{eqnarray*}
+
+Each term $(y-\hat{y}_\ell)^2$ is called a ``loss head'' and defines a loss on each prediction $\hat{y}_{\ell}$.
+Note, however, that there is only one scalar loss minimized by SGD which is the sum of the losses of each loss head.
+
+\medskip
+{\bf (a) 7 pts} Explain why these multiple loss terms might improve the ability of SGD to find a useful $L$-layer MLP regrssion $\hat{y}_L$ when $L$ is large.
+
+\solution{
+  SGD on deep networks with the loss term only occuring at the final layer is not generally effective because the lower layers
+  never get meaninful gradients.  Placing loss functions near the lower layers will cause the lower hidden layers to have meaningful
+  gradients and produce informative features.
+}
+
+\medskip
+{\bf (b) 7 pts} As a function of $L$ (ignoring the dimension size $I$) what is the order of run time for the backpropagation procedure.
+Explain your answer.
+
+\solution{It is $O(L)$ --- linear in $L$.  Backpropagation loops over the assignments of the program and takes time proportional to the size of the program.
+  Back-propagation over the final sum of losses produces a gradient for each prediction $\hat{y}_\ell$ which can be used as we back-propagate over the
+  earlier assignments.
+}
+
+\medskip
+{\bf (c) 11 pts} Rewrite the above MLP equations to use residual connections rather than multiple heads.  There are multiple correct solutions differing in minor details.  Pick one that seems
+good to you.
+
+\solution{
+\begin{eqnarray*}
+  h_0[i] & = & x[i] \\
+  & \vdots & \\
+  \tilde{h}_{\ell+1}[i] & = & \sigma(W^{h,h}_{\ell+1}[i,I]h_\ell[I] - B^{h,h}_{\ell+1}[i]) \\
+  h_{\ell+1}[i] & = & \tilde{h}_{\ell+1}[i] + h_\ell[i] \\
+  & \vdots & \\
+  \hat{y} & = & W^{h,y}[I]h_L[I]- B^{h,y} \\
+  \mathrm{Loss} & = & (y - \hat{y})^2
+\end{eqnarray*}
+}
+\medsip
 {\bf Problem 1.}  This problem is on initialization.  Consider a single unit defined by
 $$y = f(W[I]x[I] - B) = f\left(\left(\sum_i\;W[i]x[i]\right) - B\right)$$
 where $B$ is initialized to zero and $f$ is an activation function such as a sigmoid or ReLU.

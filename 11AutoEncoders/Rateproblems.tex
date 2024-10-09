@@ -388,5 +388,56 @@ of the vectors of the form $x_\Psi(y)$ satisfying $\mathrm{nearest}_E(x_\Psi(y))
 }
 
 
+\bigskip
+{\bf Problem 3. 25 pts} This problem is on VAE language modeling (in contrast to GAN language modeling).  Consider a VAE where the signal $s$ is a word string $w_1,\ldots,w_T$ (as in problem 2).  In the VAE 
+we can have a continuous latent variable $z$. The VAE optimization problem is then
+\begin{equation}
+    \Phi^*,\Theta^*,\Psi^* = \argmin_{\Phi,\Theta,\Psi}\;E_{s \sim \pop,\;z \sim p_\Psi(z|s)}\;\ln\frac{p_\Psi(z|s)}{p_\Phi(z)} \;-\; \ln P_\Theta(s|z)
+    \label{VAE}
+\end{equation}
+Here the first ``rate term'' is defined on densities and the final ``distortion term'' is defined for a discrete sentence $s$.
+To explicitly handle the reparameterization trick will take the encoder density to be a Gaussian.
+For a Gaussian encoder we compute a mean vector $\hat{z}_\Psi(s)$ and a variance $\sigma^2_\Psi(s)[i]$ for each component
+$z[i]$ of $z$.  The Gaussian density for the encoder is then.
+$$ p_\Psi(z[i]|s) \propto \exp(-(z[i]-\hat{z}_\Psi(s)[i])^2/(2\sigma^2_\Psi(s)[i])$$
+
+{\bf (a)} For a noise value $\epsilon \in \reals$ drawn from ${\cal N}(0,1)$,
+and for given values $\hat{z} \in \reals$ and $\sigma^2 \in \reals$, define a deterministic function $z(\hat{z},\sigma^2,\epsilon)$ such that over the draw of the noise
+$\epsilon$ we have that $z(\hat{z},\sigma^2,\epsilon)$ has the density
+$$p(z) \propto \exp(-(z-\hat{z})^2/(2\sigma^2)).$$
+
+\solution{$z(\hat{z},\sigma^2,\epsilon) = \hat{z} + \sigma\epsilon$}
+
+{\bf (b)} Applying your solution to part (a) to the individual components of $z$ equation~(\ref{VAE}) can be rewritten as
+\begin{equation}
+    \Phi^*,\Theta^*,\Psi^* = \argmin_{\Phi,\Theta,\Psi}\;E_{s \sim \pop,\;\epsilon \sim {\cal N}(0,I)}\;\ln\frac{p_\Psi(z|s)}{p_\Phi(z)} \;-\; \ln P_\Theta(s|z)
+    \label{VAE2}
+\end{equation}
+Are there any problems with doing SGD on the optimization defined by (\ref{VAE2}) due to the use of continuous $z$ and discrete $s$?  Explain your answer.
+
+\solution{There are no problems here.
+  Since $P(s|z)$ is a computable and $z$ is continuous we can compute $z.\grad$ which can then passed back to the encoder $\Psi$
+  through the computation of $z(\hat{z}_\Psi(y),\Sigma_\Psi(y),\epsilon)$. We get a clear advantage of VAEs over GANs for $s$ discrete.}
+
+{\bf (c)} It can be shown that if we hold the encoder $\Psi$ fixed then the optimal value of the prior density $p_\Phi(z)$ is just the marginal on $z$ of the distribution defined
+by sampling $s \sim \pop$ and $z \sim p_\Psi(z|s)$.  We can write this marginal as $p_{\pop,\Psi}(z)$.  Now consider the rate term when $p_\Phi(z) = p_{\pop,\Psi}(z)$.
+$$\mathrm{rate} = E_{s \sim \pop,\;z \sim P_\Psi(z|s)}\;\ln\frac{p_\Psi(z|s)}{p_{\pop,\Psi}(z)}$$
+Write this rate term as a differential mutual information.
+
+\solution{
+  $$\mathrm{rate} = I_{\pop,\Psi}(s,z)$$
+  This has a channel capacity interpretation.  It is the information capacity (information rate) of the communication channel that takes input $y$ to output $z$.
+  This is typically a nice finite number of bits (or nats) even for continuous densities.  Adding noise to $\hat{z}_\Psi(y)$ intuitively limits its precision
+  and limits the information that $z$ carries about $s$.
+}
+
+\bigskip
+{\bf Problem 4. 25 pts} This problem is on VAEs when both $z$ and $s$ are discrete.
+Is the discreteness of $z$ an issue in this case?  Explain your answer.
+
+\solution{Yes, the discreteness of $z$ is an issue. This is true independent of the nature of $s$. A differential change in parameters will not change a discrete $z$ and $z.\grad = 0$.
+  So the standard back-propagation into the encoder fails.  VQ-VAE back-propagates into the encoder using a K-means loss term together with straight-through gradients.
+  Discreteness of $s$ is not a problem.}
+
 
 \end{document}

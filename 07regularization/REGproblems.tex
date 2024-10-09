@@ -35,4 +35,24 @@ $$g = E_{\tuple{x,y}\sim \mathrm{Train}} \nabla \Phi {\cal L}(\Phi,x,y).$$
 }
 
 
+\bigskip
+{\bf Problem 4. (25 pts)} This problem is on PAC-Bayes bounds for classifiers built on CLIP using {\bf prompt engineering}.  CLIP is a joint probability model on images
+and English descriptions (image captions).  Clip is trained on a large corpus of captioned images drawn from the web and defines a probability distribution over captions $c$ given an image $x$.
+We can use CLIP for image classification (as in ImageNet) using ``prompt engineering''.  A ``prompt'' is caption specific to an image label.  For example the caption ``this is an image of a cat'' for the label ``cat'' or ``this is an image of a dog''
+for the label ``dog''. For each image class $y$ we have a prompt (hypothetical caption) $c(y)$.
+We can then label an image $x$ with class $\hat{y}$ using the rule
+$$\hat{y}(x) = \argmax_y \;P_{\mathrm{CLIP}}(c(y)|x)$$
+Suppose that we search (somehow) over the captions $c(y_1),\ldots,c(y_n)$ assigned to the $n$
+image classes $y_1,\ldots,y_n$ to find a set of captions minimizing the error rate (0-1 loss) on a set of $N$ labeled training images.  Let $\hat{\cal L}$ be the error rate on the training data.
+Also suppose that CLIP assigns a prior probability $P_{\mathrm{CLIP}}(c)$ to any caption $c$ independent of any image.  Consider the PAC-Bayes bound on generalization loss for predictive rule $h$
+where the bound is guaranteed to hold for all $h$ with probability at least $1-\delta$.
+$${\cal L}(h) \leq \frac{10}{9}\left(\hat{{\cal L}}(h) + \frac{5\lmax}{N_\mathrm{Train}}\left(- \ln P(h) +\ln\frac{1}{\delta}\right)\right)$$
+Apply this rule to the CLIP image classifier using CLIP's ``prior probability'' on the caption space.
+
+\solution{
+  $${\cal L}(h) \leq \frac{10}{9}\left(\hat{{\cal L}}(h) + \frac{5}{N}\left(\left(\sum_y - \ln P_{\mathrm{CLIP}}(c(y))\right) +\ln\frac{1}{\delta}\right)\right)$$
+
+  I am not proposing that searching over all captions is a good idea.  Some narrower prior is called for.
+}
+
 \end{document}
