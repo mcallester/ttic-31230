@@ -203,7 +203,7 @@ However, the attention softmax of the transformer (\ref{eqgenprod}) does not use
 \medskip
     {\bf (a)} Explain why we cannot replace (\ref{eqgenprod}) with a naive inner product of $L[\ell,t_1,J]$ and $L[\ell,t_2,J]$ as in (\ref{eqproduct}).
 
-    \solution{The attention $\alpha[\ell,k,t_1,t_2]$ need to depend on the particular head $k$.  Different heads compute different information as indicated in problem 2.}
+    \solution{The attention $\alpha[\ell,k,t_1,t_2]$ need to depend on the particular head $k$.  Different heads compute different information.}
     
 \medskip
 {\bf (b)} Rewrite the transformer self-attention equation (\ref{eqgenprod}) in the form of (\ref{eqgenprod}) where
@@ -353,43 +353,6 @@ what is the resulting number of query matrix parameters for a given layer and ho
 
 \bigskip
 
-{\bf Problem 3. (25 pts)} RNNs
-
-Below are the equations defining the update cell of the UGRNN which takes as data inputs $h[B,t-1,I]$ and $x[B,t,K]$ and produces
-$h[B,t,J]$.
-
-\begin{eqnarray*}
-R[b,t,j] & = & \mathrm{tanh}\left(W^{h,R}[j,I]{\color{red} h[b,t\!-\!1,I]} + W^{x,R}[j,K]{\color{red} x[b,t,K]} - B^R[j]\right) \\
-\\
-G^h[b,t,j] & = & \sigma\left(W^{h,G}[j,I]{\color{red} h[b,t\!-\!1,I]} + W^{x,G}[j,K]{\color{red} x[b,t,K]} - B^G[j]\right) \\
-\\
-h[b,t,j] & = & {\color{red} G^h[b,t,j]}h[b,t\!-\!1,j] + {\color{red} (1-G^h[b,t,j])}R[b,t,j]
-\end{eqnarray*}
-
-Here I have written the gate as $G^h$ to emphasize that it is a gate used to define a convex combination of the $h_{t-1}$ and $x_t$ inputs to $h_t$. Modify these equations to use a second gate $G^R$
-which gates inputs to $R$
-so that the input to the activation function (threshold function) producing $R[b,t,j]$ is a convex combination of
-$$W^{h,R}[j,I] h[b,t\!-\!1,I] - B^{h,R}[j]$$
-and
-$$W^{x,R}[j,K] x[b,t,K] - B^{x,R}[j]$$
-where the weighting in the convex combination is given by your new gate $G^R[b,t,j]$.
-This gated RNN is similar to, but different from, a GRU which also has two gates.
-
-\solution{
-  \begin{eqnarray*}
-    G^R[b,t,j] & = & \sigma\left(W^{h,GR}[j,I]{\color{red} h[b,t\!-\!1,I]} + W^{x,GR}[j,K]{\color{red} x[b,t,K]} - B^{GR}R[j]\right) \\
-    \\
-    R[b,t,j] & = & \mathrm{tanh}\left(\begin{array}{l}G^R[b,t,j]\;(W^{h,R}[j,I]{\color{red} h[b,t\!-\!1,I]} - B^{h,R}[j]) \\ \\ +\;\; (1-G^R[b,t,j])\;(W^{x,R}[j,K]{\color{red} x[b,t,K]} - B^{x,R}[j])\end{array}\right) \\
-    \\
-      \\
-      G^h[b,t,j] & = & \sigma\left(W^{h,Gh}[j,I]{\color{red} h[b,t\!-\!1,I]} + W^{x,Gh}[j,K]{\color{red} x[b,t,K]} - B^{Gh}[j]\right) \\
-      \\
-      h[b,t,j] & = & {\color{red} G^h[b,t,j]}h[b,t\!-\!1,j] + {\color{red} (1-G^h[b,t,j])}R[b,t,j]
-\end{eqnarray*}
-    }
-    
-
-\bigskip
 {\bf Problem 4. (25 pts)} The self-attention in the transformer is computed by the following equations.
 
 \begin{eqnarray*}

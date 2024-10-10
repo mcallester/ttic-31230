@@ -188,9 +188,9 @@ L_{\color{red} \ell+2}[B,X,Y,N] & = & L_{\color{red}\ell}[B,X,Y,N] + \tilde{L}_{
 \end{eqnarray*}
 
 
-\slideplain{Handling Spacial Reduction}
+\slide{Handling Spacial Reduction}
 
-Spacial reduction and neuron expansion is done without convolution.
+When needed, the skip connection reduces spactial dimension and increases neuron dimension without convolution.
 
 \vfill
 
@@ -204,7 +204,14 @@ Residual connections are still placed around all convolutions.
 \centerline{\includegraphics[height= 5.5in]{../images/ResnetStack} {\large [Kaiming He]}}
 
 
-\slideplain{Deeper Versions use Bottleneck Residual Paths}
+\slideplain{A General Residual Connection}
+
+$${\color{red} y = A(x) + R(x)}$$
+
+\vfill
+We typically have $A(x)=x$ but $A(x)$ is needed for shape adjustment when $R(x)$ has a different shape from $x$.
+
+\slide{Deeper Versions use Bottleneck Residual Paths}
 
 We reduce the number of neurons to ${\color{red} N_{\mathrm{bottle}} < N}$ before doing the convolution.
 
@@ -219,13 +226,6 @@ R[B,X,Y,N] & = & \mathrm{Conv}(K^R[N,1,1,N_{\mathrm{bottle}}],V[B,X,Y,N]) \\
 L_{ \ell+1} & = & L_\ell + R
 \end{eqnarray*}
 }
-
-\slide{A General Residual Connection}
-
-$${\color{red} y = x + R(x)}$$
-
-\vfill
-where $R(x)$ has the same shape as $x$.
 
 \slide{Improving Trainability}
   \centerline{ReLu}

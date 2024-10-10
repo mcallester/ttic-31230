@@ -14,7 +14,37 @@
 
 \bigskip
 
-{\bf Problem 2. (25 pts)}  Consider a regression problem where we want to predict a scalar value $y$ from a vector $x$.
+\medskip
+{\bf Problem 1.} Consider a computation function $f$ that takes a tensor (such as a layer
+in a CNN) and returns a tensor of a potentially different shape (such as an image
+tensor of reduced dimension).  We can write a residual network for this case as 
+
+\begin{eqnarray*}
+  L_1 & = & A_1(L_0) + f_1(L_0) \\
+  \\
+  L_2 & = & A_2(L_1) + f_2(L_1) \\
+        & \vdots & \\
+  L_N & = & A_N(L_{N-1}) + f_N(L_{N-1})
+\end{eqnarray*}
+
+
+Here the function $A_n$ adjust the shape of the previous layer to match the shape of $f_n(L_{n-1})$.
+Suppose that in a CNN we have that $f_n(L_{n+1})$ has the same spatial dimension but fewer features than $L_{n-1}$. 
+
+\medskip
+{\bf a.} Write a tensor expression for an adjustment function $A_n$ in this case where the dimension is reduced by multiplying the larger dimension feature vector by a matrix.
+
+\medskip
+{\bf b.} Write a tensor expression for reducing the number of features simply by selecting some features and ignoring others.
+
+\medskip
+{\bf c.} A standard motivation for residual connections is that there is a direct gradiant path from the loss to the first layer of the network.  Which of the adjustment methods of parts I and II preserve this property?
+
+\medskip
+{\bf d.} Does the shape adjustment given on slide 15 of the notes preserve a direct path from the loss to the first layer?
+
+\medskip
+{\bf Problem 2.}  Consider a regression problem where we want to predict a scalar value $y$ from a vector $x$.
 Consider the L-layer perceptron for this problem defined by the following equations
 which compute hidden layer vectors $h_1[I], \ldots, h_L[I]$ and predictions $\hat{y}_1, \ldots, \hat{y}_L$ where
 the prediction $\hat{y}_\ell$ is done with a linear regression on the hidden vector $h_\ell[I]$.
@@ -32,7 +62,7 @@ Each term $(y-\hat{y}_\ell)^2$ is called a ``loss head'' and defines a loss on e
 Note, however, that there is only one scalar loss minimized by SGD which is the sum of the losses of each loss head.
 
 \medskip
-{\bf (a) 7 pts} Explain why these multiple loss terms might improve the ability of SGD to find a useful $L$-layer MLP regrssion $\hat{y}_L$ when $L$ is large.
+{\bf (a)} Explain why these multiple loss terms might improve the ability of SGD to find a useful $L$-layer MLP regrssion $\hat{y}_L$ when $L$ is large.
 
 \solution{
   SGD on deep networks with the loss term only occuring at the final layer is not generally effective because the lower layers
@@ -41,7 +71,7 @@ Note, however, that there is only one scalar loss minimized by SGD which is the 
 }
 
 \medskip
-{\bf (b) 7 pts} As a function of $L$ (ignoring the dimension size $I$) what is the order of run time for the backpropagation procedure.
+{\bf (b)} As a function of $L$ (ignoring the dimension size $I$) what is the order of run time for the backpropagation procedure.
 Explain your answer.
 
 \solution{It is $O(L)$ --- linear in $L$.  Backpropagation loops over the assignments of the program and takes time proportional to the size of the program.
@@ -50,7 +80,7 @@ Explain your answer.
 }
 
 \medskip
-{\bf (c) 11 pts} Rewrite the above MLP equations to use residual connections rather than multiple heads.  There are multiple correct solutions differing in minor details.  Pick one that seems
+{\bf (c)} Rewrite the above MLP equations to use residual connections rather than multiple heads.  There are multiple correct solutions differing in minor details.  Pick one that seems
 good to you.
 
 \solution{
@@ -66,59 +96,7 @@ good to you.
 }
 
 \medskip
-
-{\bf Problem 2. (25 pts)}  Consider a regression problem where we want to predict a scalar value $y$ from a vector $x$.
-Consider the L-layer perceptron for this problem defined by the following equations
-which compute hidden layer vectors $h_1[I], \ldots, h_L[I]$ and predictions $\hat{y}_1, \ldots, \hat{y}_L$ where
-the prediction $\hat{y}_\ell$ is done with a linear regression on the hidden vector $h_\ell[I]$.
-
-\begin{eqnarray*}
-  h_0[i] & = & x[i] \\
-  & \vdots & \\
-  h_{\ell+1}[i] & = & \sigma(W^{h,h}_{\ell+1}[i,I]h_\ell[I] - B^{h,h}_{\ell+1}[i]) \\
-  \hat{y}_{\ell +1} & = & W^{h,p}_{\ell+1}[I]h_{\ell+1}[I]- B^{h,y}_{\ell+1} \\
-  & \vdots & \\
-  \mathrm{Loss} & = & \sum_{\ell = 1}^L (y - \hat{y}_\ell)^2
-\end{eqnarray*}
-
-Each term $(y-\hat{y}_\ell)^2$ is called a ``loss head'' and defines a loss on each prediction $\hat{y}_{\ell}$.
-Note, however, that there is only one scalar loss minimized by SGD which is the sum of the losses of each loss head.
-
-\medskip
-{\bf (a) 7 pts} Explain why these multiple loss terms might improve the ability of SGD to find a useful $L$-layer MLP regrssion $\hat{y}_L$ when $L$ is large.
-
-\solution{
-  SGD on deep networks with the loss term only occuring at the final layer is not generally effective because the lower layers
-  never get meaninful gradients.  Placing loss functions near the lower layers will cause the lower hidden layers to have meaningful
-  gradients and produce informative features.
-}
-
-\medskip
-{\bf (b) 7 pts} As a function of $L$ (ignoring the dimension size $I$) what is the order of run time for the backpropagation procedure.
-Explain your answer.
-
-\solution{It is $O(L)$ --- linear in $L$.  Backpropagation loops over the assignments of the program and takes time proportional to the size of the program.
-  Back-propagation over the final sum of losses produces a gradient for each prediction $\hat{y}_\ell$ which can be used as we back-propagate over the
-  earlier assignments.
-}
-
-\medskip
-{\bf (c) 11 pts} Rewrite the above MLP equations to use residual connections rather than multiple heads.  There are multiple correct solutions differing in minor details.  Pick one that seems
-good to you.
-
-\solution{
-\begin{eqnarray*}
-  h_0[i] & = & x[i] \\
-  & \vdots & \\
-  \tilde{h}_{\ell+1}[i] & = & \sigma(W^{h,h}_{\ell+1}[i,I]h_\ell[I] - B^{h,h}_{\ell+1}[i]) \\
-  h_{\ell+1}[i] & = & \tilde{h}_{\ell+1}[i] + h_\ell[i] \\
-  & \vdots & \\
-  \hat{y} & = & W^{h,y}[I]h_L[I]- B^{h,y} \\
-  \mathrm{Loss} & = & (y - \hat{y})^2
-\end{eqnarray*}
-}
-\medsip
-{\bf Problem 1.}  This problem is on initialization.  Consider a single unit defined by
+{\bf Problem 3.}  This problem is on initialization.  Consider a single unit defined by
 $$y = f(W[I]x[I] - B) = f\left(\left(\sum_i\;W[i]x[i]\right) - B\right)$$
 where $B$ is initialized to zero and $f$ is an activation function such as a sigmoid or ReLU.
 The vector $x$ is a random variable determined by a random draw of a training example.
@@ -172,61 +150,7 @@ is the variance of $u$ larger than, equal to, or smaller than the variance of $y
 }
 
 \bigskip
-{\bf Problem 2.}  Consider a regression problem where we want to predict a scalar value $y$ from a vector $x$.
-Consider the L-layer perceptron for this problem defined by the following equations
-which compute hidden layer vectors $h_1[I], \ldots, h_L[I]$ and predictions $\hat{y}_1, \ldots, \hat{y}_L$ where
-the prediction $\hat{y}_\ell$ is done with a linear regression on the hidden vector $h_\ell[I]$.
-
-\begin{eqnarray*}
-  h_0[i] & = & x[i] \\
-  & \vdots & \\
-  h_{\ell+1}[i] & = & \sigma(W^{h,h}_{\ell+1}[i,I]h_\ell[I] - B^{h,h}_{\ell+1}[i]) \\
-  \hat{y}_{\ell +1} & = & W^{h,p}_{\ell+1}[I]h_{\ell+1}[I]- B^{h,y}_{\ell+1} \\
-  & \vdots & \\
-  \mathrm{Loss} & = & \sum_{\ell = 1}^L (y - \hat{y}_\ell)^2
-\end{eqnarray*}
-
-Each term $(y-\hat{y}_\ell)^2$ is called a ``loss head'' and defines a loss on each prediction $\hat{y}_{\ell}$.
-Note, however, that there is only one scalar loss minimized by SGD which is the sum of the losses of each loss head.
-
-\medskip
-{\bf (a)} Explain why these multiple loss terms might improve the ability of SGD to find a useful $L$-layer MLP regrssion $\hat{y}_L$ when $L$ is large.
-
-\solution{
-  SGD on deep networks with the loss term only occuring at the final layer is not generally effective because the lower layers
-  never get meaninful gradients.  Placing loss functions near the lower layers will cause the lower hidden layers to have meaningful
-  gradients and produce informative features.
-}
-
-\medskip
-{\bf (b)} As a function of $L$ (ignoring the dimension size $I$) what is the order of run time for the backpropagation procedure.
-Explain your answer.
-
-\solution{It is $O(L)$ --- linear in $L$.  Backpropagation loops over the assignments of the program and takes time proportional to the size of the program.
-  Back-propagation over the final sum of losses produces a gradient for each prediction $\hat{y}_\ell$ which can be used as we back-propagate over the
-  earlier assignments.
-}
-
-\medskip
-{\bf (c)} Rewrite the above MLP equations to use residual connections rather than multiple heads.  There are multiple correct solutions differing in minor details.  Pick one that seems
-good to you.
-
-\solution{
-\begin{eqnarray*}
-  h_0[i] & = & x[i] \\
-  & \vdots & \\
-  \tilde{h}_{\ell+1}[i] & = & \sigma(W^{h,h}_{\ell+1}[i,I]h_\ell[I] - B^{h,h}_{\ell+1}[i]) \\
-  h_{\ell+1}[i] & = & \tilde{h}_{\ell+1}[i] + h_\ell[i] \\
-  & \vdots & \\
-  \hat{y} & = & W^{h,y}[I]h_L[I]- B^{h,y} \\
-  \mathrm{Loss} & = & (y - \hat{y})^2
-\end{eqnarray*}
-}
-
-
-
-\bigskip
-{\bf Problem 3.} Consider a bottleneck multi-layer perceptron (MLP) with residual connections
+{\bf Problem 4.} Consider a bottleneck multi-layer perceptron (MLP) with residual connections
 defined as follows where $N_{\mathrm{bottle}}$ is smaller than $\Nin = \Nout$.
 
 \begin{eqnarray*}
@@ -267,111 +191,6 @@ the lower layers of the residual stack.
   reduced by $\gamma^{L-2}$.  This could harm the learning along the direct connection between the
   loss and the first layer of the network.}
 
-\ignore{
-\bigskip
-{\bf Problem 4.} This problem is on the initialization of ResNet filters.
-Consider the following residual skip connection where $R_{\ell+1}$ is computed with an $N \times N$ filter.
-
-\begin{eqnarray*}
-  \mathrm{for}\;b,x,y,j\Delta x,\Delta y,j' \\
-  \;\;\;  R_{\ell+1}[b,x,y,j] & \pluseq & W_{\ell+1}[\Delta x, \Delta y, j',j]\; L_{\ell}[b,x + \Delta x, y + \Delta y, j'] \\
-  \\
-  \mathrm{for}\;b,x,y,j \;\;\;\;\;\;\;\;\;\;\;\\
-    \;\;\;  R_{\ell+1}[b,x,y,j] & \minuseq & B_{\ell+1}[j] \\
-\\
-\mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\;\;\;\;\;\\
-L_{\ell+1}[b,x,y,j] & = & L_{\ell}[b,x,y,j] + R_{\ell+1}[b,x,y,j]
-\end{eqnarray*}
-
-
-Here we have omitted an activation function that would be present in practice.  This omission allows an analysis that seems to provide insight
-into the more complex case with activations.
-
-Assume that $L_0[b,x,y,j]$
-is computed from the input in some unspecified way such that $L_0[b,x,y,j]$ has unit variance.
-Assume that the values $L_\ell[b,x,y,j]$  and $R_{\ell+1}[b,x,y,j]$ are all independent.
-Suppose that each weight $W_\ell[\Delta x,\Delta y,j,j']$ is drawn independently at random
-from a distribution with zero mean and variance $\sigma_W$. Recall that the variance $\sigma^2$ of
-a sum of independent random is the sum of the variances and the variance of a product of independent random variables is the product of the variances.
-
-\medskip
-(a) Give an expression for
-the variance $\sigma^2_\ell$ of $L_{\ell+1}[b,x,y,j]$ as a function of $\ell$, the filter dimension $D = \Delta X = \Delta Y$,
-the feature dimension $J$, and the weight variance $\sigma_W^2$.
-
-\solution{
-Assuming everything is independent we have
-
-\begin{eqnarray*}
-\sigma^2_{\ell+1} & = & \sigma^2_{\ell} + D^2J\sigma^2_w\sigma^2_{\ell} \\
-\\
-& = & \sigma^2_\ell(1 + D^2J\sigma^2_w)
-\end{eqnarray*}
-
-This gives
-$$\sigma^2_\ell = (1 + D^2J\sigma^2_w)^\ell$$
-} 
-
-\medskip
-(b) Using $(1+\epsilon)^N \approx e^{\epsilon N}$ solve for the value of $\sigma_W$ such that $\sigma^2_L = 2$.
-
-\solution{
-
-\begin{eqnarray*}
-\sigma^2_L & = & (1 + D^2J\sigma^2_w)^L \\
-\\
-& \approx & e^{LD^2J\sigma_W^2}
-\end{eqnarray*}
-
-setting
-$$e^{LD^2J\sigma_W^2} = 2$$
-gives
-$$\sigma_w \approx \sqrt{\frac{\ln 2}{LD^2J}}$$
-}
-
-\medskip
-(c) Assuming $L_L.\grad[b,x,y,j]$ has unit variance, and that all components of $L_\ell.\grad[b,x,y,j]$ and $R_\ell.\grad[b,x,y,j]$ are independent,
-give an expression for the variance
-$\sigma^2_{\ell,\mathrm{grad}}$ of the components of $L_\ell.\mathrm{grad}[b,x,y,j]$ as a function of $\ell$, $D$, $J$ and $\sigma_W$.
-
-\solution{
-The code we are concerned with is
-\begin{eqnarray*}
-  \mathrm{for}\;b,x,y,j\Delta x,\Delta y,j' \\
-  \;\;\;  R_{\ell+1}[b,x,y,j] & \pluseq & W_{\ell+1}[\Delta x, \Delta y, j',j]\; L_{\ell}[b,x + \Delta x, y + \Delta y, j'] \\
-  \\
-  \mathrm{for}\;b,x,y,j \;\;\;\;\;\;\;\;\;\;\;\\    \;\;\;  R_{\ell+1}[b,x,y,j] & \minuseq & B_{\ell+1}[j] \\
-  \\
-  \mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\;\;\;\;\;\\
-  L_{\ell+1}[b,x,y,j] & = & L_{\ell}[b,x,y,j] + R_{\ell+1}[b,x,y,j]
-\end{eqnarray*}
-
-The backpropagation program includes
-
-\begin{eqnarray*}
-  \mathrm{for}\;b,x,y,j\;\;\;\;\;\;\;\;\;\;\;\;\\
-  R_{\ell+1}.\grad [b,x,y,j] & = & L_{\ell+1}[b,x,y,j].\grad \\
-  L_{\ell}.\grad [b,x,y,j] & \pluseq & L_{\ell+1}[b,x,y,j].\grad \\
-  \\
-  \mathrm{for}\;b,x,y,j\Delta x,\Delta y,j'\;\;\;\;\;\;\;\;\;\;\; \\
-  \;\;\;  L_{\ell}.\grad[b,x + \Delta x, y + \Delta y, j'] & \pluseq & R_{\ell+1}.\grad[b,x,y,j] W_{\ell+1}[\Delta x, \Delta y, j',j]\;  \\
-  \\
-\end{eqnarray*}
-
-Each element of $L_\ell.\grad[b,x,y,j]$ has the same variance. Let $\sigma^2_\ell.\grad$ denote the variance of an element of $L_\ell.\grad[b,x,y,j]$.
-
-Note that $L_\ell.\grad[b,x,y,j]$ is a sum of $L_{\ell+1}.\grad[b,x,y,j]$ and $D^2J$ products of the form
-$R_{\ell+1}.\grad[b,x,y,j] W_{\ell+1}[\Delta x, \Delta y, j',j]$.  This gives
-
-$$\sigma_\ell^2.\grad = \sigma^2_{\ell+1}.\grad + D^2J\sigma^2_{\ell+1}.\grad\;\sigma^2_W = \sigma^2_{\ell+1}.\grad(1 + D^2J\sigma^2_W)$$
-
-and we get
-
-$$\sigma^2_{\ell,\mathrm{grad}} = \sigma^2_L.\grad(1 + D^2J\sigma^2_W)^{L-\ell}$$
-
-We have assumed that $\sigma^2_L.\grad$ is 1.
-}
-}
 
 \bigskip
 ~{\bf Problem 5. RNN run time.}  Consider an autoregressive RNN neural language model with $P_\Phi(w_{t+1}|w_1,\ldots,w_t)$ defined by
@@ -396,35 +215,5 @@ run on a sentence $w_1,\ldots,w_T$?  Explain your answer.
   sequence length even on parallel hardware.  The transformer, on the other hand, takes constant time in parallel independent of the length of the sequence.  This is
   a major advantage of the transformer.
 }
-
-\medskip
-{\bf Problem:}
-
-Consider a computation function $f$ that takes a tensor (such as a layer
-in a CNN) and returns a tensor of a potentially different shape (such as an image
-tensor of reduced dimension).  We can write a residual network for this case as 
-
-\begin{eqnarray*}
-  L_1 & = & A_1(L_0) + f_1(L_0) \\
-  \\
-  L_2 & = & A_2(L_1) + f_2(L_1) \\
-        & \vdots & \\
-  L_N & = & A_N(L_{N-1}) + f_N(L_{N-1})
-\end{eqnarray*}
-
-
-Here the function $A_n$ adjust the shape of the previous layer to match the shape of $f_n(L_{n-1})$
-
-The last slide in the lecture notes is misleading.  The above equations correspond to shape adjustments in Resnet.
-
-Suppose that in a CNN we have that $f_n(L_{n+1})$ has the same spatial dimension but fewer features than $L_{n-1}$. 
-
-Part I: Write a tensor expression for an adjustment function $A_n$ in this case where the dimension is reduced by multiplying the larger dimension feature vector by a matrix.
-
-Part II: Write a tensor expression for reducing the number of features simply by selecting some features and ignoring others.
-
-Part III: A standard motivation for residual connections is that there is a direct gradiant path from the loss to the first layer of the network.  Which of the adjustment methods of parts I and II preserve this property?
-
-Part IV: Does the shape adjustment given on slide 15 of the notes preserve a direct path from the loss to the first layer?
 
 \end{document}

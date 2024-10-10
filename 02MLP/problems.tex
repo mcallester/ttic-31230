@@ -25,30 +25,16 @@ for $w,x \in R^d$ with $\sigma(z) = \max(z,0)$ (the ReLU activation)
 and for ${\cal L}(y)$ an arbitrary function (a loss function).  Let $w_i$ denote the $i$th component of the weight vector $w$.
 Give an expression for $\frac{\partial \ell}{\partial w_i}$ as a function of $\frac{d{\cal L}(y)}{dy}$.
 
-\bigskip
-~{\bf Problem 2:} The KL-divergence between two discrete distributions is defined by
-$$KL(P,Q) = E_{x \sim P} \ln \frac{P(x)}{Q(x)}$$
-We will show later in the class that $KL(P,Q) \geq 0$ for any $P$ and $Q$.
-
-The Cross Entropy $H(P,Q)$ is defined by
-
-$$H(P,Q) = E_{x \sim P} - \ln Q(x)$$
-
-When $P$ is a population distribution and $Q$ is a model distribution this is the cross entropy loss.
-
-The entropy of a distribution is defined by
-$$H(P) = E{x \sim P}\;-\ln P(x)$$
-
-Show the following.
-
-$$H(P,Q) \geq H(P)$$
-
-$$H(P,P) = H(P)$$
-
-Explain why these facts are important when training a model to minimize cross entropy loss.
+\solution{
+  There are various correct ways of writing the answer.  The following corresponds to a backpropagation computation.
+  \begin{eqnarray*}
+    \frac{d\ell}{dy} & = & \frac{d{\cal L}(y)}{dy} \\
+    \frac{d\ell}{dw_i} & = & \frac{d\ell}{dy} \frac{dy}{dw_i} \;\;=\;\; \frac{d\ell}{dy}\; x_i\mathbf{1}[w_ix_i \geq 0]
+  \end{eqnarray*}
+  }
 
 \bigskip
-~{\bf Problem 3:  Backpropagation through softmax.} Consider the following softmax.
+~{\bf Problem 2:  Backpropagation through softmax.} Consider the following softmax.
 \begin{eqnarray*}
   Z[b] & = & \sum_j\;\exp(s[b,j]) \\
   p[b,j] & = & \exp(s[b,j])/Z[b]
@@ -93,7 +79,7 @@ Each individual $\pluseq$ operation inside the loops can be treated independentl
 
 
 \bigskip
-~{\bf Problem 4:  Optimizing Backpropagation through softmax.} Show that the addition to $s.\grad$ shown in problem 1 can be computed using the following more efficient updates.
+~{\bf Problem 3:  Optimizing Backpropagation through softmax.} Show that the addition to $s.\grad$ shown in problem 2 can be computed using the following more efficient updates.
 
 \medskip
 $\mathrm{for}\;b,j\;\;\;e[b] \; \minuseq \; p[b,j]p.\grad[b,j]$
@@ -127,7 +113,7 @@ between the abstraction level of the programming language and the efficiency of 
 
 
 \medskip
-~{\bf Problem 5. Backpropogation through batch normalization.}
+~{\bf Problem 4. Backpropogation through batch normalization.}
 Consider the following set of $\pluseq$ statements defining batch normalization
 where all computed tensors are initialized to zero.
 
@@ -165,7 +151,7 @@ The loops should be given in the order they are to be executed.
 
 
 \bigskip
-~{\bf Problem 6. Backpropagation through a UGRNN.}
+~{\bf Problem 5. Backpropagation through a UGRNN.}
 Equations defining a UGRNN are given below.
 
 \begin{eqnarray*}
@@ -210,7 +196,7 @@ parameter gradients are averaged over the batch and where the batch size is $B$.
 }
 
 \bigskip
-~{\bf Problem 7. Writing framework code.} Consider a function $c:R^d \times R^s \rightarrow R^s$, in other words a function that takes a
+~{\bf Problem 6. Writing framework code.} Consider a function $c:R^d \times R^s \rightarrow R^s$, in other words a function that takes a
 vector of dimension $d$ and a vector of dimension $s$ and yields a vector of dimension
 $s$.  Given a sequence of vectors $x_0$, $x_2$, $\ldots$, $x_T$ with $x_t \in R^d$ we can define a sequence of vectors $h_0$, $h_1$, $\ldots$, $h_T$ by the equations
 \begin{eqnarray*}

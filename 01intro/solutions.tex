@@ -1,34 +1,30 @@
 \documentclass{article}
-\usepackage{amsfonts}
 \input ../preamble
 \parindent = 0em
 
 %\newcommand{\solution}[1]{}
 \newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
-
 \begin{document}
-
 
 \centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
 \centerline{\bf Problems For Fundamental Equations.}
 
 \bigskip
-{\bf Problem 0: Backprogation through a ReLU linear threshold unit.}
-Consider the computation
-\begin{eqnarray*}
-  y & = & \sigma(w^\top x) \\
-  \ell & = & {\cal L}(y)
-\end{eqnarray*}
-for $w,x \in R^d$ with $\sigma(z) = \max(z,0)$ (the ReLU activation)
-and for ${\cal L}(y)$ an arbitrary function (a loss function).  Let $w_i$ denote the $i$th component of the weight vector $w$.
-Give an expression for $\frac{\partial \ell}{\partial w_i}$ as a function of $\frac{d{\cal L}(y)}{dy}$.
+{\bf Problem 1. The Zero Temperature (Infinite $\beta$) Limit.}
 
-\solution{
-  There are various correct ways of writing the answer.  The following corresponds to a backpropagation computation.
-  \begin{eqnarray*}
-    \frac{d\ell}{dy} & = & \frac{d{\cal L}(y)}{dy} \\
-    \frac{d\ell}{dw_i} & = & \frac{d\ell}{dy} \frac{dy}{dw_i} \;\;=\;\; \frac{d\ell}{dy}\; x_i\mathbf{1}[w_ix_i \geq 0]
-  \end{eqnarray*}
-  }
+Suppose we introduce a temperature parameter into the softmax operation.
+
+$$P_{\beta\;\mathrm{softmax}}(y) = \frac{1}{Z} e^{\beta s(y)} ~\;\;\;Z = \sum_y\;e^{\beta s(y)}$$
+
+suppose that there exists an element $y_{\mathrm max}$ such that
+for all $y' \ne y_{\mathrm max}$ we have
+
+$$s(y_{\mathrm max}) > s(y')$$
+
+Show 
+
+$$\lim_{\beta \rightarrow \infty} \;P_{\beta\;\mathrm{softmax}}(y_{\mathrm max}) = 1$$
+
       
 \end{document}
+

@@ -7,8 +7,6 @@
 
 \begin{document}
 
-
-
 \centerline{\bf TTIC 31230 Fundamentals of Deep Learning, winter 2019}
 
 \medskip
@@ -21,8 +19,25 @@ while $M[i,j]$ denotes one element of the matrix, $M[i,J]$ denotes the $i$th row
 We also adopt the convention, similar to true Einstein notation, that repeated capital indeces in a product of tensors are implicitly summed.  We can then write
 the inner product $e[w,I]^\top h[t,I]$ as $e[w,I]h[t,I]$.  Using this implicit summation notation we can avoid ever using transpose.
 
+\medskip
+{\bf Problem 1. Einstein Notation.}
+
+Suppose that at each time $t$ from $1$ to $T$ we have a matrix $W_t \in \mathbb{R}^{IJ}$.  Suppose we are given an initial vector $x_0$.  We define the vectors $x_1,\ldots x_T$ by the equation
+
+(1)  $x_{t+1} = W_t x_t$
+
+($W_t x_t$ is the matrix $W_t$ times the vector $x_t$).
+
+We can represent the vector $x_t$ as a tensor $x[t,j]$ and represent the matrix $W_t$ as a tensor $W[t,i,j]$.
+
+\medskip
+part a: Rewrite equation (1) in terms of the tensors using summation notation.
+
+\medskip
+part b: Rewrite equation (1) in terms of the tensors using Einstein notation where summation is represented by repeating a capital letter index.
+
 \bigskip
-{\bf Problem 1.}  Consider convolving a kernel $K[\nout,\Delta x, \Delta y,\nin]$  with thresholds $B[\nout]$ on a layer $L[b,x,y,\nin]$ where $B,\;X,\;Y,\Nout, \Nin,\Delta X,\;\Delta Y$
+{\bf Problem 2. Counting Floating Point Operations.}  Consider convolving a kernel $K[\nout,\Delta x, \Delta y,\nin]$  with thresholds $B[\nout]$ on a layer $L[b,x,y,\nin]$ where $B,\;X,\;Y,\Nout, \Nin,\Delta X,\;\Delta Y$
 are the number of possible values for $b$, $x$, $y$, $\nout$, $\nin$, $\Delta x$ and $\Delta y$ respectively.
 How many floating point multiplies are required
 in computing the convolution on the batch (without any activation function)?
@@ -30,7 +45,8 @@ in computing the convolution on the batch (without any activation function)?
 \solution{$$BXY\;\Delta X\;\Delta Y \;\Nout \;\Nin$$}
 
 \bigskip
-{\bf Problem 2:} Suppose that we want a video CNN producing layers of the form $L[b,x,y,t,n]$ which are the same as the layers of an image CNN but with an additional time index.
+{\bf Problem 3. 3D Convolutions.} Suppose that we want a video CNN producing
+layers of the form $L[b,x,y,t,n]$ which are the same as the layers of an image CNN but with an additional time index.
 Write the equation for computing $L_{\ell+1}[b,x,y,t,j]$ from the tensor $L_\ell[B,X,Y,T,I]$.  Your filter should include an index $\Delta t$ and handle a stride $s$ applied
 to both space and time. Use the repeated index notation for summation.
 
@@ -39,7 +55,7 @@ to both space and time. Use the repeated index notation for summation.
   }
 
 \bigskip
-{\bf Problem 3:} Images have translation invariance --- a person detector must look for people at
+{\bf Problem 5. Incorporating Scale Invariance.} Images have translation invariance --- a person detector must look for people at
 various places in the image.  Translation invariance is the motivation for convolution --- all
 places in the image are treated the same.
 
@@ -73,7 +89,6 @@ $L_{\ell,d}[b,x,y,n]$ {\bf and} $L_{\ell,2d}[b,x,y,n]$ using the same kernel $K_
     + & K_{\ell+1}[\nout,\Delta X,\Delta Y,\Nin]L_{\ell,2d}[b,2x+\Delta X,2y+\Delta Y,\Nin] \\
     - & B_{\ell+1}[\nout] \end{array}\right)$$
 }
-
 
 
 \end{document}

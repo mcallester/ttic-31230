@@ -17,6 +17,24 @@ Assume that probability distributions $P(y)$ are discrete with $\sum_y\;P(y) = 1
 
 \bigskip
 
+
+\bigskip
+~{\bf Problem 1: Cross Entropy Upper Bounds Entropy} The KL-divergence between two discrete distributions is defined by
+$$KL(P,Q) = E_{x \sim P} \ln \frac{P(x)}{Q(x)}$$
+We will show later in the class that $KL(P,Q) \geq 0$ for any $P$ and $Q$.
+
+The Cross Entropy $H(P,Q)$ is defined by
+
+$$H(P,Q) = E_{x \sim P} - \ln Q(x)$$
+
+When $P$ is a population distribution and $Q$ is a model distribution this is the cross entropy loss.
+You are responsible for the derivation of
+
+$$\argmin_Q H(P,Q) = P$$
+
+This is the motivation for cross-entropy loss.
+
+
 {\bf Problem 1. }  This problem is on softmax, entropy and cross entropy.  Let the variable $i$ range over the non-negative integers (0 to $\infty$).
 Consider the following softmax distribution where $\beta> 0$ is an inverse temperature parameter.
 
