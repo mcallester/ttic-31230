@@ -7,8 +7,6 @@
 
 \begin{document}
 
-
-
 \centerline{\bf TTIC 31230 Fundamentals of Deep Learning, winter 2019}
 
 \medskip
@@ -74,6 +72,21 @@ $L_{\ell,d}[b,x,y,n]$ {\bf and} $L_{\ell,2d}[b,x,y,n]$ using the same kernel $K_
     - & B_{\ell+1}[\nout] \end{array}\right)$$
 }
 
+\medskip
+\{bf Problem:}
+  
+This problem is on Einstein notation.
 
+Suppose that at each time $t$ from $1$ to $T$ we have a matrix $W_t \in \mathbb{R}^{IJ}$.  Suppose we are given an initial vector $x_0$.  We define the vectors $x_1,\ldots x_T$ by the equation
+
+(1)  $x_{t+1} = W_t x_t$
+
+($W_t x_t$ is the matrix $W_t$ times the vector $x_t$).
+
+We can represent the vector $x_t$ as a tensor $x[t,j]$ and represent the matrix $W_t$ as a tensor $W[t,i,j]$.
+
+part a: Rewrite equation (1) in terms of the tensors using summation notation.
+
+part b: Rewrite equation (1) in terms of the tensors using Einstein notation where summation is represented by repeating a capital letter index.
 
 \end{document}

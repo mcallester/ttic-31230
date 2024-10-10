@@ -466,4 +466,11 @@ This is the Donsker-Varadhan variational representation of KL-divergence.
 This can be used in cases where we can sample from $P$ and $Q$ but cannot compute $P(y)$ or $Q(y)$.
 Instead we can use a model score $s_\Phi(y)$ where $s_\Phi(y)$ can be computed.
 
+\medskip
+
+{\bf Problem:}
+The mutual information between two random variables can be defined in various ways.  Use the definitions of entropy, conditional entropy, and KL divergence to show the equivalence of the following two expressions for the mutual information I(x,y).
+
+H(x) - H(x|y) = E_y\left[KL(P(x|y),P(x))\right]
+
 \end{document}

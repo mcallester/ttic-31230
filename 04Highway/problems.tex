@@ -397,5 +397,34 @@ run on a sentence $w_1,\ldots,w_T$?  Explain your answer.
   a major advantage of the transformer.
 }
 
+\medskip
+{\bf Problem:}
+
+Consider a computation function $f$ that takes a tensor (such as a layer
+in a CNN) and returns a tensor of a potentially different shape (such as an image
+tensor of reduced dimension).  We can write a residual network for this case as 
+
+\begin{eqnarray*}
+  L_1 & = & A_1(L_0) + f_1(L_0) \\
+  \\
+  L_2 & = & A_2(L_1) + f_2(L_1) \\
+        & \vdots & \\
+  L_N & = & A_N(L_{N-1}) + f_N(L_{N-1})
+\end{eqnarray*}
+
+
+Here the function $A_n$ adjust the shape of the previous layer to match the shape of $f_n(L_{n-1})$
+
+The last slide in the lecture notes is misleading.  The above equations correspond to shape adjustments in Resnet.
+
+Suppose that in a CNN we have that $f_n(L_{n+1})$ has the same spatial dimension but fewer features than $L_{n-1}$. 
+
+Part I: Write a tensor expression for an adjustment function $A_n$ in this case where the dimension is reduced by multiplying the larger dimension feature vector by a matrix.
+
+Part II: Write a tensor expression for reducing the number of features simply by selecting some features and ignoring others.
+
+Part III: A standard motivation for residual connections is that there is a direct gradiant path from the loss to the first layer of the network.  Which of the adjustment methods of parts I and II preserve this property?
+
+Part IV: Does the shape adjustment given on slide 15 of the notes preserve a direct path from the loss to the first layer?
 
 \end{document}

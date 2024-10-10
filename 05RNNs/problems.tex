@@ -430,6 +430,45 @@ what is the resulting number of query matrix parameters for a given layer and ho
   The original version uses $2(I \times J)$ key-query matrix parameters for each head.  If we use only the single query matrix we use $J^2$ parameters for each head.  These are the same for $I = J/2$.
 }
 
+\medskip{Problem:}
+
+In these slides the letter $t$ represents the position in the token
+sequence.  We are assuming the input has $T$ tokens and the lower case
+letter $t$ indicates a particular position in the input sequence.  The
+network has layers where each layer is computed from the layer below.
+We assume $L$ layers and use lower case $\ell$ to indicate a
+particular layer.  For each layer $\ell$ and position $t$ in the
+sequence we have a vector written $L_\ell(t,J)$ where $J$ is the dimension
+of the vector and $L_\ell(t,j)$ is the $j$th component of the vector
+$L_\ell(t,J)$.
+
+For a given layer $\ell$ we have $K$ different relationships that hold
+between positions in the sequence.  For example we might have a
+subject-of relation and a different object-of relation.  We call these
+different relationships "heads" and write $k$ for a particular head
+(relationship).  The tensor $\alpha_\ell(k,t_1,t_2)$ which is the
+strength of the kth relationship from $t_1$ to $t_2$ at layer $\ell4.
+
+(a) Givan an expression for the value of
+
+$$\sum_{t_2} \alpha_\ell(k,t_1,t_2)$$
+
+For each head $k$ and layer $\ell$ we have matrices $W^{\mathrm{query}}_\ell(k,I,J)$ and
+$W^{\mathrm{key}}_\ell(k,I,J)$.  The equations on slide 37 give the method of computing the relationship
+strength $\alpha_\ell(k,t_1,t_2)$.
+
+(b) How many multiplications are involved in each of the equations on slide 37 (give a number for each equation in terms of the vector dimensions $I$ and $J$).
+In the transformer we have $I < J$.
+
+(c) How many multiplications are involved in each of the equations on slide 38.
+
+(d) Explain why the key and query vectors must have the same dimension.
+
+(e) Rewrite the equations on slide 38 such that the dimension of the value vectors
+has dimension M different from the dimension I of the key and query vectors.
+
+(f) Rewrite the equations on slide 40 to use a dimension $N$ different from $I$ and $M$ in the hidden layer of the MLP. Somewhat surprisingly, in the transformer we have $N > J$.
+
 
 
 

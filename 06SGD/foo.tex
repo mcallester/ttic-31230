@@ -67,4 +67,26 @@ Show
 
 $$\Sigma_{\Delta \Phi} = \left(\sum_i \alpha_i^2\right)\Sigma_g$$
 
+\medskip{Problem:}
+
+Consider gradient flow:
+
+$$\frac{d\Phi}{dt} = -g(\Phi)$$
+
+$$g(\Phi) = E_{(x,y) \sim \mathrm{Train}}\left[ \nabla_\Phi\;{\cal L}(\Phi,x,y)\right]$$
+
+And consider SGD
+
+$$\Phi_{s+1} = \Phi_s - \eta \hat{g}_s$$
+
+$$\hat{g}_s = E_{(x,y) \sim \mathrm{Batch}}\left[\nabla_\Phi {\cal L}(\Phi_s,x,y)\right]$$
+
+Here $\mathrm{Train}$ is the complete training data and $\mathrm{Batch}$ is a subset of the training data.
+
+We have that $\Phi(t)$ is defined for $t \in \mathbb{R}$ and $\Phi_s$ is defined for $s \in \{0,1,2,3,\ldots\}$
+
+Define $t(s)$ such that for small $\eta$ we have
+
+$$\Phi_s \approx \Phi(t(s))$$
+
 \end{document}

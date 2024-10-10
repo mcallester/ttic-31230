@@ -97,6 +97,25 @@ $$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi} \;E_{y,\ell,z_{\ell-1},z_\ell,\epsilon}\;\
 \medskip
 There are various equivalent ways of writing this which also get full credit.
 }
+
+\medskip
+
+{\bf Problem:}
     
+Consider the equation
+
+$$z(t + \Delta t) = z(t) + \sqrt{\Delta t}\;\epsilon      \epsilon \sim {\cal N}(0,I)$$
+
+Consider making two steps as follows
+
+
+$$z(t + \Delta t_1 + \Delta t_2) = z(t) + \sqrt{\Delta t_1}\;\epsilon_1 + \sqrt{\Delta t_2}\;\epsilon_2      \epsilon_1,\epsilon_2 \sim {\cal N}(0,I).$$
+
+Show that this is the same as 
+
+$$z(t + \Delta t_1 + \Delta t _2) = z(t) + \sqrt{\Delta t_1 + \Delta t_2}\;\epsilon      \epsilon \sim {\cal N}(0,I)$$
+
+Hint: use the formula for the distribution of the sum of two Gaussian variables.
+
 \end{document}
 

@@ -3,8 +3,8 @@
 \parindent = 0em
 \parskip = 1ex
 
-\newcommand{\solution}[1]{}
-%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+%\newcommand{\solution}[1]{}
+\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
 
 \begin{document}
 
@@ -438,6 +438,86 @@ Is the discreteness of $z$ an issue in this case?  Explain your answer.
 \solution{Yes, the discreteness of $z$ is an issue. This is true independent of the nature of $s$. A differential change in parameters will not change a discrete $z$ and $z.\grad = 0$.
   So the standard back-propagation into the encoder fails.  VQ-VAE back-propagates into the encoder using a K-means loss term together with straight-through gradients.
   Discreteness of $s$ is not a problem.}
+
+A variational autoencoder (VAE) has three parts, an encoder $\mathrm{enc}$, a decoder
+$\mathrm{dec}$ and a prior $\mathrm{pri}$.  The VAE is defined by the following objective.
+
+$$\mathrm{enc}^*,\mathrm{dec}^*,\mathrm{pri}^* = \mathrm{argmin}_{\mathrm{enc,dec,pri}}\;\mathrm{ELBO}(z,y)$$
+
+$$\mathrm{ELBO}(y,z) = E_{y\sim \mathrm{pop},z\sim P_{\mathrm{enc}}(z|y)}\left[ -\ln\frac{P_\mathrm{pri}(z)P_{\mathrm{dec}}(y|z)}{P_{\mathrm{enc}}(z|y)}\right]$$
+
+Recall that the cross entropy $H(P,Q)$ for a sampling distribution $P$ and a model distribution $Q$ is defined by
+
+$$H(P,Q) = E_{w\sim P}\left[-\ln Q(w)\right]$$
+
+A conditional entropy $H(w|u)$ is defined for a joint distribution P(w,u) by
+
+$$H(w|u) = E_{(w,u) \sim P}\left[-\ln P(w|u)\right]$$
+
+Part 1: Write $\mathrm{ELBO}(y,z)$ as a cross entropy (on a joint distribution of $y$ and $z$) minus a conditional entropy.
+
+\solution{
+
+  $$\mathrm{ELBO}(y,z) = H(\mathrm{pop}(y)P_{\mathrm{enc}}(z|y),\;P_{\mathrm{pri}}(z)P_{\mathrm{dec}}(y|z)) - H(P_{\mathrm{enc}}(z|y))$$
+
+  Here $H(P_\enc(z|y))$ refers to the joint distribution on $y$ and $z$ defined by $\pop(y)P_\enc(z|y)$.
+  }
+
+\medskip
+Part 2: Suppose we fix the encoder arbitrarily and optimize only the prior and the decoder.  What is the joint distribution on y and z defined by the optimal models $P_{\mathrm{pri}^*}(z)$
+and $P_{\mathrm{dec}^*}(y|z)$?  Justify your answer.
+
+\solution{
+The optimal models for the prior and the decoder define the same joint distribution as
+that defined by the population and then encoder.  This is because the optimal solution to a cross entropy is the sampling distribution.}
+
+\medskip
+Part 3. Suppose that we leave the encoder fixed arbitrarily and train just the prior and the decoder, as in part 2, and then sample y (perhaps an image) by sampling $z$ from the prior and $y$ from the decoder.  Assuming universality for the prior and decoder, but with the encoder untrained, will this result in sampling $y$ from the population distribution?  Explain your answer.
+
+\solution{
+
+Yes, this will sample from the population because the joint distribution defined by the prior and the decoder will match the joint distribution defined by the population and encoder.
+}
+
+\eject
+
+{\bf Problem}
+
+This is a problem on vector quantization.  Vector quantization converts vectors to tokens.
+Converting vectors to tokens allows images and sounds to be modeled with transformers.
+
+Consider $k \in \{1,2,\ldots,K\}$.  I will call $k$ a token.
+
+For each token $k \in \{1,2,\ldots,K\}$ let $e(k) \in R^d$ be a vector embedding of the token $k$.
+
+This is the same formal set-up as having vector embeddings for language tokens (words).
+
+Let $e$ be the embedding matrix (the matrix $e(k)[i]$ giving the $i$th component of the vector $e(k)$).
+
+Let $\hat{k}$ be a tokenization function mapping any $x \in R^d$ to a token $\hat{k}(x)$.
+
+We want to optimize the embedding matrix e and the tokenization function $\hat{k}$
+so that $e(\hat{k}(x))$ is near $x$.
+
+More formally, let $\rho$ be a probability density on $R^d$.  We want the following.
+
+$$e^*,\hat{k}^* = \mathrm{argmin}_{e,\hat{k}}\;E_{x \sim \rho}\;||e(k(x)) - x||^2$$
+
+(a) Write a gradient descent update equation for optimizing the embedding matrix e for a fixed embedding function $\hat{k}$.
+
+(b) Write a equation defining an optimal embedding function $\hat{k}$ for a fixed embedding matrix $e$.
+
+{\bf Comments:}
+
+Loyd's Algorithm for k-means vector quantization replaces (a) with a closed form solution for $\hat{k}$ given e and alternates the optimization of $\hat{k}$ and $e$.
+
+In vector quantization for deep learning models we also have an embedding model
+$\mathrm{emb}$ and ab  decoding model $\mathrm{dec}$ and want to solve the optimization problem.
+
+$$e^*,\hat{k}^*,\mathrm{emb}^*,\mathrm{dec}^*= \mathrm{argmin}_{e,\hat{k},\mathrm{emb},\mathrm{dec}}\;E_{x \sim \rho}\;||\mathrm{dec}(e(k(\mathrm{emb}(x))))- x||^2$$
+
+Actually it is a little more complicated that this equation because the embedding and the decoding operate on the whole image or sound wave and produce a matrix or array of vectors which are then tokenized individually.
+
 
 
 \end{document}
