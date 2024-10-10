@@ -1,0 +1,30 @@
+\documentclass{article}
+\input ../preamble
+\parindent = 0em
+
+\newcommand{\solution}[1]{}
+%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+\begin{document}
+
+\centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
+\centerline{\bf Problems For Fundamental Equations.}
+
+\bigskip
+{\bf Problem 1. The Zero Temperature (Infinite $\beta$) Limit.}
+
+Suppose we introduce a temperature parameter into the softmax operation.
+
+$$P_{\beta\;\mathrm{softmax}}(y) = \frac{1}{Z} e^{\beta s(y)} ~\;\;\;Z = \sum_y\;e^{\beta s(y)}$$
+
+suppose that there exists an element $y_{\mathrm max}$ such that
+for all $y' \ne y_{\mathrm max}$ we have
+
+$$s(y_{\mathrm max}) > s(y')$$
+
+Show 
+
+$$\lim_{\beta \rightarrow \infty} \;P_{\beta\;\mathrm{softmax}}(y_{\mathrm max}) = 1$$
+
+      
+\end{document}
+
