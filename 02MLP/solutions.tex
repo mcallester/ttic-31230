@@ -112,44 +112,50 @@ While optimizing compilers can of course be written, one must keep in mind the t
 between the abstraction level of the programming language and the efficiency of the generated code.
 
 
-\medskip
-~{\bf Problem 4. Backpropogation through batch normalization.}
-Consider the following set of $\pluseq$ statements defining batch normalization
-where all computed tensors are initialized to zero.
+\bigskip
+~{\bf Problem 4. Backpropagation through a UGRNN.}
+Equations defining a UGRNN are given below.
 
-\medskip
-For $b,j \;\;\mu[j] \;\pluseq\; \frac{1}{B}\;x[b,j]$
+\begin{eqnarray*}
+\tilde{R}_t[b,j] & = & \left(\sum_i\;W^{h,R}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,R}[j,k]{\color{red} x_t[b,k]}\right) - B^R[j] \\
+\\
+R_t[b,j] & = & \mathrm{\tanh}(\tilde{R}_t[b,j]) \\
+\\
+\tilde{G}_t[b,j] & = & \left(\sum_i\;W^{h,G}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,G}[j,k]{\color{red} x_t[b,k]}\right) - B^G[j] \\
+\\
+G_t[b,j] & = & \mathrm{\sigma}(\tilde{G}_t[b,j]) \\
+\\
+{\color{red} h_t[b,j]} & = & G_t[b,j]{\color{red} h_{t-1}[b,j]} + (1-G_t[b,j])R_t[b,j]
+\end{eqnarray*}
 
-\medskip
-For $b,j\;\;s[j] \;\pluseq\; \frac{1}{B-1}\;(x[b,j] - \mu[j])^2$
+(a) Rewrite the first equation defining $\tilde{R}_t$ using $\pluseq$ loops instead of summations assuming that all computed tensors are initialized to zero.
 
-\medskip
-For $b,j\;\;x'[b,j] \;\pluseq\; \frac{x[b,j] - \mu[j]}{\sqrt{s[j]}}$
 
-\medskip
-Give backpropagation $\pluseq$ (or $\minuseq$) loops for computing $x.\grad[b,j]$, $\mu.\grad[j]$, and $s.\grad[j]$ from $x'.\grad[b,j]$.
-The loops should be given in the order they are to be executed.
-
-\medskip
 \solution{
-
-  $$\begin{array}{lrcl}
-
-    \mbox{For}\;b,j & x.grad[b,j] &\pluseq & \frac{x'.\grad[b,j]}{\sqrt{s[j]}} \\
-    \\
-    \mbox{For}\; b,j & \mu.grad[j] &\minuseq & \frac{x'.\grad[b,j]}{\sqrt{s[j]}} \\
-    \\
-    \mbox{For}\; b,j & s.grad[j] &\minuseq & \frac{1}{2}(x[b,j] - \mu[j])s[j]^{-3/2}\;x'.grad[b,j] \\
-    \\
-    \mbox{For}\; b,j & x.grad[b,j] &\pluseq & \frac{2}{B-1}\;(x[b,j] - \mu[j])s.\grad[j] \\
-    \\
-    \mbox{For}\; b,j & \mu.\grad[j] &\minuseq & \frac{2}{B-1}\;(x[b,j] - \mu[j])s.\grad[j] \\
-    \\
-    \mbox{For}\; b,j & x.grad[b,j] &\pluseq & \frac{1}{B}\;\mu.\grad[j]
-  \end{array}$$
+\begin{eqnarray*}
+\mbox{for}\; b,j,i\;\tilde{R}_t[b,j] & \pluseq & W^{h,R}[j,i]h_{t-1}[b,i] \\
+\\
+\mbox{for}\;b,j,k\;\tilde{R}_t[b,j] & \pluseq & W^{X,R}[k,i]x_t[b,k] \\
+\\
+\mbox{for}\;b,j\;\tilde{R}_t[b,j] & \minuseq & B^R[j]
+\end{eqnarray*}
 }
 
-\bigskip
+\medskip
+(b) Give $\pluseq$ loops for the backward computation for your solution to part (a) using the convention that
+parameter gradients are averaged over the batch and where the batch size is $B$.
+
+\solution{
+\begin{eqnarray*}
+\mbox{for}\; b,j,i\;W^{h,R}.\grad[j,i] & \pluseq & \frac{1}{B}\;h_{t-1}[b,i]\tilde{R}_t.\grad[b,j] \\
+\\
+\mbox{for}\; b,j,i\; h_{t-1}.\grad[b,j] & \pluseq & W^{h,R}[j,i]\tilde{R}_t.\grad[b,j] \\
+\\
+\mbox{for}\; b,j,k\;W^{x,R}.\grad[j,k] & \pluseq & \frac{1}{B}\;x[b,k]\tilde{R}_t.\grad[b,j] \\
+\\
+\mbox{for}\;b,j\;B^R.\grad[j] & \minuseq & \frac{1}{B}\;\tilde{R}_t.\grad[b,j]
+\end{eqnarray*}
+}
 
 {\bf Problem 5. Writing framework code.} Consider a function $c:R^d \times R^s \rightarrow R^s$, in other words a function that takes a
 vector of dimension $d$ and a vector of dimension $s$ and yields a vector of dimension
