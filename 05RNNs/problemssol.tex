@@ -78,7 +78,7 @@ that these terms might help in practice.
   
 
 \bigskip
-{\bf Problem 2. The Adjusting Temperature for Dimension.} For a typical language model the softmax operation defining the probablility $P(w_{t+1}\;|\;w_1,\ldots,w_t)$ has the form
+{\bf Problem 2. Adjusting Temperature for Dimension.} For a typical language model the softmax operation defining the probablility $P(w_{t+1}\;|\;w_1,\ldots,w_t)$ has the form
 $$\alpha[\ell,t,w] = \softmax_{w} h[\ell,t,I] e[w,I]$$
 We now consider adding a ``temperature parameter'' $\beta$ to this softmax.
 \begin{equation}
