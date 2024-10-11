@@ -157,18 +157,16 @@ parameter gradients are averaged over the batch and where the batch size is $B$.
 \end{eqnarray*}
 }
 
-\medskip
-
 {\bf Problem 5. Writing framework code.} Consider a function $c:R^d \times R^s \rightarrow R^s$, in other words a function that takes a
 vector of dimension $d$ and a vector of dimension $s$ and yields a vector of dimension
 $s$.  Given a sequence of vectors $x_0$, $x_2$, $\ldots$, $x_T$ with $x_t \in R^d$ we can define a sequence of vectors $h_0$, $h_1$, $\ldots$, $h_T$ by the equations
 \begin{eqnarray*}
-  h_{0} & = & c(x_0,0) \\
-  h_{t} & = & c(x_t,h_{t-1})\;\mbox{for $1 \leq t \leq T$} 
+  h_{0} & = & c(\Phi,x_0,0) \\
+  h_{t} & = & c(\Phi,x_t,h_{t-1})\;\mbox{for $1 \leq t \leq T$} 
 \end{eqnarray*}
-When the function $c$ is defined by a neural network the resulting network mapping $x_1$, $\ldots$, $x_T$ to $h_0$, $\ldots$, $h_T$ is called a recurrent neural network (RNN).
-
-{\bf a.} In the educational framework EDF we work with objects where each object has a value attribute and a gradient attribute each of which have tensor values
+When the function $c$ is defined by a neural network with parameters $\Phi$ where the same parameters are used at all times $t$.
+This architecture is called a recurrent neural network (RNN) and is used in processesing strings of inputs where the string has an arbitrary length.
+In the educational framework EDF we work with objects where each object has a value attribute and a gradient attribute each of which have tensor values
 where the value tensor and the gradient tensor are the same shape. 
 Each object is assigned a value in a forward pass and assigned a gradient in a backward pass.
 Suppose that we are given an EDF procedure {\tt CELL} which takes as
@@ -180,21 +178,14 @@ Your solution can be in Python or informal high level pseudo code.
 
 \solution{
   We can use the equations given as the definition of the computation graph if we replace $c$ in the equations with the function {\tt CELL}.
-  In the folloing code CELL is a class parameter packages and the call CELL() creaates a fresh parameter package on each call.
-  A recuarive solution can also be given.
+  In the folloing code CELL is a class parameter packages and Phi is a fixed paramter package. A recursive solution can also be given.
 \begin{tabbing}
   X = list() \\
   H = list() \\
-  H[0] = CELL(Phi(),X[0],ZERO) \\
+  H[0] = CELL(Phi,X[0],ZERO) \\
   for \=t in range(1,T) \\
   \>H[t] = CELL(Phi,X[t],H[t-1])
 \end{tabbing}
 }
-
-{\bf b.} Deep learning systems generally make extensive use of parallel computation for training.
-How does the parallel running time of an RNN computation graph scale with the length $T$?
-
-\solution{
-  The parallel running time is proportional to $T$. RNNS are fundamentally serial and this is a problem.  RNNs have recently been largely replaced by the transformer architecture.}
     
 \end{document}
