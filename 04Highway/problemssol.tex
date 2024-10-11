@@ -15,7 +15,7 @@
 \bigskip
 
 \medskip
-{\bf Problem 1.} Consider a computation function $f$ that takes a tensor (such as a layer
+{\bf Problem 1. Adjusting Shape for Residual Connections.} Consider a computation function $f$ that takes a tensor (such as a layer
 in a CNN) and returns a tensor of a potentially different shape (such as an image
 tensor of reduced dimension).  We can write a residual network for this case as 
 
@@ -44,7 +44,7 @@ Suppose that in a CNN we have that $f_n(L_{n+1})$ has the same spatial dimension
 {\bf d.} Does the shape adjustment given on slide 15 of the notes preserve a direct path from the loss to the first layer?
 
 \medskip
-{\bf Problem 2.}  Consider a regression problem where we want to predict a scalar value $y$ from a vector $x$.
+{\bf Problem 2. Improving Trainability with Multiple Loss Heads.}  Consider a regression problem where we want to predict a scalar value $y$ from a vector $x$.
 Consider the L-layer perceptron for this problem defined by the following equations
 which compute hidden layer vectors $h_1[I], \ldots, h_L[I]$ and predictions $\hat{y}_1, \ldots, \hat{y}_L$ where
 the prediction $\hat{y}_\ell$ is done with a linear regression on the hidden vector $h_\ell[I]$.
@@ -96,7 +96,7 @@ good to you.
 }
 
 \medskip
-{\bf Problem 3.}  This problem is on initialization.  Consider a single unit defined by
+{\bf Problem 3. Weight Initialization.}  This problem is on initialization.  Consider a single unit defined by
 $$y = f(W[I]x[I] - B) = f\left(\left(\sum_i\;W[i]x[i]\right) - B\right)$$
 where $B$ is initialized to zero and $f$ is an activation function such as a sigmoid or ReLU.
 The vector $x$ is a random variable determined by a random draw of a training example.
@@ -150,7 +150,7 @@ is the variance of $u$ larger than, equal to, or smaller than the variance of $y
 }
 
 \bigskip
-{\bf Problem 4.} Consider a bottleneck multi-layer perceptron (MLP) with residual connections
+{\bf Problem 4. Counting Multiplications in Bottleneck Layers.} Consider a bottleneck multi-layer perceptron (MLP) with residual connections
 defined as follows where $N_{\mathrm{bottle}}$ is smaller than $\Nin = \Nout$.
 
 \begin{eqnarray*}

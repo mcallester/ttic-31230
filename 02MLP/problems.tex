@@ -149,54 +149,9 @@ The loops should be given in the order they are to be executed.
   \end{array}$$
 }
 
-
 \bigskip
-~{\bf Problem 5. Backpropagation through a UGRNN.}
-Equations defining a UGRNN are given below.
 
-\begin{eqnarray*}
-\tilde{R}_t[b,j] & = & \left(\sum_i\;W^{h,R}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,R}[j,k]{\color{red} x_t[b,k]}\right) - B^R[j] \\
-\\
-R_t[b,j] & = & \mathrm{\tanh}(\tilde{R}_t[b,j]) \\
-\\
-\tilde{G}_t[b,j] & = & \left(\sum_i\;W^{h,G}[j,i]{\color{red} h_{t-1}[b,i]}\right) + \left(\sum_k W^{x,G}[j,k]{\color{red} x_t[b,k]}\right) - B^G[j] \\
-\\
-G_t[b,j] & = & \mathrm{\sigma}(\tilde{G}_t[b,j]) \\
-\\
-{\color{red} h_t[b,j]} & = & G_t[b,j]{\color{red} h_{t-1}[b,j]} + (1-G_t[b,j])R_t[b,j]
-\end{eqnarray*}
-
-(a) Rewrite the first equation defining $\tilde{R}_t$ using $\pluseq$ loops instead of summations assuming that all computed tensors are initialized to zero.
-
-
-\solution{
-\begin{eqnarray*}
-\mbox{for}\; b,j,i\;\tilde{R}_t[b,j] & \pluseq & W^{h,R}[j,i]h_{t-1}[b,i] \\
-\\
-\mbox{for}\;b,j,k\;\tilde{R}_t[b,j] & \pluseq & W^{X,R}[k,i]x_t[b,k] \\
-\\
-\mbox{for}\;b,j\;\tilde{R}_t[b,j] & \minuseq & B^R[j]
-\end{eqnarray*}
-}
-
-\medskip
-(b) Give $\pluseq$ loops for the backward computation for your solution to part (a) using the convention that
-parameter gradients are averaged over the batch and where the batch size is $B$.
-
-\solution{
-\begin{eqnarray*}
-\mbox{for}\; b,j,i\;W^{h,R}.\grad[j,i] & \pluseq & \frac{1}{B}\;h_{t-1}[b,i]\tilde{R}_t.\grad[b,j] \\
-\\
-\mbox{for}\; b,j,i\; h_{t-1}.\grad[b,j] & \pluseq & W^{h,R}[j,i]\tilde{R}_t.\grad[b,j] \\
-\\
-\mbox{for}\; b,j,k\;W^{x,R}.\grad[j,k] & \pluseq & \frac{1}{B}\;x[b,k]\tilde{R}_t.\grad[b,j] \\
-\\
-\mbox{for}\;b,j\;B^R.\grad[j] & \minuseq & \frac{1}{B}\;\tilde{R}_t.\grad[b,j]
-\end{eqnarray*}
-}
-
-\bigskip
-~{\bf Problem 6. Writing framework code.} Consider a function $c:R^d \times R^s \rightarrow R^s$, in other words a function that takes a
+{\bf Problem 5. Writing framework code.} Consider a function $c:R^d \times R^s \rightarrow R^s$, in other words a function that takes a
 vector of dimension $d$ and a vector of dimension $s$ and yields a vector of dimension
 $s$.  Given a sequence of vectors $x_0$, $x_2$, $\ldots$, $x_T$ with $x_t \in R^d$ we can define a sequence of vectors $h_0$, $h_1$, $\ldots$, $h_T$ by the equations
 \begin{eqnarray*}
@@ -216,11 +171,13 @@ write a procedure for constructing the sequence of EDF objects representing $h_1
 Your solution can be in Python or informal high level pseudo code.
 
 \solution{
-We can use the equations given as the definition of the computation graph if we replace $c$ in the equations with the function {\tt CELL}.
+  We can use the equations given as the definition of the computation graph if we replace $c$ in the equations with the function {\tt CELL}.
+  In the folloing code CELL is a class parameter packages and the call CELL() creaates a fresh parameter package on each call.
+  A recuarive solution can also be given.
 \begin{tabbing}
   X = list() \\
   H = list() \\
-  H[0] = CELL(Phi,X[0],ZERO) \\
+  H[0] = CELL(Phi(),X[0],ZERO) \\
   for \=t in range(1,T) \\
   \>H[t] = CELL(Phi,X[t],H[t-1])
 \end{tabbing}
