@@ -27,7 +27,7 @@ For ``sufficiently smooth'' non-negative loss with
 $$\eta_t \geq 0\;\;\;\;\;\;\;\;\lim_{t \rightarrow \infty} \;\eta_t = 0\;\;\;\;\;\;\;\;\sum_t \eta_t = \infty \;\;\;\;\;\;\sum_t \;\eta_t^2 < \infty$$
 
 \vfill
-we have that the training loss $E_{(x,y) \sim \mathrm{Train}}\; {\cal L}(\Phi,x,t)$ converges to a limit and any limit point of the sequence $\Phi_t$
+we have that the training loss $E_{(x,y) \sim \mathrm{Train}}\; {\cal L}(\Phi,x,y)$ converges to a limit and any limit point of the sequence $\Phi_t$
 is a stationary point in the sense that {\huge  $\nabla_\Phi \; E_{(x,y) \sim \mathrm{Train}} \;{\cal L}(\Phi,x,t) = 0$}.
 
 \vfill
@@ -39,7 +39,7 @@ is a stationary point in the sense that {\huge  $\nabla_\Phi \; E_{(x,y) \sim \m
 
 \slide{Physicist's Proof of the Convergence Theorem}
 
-Since $\lim_{t \rightarrow 0} \;\eta_t = 0$ we will eventually get to arbitrarilly small learning rates.
+Since $\lim_{t \rightarrow \infty} \;\eta_t = 0$ we will eventually get to arbitrarilly small learning rates.
 
 \vfill
 For sufficiently small learning rates any meaningful update of the parameters will be based on an arbitrarily large sample
