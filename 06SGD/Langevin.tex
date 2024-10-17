@@ -93,7 +93,6 @@ We will start with the simplest SDE: Brownian motion.  Brownian motion is the SD
 
 Consider a discrete-time process $z(0),z(1),z(2),z(3),\ldots$ with $z(n)\in \mathbb{R}^d$ defined by
 \begin{eqnarray*}
-  z(0) & = & y,\;\;\;y \sim \popd(y) \\
   z(n+1) & = & z(n) + \sigma\epsilon,\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
@@ -101,7 +100,6 @@ Consider a discrete-time process $z(0),z(1),z(2),z(3),\ldots$ with $z(n)\in \mat
 We can sample from $z(n)$ using
 
 \begin{eqnarray*}
-  z(0) & = & y,\;\;\;y \sim \popd(y) \\
   z(n) & = & z(0) + \sigma\epsilon\sqrt{n} ,\;\;\;\epsilon \sim {\cal N}(0,I)
 \end{eqnarray*}
 
@@ -110,8 +108,6 @@ Fix a numerical time step $\Delta t$ and consider a discrete-time process $z(0)$
 
 {\huge
 \begin{eqnarray*}
-  z(0) & = & y,\;\;\;y \sim \popd(y) \\
-  \\
   z(t+\Delta t) & = & z(t) + \sigma\epsilon\sqrt{\Delta t},\;\;\;\epsilon\sim {\cal N}(0,I) \\
   \\
   z(t+n\Delta t) & = & z(t) + \sigma\epsilon\sqrt{n\Delta t},\;\;\;\epsilon\sim {\cal N}(0,I) \\    
@@ -121,17 +117,7 @@ We now take the limit of this numerical simulation as $\Delta t \rightarrow 0$.
 
 In this limit we can sample directly from $z(t)$ using
 
-$$z(t) = y + \sigma\epsilon \sqrt{t}\;\;\;\epsilon \sim {\cal N}(0,I)$$
-
-\slide{Brownian Motion}
-
-We can sample directly from $z(t+\Delta t)$ given $z(t)$ using
-
-$$z(t+\Delta t) =  z(t) + \sigma\epsilon\sqrt{\Delta t},\;\;\;\epsilon \sim {\cal N}(0,I)$$
-
-\vfill
-For Brownian motion this equation holds for any continuous $t \geq 0$.
-and $\Delta t \geq 0$.
+$$z(t + \Delta t) = z(t) + \sigma\epsilon \sqrt{\Delta t}\;\;\;\epsilon \sim {\cal N}(0,I)$$
 
 \slide{Sampling from a Bayesian Posterior: Langevin Dynamics}
 
