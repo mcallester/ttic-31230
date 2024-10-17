@@ -417,9 +417,8 @@ N_g & = & (1-\beta_g) = \min(1,N^0_g/B) \\
 \\
 N_s & = & (1-\beta_s) = \min(1,N^0_s/B) \\
 \\
-\epsilon & = & \epsilon_0\sqrt{B} \\
-\\
-\eta & = & \epsilon B \eta_0
+\eta & = & \left\{\begin{array}{ll} \epsilon B \eta_0 & \mbox{for $\epsilon > \sqrt{s_t[i]}$} \\ \\
+     B \eta_0 & \mbox{otherwise} \end{array} \right.
 \end{eqnarray*}
 }
 \slide{Stochastic Gradient Descent (SGD)}
