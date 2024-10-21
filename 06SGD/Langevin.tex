@@ -508,6 +508,69 @@ we have a stationary distribution
 \vfill
 $$p(\Phi) = \frac{1}{Z} \exp\left(\frac{-2{\cal L}}{\eta}\right)$$
 
+
+\slide{Relating Langevin Dynamics and the SGD-SDE}
+
+Consider A Bayesian Model:
+{\huge
+\begin{eqnarray*}
+p_{\mathrm{Bayes}}(\Phi|\train) & = & \frac{1}{Z}\;p_{\mathrm{Bayes}}(\Phi,\train)\;\;\;Z = p_\mathrm{Bayes}(\train) \\
+\\
+ & = & \frac{1}{Z}\; p_\pri(\Phi)P(\train|\Phi)
+ \end{eqnarray*}
+}
+
+Consider the loss function:
+{\huge
+\begin{eqnarray*}
+{\cal L}(\Phi) & = & -\ln P_\mathrm{Bayes}(\Phi|\train)
+\end{eqnarray*}
+}
+
+We will give an SGD algorithm and learning rate $\eta$ such that:
+{\huge
+$$p_\mathrm{SGD}(\Phi|{\cal L},\eta) = p_\mathrm{Bayes}(\Phi|\train)$$
+}
+
+\slide{The Loss Function}
+
+{\huge
+\begin{eqnarray*}
+p_{\mathrm{Bayes}}(\Phi|\train) & = & \frac{1}{Z}\;p_{\mathrm{Bayes}}(\Phi,\train)\;\;\;Z = p_\mathrm{Bayes}(\train) \\
+\\
+ & = & \frac{1}{Z}\; p_\pri(\Phi)P(\train|\Phi) \\
+ \\
+ & = & \frac{1}{Z'}\; p_\pri(\Phi)\;\sum_{(x,y) \in \train} p_\Phi(y|x)
+ \end{eqnarray*}
+}
+
+\vfill
+
+{\huge
+\begin{eqnarray*}
+{\cal L}(\Phi) & = & -\ln P_\mathrm{Bayes}(\Phi|\train) \\
+\\
+& = & E_{(x,y) \sim \train}\left[-\ln(P_\Phi(y|x))\right] \;\;+ \frac{1}{N_\train}\left(-\ln p_\pri(\Phi)\right) + \ln Z''
+\end{eqnarray*}
+}
+
+\slide{The Gibbs Distribution}
+
+For the adaptive update
+
+\vfill
+$$\Phi_{i+1} = \Phi_{i} - \eta \Sigma(\Phi)^{-1} \hat{g}_i$$
+
+\vfill
+we have a stationary distribution
+
+\vfill
+\begin{eqnarray*}
+p_\mathrm{SGD}(\Phi) & = & \frac{1}{Z} \exp\left(\frac{-2{\cal L}}{\eta}\right) \\
+\\
+& = & p_\mathrm{Bayes}(\Phi|\train)\;\;\;\mbox{for $\eta = 2$}
+\end{eqnarray*}
+
 \slide{END}
 
 \slide{Appendix: Diffusion Flow}
@@ -630,6 +693,9 @@ Where $\Sigma = E\;(\hat{g} - g)(\hat{g} - g)^\top$ is the covariance matrix of 
 Here we have derived this from first principle but it also follows from the Fokker–Planck equation (see Wikipedia).
 }
 
+
+
 \slide{END}
+
 
 \end{document}
