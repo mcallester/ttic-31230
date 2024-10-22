@@ -64,14 +64,16 @@ Theorem: There exists $c$ with {\color{red} $E_{y \sim P} \;|c(y)| \leq H_2(P) +
 Let $P$ and $Q$ be two distribution on the same set.
 
 {\color{red} $$H(P,Q) = E_{y \sim P}\;\left[ \;-\ln \;Q(y)\right]$$}
-
 {\color{red} $$\Phi^* = \argmin_\Phi \;H(\pop,P_\Phi)$$}
 
-\vfill
-{\color{red} $H(P,Q)$} can be interpreted as the number of bits used to code draws from $P$ when using an optimal code for $Q$.
+We will show {\color{red} $H(P,Q) \geq H(P)$}
 
-\vfill We will show
-$$H(P,Q) \geq H(P)$$
+\vfill
+We have {\color{red} $H(P,P) = H(P)$}
+
+
+\vfill
+Universality implies {\color{red} $H(\pop,P_{\Phi^*}) = H(\pop)$} or {\color{red} $P_{\Phi^*} = \pop$}
 
 \slide{KL Divergence}
 
@@ -117,7 +119,7 @@ $$E[f(x)] \geq f(E[x])$$
 \end{eqnarray*}
 
 
-
+\ignore{
 \slide{Asymmetry of Cross Entropy}
 Consider 
 
@@ -147,6 +149,7 @@ Consider
 
 \vfill
 For a synthetic population where $\pop(y)$ is computable but $P_\Phi$ cannot perfectly model $\pop$, (2) produces mode collapse.
+}
 
 \slide{Conditional Entropy and Mutual Information}
 
@@ -158,7 +161,7 @@ $$H(y|x) = E_{(x,y)\sim Q}\;-\ln P(y|x)$$
 
 \vfill
 mutual information:
-$$I(x,y) = H(y) - H(y|x)$$
+$$I(x,y) = H(y) - H(y|x) = H(x) - H(y|x)$$
 
 \vfill
 Suppose you dont't know anything about $x$ and $y$. The mutual information $I(x,y)$ is the expectation over a draw of $x$ of
@@ -177,45 +180,52 @@ $E_{x \sim P(x)}\;f(x)$ is the limit of the average of $f(x)$ over ever larger s
 \vfill
 In order to write general equations we will use capital letter notation $P(x)$ for both continuous densities and discrete distributions.
 
-\vfill
+\slide{Infinite Precision Real Numbers}
 
-\slide{Differential Entropy}
-
-In the case of a continuous density (as opposed to a discrete probability) we have the notion of differential entropy.
+An infinite precision real number contains an infinite amount of information (we have an infinite sequence of decimal places).
 
 \vfill
-For a density $P(x)$ on a real value $x$ we have
+For a continuous density the probability of a particular infinite precision real number $x$ is zero and $-\ln P(x) = \infty$.  This should $H(P) = \infty$
+
+\vfill
+However, for a continuous density $P$ the (unfortunate) convention is to define ``differential entropy'' $H(P)$ in terms of {\em probability density} $p(x)$
+rather than the probbility $P(x)$ (which is zero).
+
+\vfill
+Differential Entropy: $H_\mathrm{diff}(p) = E_{x \sim P(x)}\;\left[-\ln p(x)\right]$
+
+\slide{Infinite Precision Real Numbers}
+
+Since a density can be greater than 1 we have that $- \ln p(x)$ can be negative.
+
+\vfill
+The cross entropy loss as measured by differential entropy can diverge to minus infinity during training.
+
+\vfill
+This will happen in a Gaussian mixture models where one of the Gaussians converges on modelng a single training point.
+
+\vfill
+We do not want to minize an objective that diverges to $-\infty$.
+
+\slide{Limiting Numerical Precision}
+
+We can avoid the difficulties of infinite precision numbers by just replacing them with floatng point numbers.
+
+\vfill
+Alteratively we can limit precision by adding noise and working with mutual information rather than entropy.
 
 \vfill
 \begin{eqnarray*}
-H(x) & = & E_{x \sim P(x)}\;\left[-\ln P(x)\right]
+y & \sim & \pop \\
+\epsilon & \sim & {\cal N}(0,\sigma^2I) \\
+\hat{y} &\sim & P_\Phi(\hat{y})
+\end{eqnarray*}
+\begin{eqnarray*}
+\Phi^* & = & \argmax_\Phi\;I(y+\epsilon,\hat{y}) \\
+& \leq & H_{\mathrm{diff}}({\cal N}(0,\sigma^2I))
 \end{eqnarray*}
 
-\slide{Differential Cross-Entropy can Diverge to $-\infty$}
-
-Consider the unsupervised training objective.
-
-$$\Phi^* = \argmin_{\Phi} E_{y \sim \mathrm{train}}\;-\ln P_\Phi(y)$$
-
-\vfill
-The training set is finite (discrete).
-
-\vfill
-For each $y \in \train$ the density $P_\Phi(y)$ can go to infinity.
-
-\vfill
-This will drive the cross-entropy training loss to $-\infty$.
-
-\slide{Differential Cross-Entropy can Diverge to $-\infty$}
-
-$$\Phi^* = \argmin_{\Phi} E_{y \sim \mathrm{train}}\;-\ln P_\Phi(y)$$
-
-\vfill
-For a Gaussian mixture model in which some mixtures are focused on a single point
-the training loss goes to $-\infty$.
-
-\vfill
-We do not want to minizing an objective that diverges to $-\infty$.
+\ignore{
 
 \slide{The Gaussian Noise Trick ($L_2$ Distortion)}
 
@@ -299,6 +309,7 @@ But $H_\sigma(y)$ goes to infinity (slowly) as $\sigma \rightarrow 0$.
 
 \vfill
 
+}
 
 \slide{Summary}
       

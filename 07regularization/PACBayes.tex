@@ -282,7 +282,7 @@ With probability at least $1-\delta$ over the draw of $\train$ we have
 {\cal L}(\train) & \leq & \frac{10}{9}\parens{ \hat{\cal L}(\train) + \frac{5\lmax}{N_\mathrm{Train}}\parens{KL(p(\Phi|\train),p(\Phi)})+ \ln\frac{1}{\delta}} \\
 \\
 \\
-E_{\train}\; {\cal L}(\train)& \leq & \frac{10}{9}\parens{ E_{\train}\left[\hat{\cal L}(\train)\right] + \frac{5\lmax}{N_\mathrm{Train}}\parens{I(\Phi,\train)+ \ln\frac{1}{\delta}}}
+E_{\train}\; {\cal L}(\train)& \leq & \frac{10}{9}\parens{ E_{\train}\left[\hat{\cal L}(\train)\right] + \frac{5\lmax}{N_\mathrm{Train}}\parens{I(\Phi,\train)}}
 \end{eqnarray*}
 }
 \vfill
@@ -306,21 +306,6 @@ The probabilities are tuned to an unrealistically low error rate and are therefo
 
 \vfill
 This over-confidence occurs before the stopping point and damages validation loss (as opposed to validation error).
-
-\slide{Shrinkage: $L_2$ regularization}
-
-We first give a Bayesian derivation. We put a prior probability on $\Phi$ and maximize the a-posteriori probability (MAP).
-
-\vfill
-{\huge
-\begin{eqnarray*}
-\Phi^* & = & \argmax_\Phi\;p(\Phi | \tuple{x_1,y_1},\ldots,\tuple{x_n,y_n}) \\
-\\
- & = & \argmax_\Phi\;\frac{p(\Phi,\; \tuple{x_1,y_1},\ldots,\tuple{x_n,y_n})}{p(\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n})} \\
-\\
- & = & \argmax_\Phi\;p(\Phi,\;\tuple{x_1,y_1},\ldots,\tuple{x_n,y_n})
- \end{eqnarray*}
-}
 
 \slideplain{5. Ensembles}
 
@@ -393,15 +378,16 @@ Preetum Nakkiran, Gal Kaplun, Yamini Bansal, Tristan Yang, Boaz Barak, Ilya Suts
 
 \slide{7. Grokking}
 
-Power et al. {bf Grokking: Generalization Beyond Overfitting on Small Algorithmic Datasets [ArXiv 2201.02177]
+Power et al. Grokking: Generalization Beyond Overfitting on Small Algorithmic Datasets [ArXiv 2201.02177]
 
 \vfill
 Wang et al. ``Grokked Transformers are Implicit Reasoners:
 A Mechanistic Journey to the Edge of Generalization'' [arXiv 2405.15071]
 
 \vfill
-There is growing evidence that regularization ($L_2$ shrikage) over long runs lead to a ``phase transition''
-reducing generalization loss late in training without improving the training loss.
+These papers present evidence that regularization ($L_2$ shrikage) over long runs leads to a ``phase transition''
+reducing generalization loss late in training without improving the training loss.  But this may be specific to certain
+simpe algorithmic problems like numerical addition.
 
 \slide{END}
 
