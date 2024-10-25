@@ -14,7 +14,7 @@
 
 
 \bigskip
-{\bf Problem 1: Running Averages.}  Consider a sequence of vectors $x_0$, $x_1$, $\ldots$ and two running averages $y_t$ and $z_t$ defined by
+{\bf Problem 1: Moving Averages.}  Consider a sequence of vectors $x_0$, $x_1$, $\ldots$ and two running averages $y_t$ and $z_t$ defined by
 as follows for $0 < \beta < 1$ and $\gamma > 0$.
 \begin{eqnarray*}
   y_0 & = & 0 \\
@@ -233,7 +233,7 @@ $$E_{\tuple{x,y} \sim \pop}\;\frac{1}{\sqrt{s(\Phi^*,x,y)+ \epsilon}}\;\nabla_\P
 \solution{Yes, the example considered here is just a special case of RMSProp or Adam which are in fact not guaranteed to converge to a stationary point (or local optimum) of the loss function.}
 
 \bigskip
-{\bf Problem 7}  This problem is on a non-standard form of adaptive learning rates.  In general when we consider the significance of a change $\Delta x$ to a number $x$ it is reasonable to consider
+{\bf Problem 7.}  This problem is on a non-standard form of adaptive learning rates.  In general when we consider the significance of a change $\Delta x$ to a number $x$ it is reasonable to consider
 the change as a percentage of $x$.  For example, a baseline annual raise in salary is often a percentage raise when different employees have significantly different salaries.  So we might consider the following
 ``multiplicative update SGD'' which we will write here for batch size 1.
 
@@ -301,7 +301,7 @@ It has been shown that stationary points of Adam and RMSProp updates do not nece
 }
 
 \bigskip
-{\bf Problem 1: 25 pts.}  This problem is on interaction of learning rate and scaling of the loss function.
+{\bf Problem 8.}  This problem is on interaction of learning rate and scaling of the loss function.
 
     \medskip
 
@@ -338,7 +338,7 @@ If we replace ${\cal L}$ by $2{\cal L}$ what learning rate $\eta'$ should we use
 to scaling the loss function.  It is not clear whether this has any significance.}
 
 \bigskip
-{\bf Problem 2. 25 pts}  This problem is on a non-standard form of adaptive learning rates.  In general when we consider the significance of a change $\Delta x$ to a number $x$ it is reasonable to consider
+{\bf Problem 9.}  This problem is on a non-standard form of adaptive learning rates.  In general when we consider the significance of a change $\Delta x$ to a number $x$ it is reasonable to consider
 the change as a percentage of $x$.  For example, a baseline annual raise in salary is often a percentage raise when different employees have significantly different salaries.  So we might consider the following
 ``multiplicative update SGD'' which we will write here for batch size 1.
 
@@ -405,59 +405,4 @@ In Adam and RMSProp we have a weighting that depends on a moving average of the 
 It has been shown that stationary points of Adam and RMSProp updates do not necessarily correspond to stationary points of the loss function.
 }
     
-\bigskip
-{\bf Problem 3. (25 pts)} This problem is on robust loss functions.  With a robust loss one identifies ``outliers'' in the data and ``gives up'' on modeling the outliers.
-In particular we can consider the following bounded version of cross-entropy loss
-\begin{eqnarray*}
-  {\cal L}(\Phi,x,y) & = & \lmax \;\tanh \left(\frac{- \ln P_\Phi(y|x)}{\lmax}\right) \\
-  \\
-  \tanh(z) & = & \frac{2}{1+e^{-2z}} - 1.
-\end{eqnarray*}
-For $z \geq 0$ we have $\tanh(z) \geq 0$ and we have that the above robust loss is non-negative and can never be larger than $\lmax$.
-
-\medskip
-{\bf (a)}  Consider the function $\lmax \;\tanh(\frac{z}{\lmax})$. Use a first order Taylor expansion of the $\tanh$ function about zero to show that for $|z| << \lmax$ we have
-$$\lmax\; \tanh\left(\frac{z}{\lmax}\right) \approx z$$
-This implies that the robust cross entropy loss is essentially equal to the cross entropy loss when the cross entropy loss is small compared to $\lmax$.
-
-\solution{
-  The first order Taylor expansion of the $\tanh$ function about zero is
-  $$\tanh(u) \approx u$$ yielding the desired result.
-}
-
-\medskip
-{\bf (b)} Consider the case where the cross-entropy loss is large compared to $\lmax$.  For $z >> 1$ we have that the derivative $\tanh'(z)$ is essentially zero.
-What parameter update is made on a training point whose cross entropy loss is large compared to $\lmax$ if we model $\tanh'(z) = 0$ in such cases.
-
-\solution{
-  The update on a data point $(x,y)$ is
-  $$\Phi^{t+1} = \Phi^t - \eta \nabla_\Phi {\cal L}(\Phi,x,y)$$
-  At a point where the derivative of the sigmoid is essentially zero this update will be essentially zero.  So ``outliers'' do not effect the model parameters.
-}
-
-\medskip
-{\bf (c)} Look up the PAC-Bayesian generalization guarantee that is stated in terms of the $L_2$ norm of the weight vector.
-Explain why the robust loss function comes with a better PAC-Bayesian generalization guarantee.  Intuitively, the improvement in generalization
-is due to insensitivity to ``outliers'' (or things the model cannot understand).
-
-\solution{
-  The $L_2$ PAC-Bayeisan guarantee in the notes is
-  $${\cal L}_\sigma(\Phi) \leq \frac{10}{9}\left(\hat{\cal L}_\sigma(\Phi) + \frac{5\lmax}{N}\left(\frac{||\Phi -\Phi_{\mathrm{init}}||^2}{2\sigma^2} + \ln \frac{1}{\delta}\right)\right)$$
-  Reducing $\lmax$ both reduces $\hat{L}_\sigma(\Phi)$ and reduces the penalty for the model complexity (the norm squared of the distance from the initialization).
-}
-
-\medskip
-{\bf (d)} Curriculum learning is the idea that one first learns how to solve easy problems and then gradually learns ever harder problems. At a high informal level describe a learning algorithm based on the above robust loss function
-which can be intuitively motivated as curriculum learning.
-
-
-\solution{
-  Easier problems should correspond to cases where the cross entropy loss can be made small.  So setting $\lmax$ to be smallish will focus the model on the easy problems while ignoring the hard problems.
-  Gradually increasing $\lmax$ will gradually pay more attention to the harder problems.
-
-  \medskip
-  Another possible answer is that holding $\lmax$ fixed will focus first on the easy problems ignoring the hard problems but as the understanding of easy problems improves the harder problems become easy problems and
-  we automatically gradually pay attention to harder and harder problems even with a fixed value of $\lmax$.
-}
-
 \end{document}
