@@ -33,40 +33,9 @@ $\tuple{x,y,i}$ defined by
 \solution{
 $$\Phi^* = \argmax_\Phi\;\min_\Psi \;E_{x,y,i \sim \tilde{P}(x,y,i)}\;\;-\ln P_\Psi(i|x,y)$$
 }
- 
-\bigskip
-{\bf Problem 2. GAN instability}
-
-Consider the following adversarial objective where $x$ and $y$ are scalars (real numbers).
-
-$$\max_x\;\min_y \;xy$$
-
-\medskip
-(a) Write the differential equation for gradient flow of this adversarial objective.
-
-\ignore{
-  \begin{eqnarray*}
-    \frac{dx}{dt} & = & y \\
-    \\
-    \frac{dy}{dt} & = & -x
-  \end{eqnarray*}
-}
-
-\medskip
-(b) Give a general solution to your differential equation. (Hint: It goes in a circle).  You solution should have parameters
-allowing for any given initial value of $x$ and $y$.
-
-\ignore{
-
-  \begin{eqnarray*}
-    x & = & r_0\sin(t + \Theta_0) \\
-    \\
-    y & = & r_0\cos(t + \Theta_0)
-  \end{eqnarray*}
-}
 
 \bigskip
-{\bf Problem 3. Contrastive GANs.}
+{\bf Problem 2. Contrastive GANs.}
 
 A GAN can be built with a ``contrastive'' discriminator.  Rather than
 estimate the probability that $y$ is from the population, the
@@ -90,7 +59,7 @@ Restate the above definition of $\tilde{P}_\Phi^{(N)}$ and the GAN adversarial o
 
 \bigskip 
 
-{\bf Problem 4. Reshaping Noise in GANs.} A GAN generator is typically given a random noise vector $z \sim {\cal N}(0,I)$.  Give equations defining a method for computing $z'$ from $z$ such that
+{\bf Problem 3. Reshaping Noise in GANs.} A GAN generator is typically given a random noise vector $z \sim {\cal N}(0,I)$.  Give equations defining a method for computing $z'$ from $z$ such that
 the distribution on $z'$ is a
 mixture of two Gaussians each with a different mean and diagonal covariance matrix.  Hint: use a step-function threshold on the first component of $z$ to compute a binary value and use the other components
 of $z$ to define the Gaussian variables.
@@ -105,7 +74,7 @@ of $z$ to define the Gaussian variables.
     
 
 \bigskip
-{\bf Problem 5.}  This problem is on GAN language modeling.  A GAN takes noise as input and transforms it to an output.  We consider the case where the output is a string of symbols $w_1,\ldots, w_T$
+{\bf Problem 4.}  This problem is on GAN language modeling.  A GAN takes noise as input and transforms it to an output.  We consider the case where the output is a string of symbols $w_1,\ldots, w_T$
 where for simplicity we always generate a string of exactly length $T$ and where the words are integers with $w_t \in \{0,\ldots,I-1\}$ where $I$ is the size of the vocabulary.
 The GAN parameters are just the parameters of a bigram model, i.e., the parameters are probability tables
 

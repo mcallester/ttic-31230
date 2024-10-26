@@ -437,58 +437,5 @@ as a KL divergence.  Explain why your expression implies that the ELBO is a lowe
   The lower bound property follows from the fact that KL divergence is non-negative.
 }
 
-\bigskip
-{\bf Problem 13. The Donsker-Varadhan Bound}
-(a) For three distributions $P$, $Q$ and $G$ show the following equality.
-$$KL(P,Q) =  \left(E_{y \sim P} \;\ln \frac{G(y)}{Q(y)}\right) + KL(P,G)$$
-
-\solution{
-  \begin{eqnarray*}
-    KL(P,Q) & = & E_{y \sim P} \;\ln \frac{P(y)}{Q(y)} \\
-    & = & E_{y \sim P} \;\ln \frac{P(y)G(y)}{Q(y)G(y)} \\
-    & = & \left(E_{y \sim P} \;\ln \frac{G(y)}{Q(y)}\right) + \left(E_{y \sim P} \;\ln \frac{P(y)}{G(y)}\right) \\
-    & = & \left(E_{y \sim P} \;\ln \frac{G(y)}{Q(y)}\right) + KL(P,G) \\
-  \end{eqnarray*}
-}
-
-(b) Show that this implies
-\begin{equation}
-  KL(P,Q) =  \sup_G \;E_{y \sim P}\; \ln \frac{G(y)}{Q(y)}
-\end{equation}
-
-
-  \solution{
-    Part (a) implies that $$KL(P,Q) \geq \;E_{y \sim P}\; \ln \frac{G(y)}{Q(y)}$$
-    and also implies that for $G = P$ we have equality.
-  }
-  
-(c) Now define
-\begin{eqnarray}
-  G(y) & = & \frac{1}{Z}\;Q(y)e^{s(y)} \\
-  \nonumber \\
-  Z & = & \sum_y \;Q(y)e^{s(y)}
-\end{eqnarray}
-
-Show that if $Q$ has full support (is nonzero everywhere) then any distribution $G$ with full supprt can be represented by a score $s(y)$ satisfying (4) and that under this
-change of variables we have
-$$KL(P,Q) =  \sup_s \;E_{y \sim P}\; s(y) - \ln E_{y \sim Q} \;e^{s(y)}$$
-
-\solution{
-  Given any $G$ which does not assign zero probability to any point we can take $s(y) = \ln\frac{G(y)}{Q(y)}$ which gives $Z = 1$ and satisfies (4).
-  Plugging (4) into (3) gives the result for distributions with full support.  Arbitrary distributions are limits of distributions with full support
-  and the result holds in general.
-}
-
-\medskip
-This is the Donsker-Varadhan variational representation of KL-divergence.
-This can be used in cases where we can sample from $P$ and $Q$ but cannot compute $P(y)$ or $Q(y)$.
-Instead we can use a model score $s_\Phi(y)$ where $s_\Phi(y)$ can be computed.
-
-\medskip
-
-{\bf Problem:}
-The mutual information between two random variables can be defined in various ways.  Use the definitions of entropy, conditional entropy, and KL divergence to show the equivalence of the following two expressions for the mutual information I(x,y).
-
-H(x) - H(x|y) = E_y\left[KL(P(x|y),P(x))\right]
 
 \end{document}
