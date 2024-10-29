@@ -1,5 +1,6 @@
 \input /users/davidmcallester/icloud/tex/SlidePreamble
 \input /users/davidmcallester/icloud/tex/preamble
+\newcommand{\bayes}{\mathrm{Bayes}}
 
 \begin{document}
 
@@ -42,61 +43,130 @@ A variational autoencoder (VAE) is defined by three parts:
 \item An encoder distribution $P_\enc(z|y)$.
 
 \vfill
-\item A ``prior'' distribution $P_\pri(z)$
+\item A decoder distribution $P_\dec(y|z)$
 
 \vfill
-\item A generator distribution $P_\dec(y|z)$
+\item A ``prior'' distribution $P_\pri(z)$
+
 \end{itemize}
 
 \vfill
-VAE generation uses $P_\pri(z)$ and $P_\dec(y|z)$ (like a GAN).
+VAE generation uses $P_\pri(z)$ and $P_\dec(y|z)$.
 
 \vfill
-VAE training uses an encoder $P_\enc(z|y)$.
+VAE training uses the encoder $P_\enc(z|y)$.
 
-\slide{Fixing an Arbitray Encoder}
-Fix the encoder arbitrarily and train $P_\pri$ and $P_\dec$ by cross entropy loss.
+\slide{Two Joint Distributions}
 
-$${\color{red}\pri^*,\dec^* = \argmin_{\pri,\dec}\;E_{y \sim \pop(y),z \sim \enc(z|y)}\left[-\ln P_\pri(z)P_\dec(y|z)\right]}$$
-
-\vfill
-Universality gives
-
-{\color{red} $$P_{\pri^*}(z)P_{\dec^*}(y|z) = \pop(y)P_\enc(z|y)$$}
+A VAE defines two joint distributions on $y$ and $z$, namely $P_\bayes(y,z)$ and $P_\enc(y,z)$ defined by
 
 \vfill
-Sampling from $P_{\pri^*}(z)P_{\dec^*}(y|z)$ now samples $y$ from the population.
+$${\color{red} P_\bayes(y,z) = P_\pri(z)P_\dec(y|z)}$$
 
-\slide{Training the Encoder --- the ELBO}
+\vfill
+$${\color{red} P_\enc(y,z) = \pop(y)P_\enc(z|y)}$$
 
-In practice the choice of encoder matters.
+\slide{Training the Bayesian Model}
 
+Fix the encoder arbitrarily and train $P_\bayes$ by cross entropy.
+
+$${\color{red}\bayes^* = \argmin_{\bayes}\;E_{(y,z) \sim P_\enc(y,z)}\left[-\ln P_\bayes(y,z)\right]}$$
+
+\vfill
+Under Universality we have that generating $y$ from $P_{\bayes^*}$ now samples $y$ from $\pop$.
+
+\slide{Training the Encoder}
+
+If the Bayes model is not universal then the choice of encoder matters.
+
+{\color{red}
 \begin{eqnarray*}
-P(y) & = & \frac{\pop(y)P_\enc(z|y)}{P_\enc(z|y)} \;=\; \frac{P_\enc(z)P_\enc(y|z)}{P_\enc(z|y)} \\ \\
+\pop(y) & = & \frac{\pop(y)P_\enc(z|y)}{P_\enc(z|y)} \;=\; \frac{P_\enc(y,z)}{P_\enc(z|y)} \\ \\
 \\
-H(y) & \leq & E_{y \sim \pop,z \sim P_\enc(z|y)}\left[ - \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]
+H(y) & \leq & E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\bayes(y,z)}{P_\enc(z|y)}\right] \\
+\\
+\\
+\enc^* & = & \argmin_\enc\;E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\bayes(y,z)}{P_\enc(z|y)}\right]
 \end{eqnarray*}
+}
+
+\slide{VAEs Evolved from Variational Bayesian Inference}
+Here $y$ is the evidence about $z$ under the Bayesian model.
+
+{\color{red}
+{\huge
+\begin{eqnarray*}
+\ln P_{\mathrm{Bayes}}(y) & =  & \ln \frac{P_{\mathrm{Bayes}}(y)P_{\mathrm{Bayes}}(z|y)}{P_{\mathrm{Bayes}}(z|y)} \\
+\\
+\\
+& = & E_{z \sim P_\enc(z|y)} \left[\ln \frac{P_{\bayes}(y,z)}{P_{\mathrm{Bayes}}(z|y)}\right] \\
+\\
+\\
+& \geq & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\bayes(y,z)}}{P_\enc(z|y)}\right] \\
+\end{eqnarray*}
+}}
+Here we have replaced a cross-entropy by an entropy.
+
+\slide{Variational Bayesian Inference}
+$y$ is the evidence about $z$ under the Bayesian model.
 
 \vfill
-The inequality follows from the fact that cross-entropy (using the models $P_\pri$ and $P_\dec$) upper bounds entropy.
+{\color{red}
+{\huge
+\begin{eqnarray*}
+\ln P_{\mathrm{Bayes}}(y) & \geq & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_\bayes(y,z)}{P_\enc(z|y)}\right]
+\end{eqnarray*}
+}}
+
+
 
 \vfill
-This upper bound on $H(y)$ is called {\bf the ELBO} (Acronym described later).
+This is the {\bf evidence lower bound} or {\bf ELBO}.
+
+\slide{Variational Bayesian Inference}
+
+{\color{red}
+{\huge
+\begin{eqnarray*}
+\ln P_{\mathrm{Bayes}}(y) & =  & \ln \frac{P_{\mathrm{Bayes}}(y)P_{\mathrm{Bayes}}(z|y)}{P_{\mathrm{Bayes}}(z|y)} \\
+\\
+\\
+& \geq & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\bayes(y,z)}}{P_\enc(z|y)}\right] \\
+\\
+\\
+\enc^* & = & \argmin_\enc E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\bayes(y,z)}}{P_\enc(z|y)}\right] \;=\; P_\bayes(z|y)
+\end{eqnarray*}
+}}
+
+
+\slideplain{Expectation Maximization (EM)}
+
+EM is used when $P_\enc(z|y)$ can be set to $P_\bayes(z|y)$ but
+$P_\bayes(y,z)$ is highly restricted and cannot express $P_\enc(y,z)$.
+
+{\huge
+\vfill
+\begin{eqnarray*}
+\mbox{E step:}\;P_\enc^*(z|y) & = & P_\bayes(z|y) \\
+\\
+\mbox{M step:}\;P_\bayes^{t+1}(y,z) & = & \argmin_\bayes E_{y \sim \train, z \sim P_\bayes^t(z|y)} \left[-\ln P_\bayes(y,z)\right]
+\end{eqnarray*}
+}
 
 \slide{Difficulties in Training the Encoder}
 
 
-$$\enc^* = \argmin_{\enc}\;\;E_{y\sim \pop(y),{\color{red} z\sim P_\enc(z|y)}}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{{\color{red} P_\enc(z|y)}}\right]$$
+$$\enc^* = \argmin_{\enc}\;\;E_{y\sim \pop(y),{\color{red} z\sim P_\enc(z|y)}}\;\left[- \ln \frac{P_\bayes(y,z)}{P_\enc(z|y)}\right]$$
 
 \vfill
 Gradient descent on the encoder parameters must take into account the fact that we are sampling from the encoder.
 
 \vfill
-Training a sampling distribution typically suffers from mode collapse (as in GANs).
+Training a sampling distribution typically suffers from {\bf mode collapse} (as in GANs).
 
 \vfill
-Often the encoder collapses to fixing $z = 0$. $P_\dec(y|z)$ can always just ignore $z$. We are then back to standard cross-entropy loss.
-This is called posterior collapse.
+The encoder can collapses to a fixed $z = 0$. $P_\dec(y|z)$ can always just ignore $z$. We are then back to standard cross-entropy loss.
+This is called {\bf posterior collapse}.
 
 \slide{Types of VAEs}
 
@@ -104,103 +174,43 @@ In {\bf a Gaussian VAE} the we have $P_\pri(z)$ and $P_\enc(z|y)$ are both Gauss
 A diffusion model involves a Gaussian VAE at each incremental step of diffusion.
 
 \vfill
-{\bf A Vector Quantized VAE} (VQ-VAE) defines $P\enc(z|y)$ in terms of vector quantization analogous to $K$-means clustering.
+{\bf A Vector Quantized VAE} (VQ-VAE) defines $P_\enc(z|y)$ in terms of vector quantization analogous to $K$-means clustering.
 VQ-VAEs provide a translation from continuous data, such as images, to token data that can be modeled with a transformer.
-This is done in Chat-GPT 4o and other multi-modal language models.
+This is used in the image understanding abilities of GPT-4o and in autoregressive image generation
+which is competative with diffusion image generation.
 
 \vfill
-We will consider each these approaches.
+We will first consider Gaussian VAEs and discuss VQ-VAEs later.
 
 \slide{Gaussian VAEs}
 
+As an example take
 
-\vfill
-We sample noise $\epsilon$ from a Gaussian distribution on $R^d$.
-
-\vfill
-{\huge
 \begin{eqnarray*}
-\enc^* & = & \argmin_{\enc}\;\;E_{y,{\color{red} \epsilon \sim {\cal N}(0,\sigma I)}}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]\;\;z = \hat{z}(y) + \epsilon \\
+P_\pri(z) & = & {\cal N}(0,I) \\
 \\
+P_\enc(z|y) & = & {\cal N}(\hat{z}(y),I) \\
 \\
-& = & \argmin_\enc\;{\color{red} KL(P_\enc(z|y),P_\pri(z))} + E_{z \sim P_\enc(z|y)}\left[- \ln P_\dec(y|z)\right] \\
-\\
-\\
-&=& \argmin_\enc\;{\color{red} \frac{||\hat{z}_\enc(y) - \hat{z}_\pri||^2}{2\sigma^2}} + E_\epsilon\;\frac{||y - \hat{y}_\dec(\hat{z}_\enc(y,\epsilon))||^2}{2\sigma^2}
+P_\dec(y|z) & = & {\cal N}(\hat{y}(z),I)
 \end{eqnarray*}
 
-
 \vfill
-A closed-form expression for the KL term avoids sampling noise.
-}
+In general we can use arbitrary Gaussians but this example makes the math simple.
+\slide{Gaussian VAEs}
 
-\slide{VAEs Evolved from Variational Bayesian Inference}
-
-$P_\pri(z)$ is interpreted as the Bayesian prior on ``hypothesis'' $z$.
-
-\vfill
-$P_\dec(y|z)$ is interpreted as the propability of the ``evidence'' $y$ given hypothesis $z$.
-
-\vfill
-We consider the Bayesian distribution defined by $P_\pri(z)$ and $P_\dec(y|z)$ and we want to compute $P_{\pri,\dec}(z|y)$
-under this Bayesian distribution.  I will write this $P_{\mathrm{Bayes}}(z|y)$
-
-\vfill
-$P_\enc(z|y)$ is interpreted as an approximation for $P_{\pri,\dec}(z|y)$.
-
-\slide{Bayesian Interpretation}
 {\huge
 \begin{eqnarray*}
-\ln P_{\mathrm{Bayes}}(y) & =  & \ln \frac{P_{\mathrm{Bayes}}(y)(z)P_{\mathrm{Bayes}}(z|y)}{P_{\mathrm{Bayes}}(z|y)} \\
+&  & E_{(y,z) \sim P_\enc}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right] \\
 \\
 \\
-& = & E_{z \sim P_\enc(z|y)} \left[\ln \frac{P_{\pri}(z)P_\dec(y|z)}{P_{\mathrm{Bayes}}(z|y)}\right] \\
+& = & E_{y \sim \pop} \left[ KL(P_\enc(z|y),P_\pri(z)) + E_{z \sim P_\enc(z|y)}\left[- \ln P_\dec(y|z)\right]\right] \\
 \\
 \\
-& \geq & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\pri}(z)P_\dec(y|z)}{P_\enc(z|y)}\right] \\
-\end{eqnarray*}
-}
-Here we have replaced a cross-entropy by an entropy.
-
-\slide{Bayesian Interpretation}
-{\huge
-\begin{eqnarray*}
-\ln P_{\mathrm{Bayes}}(y) & \geq & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\pri}(z)P_\dec(y|z)}{P_\enc(z|y)}\right] \\
+&=& E_{y \sim \pop} \left[\frac{1}{2}||\hat{z}_\enc(y)||^2 + E_\epsilon\left[\frac{1}{2}||y - \hat{y}_\dec(\hat{z}_\enc(y)+\epsilon))||^2\right]\right]
 \end{eqnarray*}
 }
 
-Here $y$ is the evidence about $z$ under the Bayesian model.
 
-\vfill
-This is the {\bf evidence lower bound} or {\bf ELBO}.
-
-\slideplain{Expectation Maximization (EM)}
-
-Expectation Maximimization (EM) applies in the (highly special) case where the exact posterior $P_{\pri,\dec}(z|y)$ is samplable and computable.
-EM alternates exact optimization of $\enc$ and the pair $(\pri,\dec)$ in:
-$$\mbox{VAE:}\;\;\;\;\;\;\; {\color{red} \pri^*,\dec^*} = \argmin_{\color{red} \pri,\dec} \min_{\color{red} \enc} E_{y,\;z \sim P_{\color{red} \enc}(z|y)}\;\;- \ln \frac{P_{\color{red} \pri,\dec}(z,y)}{P_{\color{red} \enc}(z|y)}$$
-
-\vfill
-$$\mbox{EM:}\;\;\;\;\;\; {\color{red} \pri^{t+1},\dec^{t+1}} =  \argmin_{\color{red} \pri,\dec}\;\;\;\;E_{y,\;z \sim P_{\color{red} \pri^t,\dec^t}(z|y)}\; - \ln P_{\color{red} \pri,\dec}(z,y)$$
-
-\vfill
-\centerline{\hspace{1em} Inference \hspace{6em} Update \hspace{2.5em}~}
-\centerline{(E Step) \hspace{6em} (M Step) ~}
-\centerline{ $P_\enc(z|y) = P_{\pri^{\color{red} t},\dec^{\color{red} t}}(z|y)$ \hspace{2.5em} Hold $P_\enc(z|y)$ fixed \hspace{0em}~}
-\
-slide{Posterior Collapse}
-
-
-{\color{red} $$P_\pri(z)P_\dec(y|z) = \pop(y)P_\enc(z|y)$$}
-
-\vfill
-Any joint distribution on $(y,z)$ with the desired marginal on $y$ optimizes the bound.
-
-\vfill
-This allows the prior and the encoder (the posterior) to both degenerate to having no mutual information with $y$.
-
-\vfill
-This often happens in language modeling.
 
 \slide{Hierarchical VAEs}
 
