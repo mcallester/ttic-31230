@@ -1,6 +1,5 @@
 \input /users/davidmcallester/icloud/tex/SlidePreamble
 \input /users/davidmcallester/icloud/tex/preamble
-\newcommand{\bayes}{\mathrm{Bayes}}
 
 \begin{document}
 
@@ -18,22 +17,17 @@
 
 \vfill \vfill
 
-\slide{Fundamental Equations of Deep Learning}
+\slide{Widely Used VAEs}
 
-\begin{itemize}
-\item Cross Entropy Loss: $\Phi^* = {\color{red} \argmin_\Phi E_{(x,y)\sim \pop}\left[-\ln P_\Phi(y|x)\right]}$.
-
-\vfill
-\item GAN: $\gen^* = {\color{red} \argmax_{\gen} \min_{\disc} E_{i \sim \{-1,1\}, y \sim P_i}\left[-\ln P_{\disc}(i|y)\right]}$.
+{\bf Diffusion Models:} A diffusion model is a hierarchical Gaussian VAE.
 
 \vfill
-\item VAE (including diffusion models)
-\begin{eqnarray*}
-& & \pri^*,\dec^*,\enc^* \\
-\\
-& = & {\color{red} \argmin_{\pri,\dec,\enc}\;E_{y \sim \pop,z \sim P_\enc(z|y)}\left[ - \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]}
-\end{eqnarray*}
-\end{itemize}
+{\bf Vector Quantized VAEs:} A VQ-VAE defines $P_\enc(z|y)$ in terms of vector quantization analogous to $K$-means clustering.
+VQ-VAEs provide a translation from continuous data, such as images, to token data that can be modelled with a transformer.
+This is done in GPT-4o.
+
+\vfill
+{\bf Auto-Regressive Language Models:} An auto-regressive language model, such as a transformer, is mathematically equivalent to a hierarchical VAE.
 
 \slide{VAEs}
 A variational autoencoder (VAE) is defined by three parts:
@@ -58,129 +52,219 @@ VAE training uses the encoder $P_\enc(z|y)$.
 
 \slide{Two Joint Distributions}
 
-A VAE defines two joint distributions on $y$ and $z$, namely $P_\bayes(y,z)$ and $P_\enc(y,z)$ defined by
+A VAE defines two joint distributions on $y$ and $z$, namely $P_\gen(y,z)$ and $P_\enc(y,z)$ defined by
 
 \vfill
-$${\color{red} P_\bayes(y,z) = P_\pri(z)P_\dec(y|z)}$$
+$${\color{red} P_\gen(y,z) = P_\pri(z)P_\dec(y|z)}$$
 
 \vfill
 $${\color{red} P_\enc(y,z) = \pop(y)P_\enc(z|y)}$$
 
-\slide{Training the Bayesian Model}
+\slide{Training the Generator}
 
-Fix the encoder arbitrarily and train $P_\bayes$ by cross entropy.
+Fix the encoder arbitrarily and train $P_\gen$ by cross entropy.
 
-$${\color{red}\bayes^* = \argmin_{\bayes}\;E_{(y,z) \sim P_\enc(y,z)}\left[-\ln P_\bayes(y,z)\right]}$$
+$${\color{red}\gen^* = \argmin_{\gen}\;E_{(y,z) \sim P_\enc(y,z)}\left[-\ln P_\gen(y,z)\right]}$$
 
 \vfill
-Under Universality we have that generating $y$ from $P_{\bayes^*}$ now samples $y$ from $\pop$.
+Under universality we have $P_{\gen^*} = P_\enc$ and hence the generator distribution on $y$ defined by $\gen^*$ matches the population distribution.
+
+\vfill
+In a diffusion model the encoder just adds noise.  The encoder is not trained.
+
+\slide{The ELBO Loss}
+
+
+{\color{red} \huge
+\begin{eqnarray*}
+\pop(y) & = & \frac{\pop(y)P_\enc(z|y)}{P_\enc(z|y)} \;=\; \frac{P_\enc(y,z)}{P_\enc(z|y)} \\
+\\
+\\
+E_{(y,z) \sim P_\enc}\left[ -\ln \pop(y)\right] & = & E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\enc(y,z)}{P_\enc(z|y)}\right] \\
+\\
+\\
+H(y) & \leq & E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\gen(y,z)}{P_\enc(z|y)}\right]
+\end{eqnarray*}
+}
+
+\vfill
+The right hand side of the last line is called the {\bf ELBO Loss}.
+
+\slide{The Variational Bayes Interpretation}
+The generator is interpreted as a Bayesian model where $y$ is evidence for $z$.
+
+{\color{red}
+{\huge
+\begin{eqnarray*}
+\ln P_{\gen}(y) & =  & \ln \frac{P_{\gen}(y)P_{\gen}(z|y)}{P_{\gen}(z|y)} \\
+\\
+\\
+& = & E_{z \sim P_\enc(z|y)} \left[\ln \frac{P_{\gen}(y,z)}{P_{\gen}(z|y)}\right] \\
+\\
+\\
+& \geq & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\gen(y,z)}}{P_\enc(z|y)}\right]
+\end{eqnarray*}
+}}
+\vfill
+Hence the name {\bf evidence lower bound} or {\bf ELBO}.
+
+\slide{Fundamental Equations of Deep Learning}
+
+\begin{itemize}
+\item Cross Entropy Loss: $\Phi^* =$
+$${\color{red} \argmin_{\Phi} E_{(x,y)\sim \pop}\left[-\ln P_\Phi(y|x)\right]}$$
+
+\vfill
+\item GAN: $\gen^* =$
+$${\color{red} \argmax_{\gen} \min_{\disc} E_{i \sim \{-1,1\}, y \sim P_i}\left[-\ln P_{\disc}(i|y)\right]}$$
+
+\vfill
+\item VAE: $\pri^*,\dec^*,\enc^* =$
+{\color{red} $$\argmin_{\pri,\dec,\enc}\;E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\gen(y,z)}{P_\enc(z|y)}\right]$$}
+\end{itemize}
 
 \slide{Training the Encoder}
 
-If the Bayes model is not universal then the choice of encoder matters.
+In diffusion models the encoder simply adds noise and is not trained.
 
-{\color{red}
+\vfill
+In a VQ-VAE the encoder is trained. A naive approach to training the encoder is to optimize the ELBO loss.
+
+{\color{red} $$\enc^* = \argmin_\enc E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\gen(y,z)}{P_\enc(z|y)}\right]$$}
+
+\slide{Training the Encoder}
+
+{\color{red} $$\enc^* = \argmin_\enc E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\gen(y,z)}{P_\enc(z|y)}\right]$$}
+
+\vfill
+Unfortunately this optimization involves optimizing a sampling distribution (the encoder).  As with GANs,
+optimizing a sampling distribution (such as a GAN generator) is subject to mode collapse --- the loss
+function is very forgiving of a failure of the sampling distribution to cover the desired space of
+values.
+
+\slide{Training the Encoder}
+
+In a VQ-VAE the encoder is traned jointly with the decoder $P_\dec(y|z)$ but is trained independently of $P_\pri(z)$.  $P_\pri(z)$ is trained later using a transformer model.
+The encoder of a VQ-VAE is closely related to K-means clustering.   In a VQ-VAE the encoder converts vectors to tokens
+so that a transformer can be applied.
+
+\vfill
+This minimal training of the encoder again exploits the fact that under universality $\pop(y)$ can be modelled fully for any encoder.
+
+
+\vfill
+A different approach to training the encoder, an ME-VAE, is discussed below.
+
+\slide{Hierarchical VAEs}
+
+
+\centerline{\includegraphics[width = 7in]{\images/DiffSequence}}
+
+\vfill
+{\huge
+\centerline{{\color{red} [Sally talked to John]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red} [Sally talked to]}
+$\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red} []}}
+}
+
+\vfill
+\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
+
+\slide{Hierarchical VAEs}
+\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
+
+\vfill
+{\bf Encoder}: $\pop(y)$, $P_\enc(z_1|y)$,$P_\enc(z_2|z_1),\ldots,P(z_N|Z_{N-1})$.
+
+
+\vfill
+{\bf Generator}: $P_\pri(z_N),P_\dec(z_{N-1}|z_N),\ldots,P_\dec(z_1|z_2),P_\dec(y|z_1)$
+
+\vfill
+The encoder and the decoder define distributions
+$P_\enc(y,z_1,\ldots,z_N)$ and $P_\gen(y,z_1,\ldots,z_N)$ respectively.
+
+
+\slide{Hierarchical VAEs}
+
+\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
+
+\vfill
+\begin{itemize}
+\item autoregressive models
+
+\vfill
+\item diffusion models
+\end{itemize}
+
+\slide{Hierarchical ELBO Loss}
+
 \begin{eqnarray*}
-\pop(y) & = & \frac{\pop(y)P_\enc(z|y)}{P_\enc(z|y)} \;=\; \frac{P_\enc(y,z)}{P_\enc(z|y)} \\ \\
+H(y) & = & E_{(y,z_1,\ldots,z_n) \sim
+P_\enc}\left[- \ln\frac{P_\gen(y,z_1,\ldots,z_n)}{P_\enc(z_1,\ldots,z_N|y)}\right]\\
+\end{eqnarray*}
+
+\slide{EM-VAEs}
+
+The use of minimal encoder training may reflect the mode collapse problem of training a sampling distribution, such as a GAN generator or a VAE encoder.
+
+\vfill
+The situation might be different if a better method were available for training the encoder.
+Here I will propose a method for training the encoder that avoids the mode collapse problem.
+
+\slide{EM-VAEs}
+We start with the following ``optimum encoder'' inequality.
+
+\vfill
+{\color{red}
+$$E_{y \sim \pop,z \sim P_\gen(z|y)}\left[ - \ln \frac{P_\gen(y,z)}{P_\gen(z|y)}\right] \leq E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\gen(y,z)}{P_\enc(z|y)}\right]$$
+}
+
+\vfill
+This implies $P_\enc^*(z|y) = P_\gen(z|y)$ and universality gives
+
+
+{\color{red} $$\enc^* = \argmin_\enc E_{(y,z) \sim P_\gen} -\ln P_\enc(z|y)$$}
+
+\slide{EM-VAE}
+
+\begin{eqnarray*}
+\mbox{E:}\;\enc^* & = & {\color{red} \argmin_\enc E_{(y,z) \sim P_\gen} -\ln P_\enc(z|y)} \\
 \\
-H(y) & \leq & E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\bayes(y,z)}{P_\enc(z|y)}\right] \\
+\mbox{M:}\;\gen^* & =& {\color{red} \argmin_{\gen}\;E_{(y,z) \sim P_\enc(y,z)}\left[-\ln P_\gen(y,z)\right]}
+\end{eqnarray*}
+
+\vfill
+The classical EM algorithm is the case where we alternate optimizing the encoder (the E step)
+and the generator (the M step) and where the E step yields $P_\enc(z|y) = P_\gen(z|y)$ exactly
+and where the $M$ step cannot fully fit the population.
+
+\vfill
+Here we can use SGD on these two objectives
+independent of details of the models.
+
+\slide{Derivation of the Encoder Optimum}
+
+{\color{red} \Large
+\begin{eqnarray*}
+& & E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\gen(y,z)}{P_\enc(z|y)}\right] \\
 \\
+& = & E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\gen(y,z)}{P_\gen(z|y)}\right] + E_{y \sim \pop} \;KL(P_\enc(z|y),P_\gen(z|y)) \\
 \\
-\enc^* & = & \argmin_\enc\;E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\bayes(y,z)}{P_\enc(z|y)}\right]
+& \geq & E_{(y,z) \sim P_\enc}\left[ - \ln \frac{P_\gen(y,z)}{P_\gen(z|y)}\right] \\
+\\
+& = & E_{(y,z) \sim P_\enc}\left[ - \ln P_\gen(y)\right] \\
+\\
+& = & E_{y \sim \pop,z \sim P_\gen(z|y)}\left[ - \ln P_\gen(y) \right]\\
+\\
+& = & E_{y \sim \pop,z \sim P_\gen(z|y)}\left[ - \ln \frac{P_\gen(y,z)}{P_\gen(z|y)}\right]
 \end{eqnarray*}
 }
 
-\slide{VAEs Evolved from Variational Bayesian Inference}
-Here $y$ is the evidence about $z$ under the Bayesian model.
 
-{\color{red}
-{\huge
-\begin{eqnarray*}
-\ln P_{\mathrm{Bayes}}(y) & =  & \ln \frac{P_{\mathrm{Bayes}}(y)P_{\mathrm{Bayes}}(z|y)}{P_{\mathrm{Bayes}}(z|y)} \\
-\\
-\\
-& = & E_{z \sim P_\enc(z|y)} \left[\ln \frac{P_{\bayes}(y,z)}{P_{\mathrm{Bayes}}(z|y)}\right] \\
-\\
-\\
-& \geq & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\bayes(y,z)}}{P_\enc(z|y)}\right] \\
-\end{eqnarray*}
-}}
-Here we have replaced a cross-entropy by an entropy.
+\slide{END}
 
-\slide{Variational Bayesian Inference}
-$y$ is the evidence about $z$ under the Bayesian model.
+\end{document}
 
-\vfill
-{\color{red}
-{\huge
-\begin{eqnarray*}
-\ln P_{\mathrm{Bayes}}(y) & \geq & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_\bayes(y,z)}{P_\enc(z|y)}\right]
-\end{eqnarray*}
-}}
-
-
-
-\vfill
-This is the {\bf evidence lower bound} or {\bf ELBO}.
-
-\slide{Variational Bayesian Inference}
-
-{\color{red}
-{\huge
-\begin{eqnarray*}
-\ln P_{\mathrm{Bayes}}(y) & =  & \ln \frac{P_{\mathrm{Bayes}}(y)P_{\mathrm{Bayes}}(z|y)}{P_{\mathrm{Bayes}}(z|y)} \\
-\\
-\\
-& \geq & E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\bayes(y,z)}}{P_\enc(z|y)}\right] \\
-\\
-\\
-\enc^* & = & \argmax_\enc E_{z \sim P_\enc(z|y)}\left[\ln \frac{P_{\bayes(y,z)}}{P_\enc(z|y)}\right] \;=\; P_\bayes(z|y)
-\end{eqnarray*}
-}}
-
-
-\slideplain{Expectation Maximization (EM)}
-
-EM is used when $P_\enc(z|y)$ can be set to $P_\bayes(z|y)$ but
-$P_\bayes(y,z)$ is highly restricted and cannot express $P_\enc(y,z)$.
-
-{\huge
-\vfill
-\begin{eqnarray*}
-\mbox{E step:}\;P_\enc^*(z|y) & = & P_\bayes(z|y) \\
-\\
-\mbox{M step:}\;P_\bayes^{t+1}(y,z) & = & \argmin_\bayes E_{y \sim \train, z \sim P_\bayes^t(z|y)} \left[-\ln P_\bayes(y,z)\right]
-\end{eqnarray*}
-}
-
-\slide{Difficulties in Training the Encoder}
-
-
-$$\enc^* = \argmin_{\enc}\;\;E_{y\sim \pop(y),{\color{red} z\sim P_\enc(z|y)}}\;\left[- \ln \frac{P_\bayes(y,z)}{P_\enc(z|y)}\right]$$
-
-\vfill
-Gradient descent on the encoder parameters must take into account the fact that we are sampling from the encoder.
-
-\vfill
-Training a sampling distribution typically suffers from {\bf mode collapse} (as in GANs).
-
-\vfill
-The encoder can collapses to a fixed $z = 0$. $P_\dec(y|z)$ can always just ignore $z$. We are then back to standard cross-entropy loss.
-This is called {\bf posterior collapse}.
-
-\slide{Types of VAEs}
-
-In {\bf a Gaussian VAE} the we have $P_\pri(z)$ and $P_\enc(z|y)$ are both Gaussian distributions on $R^d$.
-A diffusion model involves a Gaussian VAE at each incremental step of diffusion.
-
-\vfill
-{\bf A Vector Quantized VAE} (VQ-VAE) defines $P_\enc(z|y)$ in terms of vector quantization analogous to $K$-means clustering.
-VQ-VAEs provide a translation from continuous data, such as images, to token data that can be modeled with a transformer.
-This is used in the image understanding abilities of GPT-4o and in autoregressive image generation
-which is competative with diffusion image generation.
-
-\vfill
-We will first consider Gaussian VAEs and discuss VQ-VAEs later.
 
 \slide{Gaussian VAEs}
 
@@ -210,70 +294,3 @@ In general we can use arbitrary Gaussians but this example makes the math simple
 \end{eqnarray*}
 }
 
-
-
-\slide{Hierarchical VAEs}
-
-
-\centerline{\includegraphics[width = 7in]{\images/DiffSequence}}
-
-\vfill
-{\huge
-\centerline{{\color{red} [Sally talked to John]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red} [Sally talked to]}
-$\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally]} $\stackrel{\rightarrow}{\leftarrow}$ {\color{red} []}}
-}
-
-\vfill
-\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
-
-\slide{Hierarchical VAEs}
-\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
-
-\vfill
-{\bf Encoder}: $\pop(y)$, $P_\enc(z_1|y)$, and $P_\enc(z_{\ell+1}|z_\ell)$.
-
-
-\vfill
-{\bf Generator}: $P_\pri(z_N)$, $P_\dec(z_{\ell-1}|z_\ell)$, $P_\dec(y|z_1)$.
-
-\vfill
-The encoder and the decoder define distributions $P_\enc(y,\ldots,z_N)$ and $P_\dec(y,\ldots,z_N)$ respectively.
-
-
-\slide{Hierarchical VAEs}
-
-\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
-
-\vfill
-\begin{itemize}
-\item autoregressive models
-
-\vfill
-\item diffusion models
-\end{itemize}
-
-
-\slide{Hierarchical (or Diffusion) ELBO}
-
-{\Large
-\begin{eqnarray*}
-H(y) & = & E_\enc\left[- \ln\frac{P_\enc(y)P_\enc(z_1,\ldots,z_N|y)}{P_\enc(z_1,\ldots,z_N|y)}\right]\\
-  \\
-  \\
-  & = & E_\enc\left[ - \ln\frac{P_{\color{red} \enc}(y|z_1)P_{\color{red} \enc}(z_1|z_2)\cdots P_{\color{red} \enc}(z_{N-1}|z_N)P_{\color{red} \enc}(z_N)}
-  {P_\enc(z_1|z_2,y)\cdots P_\enc(z_{N-1}|z_N,y)P_\enc(z_N|y)}\right] \\
-   \\
-   \\
-  & {\color{red} \leq} & E_\enc\left[ - \ln\frac{P_{\color{red} \dec}(y|z_1)P_{\color{red} \dec}(z_1|z_2)\cdots P_{\color{red} \dec}(z_{N-1}|z_N)P_{\color{red} \dec}(z_N)}
-  {P_\enc(z_1|z_2,y)\cdots P_\enc(z_{N-1}|z_N,y)P_\enc(z_N|y)}\right] \\
-\\
-\\
- & = & \left\{\begin{array}{l}E_\enc\;[-\ln P_\dec(y|z_1)]
-                             \\ \\ + \sum_{i=2}^N  \; E_\enc\; KL(P_\enc(z_{i-1}|z_i,y),\;P_\dec(z_{i-1}|z_i)) \\
-                             \\ + E_\enc\; KL(P_\enc(Z_N|y),p_\dec(Z_N))\end{array}\right.
-\end{eqnarray*}
-}
-
-\slide{END}
-
-\end{document}
