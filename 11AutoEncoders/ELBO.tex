@@ -142,6 +142,46 @@ optimizing a sampling distribution (such as a GAN generator) is subject to mode 
 function is very forgiving of a failure of the sampling distribution to cover the desired space of
 values.
 
+\slide{Gaussian VAEs}
+
+Gaussian VAEs, which are the original version from 2014, train the encoder.
+
+\vfill
+Gaussian VAEs solve the problem of optimizing a sampling distribution
+by sampling instead from fixed Gaussian noise.  This further allows expressing the ELBO loss as a ``closed form'' $L_2$ loss
+which avoids the need to even sample the noise.
+
+\vfill
+However, non-hierarchical Gaussian VAEs (with a single Gaussian latent variable) produce poor results in practice.  A diffusion model
+is a hierarchical Gaussian VAEs which does not train the encoder. Hierarchical Gaussian VAEs which train the encoder can also
+produce good results.
+
+\slide{A Non-Hierarchical Gaussian VAE}
+
+\begin{eqnarray*}
+P_\pri(z) & = & {\cal N}(0,I) \\
+\\
+P_\enc(z|y) & = & {\cal N}(\hat{z}(y),I) \\
+\\
+P_\dec(y|z) & = & {\cal N}(\hat{y}(z),I)
+\end{eqnarray*}
+
+\vfill
+In general we can use arbitrary Gaussians but this example makes the math simple.
+\slide{Gaussian VAEs}
+
+{\huge
+\begin{eqnarray*}
+&  & E_{(y,z) \sim P_\enc}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right] \\
+\\
+\\
+& = & E_{y \sim \pop} \left[ KL(P_\enc(z|y),P_\pri(z)) + E_{z \sim P_\enc(z|y)}\left[- \ln P_\dec(y|z)\right]\right] \\
+\\
+\\
+&=& E_{y \sim \pop} \left[\frac{1}{2}||\hat{z}_\enc(y)||^2 + E_\epsilon\left[\frac{1}{2}||y - \hat{y}_\dec(\hat{z}_\enc(y)+\epsilon))||^2\right]\right]
+\end{eqnarray*}
+}
+
 \slide{Training the Encoder}
 
 In a VQ-VAE the encoder is traned jointly with the decoder $P_\dec(y|z)$ but is trained independently of $P_\pri(z)$.  $P_\pri(z)$ is trained later using a transformer model.
@@ -157,6 +197,15 @@ A different approach to training the encoder, an ME-VAE, is discussed below.
 
 \slide{Hierarchical VAEs}
 
+Hierarchical Gaussian VAEs which train the encoder are explored both theoretically and empirically by Vahdat and Kautz.
+
+\vfill
+{\huge {\bf NVAE: A Deep Hierarchical Variational Autoencoder}, Arash Vahdat, Jan Kautz (NVIDIA, January 2021)}
+
+\vfill
+But diffusion models and autoregressive models are also instances of hierarchical VAEs.
+
+\slide{Hierachical VAEs}
 
 \centerline{\includegraphics[width = 7in]{\images/DiffSequence}}
 
@@ -173,7 +222,7 @@ $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rig
 \centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
 
 \vfill
-{\bf Encoder}: $\pop(y)$, $P_\enc(z_1|y)$,$P_\enc(z_2|z_1),\ldots,P(z_N|Z_{N-1})$.
+{\bf Encoder}: $\pop(y)$, $P_\enc(z_1|y)$,$P_\enc(z_2|z_1),\ldots,P(z_N|z_{N-1})$.
 
 
 \vfill
@@ -182,19 +231,6 @@ $\stackrel{\rightarrow}{\leftarrow}$ {\color{red}[Sally talked]} $\stackrel{\rig
 \vfill
 The encoder and the decoder define distributions
 $P_\enc(y,z_1,\ldots,z_N)$ and $P_\gen(y,z_1,\ldots,z_N)$ respectively.
-
-
-\slide{Hierarchical VAEs}
-
-\centerline{$y \stackrel{\rightarrow}{\leftarrow} z_1  \stackrel{\rightarrow}{\leftarrow} \cdots \stackrel{\rightarrow}{\leftarrow} z_N$}
-
-\vfill
-\begin{itemize}
-\item autoregressive models
-
-\vfill
-\item diffusion models
-\end{itemize}
 
 \slide{Hierarchical ELBO Loss}
 
@@ -265,32 +301,4 @@ independent of details of the models.
 
 \end{document}
 
-
-\slide{Gaussian VAEs}
-
-As an example take
-
-\begin{eqnarray*}
-P_\pri(z) & = & {\cal N}(0,I) \\
-\\
-P_\enc(z|y) & = & {\cal N}(\hat{z}(y),I) \\
-\\
-P_\dec(y|z) & = & {\cal N}(\hat{y}(z),I)
-\end{eqnarray*}
-
-\vfill
-In general we can use arbitrary Gaussians but this example makes the math simple.
-\slide{Gaussian VAEs}
-
-{\huge
-\begin{eqnarray*}
-&  & E_{(y,z) \sim P_\enc}\;\left[- \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right] \\
-\\
-\\
-& = & E_{y \sim \pop} \left[ KL(P_\enc(z|y),P_\pri(z)) + E_{z \sim P_\enc(z|y)}\left[- \ln P_\dec(y|z)\right]\right] \\
-\\
-\\
-&=& E_{y \sim \pop} \left[\frac{1}{2}||\hat{z}_\enc(y)||^2 + E_\epsilon\left[\frac{1}{2}||y - \hat{y}_\dec(\hat{z}_\enc(y)+\epsilon))||^2\right]\right]
-\end{eqnarray*}
-}
 
