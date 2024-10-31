@@ -164,6 +164,14 @@ Trained on 53k hours of unlabeled audio (no text) they convert speech to a seque
 By training on only one hour of human-transcribed audio, and using the Wav2Vec transcription into pseudo-text, they outperform the previous state of the
 art in word error rate for 100 hours of human-transcribed text.
 
+\slide{VQGAN, December 2020, Heidelberg University}
+
+{\bf Taming Transformers for High-Resolution Image Synthesis},
+Patrick Esser, Robin Rombach, Björn Ommer
+
+\vfill
+VQGAN is now the default tokenizer for images and sounds.  It achieves a coarser tokenization (fewer tokens) by replacing the reconstruction loss with a ``perceptual loss'' and adding a GAN discriminator to the loss function. 
+
 \slide{DALLE-1, January 2021}
 
 \vfill

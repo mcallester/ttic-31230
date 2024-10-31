@@ -41,7 +41,7 @@ $${\color{red} P_\gen(y) = P_{\pop}(y)}$$
 Auto-Encoding Variational Bayes, Kingma and Welling, 2013
 
 \vfill
-$${\color{red} \argmin_{\pri,\gen,\enc}\;E_{y \sim \pop,z \sim P_\enc(z|y)}\left[ - \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]}$$
+$${\color{red} \argmin_{\pri,\dec,\enc}\;E_{y \sim \pop,z \sim P_\enc(z|y)}\left[ - \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]}$$
 
 \vfill
 Under Universality:
@@ -50,29 +50,11 @@ Under Universality:
 For for any encoder $\enc$
 
 \vfill
-$${\color{red} P_{\pri^*,\gen^*}(z,y) = P_{\pop,\enc}(z,y)}$$
+$${\color{red} P_{\pri^*,\dec^*}(z,y) = P_{\pop,\enc}(z,y)}$$
 
 \vfill
 Under universality the Encoder can be anything (but in practice the encoder matters).
 
-\slide{Review: Hierarchical VAEs (Diffusion Models)}
-
-Denoising Diffusion Probabilistic Models, Ho, Jain, and Abbeel, June 2020.
-
-{\huge
-$${\color{red} \argmin_{\pri,\gen,\enc}\;E_{y \sim \pop,z \sim P_\enc(z|y)}\left[ - \ln \frac{P_\pri(z)P_\gen(y|z)}{P_\enc(z|y)}\right]}$$
-
-$${\color{red} z = z_1,\ldots,z_N}$$
-
-\vfill
-$${\color{red} P_\enc(z|y) = P_\enc(z_1|y)P_\enc(z_2|z_1)\cdots P_\enc(z_n|z_{N-1})}$$
-
-$${\color{red} P_\dec(y|z) = P_\pri(z_N)P_\pri(z_{N-1}|z_N)\cdots P_\pri(z_1|z_2)P_\dec(y|z_1)}$$
-
-\vfill
-
-For VAEs under universality the encoder can be anything.  For diffusion models it is simply the addition of noise.
-}
 \slide{Contrastive Coding: A Fourth Training Objective}
 
 Representation Learning with Contrastive Predictive Coding,
@@ -89,19 +71,19 @@ CLIP: Contrastive Language-Image Pre-training, January 2021, OpenAI
 
 \slide{Contrastive Coding: the Fourth Training Objective}
 
-We draw pairs $(I_1,T_1), \ldots (I_B,T_B)$ from the population.
-We then select $b$ uniformly from $1$ to $B$ and construct the tuple $(I_b,T_1,\ldots,T_B,b)$.
+We draw pairs $(x_1,y_1), \ldots (x_B,y_B)$ from the population.
+We then select $b$ uniformly from $1$ to $B$ and construct the tuple $(x_b,y_1,\ldots,y_B,b)$.
 
 \vfill
 We then train a model to predict $b$.
 \vfill
 {\huge
 \begin{eqnarray*}
-\enc_x^*,\enc_y^* & = & \argmin_{\enc_x,\enc_y} \;E_{(x,T_1,\ldots,T_B,b)}\left[-\ln P_{\enc_x,\enc_y}(b|x,T_1,\ldots,T_B)\right]
+\enc_x^*,\enc_y^* & = & \argmin_{\enc_x,\enc_y} \;E_{(x_b,y_1,\ldots,y_B,b)}\left[-\ln P_{\enc_x,\enc_y}(b|x_b,y_1,\ldots,y_B)\right]
 \end{eqnarray*}
 
 \begin{eqnarray*}
-P_{\enc_x,\enc_y}(b|x,T_1,\ldots,T_B) & = & \softmax_b\; \enc_x(x)^\top\enc_y(T_b)
+P_{\enc_x,\enc_y}(b|x,y_1,\ldots,y_B) & = & \softmax_b\; \enc_x(x)^\top\enc_y(y_b)
 \end{eqnarray*}
 }
 
@@ -116,12 +98,12 @@ In CLIP we make $B^2$ predictions for a batch of size $N = B$
 For any distribution on pairs $(x,y)$, with contrastive probabilities computed by
 
 \begin{eqnarray*}
-P(b|I,T_1,\ldots,T_B) & = & \softmax_b\;\enc_I(I),\enc_T(T_b)
+P(b|x,y_1,\ldots,y_B) & = & \softmax_b\;\enc_x(x),\enc_y(y_b)
 \end{eqnarray*}
 
 {\huge
 \begin{eqnarray*}
-I(\mathrm{Image},\mathrm{Text}) & \geq & \ln B - \;\;E_{(I_b,y_1,\ldots,y_B,b)}\left[-\ln P(b|(I,T_1,\ldots,T_B))\right]
+I(x,y) & \geq & \ln B - \;\;E_{(x_b,y_1,\ldots,y_B,b)}\left[-\ln P(b|(x_b,y_1,\ldots,y_B))\right]
 \end{eqnarray*}
 }
 
