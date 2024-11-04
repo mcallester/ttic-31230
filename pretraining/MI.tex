@@ -1,133 +1,29 @@
 \input ../SlidePreamble
 \input ../preamble
-
+\newcommand{\float}{\mathrm{Float}}
 
 \begin{document}
 
 {\Huge
   \centerline{\bf TTIC 31230,  Fundamentals of Deep Learning}
   \vfill
-  \centerline{David McAllester, Autumn   2023}
+  \centerline{David McAllester, Autumn   2024}
+  \vfill
+  \centerline{\bf Maximizing Mutual Information}
   \vfill
   \centerline{\bf Contrastive Coding}
   \vfill
+  \centerline{\bf Cotraining}
+  \vfill
+  \centerline{\bf The Visual Transformer (ViT)}
+  \vfill
   \vfill
 
-\slide{Review: Cross Entropy Loss}
 
-$${\color{red} \argmin_\Phi E_{(x,y)\sim \pop}\left[-\ln P_\Phi(y|x)\right]}$$
+\slide{Maximizing Mutual Information}
 
-\vfill
-Under universality:
+Assume a population of pairs $(x,y)$.
 
-$${\color{red} P_{\Phi^*}(y|x) = P_{\pop}(y|x)}$$
-
-\slide{Review: GANs}
-
-Generative Adversarial Networks
-Ian J. Goodfellow et al, 2014
-
-\vfill
-$${\color{red} \argmax_{\gen} \min_{\disc} E_{i \sim \{-1,1\}, y \sim P_i}\left[-\ln P_{\disc}(i|y)\right]}$$
-
-\vfill
-Under Universality:
-
-\vfill
-$${\color{red} P_\gen(y) = P_{\pop}(y)}$$
-
-\slide{Review: VAEs}
-
-Auto-Encoding Variational Bayes, Kingma and Welling, 2013
-
-\vfill
-$${\color{red} \argmin_{\pri,\dec,\enc}\;E_{y \sim \pop,z \sim P_\enc(z|y)}\left[ - \ln \frac{P_\pri(z)P_\dec(y|z)}{P_\enc(z|y)}\right]}$$
-
-\vfill
-Under Universality:
-
-\vfill
-For for any encoder $\enc$
-
-\vfill
-$${\color{red} P_{\pri^*,\dec^*}(z,y) = P_{\pop,\enc}(z,y)}$$
-
-\vfill
-Under universality the Encoder can be anything (but in practice the encoder matters).
-
-\slide{Contrastive Coding: A Fourth Training Objective}
-
-Representation Learning with Contrastive Predictive Coding,
-Aaron van den Oord, Yazhe Li, Oriol Vinyals, July 2018.
-
-\vfill
-CLIP: Contrastive Language-Image Pre-training, January 2021, OpenAI
-
-
-
-\slide{CLIP Contrastive Coding}
-
-\centerline{\includegraphics[height= 5in]{\images/CLIPTraining}}
-
-\slide{Contrastive Coding: the Fourth Training Objective}
-
-We draw pairs $(x_1,y_1), \ldots (x_B,y_B)$ from the population.
-We then select $b$ uniformly from $1$ to $B$ and construct the tuple $(x_b,y_1,\ldots,y_B,b)$.
-
-\vfill
-We then train a model to predict $b$.
-\vfill
-{\huge
-\begin{eqnarray*}
-\enc_x^*,\enc_y^* & = & \argmin_{\enc_x,\enc_y} \;E_{(x_b,y_1,\ldots,y_B,b)}\left[-\ln P_{\enc_x,\enc_y}(b|x_b,y_1,\ldots,y_B)\right]
-\end{eqnarray*}
-
-\begin{eqnarray*}
-P_{\enc_x,\enc_y}(b|x,y_1,\ldots,y_B) & = & \softmax_b\; \enc_x(x)^\top\enc_y(y_b)
-\end{eqnarray*}
-}
-
-\slide{CLIP Contrastive Coding}
-
-In CLIP we make $B^2$ predictions for a batch of size $N = B$
-\centerline{\includegraphics[height= 4in]{\images/CLIPTraining}}
-
-
-\slide{The Mutual Information Contrastive Coding Theorem}
-
-For any distribution on pairs $(x,y)$, with contrastive probabilities computed by
-
-\begin{eqnarray*}
-P(b|x,y_1,\ldots,y_B) & = & \softmax_b\;\enc_x(x),\enc_y(y_b)
-\end{eqnarray*}
-
-{\huge
-\begin{eqnarray*}
-I(x,y) & \geq & \ln B - \;\;E_{(x_b,y_1,\ldots,y_B,b)}\left[-\ln P(b|(x_b,y_1,\ldots,y_B))\right]
-\end{eqnarray*}
-}
-
-Chen et al., On Variational Bounds of Mutual Information, May 2019.
-
-\slide{CLIP Image Classification}
-
-\centerline{\includegraphics[height= 5in]{\images/CLIPClassifier}}
-
-\slide{Zero-Shot Image Classification}
-
-\centerline{\includegraphics[width = 7in]{\images/CLIP0}}
-
-\slide{Zero-Shot Image Classification}
-
-\centerline{\includegraphics[height= 5in]{\images/CLIP1}}
-
-\slide{An abstract Formulation}
-
- We consider a population distribution on pairs $(x,y)$.
- 
- \vfill
- For example:
- 
  \vfill
 \begin{itemize}
 \item $x$ might be an image and $y$ might be the text of a caption for image $x$ (CLIP).
@@ -139,67 +35,282 @@ Chen et al., On Variational Bounds of Mutual Information, May 2019.
 \item $x$ might be a window of a sound wave and $y$ a later window (Wav2Vec).
 
 \vfill
-\item $x = f(z)$ and $y = f(z)$ where $f$ and $g$ are transformation functions on an image $z$ such as  translation, rotation, color shift, or cropping. (augmentation) of $x$. (SimCLR)
+\item $x$ and $y$ are different transformations of an image $z$ such as translation, rotation, color shift, or cropping. (SimCLR,DINO)
 \end{itemize}
 
+\slide{Maximizing Mutual Information}
 
-\slide{A Weakness of Contrastive Coding}
+{\bf The Information Bottleneck Method} Tishby, Pereira, Bialek, (1999).
+
+
+\vfill
+Assume a distribution on pairs $(x,y)$ and an encoder $P_\enc(z|x)$.
+
+\vfill
+$$\enc^* = \argmax_\enc I(z,y) - \beta I(z,x)$$
+
+\slide{Maximizing Mutual Information}
+
+The methods discussed here --- contrastive coding and cotraining --- can be interpreted as optimizing only the first term in the
+information bottleneck.
+
+\vfill
+We take the encoder to be deterministic $\enc(x) \in R^d$ and maximize mutual information with $y$.
+
+$$\enc^* = \argmax_\enc\; I(\enc(x),y)$$
+
+\vfill
+Here there is no incentive in this objective for $\enc(x)$ to retain information unrelated to $y$.
+
+\slide{Maximizing Mutual Information.}
+
+$$\enc^* = \argmax_\enc\; I(\enc(x),y)$$
+
+\vfill
+{\huge
+It would be natural to try to maximize a variational lower bound on $I(\enc(x),y)$.
+
+\vfill
+In the applications discussed here we expect hundred of bits of mutual information.
+
+\vfill
+Unfortunately one can prove that no formal lower bound
+establishing hundreds of bits of mutual information  is possible without an exponential ($2^{100}$) number of training examples.
+
+\vfill
+{\bf Formal Limitations on the Measurement of Mutual Information},
+David McAllester, Karl Stratos, (November 2018)
+}
+
+\slide{Surrogate Objectives and Hardness Parameters}
+
+Since variation optimization of mutual information is not possible, contrastive learning and cotraining each introduce a surrogate objective.
+
+\vfill
+Each surrogate objective has a parameter --- the hardness parameter --- that controls the difficulty of the optimization problem.
+
+\vfill
+Increasing the hardness parameter makes training more difficult but should increase the resulting mutual information $I(\enc(x),y)$
+when training is successful.
+
+\slide{Contrastive Coding}
+
+{\bf Representation Learning with Contrastive Predictive Coding}, van den Oord, Li and Vinyals (DeepMind, 2018)
+
+\vfill
+CLIP: {\bf Learning Transferable Visual Models From Natural Language Supervision} (OpenAI, February 2021)
+
+\slide{The Contrastive Codding Desiderata}
+
+We draw a batch of pairs $(x_1,y_1),\ldots,(x_B,y_B)$.
+
+\vfill
+We select one of the $x$ values.
+
+\vfill
+We train a classifier that, when given one of the $x$ values and the batch $(y_1,\ldots,y_b)$ of $y$ values, must determine which $y$ was paired with the given $x$.
+
+
+\slide{The Contrastive Coding Surrogate Objective}
+
+We train two encoders $\enc_x$ and $\enc_y$ with $\enc_x(x) \in R^d$ and $\enc_y(y) \in R^d$.
 
 {\huge
+$$\enc_x^*,\enc_y^* = \argmin_{\enc_x,\enc_y}\; \begin{array}{cl} E_{(b,x_b,y_1,\ldots,y_B)}\;&\left[-\ln P_{\enc_x,\enc_y}(b|x_b,y_1,\ldots,y_B)\right] \\
++  E_{(b,y_b,x_1,\ldots,x_B)}&\left[-\ln P_{\enc_x,\enc_y}(b|y_b,x_1,\ldots,x_B)\right]\end{array}$$
+
+\vfill
 \begin{eqnarray*}
-I(x,y) & \geq & \ln B - \;\;E_{(x,y_1,\ldots,y_B,b)}\left[-\ln P(b|(x,y_1,\ldots,y_B)\right]
+P_{\enc_x,\enc_y}(b|x,y_1,\ldots,y_B) & = & \softmax_b\; \enc_x(x)^\top\enc_y(y_b) \\
+P_{\enc_x,\enc_y}(b|y,x_1,\ldots,x_B) & = & \softmax_b\; \enc_y(y)^\top\enc_x(x_b) \\
 \end{eqnarray*}
 }
 
-The discrimination problem may be too easy.
+\slide{The Contrastive Coding Hardness Parameter}
 
-\vfill
-The guarantee can never be stronger than $\ln B$ where $B$ is the batch size.
 
-\vfill
-Suppose we have 100 bits of mutual information as seem plausible for translation pairs.
-
-\slide{Addresses the Weakness with Large Batch Size}
-
+{\huge
 \begin{eqnarray*}
-I(x,y) & \geq & \ln B - \;\;E_{(x,y_1,\ldots,y_B,b)}\left[-\ln P(b|(x,y_1,\ldots,y_B)\right]
+{\cal L}(\enc_x,\enc_y) & = & E_{(b,x_b,y_1,\ldots,y_B)}\left[-\ln P_{\enc_x,\enc_y}(b|x_b,y_1,\ldots,y_B)\right] \\
+& \;\;\;+ & E_{(b,y_b,x_1,\ldots,x_B)}\left[-\ln P_{\enc_x,\enc_y}(b|y_b,x_1,\ldots,x_B)\right]
 \end{eqnarray*}
 
 \vfill
-For CLIP the batch size $B = 2^{15}$ so we can potentially guarantee 15 bits of mutual information.
-
-
-\slide{Contrastive Coding for Speech}
-\centerline{\includegraphics[width = 6 in]{\images/CPC}}
-\centerline{\huge van den Oord, Li and Vinyals,}
-\centerline{\huge Representation Learning with Contrastive Predictive Coding, 2018}
+The hardness parameter is the batch size $B$.  Making $B$ large makes the classification task harder.
 
 \vfill
-What should we abstract from the past that is relevant to the future?
+In CLIP $B$ = $2^{15}$ = 32,768.
 
-\slide{Contrastive Coding for Speech}
-\centerline{\includegraphics[width = 6 in]{\images/CPC}}
+\slide{Zero-Shot Image Classification}
 
-\vfill
-{\bf Unlike VAEs}, contrastive coding is about {\bf capturing mutual information}.
-Intuitively we want to {\bf separate signal from noise} and avoid modeling noise.
+\centerline{\includegraphics[width = 7in]{\images/CLIP0}}
 
-\slide{Contrastive Coding for Speech}
-\centerline{\includegraphics[width = 6 in]{\images/CPC}}
+\slide{Zero-Shot Image Classification}
 
-\vfill
-We abstract this problem to that of capturing the mutual information between any two arbitrary random variables $x$ and $y$.
+\centerline{\includegraphics[height= 5in]{\images/CLIP1}}
 
-\slide{Tishby's Information Bottleneck}
 
-\centerline{The Information Bottleneck Method}
-\centerline{Tishby, Pereira and Bialeck, 1999}
+\slide{Cotraining}
+
+{\bf Combining labeled and unlabeled data with co-training} Avrim Blum, and Tom Mitchell (1998)
 
 \vfill
-Design $P_\enc(z|x)$ with the following objective.
+{\bf PAC Generalization Bounds for Co-training}, Dasgupta, Littman, McAllester (2001)
 
 \vfill
-$$\enc^* = \argmin_\enc\;I(z,x) - \beta I(z,y)$$
+DINOv1: {\bf Emerging Properties in Self-Supervised Vision Transformers}, (Meta, Inria, April 2021)
+
+\vfill
+DINOv2: {\bf Learning Robust Visual Features without Supervision}, (Meta, Inria, February 2024)
+
+\slide{Cotraining}
+
+We again consider a population distribution on pairs $(x,y)$.
+
+\vfill
+In cotraining we assume a label set $k \in \{1,\ldots,K\}$.
+
+\vfill
+The labels have no a-priori meaning.  Meaning will emerge from the training.
+
+\vfill
+We train two classifiers $P_\Phi(k|x)$ and $P_\Psi(k|y)$ under a cotraining objective.
+
+\slide{Cotraining Desiderata}
+
+{\huge
+In cotraining we seek to find two classifiers $P_\Phi(k|x)$ and $P_\Psi(k|y)$ such that on typical pairs $(x,y)$ the two classifiers agree on the label.
+
+\begin{itemize}
+\item[(1)] For a given pair $(x,y)$ we want each classifier to be confident in its label.  Formally, we want that in expectation over the draw of a pair $(x,y)$ the entropies
+$H(P_\Phi(k|x))$ and $H(P_\Psi(k|y))$ are both small.
+
+\item[(2)] For a given pair $(x,y)$ we want the classifiers to agree on the label. Formally, we want that in expectation over a draw of a pair $(x,y)$ the cross-entropies
+$H(P_\Phi(k|x),P_\psi(k|y))$ and $H(P_\psi(k|y),P_\Phi(k|x))$ are both small.
+
+\item[(3)] We want that over different draws of $(x,y)$ the distributions of predicted labels covers all the labels.  Formally, we want the marginal distributions $P_\Phi(k)$
+and $P_\Psi(k)$ to have large entropy.
+\end{itemize}
+}
+
+
+\slide{The Cotraining Surrogate Objective}
+
+$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{(x,y)\sim \pop} \left\{\begin{array}{cl}&H(P_\Phi(k|x),P_\psi(k|y)) \\ +& H(P_\psi(k|y),P_\Phi(k|x)) \\ \\ - & \beta(H(P_\Phi(k)) + H(P_\Psi(k)))\end{array}\right.$$
+
+\vfill
+Here we have subsumed the criterion (1) -- that the classifiers are confident -- into the cross-entropy terms.  Making the cross entropies small requires confidence of both classifiers as well as agreement.
+
+\slide{The Cotraining Hardness Parameter}
+
+$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{(x,y)\sim \pop} \left\{\begin{array}{cl}&H(P_\Phi(k|x),P_\psi(k|y)) \\ +& H(P_\psi(k|y),P_\Phi(k|x)) \\ \\ - & \beta(H(P_\Phi(k)) + H(P_\Psi(k)))\end{array}\right.$$
+
+\vfill
+The Hardness parameter is $K$, the number of labels.  Getting agreement on all labels, when all labels are used, is hard when the number of labels is large.
+
+\vfill
+in DINOv2 $K$ = $2^{10} + 2^9$ = 1536.
+
+\slide{DINOv1}
+
+We will discuss the simpler version DINOv1. DINOv2 is similar but with a variety of engineering improvements.
+
+\vfill
+Although there exists a well defined gradient on the cotraining objective, DINOv1 (and DINOv2) achieve better performance, and presumably better values of the cotraining objective, by innovating with the training algorithm.
+
+\vfill
+The main innovation is something they call ``self-distillation''.
+
+\vfill
+The basic idea of self-distillation is to do a brute-force enforcement the desiderata (1)-(3) given above.
+
+\slide{Self-Distillation}
+
+They construct a ``teacher network'' $\tilde{P}_\Phi(k|x)$ which uses the same parameters as $P_\Phi(k|x)$ but which is modified to enforce
+(encourage) the desiderata.
+
+\vfill
+They then replace the cross-entropy losses in the cotraining objective with
+
+$$H(sg(\tilde{P}_\Phi(k|x)),P_\Psi(k|y))\;\mbox{and}\;H(sg(\tilde{P}_\Psi(k|y)),P_\Phi(k|x)).$$
+
+\vfill
+sg is the stop gradient operator. We train $P_\Psi(k|y)$ to model $\tilde{P}_\Phi(k|x)$
+and train $P_\Phi(k|x)$ to model $\tilde{P}_\Psi(k|y)$.
+
+\slide{Encouraging the Desiderata}
+
+
+\vfill
+{\bf Increasing Confidence (Sharpening):} They put a temperature parameter into the softmax of $\tilde{P}_\Phi(k|x)$.
+This allows $\tilde{P}_\Psi(k|x)$ to be defined at a lower temperature (higher $\beta$) which ``sharpens'' the distribution.
+
+\vfill
+{\bf Diversifying the Label Usage (Centering):} For each category $k$ we compute an EMA over the draw of pairs $(x,y)$ of the
+score (the logit) $s_\Phi(k,x)$.  Denote this EMA value by $\overline{s}(k)$.  The softmax defining the distribution $\tilde{P}_\Phi(k|x)$ is then
+
+$$\tilde{P}_\Phi(k|x) = \softmax_k\;\beta(s_\Phi(k|x) - \overline{s}(k))$$
+
+\slide{DIVOv1 PyTorch Pseudo-code}
+
+\centerline{\includegraphics[height= 5in]{\images/DINO1}}
+
+\slide{The Vision Transformer (ViT)}
+
+Part of the motivation for DINOv1 (Meta, April 2021) was to demonstrate the power of visual transformers (Google Brain, October 2020).
+
+\vfill
+{\bf An Image is Worth 16x16 Words: Transformers for Image Recognition at Scale}, Alexey Dosovitskiy et al. (Oct 2020, Google Brain)
+
+\slide{ViT}
+
+An image $I$ with height $X$, width $Y$ and $3$ color channels has shape
+$I[X,Y,3]$.  In a ViT this is processed by a linear layer with stride $s$ resulting in a layer $L$ with shape $[X/s,Y/s,N]$.
+This processing is equivalent to a Conv2D layer with stride $s$ but
+without an activation function (there is no ReLU).
+
+$$\mbox{for}\;x,y,n,\Delta x, \Delta y, m\;\;\;L[x,y,n] \;\pluseq\; W[n,\Delta x,\Delta y,m]I[sx+\Delta x,sy+\Delta Y,m]$$
+
+\vfill
+In the original ViT paper the stride $s$ is taken to be 16 (hence the title). DINOv2 uses $s$ = 14.
+
+\vfill
+Presumably for each output neuron $n$ the tensor $W[n,\Delta X,\Delta Y,M]$ converges on some Haar wavelet.
+
+\slide{ViT}
+
+We now have a tensor $L(X,Y,N)$. We treat this as $X \times Y$ positions with an ``embedding vector'' at each position.
+
+\vfill
+At each position the embedding vector is concatenated with a position embedding. The position embeddings can be trained so there is no need
+to make a distinction between ``linear'' vs. ``spatial'' position embeddings (this would presumably not be true for relative position embeddings.)
+
+\vfill
+An additoinal non-image  position is added to represent the image as a whole. The vector computed for the additonal position, which I will write as $\enc_x(x)$, is interpreted as the feature vector
+for image $x$.
+
+\vfill
+In DINOv2 each component $\enc_x(x)[k]$ of the image embedding is interpreted as the score of label $k$.
+
+\slide{Attention Gives Segmentation in DINOv1}
+
+\centerline{\includegraphics[width = 8.5in]{\images/DINO2}}
+
+\vfill
+This is showing the attention that the whole image position pays to the other image positions.
+
+\slide{PCA Gives Part Matching in DINOv2}
+
+\centerline{\includegraphics[width = 6in]{\images/DINO3}}
+
+\vfill
+For each column we pool the top transformer layer vectors across the four images of the column and do PCA on that pool of vectors.
+
+\vfill
+Each image is segmented by thresholding the largest PCA component.
+
+\vfill
+The three colors in the image then correspond to the strength of the three largest PCA components. We then get part matching across different images.
 
 \slide{END}
 
