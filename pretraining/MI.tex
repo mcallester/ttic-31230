@@ -100,7 +100,7 @@ when training is successful.
 \vfill
 CLIP: {\bf Learning Transferable Visual Models From Natural Language Supervision} (OpenAI, February 2021)
 
-\slide{The Contrastive Codding Desiderata}
+\slide{The Contrastive Coding Desiderata}
 
 We draw a batch of pairs $(x_1,y_1),\ldots,(x_B,y_B)$.
 
@@ -108,7 +108,7 @@ We draw a batch of pairs $(x_1,y_1),\ldots,(x_B,y_B)$.
 We select one of the $x$ values.
 
 \vfill
-We train a classifier that, when given one of the $x$ values and the batch $(y_1,\ldots,y_b)$ of $y$ values, must determine which $y$ was paired with the given $x$.
+We train a classifier that, when given one of the $x$ values and the batch $(y_1,\ldots,y_B)$ of $y$ values, must determine which $y$ was paired with the given $x$.
 
 
 \slide{The Contrastive Coding Surrogate Objective}
@@ -264,18 +264,18 @@ Part of the motivation for DINOv1 (Meta, April 2021) was to demonstrate the powe
 
 \slide{ViT}
 
-An image $I$ with height $X$, width $Y$ and $3$ color channels has shape
-$I[X,Y,3]$.  In a ViT this is processed by a linear layer with stride $s$ resulting in a layer $L$ with shape $[X/s,Y/s,N]$.
-This processing is equivalent to a Conv2D layer with stride $s$ but
+An image $I$ with height $X$, width $Y$ and $C = 3$ color channels has shape
+$I[X,Y,C]$.  In a ViT this is processed by a linear layer with stride $s$ resulting in a layer $L$ with shape $L[X/s,Y/s,N]$.
+This processing is equivalent to a Conv2d layer with stride $s$ but
 without an activation function (there is no ReLU).
 
-$$\mbox{for}\;x,y,n,\Delta x, \Delta y, m\;\;\;L[x,y,n] \;\pluseq\; W[n,\Delta x,\Delta y,m]I[sx+\Delta x,sy+\Delta Y,m]$$
+$$\mbox{for}\;x,y,n,\Delta x, \Delta y, c\;\;\;L[x,y,n] \;\pluseq\; W[n,\Delta x,\Delta y,c]I[sx+\Delta x,sy+\Delta Y,c]$$
 
 \vfill
 In the original ViT paper the stride $s$ is taken to be 16 (hence the title). DINOv2 uses $s$ = 14.
 
 \vfill
-Presumably for each output neuron $n$ the tensor $W[n,\Delta X,\Delta Y,M]$ converges on some Haar wavelet.
+Presumably for each neuron $n$ the tensor $W[n,\Delta X,\Delta Y,C]$ converges on some Haar wavelet.
 
 \slide{ViT}
 
