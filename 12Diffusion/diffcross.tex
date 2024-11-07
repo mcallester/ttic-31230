@@ -11,21 +11,29 @@
   \centerline{David McAllester, Autumn 2023}
   \vfill
   \vfil
-  \centerline{Diffusion Image Modeling Timeline}
+  \centerline{Diffusion Model Guidance}
   \vfill
   \vfill
 
-\slidetwo{Diffusion Models Beat GANs on Image Synthesis}{Dharwali and Nichol, May 2021}
+\slide{Conditional Diffusion Models and Guidance}
 
-This paper introduces guided diffusion as a way of handling class-conditional diffusion models.
+\centerline{Deep unsupervised learning using nonequilibrium thermodynamics}
+\centerline{Sohl-Dickstein et al., 2015.}
+
+\vfill
+\centerline{Denoising Diffusion Probabilistic Models (DDPM)}
+\centerline{Ho, Jain and Abbeel, (Berkeley, May 2021)}
+
+
+\vfill
+\centerline{\includegraphics[width = 2.5in]{\images/DiffCeleb}}
+
+\slidetwo{Diffusion Models Beat GANs on Image Synthesis}{Dharwali and Nichol (OpenAI, May 2021)}
 
 \vfill
 \centerline{\includegraphics[width = 6in]{\images/DiffGAN}}
 
-\vfill
-Guided diffusion is used in DALLE-2.
-
-\slide{Class-Conditional Image Generation}
+\slide{Conditional Diffusion Models}
 
 We assume training data consisting of $(x,y)$ pairs and we want to generate from the distribution $P(y|x)$.  For example class-conditional image generation.
 
@@ -37,13 +45,16 @@ Here we will train a single model which takes the class label as input.
 
 \slide{Conditional Diffusion Models}
 
-An obvious approach is to draw a pair $(x,y)$ and pass the conditioning information $x$ to the image genertor.
+An obvious approach is to pass the conditioning information $x$ to the image generator.
 
 \vfill
-It is a weakness of GANs that we need a separate model for each $x$.
+Unfortunately this natural approach to conditioning generates poor images.
 
 \vfill
-It seems to be a weakness of diffusion models that this natural approach to conditioning fails.
+It remains true that generating high quality images requires ``guidance''.
+
+\vfill
+There are two forms of guidance --- classifier guidance and self-guidance.
 
 \slide{Classifier Guidance}
 We assume a distribution on pairs $(x,y)$.
@@ -52,19 +63,10 @@ We assume a distribution on pairs $(x,y)$.
 We also assume {\bf a classifier} $P(x|y)$.  For example $x$ might be the ImageNET label for image $y$.
 
 \vfill
+We use $p(y|x) \propto P(y)P(x|y)$.
+
+\vfill
 We will generate an image by using $P(x|y)$ to ``guide'' generation from the unconditional model $\epsilon(z_\ell,\ell)$.
-
-\vfill
-Guidance will be based on the score-mathching interpretation of diffusion models where
-$\epsilon(z_\ell,\ell)$ is interpreted as $- \nabla_z \ln p(z)$.
-
-\slide{Diffusion Image Generation}
-
-$$p(z|x) = \frac{P(z)P(x|z)}{P(x)} \propto p(z)P(x|z)$$
-
-\vfill
-We want a step in direction $\nabla_z\;\ln p(z)P(x|z)$. They use
-
 
 \begin{eqnarray*}
 z(t - \Delta t) & = & z(t) + \eta\left(\nabla_z\ln P_t(z) +  s \nabla_z\;\ln P(x|z)\right)
@@ -99,7 +101,7 @@ Various architectural choices in the U-Net were optimized.
 These improvements are used in DALLE-2.
 
 \slidetwo{Classifier-Free Diffusion Guidance}
-{Ho and Salimans, December 2021 (NeurIPS workshop)}
+{Ho and Salimans, (Google Brain, December 2021)}
 
 Classification diffusion guidance uses a classification model $P(x|y)$.
 
