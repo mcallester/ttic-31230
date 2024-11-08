@@ -71,7 +71,7 @@ $$\enc^* = \argmax_\enc\; I(\enc(x),y)$$
 It would be natural to try to maximize a variational lower bound on $I(\enc(x),y)$.
 
 \vfill
-In the applications discussed here we expect hundred of bits of mutual information.
+In the applications discussed here we expect hundreds of bits of mutual information.
 
 \vfill
 Unfortunately one can prove that no formal lower bound
@@ -161,6 +161,10 @@ In CLIP $B$ = $2^{15}$ = 32,768.
 DINOv1: {\bf Emerging Properties in Self-Supervised Vision Transformers}, (Meta, Inria, April 2021)
 
 \vfill
+iBOT: {\bf Image BERT Pre-Training with Online Tokenizer},
+Zhou et al. (ByteDance, January 2022)
+
+\vfill
 DINOv2: {\bf Learning Robust Visual Features without Supervision}, (Meta, Inria, February 2024)
 
 \slide{Cotraining}
@@ -196,14 +200,14 @@ and $P_\Psi(k)$ to have large entropy.
 
 \slide{The Cotraining Surrogate Objective}
 
-$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{(x,y)\sim \pop} \left\{\begin{array}{cl}&H(P_\Phi(k|x),P_\psi(k|y)) \\ +& H(P_\psi(k|y),P_\Phi(k|x)) \\ \\ - & \beta(H(P_\Phi(k)) + H(P_\Psi(k)))\end{array}\right.$$
+$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{(x,y)\sim \pop} \left\{\begin{array}{cl}&H(P_\Phi(k|x),P_\Psi(k|y)) \\ +& H(P_\Psi(k|y),P_\Phi(k|x)) \\ \\ - & \beta(H(P_\Phi(k)) + H(P_\Psi(k)))\end{array}\right.$$
 
 \vfill
 Here we have subsumed the criterion (1) -- that the classifiers are confident -- into the cross-entropy terms.  Making the cross entropies small requires confidence of both classifiers as well as agreement.
 
 \slide{The Cotraining Hardness Parameter}
 
-$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{(x,y)\sim \pop} \left\{\begin{array}{cl}&H(P_\Phi(k|x),P_\psi(k|y)) \\ +& H(P_\psi(k|y),P_\Phi(k|x)) \\ \\ - & \beta(H(P_\Phi(k)) + H(P_\Psi(k)))\end{array}\right.$$
+$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{(x,y)\sim \pop} \left\{\begin{array}{cl}&H(P_\Phi(k|x),P_\Psi(k|y)) \\ +& H(P_\Psi(k|y),P_\Phi(k|x)) \\ \\ - & \beta(H(P_\Phi(k)) + H(P_\Psi(k)))\end{array}\right.$$
 
 \vfill
 The Hardness parameter is $K$, the number of labels.  Getting agreement on all labels, when all labels are used, is hard when the number of labels is large.
@@ -211,15 +215,48 @@ The Hardness parameter is $K$, the number of labels.  Getting agreement on all l
 \vfill
 in DINOv2 $K$ = $2^{10} + 2^9$ = 1536.
 
+\slide{Collapse of the Surrogate Objective}
+
+$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi}\;E_{(x,y)\sim \pop} \left\{\begin{array}{cl}&H(P_\Phi(k|x),P_\Psi(k|y)) \\ +& H(P_\Psi(k|y),P_\Phi(k|x)) \\ \\ - & \beta(H(P_\Phi(k)) + H(P_\Psi(k)))\end{array}\right.$$
+
+\vfill
+SGD on the this surrogate objective collapses into making both $P_\Phi(k|x)$ and $P_\Psi(k|y)$ uniform in $k$.
+
+\vfill
+This maximizes $H(P_\Phi(k))$ and $H(P_\Psi(k))$ and gives
+
+$$\Phi = \argmin_\Phi E_{(x,y)}\;H(P_\Phi(k|x),P_\Psi(k|y)) + H(P_\Psi(k|y),P_\Phi(k|x))$$
+$$\Psi = \argmin_\Psi E_{(x,y)}\;H(P_\Phi(k|x),P_\Psi(k|y)) + H(P_\Psi(k|y),P_\Phi(k|x))$$
+
+\vfill
+Hence this is a local optimum of SGD.
+
+\slide{Collapse of the Surrogate Objective}
+
+More generally whenever $P_\Phi(k|x)$ and $P_\Psi(k|y)$ agree we have.
+
+$$\Phi = \argmin_\Phi E_{(x,y)}\;H(P_\Phi(k|x),P_\Psi(k|y)) + H(P_\Psi(k|y),P_\Phi(k|x))$$
+$$\Psi = \argmin_\Psi E_{(x,y)}\;H(P_\Phi(k|x),P_\Psi(k|y)) + H(P_\Psi(k|y),P_\Phi(k|x))$$
+
+\vfill
+So the gradients on $\Phi$ and $\Psi$ vanish.
+
+\vfill
+We can improve the cross-entropies by reducing both $H(P_\Phi(k|x))$ and $H(P_\Psi(k|y))$ simultaneously.
+However, the amount of improvement is quadratic (second order) in the change in parameters.
+
+\vfill
+It seems that SGD is attracted to saddle points!
+
 \slide{DINOv1}
 
 We will discuss the simpler version DINOv1. DINOv2 is similar but with a variety of engineering improvements.
 
 \vfill
-Although there exists a well defined gradient on the cotraining objective, DINOv1 (and DINOv2) achieve better performance, and presumably better values of the cotraining objective, by innovating with the training algorithm.
+The main contribution of DINO is a method for avoiding collapse of the training into uniform distributions $P_\Phi(k|x)$ and $P_\Psi(k|y)$.
 
 \vfill
-The main innovation is something they call ``self-distillation''.
+They their innovation ``self-distillation''.
 
 \vfill
 The basic idea of self-distillation is to do a brute-force enforcement the desiderata (1)-(3) given above.
@@ -235,11 +272,23 @@ They then replace the cross-entropy losses in the cotraining objective with
 $$H(sg(\tilde{P}_\Phi(k|x)),P_\Psi(k|y))\;\mbox{and}\;H(sg(\tilde{P}_\Psi(k|y)),P_\Phi(k|x)).$$
 
 \vfill
-sg is the stop gradient operator. We train $P_\Psi(k|y)$ to model $\tilde{P}_\Phi(k|x)$
-and train $P_\Phi(k|x)$ to model $\tilde{P}_\Psi(k|y)$.
+We train $P_\Psi(k|y)$ to model $\tilde{P}_\Phi(k|x)$
+and train $P_\Phi(k|x)$ to model $\tilde{P}_\Psi(k|y)$. sg is the stop-gradient operator.
+
+\slide{Why the stop-gradient sg?}
+
+$$H(\tilde{P}_\Phi(k|x),P_\Psi(k|y)) = E_{k \sim \tilde{P}_\Phi(k|x)}\left[-\ln P_\Psi(k|y)\right]$$
+
+\vfill
+Computing the gradient with respect to $\Phi$ is problematic in any case --- optimizing a sampling distribution is problematic in general.
+
+\vfill
+We simply avoid the issue by not trying to compute this gradient.
+
+\vfill
+We sample from $\tilde{P}_\Phi(k|x)$ and compute gradients on $\Psi$.
 
 \slide{Encouraging the Desiderata}
-
 
 \vfill
 {\bf Increasing Confidence (Sharpening):} They put a temperature parameter into the softmax of $\tilde{P}_\Phi(k|x)$.
@@ -254,6 +303,10 @@ $$\tilde{P}_\Phi(k|x) = \softmax_k\;\beta(s_\Phi(k|x) - \overline{s}(k))$$
 \slide{DIVOv1 PyTorch Pseudo-code}
 
 \centerline{\includegraphics[height= 5in]{\images/DINO1}}
+
+\slide{Results for DINOv2}
+
+\centerline{\includegraphics[width= 7in]{\images/DINO4}}
 
 \slide{The Vision Transformer (ViT)}
 
