@@ -7,7 +7,7 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Autumn 2023}
+  \centerline{David McAllester, Autumn 2024}
 \vfill
   \centerline{\bf Reinforcement Learning}
   \vfill
@@ -36,16 +36,60 @@ RL is defined by the following properties:
   \vfill
 \item Atari Games (pong)
 
+
+\vfill
+\item Stock Market Investment
+
   \vfill
 \item Robot control (driving)
 
-  \vfill
+\vfill
 \item Dialog
 
   \vfill
 \item Life
 
 \end{itemize}
+
+\slide{Agentive AI}
+
+AI systems are becoming more ``agentive'' --- they take actions in the world.
+
+\vfill
+LLMs are currently fine tuned with reinforcement learning from human feedback (RLHF).
+
+\vfill
+As AI systems expand the range of the actions they can take AI safety becomes more of an issue.
+
+\slidetwo{A Formal Model of Decision Making}{Markov Decision Processes (MDPs)}
+
+An MDP consists of a set ${\cal S}$ of states, a set ${\cal A}$ of allowed actions, a reward function $R$
+and a next-state probability function $P_T$.  We will use the following notation.
+
+\vfill
+$s_t \in {\cal S}$ is the state at time $t$
+
+\vfill
+$a_t \in {\cal A}$ is the action taken at time $t$.
+
+\vfill
+$r_t = R(s_t,a_t) \in \mathbb{R}$ is the reward at time $t$
+
+\vfill
+$P_T(s_{t+1}|s_t,a_t)$ is the probability of $s_{t+1}$ given $s_t$ and $a_t$.
+
+\vfill
+The function $R(s,a)$ can allow for a cost of the action $a$.
+
+\slide{Orthogonality}
+
+The reward $R(s,a)$ is ``orthogonal'' to the ``physics'' of the world $P_T(s_{t+1}|s_t,a)$.
+
+\vfill
+Orthogonality is often cited as a source of AI safety --- we can give the AI agents whatever motivation that we select.
+
+\vfill
+Orthogonality also seems related to identity politics --- each person their own individual sense of what is meaningful in life.
 
 \slide{Policies}
 
@@ -56,7 +100,7 @@ Formally, a (nondeterministic) policy maps a state to a probability distribution
 
 \vfill
 \begin{eqnarray*}
-    \pi(a_t|s_t) & & \mbox{probability of action $a_t$ in state $s_t$}
+    \pi(a_t|s_t) & & \mbox{probability of action $a_t$ in state $s_t$ under policy $\pi$}
 \end{eqnarray*}
 
 \slide{Imitation Learning}
@@ -85,27 +129,7 @@ Imitating experts, such as expert fire eaters, can be dangersous.  ``Don't try t
 \vfill
 Also, it is difficult to exceed expert performance by imitating experts.
 
-\slide{Markov Decision Processes (MDPs)}
-
-An MDP consists of a set ${\cal S}$ of states, a set ${\cal A}$ of allowed actions, a reward function $R$
-and a next-state probability function $P_T$.  We will use the following notation.
-
-\vfill
-$s_t \in {\cal S}$ is the state at time $t$
-
-\vfill
-$a_t \in {\cal A}$ is the action taken at time $t$.
-
-\vfill
-$r_t = R(s_t,a_t) \in \mathbb{R}$ is the reward at time $t$
-
-\vfill
-$P_T(s_{t+1}|s_t,a_t)$ is the probability of $s_{t+1}$ given $s_t$ and $a_t$.
-
-\vfill
-The function $R(s,a)$ can allow for a cost of the action $a$.
-
-\slide{Optimizing Reward}
+\slide{Different Ways of Aggregating Reward Over Time}
 
 In RL we maximize reward rather than minimize loss.
 
@@ -137,10 +161,11 @@ For discounted reward:
 
 \slide{Value Iteration}
 
-Suppose the state space and action space are finite.
+Suppose the state space is small enough
+that we can store a table $V[s]$.
 
 \vfill
-In that case we can do value iteration.
+If the action space is also small we can do value iteration.
 
 \begin{eqnarray*}
   V_0(s) & = & 0 \\
@@ -294,7 +319,8 @@ We consider a CNN $Q_\Phi(s,a)$.
 
 https://www.youtube.com/watch?v=V1eYniJ0Rnk
 
-\slide{The REINFORCE Algorithm}
+\slidetwo{Policy Gradient Methods}
+{The REINFORCE Algorithm}
 
 \centerline{\bf Williams, 1992}
 
@@ -306,6 +332,9 @@ We assume a parameterized policy $\pi_\Phi(a|s)$.
 
 \vfill
 $\pi_\Phi(a|s)$ is normalized while $Q_\Phi(s,a)$ is not.
+
+\vfill
+The idea is to use the stochasticity of the policy for exploration.
 
 \slide{Policy Gradient Theorem (Episodic Case)}
 
@@ -378,13 +407,6 @@ For example error rate and BLEU score are non-differentiable --- they are define
 \vfill
 $$\Phi^* = \argmax_\Phi \;E_{w_1,\ldots,w_n \sim P_\Phi}\;\mathrm{BLEU}$$
 
-
-\slide{REINFORCE}
-$$\nabla_\Phi \;E_{\pi_\Phi}\;R \;\;\; = \;\;\; E_{\pi_\Phi}\; \sum_{t,\;t' \geq t} \; \left(\nabla_\Phi\;\ln \pi_\Phi(a_t|s_t)\right) \;r_{t'}$$
-
-\vfill
-Sampling runs and computing the above sum over $t$ and $t'$ is Williams' REINFORCE algorithm.
-
 \slide{The Variance Issue}
 
 REINFORCE typically suffers from high variance of the gradient samples requiring very small learning rates and very long convergence times.
@@ -422,13 +444,13 @@ The first is easier to read.  The second has additional insights.
     \nabla_\Phi \; E_{\pi_\Phi}\; R  & = & \sum_{t,t'}\;E_{s_t,a_t,r_{t'}}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} r_{t'}} \\
     \\
     \\
-    & = & \sum_{t}\;E_{s_t,a_t}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} \sum_{t' \geq t} E_{r_{t'}\;|\;s_t,a_t}\;r_{t'}} \\
+    & = & \sum_{t}\;E_{s_t,a_t}\;\nabla_\Phi\; \ln \pi_\Phi(a_{t}|s_{t})\;\;{\color{red} \sum_{t' \geq t} E_{\pi_\Phi}[r_{t'}|s_t,a_t]} \\
   \\
   \\
-  & = & E_{\pi_\Phi} \; \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;{\color{red} Q^{\pi_\Phi}(s_t,a_t)} \\
+  & = & E_{\pi_\Phi} \; \sum_{t \geq 0}\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;{\color{red} Q^{\pi_\Phi}(s_t,a_t)} \\
   \\
   \\
- Q^\pi(s,a) & = & \expectsub{\pi}{\sum_t\; r_t\;|\;s_0=s,\;a_0=a}
+ {\color{red} Q^\pi(s,a)} & = & \sum_{t\geq 0}E_\pi[r_{t}|s_0=s,,a_0=a]
  \end{eqnarray*}
 }
 
@@ -461,10 +483,10 @@ To get a theorem for following the loss gradient we need
 \begin{eqnarray}
   \Phi^* & = & \argmin_\Phi\left[R\;|\;\pi_\Phi\right] \label{AC1} \nn
   \nn
-  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & E\left[ \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_{\Theta^*(\Phi)}(s_t,a_t)\;|\; \pi_\Phi\right] \\
+  \nabla_\Phi \;E_{\pi_\Phi}\;R   & = & E_{\pi_\Phi}\left[ \sum_t\; \left(\nabla_\Phi \;\ln \pi_\Phi(a_t|s_t)\right) \;\;Q_{\Theta^*(\Phi)}(s_t,a_t)\;|\; \pi_\Phi\right] \\
   \nn
   \nn
-  \Theta^*(\Phi) & = & \argmin_\Theta\; E\left[\sum_t\;\left(Q_\Theta(s_t,a_t) - \sum \!_{t' \geq t}\; r_{t'}\right)^2 \;|\;\pi_\Phi\right] \label{AC2}
+  \Theta^*(\Phi) & = & \argmin_\Theta\; E_{\pi_\Phi}\left[\sum_t\;\left(Q_\Theta(s_t,a_t) - \sum \!_{t' \geq t}\; r_{t'}\right)^2 \;|\;\pi_\Phi\right] \label{AC2}
 \end{eqnarray}
 }
 
@@ -509,7 +531,7 @@ We have the following for any function $V(s)$ of states.
   \Theta^*(\Phi) & = & \argmin_\Theta\; E\left[\sum_t\;\left(Q_\Theta(s_t,a_t) - \sum \!_{t' \geq t}\; r_{t'}\right)^2 \;|\;\pi_\Phi\right] \label{ACA2} \\
   \nn
   \nn
-  \Psi^*(\Phi) & = & \argmin_\Psi\;E\left[\sum_t\;\left(Q_{\Theta^*(\Phi)}(s_t,a_t) - V_\Psi(s_t)\right)^2 \;|\;\pi_\Phi\right] \label{ACA3}
+  \Psi^*(\Phi) & = & \argmin_\Psi\;E\left[\sum_t\;\left(V_\Psi(s_t) - Q_{\Theta^*(\Phi)}(s_t,a_t)\right)^2 \;|\;\pi_\Phi\right] \label{ACA3}
 \end{eqnarray}
 
 We now have a three player game defined by (\ref{ACA1}), (\ref{ACA2}) and (\ref{ACA3}).
@@ -563,24 +585,16 @@ Presumably this is because actions have near term consequences.
 This should be properly handled in the mathematics, perhaps in terms of the mixing time of
 the Markov process defined by the policy.
 
-
-\slide{Issue: Discounted Reward}
-
-DQN and A3C use discounted reward on episodic or long term problems.
-
-\vfill
-Presumably this is because actions have near term consequences.
-
-\vfill
-This should be properly handled in the mathematics, perhaps in terms of the mixing time of
-the Markov process defined by the policy.
-
 \slide{Observation: Continuous Actions are Differentiable }
 
 In problems like controlling an inverted pendulum, or robot control generally,
 a continuous loss can be defined and the gradient of loss of with respect to a deterministic policy exists.
 
-\slide{More Videos}
+\slide{Some Videos}
+
+https://deepmind.google/discover/blog/producing-flexible-behaviours-in-simulated-environments/
+
+\vfill
 
 https://www.youtube.com/watch?v=NI3NQczBWjg
 
