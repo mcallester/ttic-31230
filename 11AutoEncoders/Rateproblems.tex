@@ -3,8 +3,8 @@
 \parindent = 0em
 \parskip = 1ex
 
-%\newcommand{\solution}[1]{}
-\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
+\newcommand{\solution}[1]{}
+%\newcommand{\solution}[1]{\bigskip {\color{red} {\bf Solution}: #1}}
 
 \begin{document}
 
@@ -12,7 +12,6 @@
 \centerline{\bf TTIC 31230 Fundamentals of Deep Learning}
 
 \bigskip
-
 
 \centerline{\bf Problems for VAEs}
 
@@ -103,115 +102,7 @@ the models are independently optimizable).
 }
 
 \bigskip
-~{\bf Problem 3. Modeling Rounding with Continuous Noise.}
-    
-Consider a rate-distortion autoencoder with $y$ and $z$ continuous.
-$$\Phi^* = \argmin_{\Phi,\Phi}\;E_{y \sim \pop} KL(p_\Phi(z|y),p_\Phi(z)) + \lambda E_{y \sim \pop,\;z \sim P(z|y)}\;\mathrm{Dist}(y,y_\Phi(z)).$$
-Define $p_\Phi(z|y)$ by $z = z_\Phi(y) + \epsilon$ with $z_\Phi[y] \in \mathbb{R}^d$
-and $\epsilon$ drawn uniformly from $[0,1]^d$. In other words,
-we add noise drawn uniformly from $[0,1]$ to each component of $z_\Phi(y)$.
-
-\medskip
-Define $p_\Phi(z)$ to be log-uniform in each dimension.  More specifically
-$p_\Phi(z)$ is defined by drawing $s[i]$ uniformly from the interval
-$[0,s_{\mathrm{max}}]$ and then setting $z[i] = e^s$ so that $\ln z[i]$ is uniformly distributed over the interval $[0,s_{\mathrm{max}}]$.
-This gives
-\begin{eqnarray*}
-  dz & = & e^sds  \;\;= \;zds\\
-  \\
-  dp & = & \frac{1}{s_{\mathrm{max}}}\;ds \\
-  \\
-  p_\Phi(z[i]) & = & \frac{dp}{dz} \;\;= \frac{1}{s_{\mathrm{max}}z[i]}
-\end{eqnarray*}
-
-\medskip
-Assume that we have that $z_\Phi(y) \in [1,e^{s_{\mathrm{max}}}-1]^d$ so that with probability 1 over the draw of $\epsilon$ we have
-$\ln(z_\Phi(y) + \epsilon) \in [0,s_{\mathrm{max}}]$.
-
-\medskip
-(a) For $z \in [z_\Phi(y),z_\Phi(y)+1]$ what is $p_\Phi(z|y)$?
-
-\solution{1}
-
-\medskip
-(b) Solve for $KL(p_\Phi(z|y),p_\Phi(z))$ in terms of $z_\Phi(y)$ under the above specifications and simplify your answer
-for the case of $z_\Phi(y)[i] >> 1$.
-
-\solution{
-\begin{eqnarray*}
-  & & KL(p_\Phi(z|y),p_\Phi(z)) \\
-  \\
-  & = & E_{z \sim P_\Phi(z|y)}\;\ln\frac{p_\Phi(z_\Phi(y))}{p_\Phi(z)} \\
-  \\
-  & = & E_{z \sim P_\Phi(z|y)} \;\sum_i \ln \frac{1}{1/(s_{\mathrm{max}}z[i])} \\
-  \\
-  & = & \sum_i E_{z[i]}\;\ln (s_{\mathrm{max}}z[i]) \\
-  \\
-  & = & \left(\sum_i \int_{z_\Phi(y)[i]}^{z_\Phi(y)[i]+1} \ln z\; dz\right) + d \ln s_{\mathrm{max}} \\
-  \\
-  & = & \left(\sum_i [z\ln z - z]_{z_\Phi(y)[i]}^{z_\Phi(y)[i]+1} \right) + d \ln s_{\mathrm{max}}
-  \\
-  & = & \left(\sum_i [z\ln z]_{z_\Phi(y)[i]}^{z_\Phi(y)[i]+1} \right) + d \ln s_{\mathrm{max}} - d \\
-  \\
-  & = & \left(\sum_i \ln (z_\Phi(y)[i] + 1) + z_\Phi(y)[i](\ln (z_\Phi(y)[i] + 1) - \ln z_\Phi(y)[i]) \right) + d \ln s_{\mathrm{max}} - d \\
-  \\
-  & = & \left(\sum_i \ln (z_\Phi(y)[i] + 1) + z_\Phi(y)[i]\ln \left(1+ \frac{1}{z_\Phi(y)[i]}\right) \right) + d \ln s_{\mathrm{max}} - d \\
-  \\
-  & \approx & \left(\sum_i \ln z_\Phi(y)[i] \right) + d \ln s_{\mathrm{max}} - d \;\;\;\mbox{for $z_\Phi(y)[i] >> 1$}
-\end{eqnarray*}
-}
-
-\bigskip
-~{\bf Problem 4. Rounding RDA}
-
-We consider the following modification of RDAa
-
-\begin{eqnarray*}
-  \mathrm{RDA:}\;\; \Phi^* & = & \argmin_\Phi\;E_{y \sim \pop,\;z \sim P_\Phi(z|y)}\;-\ln \frac{P_\Phi(z)}{P_\Phi(z|y)} + \lambda\mathrm{Dist}(y,y_\Phi(z)) \\
-  \\
-  \mathrm{Rounding\; RDA:}\;\; \Phi^*,\Psi^* & = & \argmin_\Phi\;E_{y \sim \pop,\;z :=\mathrm{round}(z_\Psi(y))}\;-\ln P_\Phi(z) + \lambda\mathrm{Dist}(y,y_\Phi(z))
-\end{eqnarray*}
-
-Here $\mathrm{round}(z) \in {\cal Z}$ where ${\cal Z}$ is a discrete set of vectors
-defined independent of the choice of $y$.  For example, rounding might map each real number in $z$ to the nearest integer
-as was done in Balle et al. 2017.
-Or rounding might map the vector $z$ to the nearest center vector resulting from $K$-means vector quantization as in VQ-VAE.  Other roundings are possible.
-The Rounding RDA corresponds to practical image compression where $-\log_2 P_\Phi(\mathrm{round}(z_\Psi(y)))$ is (approximately) the number of bits in the compressed file.
-
-(a) What is $\nabla_\Psi \ln P_\Phi(\mathrm{round}(z_\Psi(y))$? \solution{zero}
-
-(b) What is $\nabla_\Psi \mathrm{Dist}(y,y_\Phi(\mathrm{round}(z_\Psi(y))))$? \solution{zero}
-
-To optimize $\Psi$ Balle et al. used two tricks.
-They replaced $P_\Phi(\mathrm{round}(z_\Psi(y)))$ with $p_\Phi(z_\Psi(y))$ where $p_\Phi(z)$ is a continuous density,
-and they replace the rounding operation with additive noise.  Although rounding will be used for image compression, gradient descent is then done on
-$$\Phi^*,\Psi^* = \argmin_{\Phi,\Psi} E_{y,\epsilon}\;-\ln p_\Phi(z_\Psi(y)) + \lambda\mathrm{Dist}(y_\Phi(z_\Psi(y) + \epsilon))$$
-To model rounding to the nearest integer we take each dimension of $\epsilon$ to be drawn uniformly over the interval $(-1/2,1/2)$.
-
-(c) The density $p_\Phi(\tilde{z})$ defines a discrete distribution on the discrete values $\tilde{z} \in Z$
-defined by
-$$P_\Phi(\tilde{z}) = P_{z \sim p_\Phi}(\mathrm{round}(z) = \tilde{z})$$
-Consider the case where ${\cal Z}$ is the discrete set of vectors with integer coordinates.
-Assume that the density $p_\Phi(z)$ is locally approximated by its first order Taylor expansion
-$$p_\Phi(z+ \Delta z) = p_\Phi(z) + \left(\nabla_z p_\Phi(z)\right)^\top \Delta z$$
-Assuming the first order Taylor expansion is exact, give a closed-form expression for the discrete distribution $P_\Phi(\tilde{z})$ in terms of the continuous density $p_\Phi(z)$.
-Hint: write $P_\Phi(\tilde{z})$ as an expectation over $\epsilon$ drawn from the uniform distribution on $[-1/2,1/2]^d$
-where $d$ is the dimension of $z$.
-
-\solution{For an vector $\tilde{z}$ with integer coordinates we have
-  \begin{eqnarray*}
-    P_\Phi(\tilde{z}) & = & P_{z \sim p_\Phi}(\mathrm{round}(z) = \tilde{z}) \\
-    & = & \int_{\epsilon \in [-1/2,1/2]^d}\;p_\Phi(\tilde{z} + \epsilon)\;d\epsilon \\
-    & = &  E_{\epsilon \sim \mathrm{uniform}[-1/2,1/2]^d}\;p_\Phi(\tilde{z} + \epsilon) \\
-    & = & E_{\epsilon \sim \mathrm{uniform}[-1/2,1/2]^d}\;p_\Phi(\tilde{z}) +  (\nabla_{\tilde{z}} p_\Phi(\tilde{z}))^\top \epsilon \\
-    & = & p_\Phi(\tilde{z}) +  E_{\epsilon \sim \mathrm{uniform}[-1/2,1/2]^d}\;(\nabla_{\tilde{z}} p_\Phi(\tilde{z}))^\top \epsilon \\
-    & = & p_\Phi(\tilde{z}) +  (\nabla_{\tilde{z}} p_\Phi(\tilde{z}))^\top E_{\epsilon \sim \mathrm{uniform}[-1/2,1/2]^d}\; \epsilon \\
-    & = & p_\Phi(\tilde{z})
-  \end{eqnarray*}
-}
-
-\bigskip
-~{\bf Problem 5. VQ-VAEs}
+~{\bf Problem 3. VQ-VAEs}
 
 In a VQ-VAE the rounding operation is parameterized by a tensor $C[K,I]$ giving $K$ center vectors of the form $C[k,I]$.
 We now consider rounding-RDAs defined by the following objective.
@@ -280,7 +171,7 @@ $C[k,I]$ is mean of the vectors assigned to class $k$?
 \solution{Of the three, this is only true for the published version.}
 
 \bigskip
-{\bf Problem 6.} This problem is on VAE language modeling.  Consider a VAE where the signal $s$ is a word string $w_1,\ldots,w_T$ (as in problem 2).  In the VAE 
+{\bf Problem 4.} This problem is on VAE language modeling.  Consider a VAE where the signal $s$ is a word string $w_1,\ldots,w_T$ (as in problem 2).  In the VAE 
 we can have a continuous latent variable $z$. The VAE optimization problem is then
 \begin{equation}
     \Phi^*,\Theta^*,\Psi^* = \argmin_{\Phi,\Theta,\Psi}\;E_{s \sim \pop,\;z \sim p_\Psi(z|s)}\;\ln\frac{p_\Psi(z|s)}{p_\Phi(z)} \;-\; \ln P_\Theta(s|z)
@@ -332,7 +223,7 @@ Is the discreteness of $z$ an issue in this case?  Explain your answer.
 
 
 \bigskip
-{\bf Problem 8. Training Vector Quantization}
+{\bf Problem 6. Training Vector Quantization}
 
 Vector quantization (VQ) can be interpreted as introducing symbols.  It uses an embedding matrix $E[K,I]$ giving an embedding vector $E[k,I]$
 for each of $K$ discrete ``symbols''.
@@ -386,137 +277,6 @@ of the vectors of the form $x_\Psi(y)$ satisfying $\mathrm{nearest}_E(x_\Psi(y))
 \solution{For $\mathrm{nearest}_E(x_\Psi(y)) = k$ we have
   $$e(k) = (1-2\eta)e(k) + 2\eta x_\Psi(y)$$
 }
-
-
-\bigskip
-{\bf Problem 3. 25 pts} This problem is on VAE language modeling (in contrast to GAN language modeling).  Consider a VAE where the signal $s$ is a word string $w_1,\ldots,w_T$ (as in problem 2).  In the VAE 
-we can have a continuous latent variable $z$. The VAE optimization problem is then
-\begin{equation}
-    \Phi^*,\Theta^*,\Psi^* = \argmin_{\Phi,\Theta,\Psi}\;E_{s \sim \pop,\;z \sim p_\Psi(z|s)}\;\ln\frac{p_\Psi(z|s)}{p_\Phi(z)} \;-\; \ln P_\Theta(s|z)
-    \label{VAE}
-\end{equation}
-Here the first ``rate term'' is defined on densities and the final ``distortion term'' is defined for a discrete sentence $s$.
-To explicitly handle the reparameterization trick will take the encoder density to be a Gaussian.
-For a Gaussian encoder we compute a mean vector $\hat{z}_\Psi(s)$ and a variance $\sigma^2_\Psi(s)[i]$ for each component
-$z[i]$ of $z$.  The Gaussian density for the encoder is then.
-$$ p_\Psi(z[i]|s) \propto \exp(-(z[i]-\hat{z}_\Psi(s)[i])^2/(2\sigma^2_\Psi(s)[i])$$
-
-{\bf (a)} For a noise value $\epsilon \in \reals$ drawn from ${\cal N}(0,1)$,
-and for given values $\hat{z} \in \reals$ and $\sigma^2 \in \reals$, define a deterministic function $z(\hat{z},\sigma^2,\epsilon)$ such that over the draw of the noise
-$\epsilon$ we have that $z(\hat{z},\sigma^2,\epsilon)$ has the density
-$$p(z) \propto \exp(-(z-\hat{z})^2/(2\sigma^2)).$$
-
-\solution{$z(\hat{z},\sigma^2,\epsilon) = \hat{z} + \sigma\epsilon$}
-
-{\bf (b)} Applying your solution to part (a) to the individual components of $z$ equation~(\ref{VAE}) can be rewritten as
-\begin{equation}
-    \Phi^*,\Theta^*,\Psi^* = \argmin_{\Phi,\Theta,\Psi}\;E_{s \sim \pop,\;\epsilon \sim {\cal N}(0,I)}\;\ln\frac{p_\Psi(z|s)}{p_\Phi(z)} \;-\; \ln P_\Theta(s|z)
-    \label{VAE2}
-\end{equation}
-Are there any problems with doing SGD on the optimization defined by (\ref{VAE2}) due to the use of continuous $z$ and discrete $s$?  Explain your answer.
-
-\solution{There are no problems here.
-  Since $P(s|z)$ is a computable and $z$ is continuous we can compute $z.\grad$ which can then passed back to the encoder $\Psi$
-  through the computation of $z(\hat{z}_\Psi(y),\Sigma_\Psi(y),\epsilon)$. We get a clear advantage of VAEs over GANs for $s$ discrete.}
-
-{\bf (c)} It can be shown that if we hold the encoder $\Psi$ fixed then the optimal value of the prior density $p_\Phi(z)$ is just the marginal on $z$ of the distribution defined
-by sampling $s \sim \pop$ and $z \sim p_\Psi(z|s)$.  We can write this marginal as $p_{\pop,\Psi}(z)$.  Now consider the rate term when $p_\Phi(z) = p_{\pop,\Psi}(z)$.
-$$\mathrm{rate} = E_{s \sim \pop,\;z \sim P_\Psi(z|s)}\;\ln\frac{p_\Psi(z|s)}{p_{\pop,\Psi}(z)}$$
-Write this rate term as a differential mutual information.
-
-\solution{
-  $$\mathrm{rate} = I_{\pop,\Psi}(s,z)$$
-  This has a channel capacity interpretation.  It is the information capacity (information rate) of the communication channel that takes input $y$ to output $z$.
-  This is typically a nice finite number of bits (or nats) even for continuous densities.  Adding noise to $\hat{z}_\Psi(y)$ intuitively limits its precision
-  and limits the information that $z$ carries about $s$.
-}
-
-\bigskip
-{\bf Problem 4. 25 pts} This problem is on VAEs when both $z$ and $s$ are discrete.
-Is the discreteness of $z$ an issue in this case?  Explain your answer.
-
-\solution{Yes, the discreteness of $z$ is an issue. This is true independent of the nature of $s$. A differential change in parameters will not change a discrete $z$ and $z.\grad = 0$.
-  So the standard back-propagation into the encoder fails.  VQ-VAE back-propagates into the encoder using a K-means loss term together with straight-through gradients.
-  Discreteness of $s$ is not a problem.}
-
-A variational autoencoder (VAE) has three parts, an encoder $\mathrm{enc}$, a decoder
-$\mathrm{dec}$ and a prior $\mathrm{pri}$.  The VAE is defined by the following objective.
-
-$$\mathrm{enc}^*,\mathrm{dec}^*,\mathrm{pri}^* = \mathrm{argmin}_{\mathrm{enc,dec,pri}}\;\mathrm{ELBO}(z,y)$$
-
-$$\mathrm{ELBO}(y,z) = E_{y\sim \mathrm{pop},z\sim P_{\mathrm{enc}}(z|y)}\left[ -\ln\frac{P_\mathrm{pri}(z)P_{\mathrm{dec}}(y|z)}{P_{\mathrm{enc}}(z|y)}\right]$$
-
-Recall that the cross entropy $H(P,Q)$ for a sampling distribution $P$ and a model distribution $Q$ is defined by
-
-$$H(P,Q) = E_{w\sim P}\left[-\ln Q(w)\right]$$
-
-A conditional entropy $H(w|u)$ is defined for a joint distribution P(w,u) by
-
-$$H(w|u) = E_{(w,u) \sim P}\left[-\ln P(w|u)\right]$$
-
-Part 1: Write $\mathrm{ELBO}(y,z)$ as a cross entropy (on a joint distribution of $y$ and $z$) minus a conditional entropy.
-
-\solution{
-
-  $$\mathrm{ELBO}(y,z) = H(\mathrm{pop}(y)P_{\mathrm{enc}}(z|y),\;P_{\mathrm{pri}}(z)P_{\mathrm{dec}}(y|z)) - H(P_{\mathrm{enc}}(z|y))$$
-
-  Here $H(P_\enc(z|y))$ refers to the joint distribution on $y$ and $z$ defined by $\pop(y)P_\enc(z|y)$.
-  }
-
-\medskip
-Part 2: Suppose we fix the encoder arbitrarily and optimize only the prior and the decoder.  What is the joint distribution on y and z defined by the optimal models $P_{\mathrm{pri}^*}(z)$
-and $P_{\mathrm{dec}^*}(y|z)$?  Justify your answer.
-
-\solution{
-The optimal models for the prior and the decoder define the same joint distribution as
-that defined by the population and then encoder.  This is because the optimal solution to a cross entropy is the sampling distribution.}
-
-\medskip
-Part 3. Suppose that we leave the encoder fixed arbitrarily and train just the prior and the decoder, as in part 2, and then sample y (perhaps an image) by sampling $z$ from the prior and $y$ from the decoder.  Assuming universality for the prior and decoder, but with the encoder untrained, will this result in sampling $y$ from the population distribution?  Explain your answer.
-
-\solution{
-
-Yes, this will sample from the population because the joint distribution defined by the prior and the decoder will match the joint distribution defined by the population and encoder.
-}
-
-\eject
-
-{\bf Problem}
-
-This is a problem on vector quantization.  Vector quantization converts vectors to tokens.
-Converting vectors to tokens allows images and sounds to be modeled with transformers.
-
-Consider $k \in \{1,2,\ldots,K\}$.  I will call $k$ a token.
-
-For each token $k \in \{1,2,\ldots,K\}$ let $e(k) \in R^d$ be a vector embedding of the token $k$.
-
-This is the same formal set-up as having vector embeddings for language tokens (words).
-
-Let $e$ be the embedding matrix (the matrix $e(k)[i]$ giving the $i$th component of the vector $e(k)$).
-
-Let $\hat{k}$ be a tokenization function mapping any $x \in R^d$ to a token $\hat{k}(x)$.
-
-We want to optimize the embedding matrix e and the tokenization function $\hat{k}$
-so that $e(\hat{k}(x))$ is near $x$.
-
-More formally, let $\rho$ be a probability density on $R^d$.  We want the following.
-
-$$e^*,\hat{k}^* = \mathrm{argmin}_{e,\hat{k}}\;E_{x \sim \rho}\;||e(k(x)) - x||^2$$
-
-(a) Write a gradient descent update equation for optimizing the embedding matrix e for a fixed embedding function $\hat{k}$.
-
-(b) Write a equation defining an optimal embedding function $\hat{k}$ for a fixed embedding matrix $e$.
-
-{\bf Comments:}
-
-Loyd's Algorithm for k-means vector quantization replaces (a) with a closed form solution for $\hat{k}$ given e and alternates the optimization of $\hat{k}$ and $e$.
-
-In vector quantization for deep learning models we also have an embedding model
-$\mathrm{emb}$ and ab  decoding model $\mathrm{dec}$ and want to solve the optimization problem.
-
-$$e^*,\hat{k}^*,\mathrm{emb}^*,\mathrm{dec}^*= \mathrm{argmin}_{e,\hat{k},\mathrm{emb},\mathrm{dec}}\;E_{x \sim \rho}\;||\mathrm{dec}(e(k(\mathrm{emb}(x))))- x||^2$$
-
-Actually it is a little more complicated that this equation because the embedding and the decoding operate on the whole image or sound wave and produce a matrix or array of vectors which are then tokenized individually.
 
 
 
