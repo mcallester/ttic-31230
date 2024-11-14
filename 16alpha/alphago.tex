@@ -170,58 +170,67 @@ We have a policy network computing $\pi_\Phi(a|s)$ and a value network computing
 \vfill
 In AlphaZero the networks are either 20 block or 40 block ResNets and either separate networks or one dual-headed network.
 
-\slide{Top Level Algorithm}
+\slide{Tree Search Algorithm}
 
-To play a game (against yourself) select a move at each position.
-
-\vfill
-Each move selection involves growing a tree of possible future positions.
+Move selection involves a tree search.
 
 \vfill
-The tree is ``sparse'' in the sense that the children of a node are a (possibly empty) subset of the possible next positions.
+Each node represents a board position $s$ and stores the following information.
+
+\vfill
+\begin{itemize}
+\item $V_\Phi(s)$ --- the value network value for the position $s$.
+\vfill
+\item The policy probabilities $\pi_\Phi(a|s)$ for each legal action $a$
+from that position.
+\vfill
+\item An initially empty set of children nodes.
+\end{itemize}
+
+
+\slide{Tree Search Algorithm}
 
 \vfill
 The tree is grown by a series of ``simulations''.
 
 \vfill
-Each simulation starts at the root and recursively selects a move at each node until the selected move adds a new node to the tree.
-
-\slide{Simulations}
-
-During a simulation moves are selected by maximizing an upper value as in the UCT algorithm.
+Each simulation starts at the root and recursively selects a move.
 
 \vfill
-Each simulation adds one new node to the tree.
+The selected move $a$ from state $s$ may or may not correspond to an existing child of $s$.
 
 \vfill
-Each simulation returns the value $V_\Phi(s)$ (from the value network) for the newly generated node.
-
-\slide{The Data Structures}
+If the child exists the simulation continues down that path.
 
 \vfill
-Each node in the tree data structrure stores the following information which is initialized
-by running the value and policy networks on state $s$.
+If the child does not exist a new child node is created for the selected move and the simulation terminates.
 
+\vfill
+Each simulation adds one new leaf $s$ and returns the value $V_\Phi(s)$ to all parents of $s$ in the tree.
+
+\slide{Tree Search Algorithm}
+
+In addition to $V_\Phi(s)$, $\pi_\Phi(a|s)$ and set of children nodes, each node $s$ contains
+the following for each possible action $a$.
+
+\vfill
 \begin{itemize}
-\item $V_\Phi(s)$ --- the value network value for the position $s$.
-\item The policy probabilities $\pi_\Phi(a|s)$ for each legal action $a$.
 \item The number $N(s,a)$ of simulations that have tried move $a$ from $s$. This is initially zero.
-\item The average $\hat{\mu}(s,a)$ of $V_\Phi(s)$ and the values of the simulations that have
-  tried move $a$ from position $s$.
+
+\vfill
+\item The average $\overline{V}(s,a)$ of $V_\Phi(s)$ plus the values returned by the the simulations that selected
+ move $a$ from position $s$.  This averages $1 + N(s,a)$ numbers.
 \end{itemize}
 
 \slide{Simulations and Upper Confidence Bounds}
 
-In descending into the tree, a simulation selects the move $\argmax_a U(s,a)$ where we have
+At a node $s$ a simulation selects the move $\argmax_a \mathrm{UCB}(s,a)$ where we have
 
 \vfill
-$$U(s,a) =   \hat{\mu}(s,a) + \lambda_u\; \pi_\Phi(a|s)/(1+N(s,a))$$
+$$\mathrm{UCB}(s,a) =   \overline{V}(s,a) + \lambda_u\; \pi_\Phi(a|s)/(1+N(s,a))$$
 
 \vfill
-We have that $U(s,a)$ will typically decrease as $N(s,a)$ increases.
-
-\vfill
-We can think of $U(s,a)$ as an upper confidence bound in the UCT algorithm.
+We set $\lambda_u$ be large enough that $\mathrm{UCB}(s,a)$ will typically decrease as $N(s,a)$ increases.
 
 \slide{Root Action Selection}
 
@@ -266,7 +275,7 @@ The replay buffer is periodically updated with new self-play games.
 The AlphaZero algorithm is a general RL learning method.  It can be applied to any problem of sequential decision making.
 
 \vfill
-In principle, the AlphaZero algorithm could be applied to the problem of direct optimization of the BLEU score in machine translation.
+The AlphaZero algorithm is used to train AlphaProof (September 2024).
 
 
 \slide{Training Time}
@@ -386,7 +395,7 @@ A replay entry $e$ has the form
 $$e = \left[\;s_t;\;\;a_{t+1},\;r_{t+1},\ldots,a_{t+K},r_{t+K},\;\;v_{t+K+1}\;\right]$$
 
 \vfill
-$r_{t+i}$ is the observed reword ti $t+i$ and $v_{t+K+1}$ is the (learned) value network applied to state $s_{t+K+1}$
+$r_{t+i}$ is the observed reword at $t+i$ and $v_{t+K+1}$ is the (learned) value network applied to state $s_{t+K+1}$
 
 \slide{Training}
 
