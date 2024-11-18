@@ -7,64 +7,43 @@
 
   \centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
   \bigskip
-  \centerline{David McAllester, Autumn 2023}
+  \centerline{David McAllester, Autumn 2024}
 
 
   \vfill
   \centerline{\bf AlphaZero, MuZero and AlphaStar}
   \vfill
-  \vfill          
+  \vfill
 
-\slide{AlphaGo Fan (October 2015)}
+\slide{The Breakthrough in Go (October 2015)}
 
-AlphaGo Defeats Fan Hui, European Go Champion.
-
-\vfill
 \centerline{\includegraphics[width=4in]{\images/alphago}}
 
-\slide{AlphaGo Lee (March 2016)}
+\slide{Timeline}
+
+{\bf October 2015:} AlphaGo-Fan Defeats Fan Hui, European Go Champion.
 
 \vfill
-\centerline{\includegraphics[width=8in]{\images/alphagolee}}
-
-\slide{AlphaGo Zero vs. Alphago Lee (April 2017)}
-
-{\bf AlphaGo Lee:}
-
-\begin{itemize}
-\item Trained on both human games and self play.
-  
-\item Trained for Months.
-
-\item Run on many machines with 48 TPUs for Lee Sedol match.
-\end{itemize}
-
-{\bf AlphaGo Zero:}
-\begin{itemize}
-\item Trained on self play only.
-  
-\item Trained for 3 days.
-
-\item Run on one machine with 4 TPUs.
-
-\item Defeated AlphaGo Lee under match conditions 100 to 0.
-\end{itemize}
-
-\slide{AlphaZero Defeats Stockfish in Chess (December 2017)}
-
-AlphaGo Zero was a fundamental algorithmic advance for general RL.
+{\bf March 2016:} AlphaGo-Lee Defeats Lee Sedol, world Go Champion.
 
 \vfill
-The general RL algorithm of AlphaZero is essentially the same as that of AlphaGo Zero.
-
-
-\slide{}
-
-\centerline{\bf Some Background}
+{\bf April 2017:} AlphaGo-Zero learns from self play only and defeats AlphaGo-Lee under match conditions 100 to 0.
 
 \vfill
+{\bf December 2017:} AlphaZero Learns to play chess and shogi and defeats stockfish (already super-human) in Chess.
 
-\slide{Early Computer Chess}
+\vfill
+{\bf September 2024:} The AlphaZero algorithm is used to train AlphaProof.
+
+\slide{Go Elo Ratings (December 2017)}
+
+\centerline{\includegraphics[height = 5in]{\images/alpha40}}
+
+\slide{Learning Curve for Predicting Human Go Moves}
+
+\centerline{\includegraphics[height = 5in]{\images/alphalearning2}}
+
+\slide{Classical Computer Chess Algorithms}
 
 First computer chess algorithm (min-max tree search) --- Claude Shannon, 1949
 
@@ -72,13 +51,13 @@ First computer chess algorithm (min-max tree search) --- Claude Shannon, 1949
 $\alpha$-$\beta$ pruning --- various originators (including John McCarthy) circa 1960.
 
 \vfill
-$\alpha$-$\beta$ pruning was the backbone of all computer chess before AlphaGo 2015.
+$\alpha$-$\beta$ pruning was the backbone of all computer chess before AlphaGo.
 
 \vfill
-The game of Go is clearly not approachable by these methods.
+The branching factor in Go so large that alpha-beta tree search is infeasible.
 
 \slidetwo{Monte-Carlo Tree Search (MCTS)}
-{Brugmann (1993)}
+{Brugmann 1993}
 
 First major advance in computer Go.
 
@@ -90,7 +69,7 @@ run a cheap stochastic policy to generate a sequence of moves (a rollout) and se
 Select the move with the best rollout value.
 
 \slidetwo{(One Armed) Bandit Problems}
-{Robbins (1952)}
+{Robbins 1952}
 
 Bandit problems were studied in an independent line of research.
 
@@ -113,7 +92,7 @@ We can select a choice and get a reward as often as we like.
 We would like to determine which choice is best using a limited number of trials.
 
 \slidetwo{The Upper Confidence Bound (UCB) Algorithm}
-{Lai and Robbins (1985)}
+{Lai and Robbins 1985}
 
 For each action choice (bandit) $a$, construct a confidence interval for its average reward
 based on $n$ trials for that acrtion.
@@ -127,7 +106,7 @@ Always select
 $$\argmax_a \;\; \hat{\mu}(a) + 2\sigma(a)/\sqrt{n(a)}$$
 
 \slidetwo{The Upper Confidence Tree (UCT) Algorithm}
-{Kocsis and Szepesvari (2006), Gelly and Silver (2007)}
+{Kocsis and Szepesvari (2006), Gelly and Silver 2007}
 
 The UCT algorithm grows a tree by running ``simulations''.
 
@@ -142,7 +121,7 @@ We select the child (bandit) with the lowest upper bound as computed from simula
 
 
 \slidetwo{Bootstrapping from Game Tree Search}
-{Vaness, Silver, Blair and Uther, NeurIPS 2009}
+{Vaness, Silver, Blair and Uther 2009}
 
 In bootstrapped tree search we do a tree search to compute a min-max value $V_{\mathrm{mm}}(s)$
 using tree search with a static evaluator $V_\Phi(s)$.  We then try to fit the static value to the min-max value.
@@ -157,10 +136,13 @@ estimate is replaced by a min-max tree search estimate.
 
 \slide{The Value and Policy Networks}
 
-The major innovation of AlphaGo and AlphaZero is to use CNNs as evaluation functions.
+The main innovation of AlphaGo and AlphaZero is to use deep networks for a value function and a policy function.
 
 \vfill
-We have a policy network computing $\pi_\Phi(a|s)$ and a value network computing $V_\Phi(s)$.
+They also innovate with the structure of UCT and self-play bootstrapping.
+
+\vfill
+The result is an extremely general RL algorithm.
 
 \slide{The Value and Policy Networks}
 
@@ -168,7 +150,7 @@ We have a policy network computing $\pi_\Phi(a|s)$ and a value network computing
 \centerline{\includegraphics[height=3.0in]{\images/alphagoArchitecture2}}
 
 \vfill
-In AlphaZero the networks are either 20 block or 40 block ResNets and either separate networks or one dual-headed network.
+The final AlphaZero system 40 a layer ResNet with both a policy head and a value head.
 
 \slide{Tree Search Algorithm}
 
@@ -268,90 +250,7 @@ Training is done by SGD on the following loss function.
 $$\Phi^*\; = \;\argmin_\Phi \;E_{(s,\pi,R) \sim \mathrm{Replay},\;a \sim \pi}\;\left(\begin{array}{l} (V_\Phi(s) - R)^2 \\ \\ - \lambda_\pi\log \pi_\Phi(a|s) \\ \\ + \lambda_R\;||\Phi||^2\end{array}\right)$$
 
 \vfill
-The replay buffer is periodically updated with new self-play games.
-
-\slide{The AlphaZero Algorithm}
-
-The AlphaZero algorithm is a general RL learning method.  It can be applied to any problem of sequential decision making.
-
-\vfill
-The AlphaZero algorithm is used to train AlphaProof (September 2024).
-
-
-\slide{Training Time}
-
-Single 20 block dual-headed ResNet.
-
-\vfill
-4.9 million Go games of self-play
-
-\vfill
-0.4s thinking time per move
-
-\vfill
-About 8 years of Go thinking time in training was completed in three days
-
-\vfill
-About 1000 fold parallelism.
-
-\slide{Elo Learning Curve for Go}
-
-\centerline{\includegraphics[height = 5in]{\images/alphalearning1}}
-
-\slide{Learning Curve for Predicting Human Go Moves}
-
-\centerline{\includegraphics[height = 5in]{\images/alphalearning2}}
-
-\slide{Ablation Studies}
-
-\centerline{\includegraphics[height=3.0in]{\images/alphagoArchitecture2}}
-
-\vfill
-We evaluate 20 layer networks which are either traditional CNNs or resnet and are either two separate networks or one network with dual heads.
-
-\slide{Ablation Studies}
-
-\centerline{\includegraphics[height = 5in]{\images/alphaablation}}
-
-\slide{Increasing Blocks and Training}
-
-Increasing the number of Resnet blocks from 20 to 40.
-
-\vfill
-Increasing the number of training days from 3 to 40.
-
-\vfill
-Gives a Go Elo rating over 5000.
-
-\slide{Final Go Elo Ratings}
-
-\centerline{\includegraphics[height = 5in]{\images/alpha40}}
-
-\slide{Is Chess a Draw?}
-
-In 2007 Jonathan Schaeffer at the University of Alberta showed that checkers is a draw.
-
-\vfill
-Using alpha-beta and end-game dynamic programming, Schaeffer computed drawing strategies for each player.
-
-\vfill
-This was listed by Science Magazine as one of the top 10 breakthroughs of 2007.
-
-\vfill
-It is generally believed that chess is a draw.  It was even conjectured that Stockfish could not be defeated ...
-
-\slide{AlphaZero vs. Stockfish in Chess}
-
-From white Alpha won 25/50 and lost none.
-
-\vfill
-From black Alpha won 3/50 and lost none.
-
-\vfill
-AlphaZero evaluates 70 thousand positions per second.
-
-\vfill
-Stockfish evaluates 80 million positions per second.
+In principle this algorithm can be applied to any RL problem.
 
 \slide{MuZero}
 
@@ -474,213 +373,6 @@ E plays only against M.
 \slide{Video}
 
 https://www.youtube.com/watch?v=UuhECwm31dM
-
-\slide{Cicero: Diplomacy}
-
-{\bf Human-level play in the game of Diplomacy by combining language models with strategic reasoning}, (Meta, November 2022)
-
-\vfill
-Players engages in secret negotiaions to conspire to take over the world.
-
-\vfill
-\centerline{\includegraphics[width = 4.0in]{\images/Diplomacy02}\hfill\includegraphics[width = 3.0in]{\images/Diplomacy01}}
-
-\slide{Cicero: Diplomacy}
-
-\vfill
-\centerline{\includegraphics[width = 3.0in]{\images/Diplomacy02}\hspace{4em}\includegraphics[width = 2.0in]{\images/Diplomacy01}}
-
-\vfill
-The play consists of a sequence of ``turns''.  In each turn each player converses with the others using a private messaging system.  After some time the messaging ends and each player submits orders to their generals.  The orders are revealed simultaneously. Promises can be broken.
-
-
-\slide{Cicero: Diplomacy}
-
-Cicero is an AI agent that plays Diplomacy with humans.  It is rated in the top 10\% of human players.
-
-
-\slide{Action Planning}
-
-We define the action of a player to be the set of orders that the player gives to their generals at the end of the turn.
-
-\vfill
-Cicero plans its actions for the current turn and generates ``beliefs'' about the actions of the other players (mathematically equivalent
-to stochastic policies for the other players).  Messages are generated from Cicero's planned actions and beliefs.  The planned actions
-and beliefs can evolve during negotiation.
-
-\slide{A Value Function}
-
-We seek a winning strategy (policy) for the agent Cicero.
-
-\vfill
-A choice of actions $a_1,\ldots,a_n$ for all the players determines the next board state.
-
-\vfill
-Cicero trains a value function that assigns a value $V_q(b)$ giving an estimate of the value that player $q$ receives 
-for board position $b$.
-
-\vfill
-As policies are trained and estimated, the value function can be trained with standard methods --- Bellman error and replay buffers.
-
-\slide{Correlated Nash Equilibria}
-
-\vfill
-At the end of negotiation it is natural to search for policies, $\pi_1,\ldots,\pi_n$ conditioned on the negotiation
-that form a (correlated) Nash equilibrium.
-
-\vfill
-This mean that each policy is a ``best response'' to other players policies where all policies are conditioned
-on the negotiation.
-
-\vfill
-It is ``correlated'' because the actions of two players are not independent when they can negotiate an agreement.
-
-\slide{Training Data}
-
-Cicero is trained on a dataset of 12,901,662 games from WebDiplomacy including messages exchanged between players. (webDiplomacy deidentified Player accounts).
-
-
-\newcommand{\act}{\mathrm{act}}
-\newcommand{\mess}{\mathrm{mess}}
-\newcommand{\im}{\mathrm{im}}
-
-\slide{An Imitation Model of Action Prediction}
-
-We want to predict actions during negotiation.
-
-\vfill
-$$\im^* = \argmin_\im\;E_{(x_p,a_q) \sim \train}\left[-\ln P_\im(a_q|x_p)\right]$$
-
-\vfill
-Here $p$ and $q$ are players. $x_p$ is taken from a time in a negotiation and
-consists of all past board positions and the previous messages in this negotiation visible to player $p$.
-$a_q$ is the action taken at the end of that round by player $q$.
-
-\vfill
-If $q = q$ this is an imitation action policy for $p$.
-
-\vfill
-If $q \ne p$ this is $p$'s imitation belief about $q$.
-
-\slide{piKL}
-
-Let $c$ denote player Cicero.
-
-\vfill
-Before sending each negotiation message Cicero samples 30 actions for each player $q$
-from the imitation action predictions $P(a_q|x_c)$ (including actions for Cicero).
-
-\vfill
-Cicero then optimizes policies $\pi_1,\ldots,\pi_n$ according to a piKL best-response objective
-where $\pi_{-p}$ is the collection of policies other than $\pi_p$.
-
-$$\pi_p^* = \argmax_{\pi_p}\;V(\pi_p,\pi_{-p}) - \lambda KL(\pi_p,P_\im(a_p|x_c)$$
-
-
-
-\slide{Imitation Message Generation}
-
-Cicero has a model $P_\mess(y|s,r,a_s,a_r,x_s)$ where
-where $y$ is the English text of the message, $s$ is the message sender, $r$ is the message recipient,
-$a_s$ is the action taken by the message sender and $a_r$ is the action
-taken by the message receiver at the end of the turn (in the future).
-
-\vfill
-$x_s$ consists of all past board positions and the previous messages visible to the sender in the current negotiation.
-
-\slide{Imitation Message Generation}
-
-{\huge
-$$\mess^* = \argmin_\mess\;E_{\{(x,s,r,y,a_s,a_r) \sim \train\}} \left[-\ln P_\mess(y|s,r,a_s,a_r,x_s)\right]$$
-}
-
-\slide{An Imitation Agent}
-
-\vfill
-$$P_\im(y|s,r,x_s) = E_{\{a_s,a_r \sim P_\act(a_s,a_r|s,r,x_s)\}}\;P_\mess(y|s,r,a_s,a_r,x_s)$$
-
-
-\vfill
-In Cicero the imitation model is combined with a planning model.
-
-\slide{Action Planning}
-
-\slide{??}
-
-
-\vfill
-
-
-
-
-\vfill
-The trained policies come two versions --- an expensive version conditioned on the board state plus dialogue,
-and a cheaper version conditioned just on the board state.
-
-\vfill
-
-
-
-
-
-
-
-
-\slide{Selecting the End Of Turn Action}
-
-For each turn Cicero first decides on its final action (the orders that it will give at the end of the turn) and then
-generates messages 
-
-\vfill
-The sends messages specified by intents.  This is done by deciding on an ``action'' which specifies all of the orders
-that the agent will actually give.specifying all of the payers orders
-where $x$ is as before (the history of board positions, and the history of messages before the message to be generated.
-
-
-
-\vfill
-A message prediction model $P_\mess(y|A,B,I,x)$ where $A$ and $B$ are two players, $y$ is a message from $A$ to $B$, $I$ is a (latent) ``intent'' of the message, and
-$x$ includes the history of board states the message and the messaged in the current turn occuring before this message.
-
-\vfill
-{\bf Step 2:} They get a base model --- a 2.7B parameter transformer
-model pre-trained on text from the internet.
-
-\vfill
-{\bf Step 3:} The base model is fine-tuned to predict messages from the board state, the previous messages negotiation in the WebDiplomacy dataset.
-
-\vfill
-$\vdots$
-
-\slide{{\bf Step 4:} Inferring Intents}
-
-The set of legal orders for any position 
-
-A an ``intent'' for a message from player $A$ to player $B$ is a set of orders for $A$ and a set of orders for $B$ 
-
-These steps are explained in more detail below.
-
-\vfill
-{\bf Step 4:} They train a model to infer an ``intent'' of each message based on the orders that followed in game move.
-\vfill
-{\bf Step 5:} They train a model annotate messages with the intent of the message.
-
-\vfill
-{\bf step 6:} 
-
-\slide{Cicero is an Elaborate System}
-
-\centerline{\includegraphics[width = 6in]{\images/Diplomacy3}}
-
-
-\slide{Cicero: Diplomacy}
-
-Cicero is an AI agent that plays Diplomacy with humans.  It is rated in the top 10\% of human players.
-
-\vfill
-
-\centerline{\includegraphics[height = 4.0in]{\images/Diplomacy1}}
-
 
 \slide{END}
 
