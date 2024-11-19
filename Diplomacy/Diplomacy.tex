@@ -101,6 +101,7 @@ a dataset of over 12 million games from WebDiplomacy including messages exchange
 \newcommand{\act}{\mathrm{act}}
 \newcommand{\mess}{\mathrm{mess}}
 \newcommand{\im}{\mathrm{im}}
+\newcommand{\RL}{\mathrm{RL}}
 
 \slide{Imitation Learning}
 
@@ -135,26 +136,27 @@ If $j \ne i$ this is $i$'s imitation belief about $j$ intended action.
 
 \slide{Learning from Self Play}
 
-Cicero trains a value function that assigns a value $V_i(b)$ giving an estimate of the value that player $i$ receives 
-given board position $b$.
+Cicero trains a value function that assigns a value $V_{\RL,i}(b)$ giving an estimate of the value that player $i$ receives 
+given board position $b$ and also a policy $P_{\RL,i}(a_i|b)$.
 
 \vfill
-As games are played the value function can be trained with standard methods --- Bellman error and replay buffers.
+As games are played the value function and policy can be trained with standard methods --- Bellman error and cross entropy respectively
+with replay buffers.
 
 \slide{Learning from Self Play}
 
 During self-play Cicero is playing all of the players.
 
 \vfill
-Before sending each negotiation message Cicero samples 30 actions for each player $i$
-from the imitation action predictions $P(a_i|x_c)$.
+Before sending each negotiation message Cicero selects 35 actions actions for each player $i$
+from a larger sample of policies from both $P_\im(a_i|x_c)$ and $P_{\mathrm{RL},i}(a_i,b)$.
 
 \vfill
-Cicero then searches for ``equalibrium policies'' $\pi_1,\ldots \pi_n$ where each $\pi_i$ is selecting one of the 30 selected actions for that agent.
+Cicero then searches for ``equilibrium policies'' $\pi_1,\ldots \pi_n$ where each $\pi_i$ is selecting one of the 35 selected actions for that agent.
 
 \slide{Learning from Self Play}
 
-Cicero then optimizes policies $\pi_1,\ldots,\pi_n$ according to a piKL best-response objective
+Cicero optimizes policies $\pi_1,\ldots,\pi_n$ according to a piKL best-response objective
 where $\pi_{-i}$ is the collection of policies other than $\pi_i$.
 
 \vfill
@@ -162,6 +164,9 @@ $$\pi_i^* = \argmax_{\pi_i}\;V_i(\pi_i,\pi_{-i}) - \lambda KL(\pi_i,P_\im(a_i|x_
 
 \vfill
 At the end of the negotiation each player draws an action from their policy.
+
+\vfill
+(This is a simplification of Cicero's actual joint optimization.)
 
 \slide{Playing with Humans}
 
@@ -179,15 +184,18 @@ where $y$ is the English text of the message, $s$ is the message sender, $r$ is 
 $a_s$ is the action taken by the message sender and $a_r$ is the action
 taken by the message receiver at the end of the turn (in the future).
 
+
 \vfill
-$x_s$ consists of all past board positions and the previous messages visible to the sender in the current negotiation.
-
-
-\slide{Imitation Message Generation}
 
 {\huge
 $$\mess^* = \argmin_\mess\;E_{\{(x,s,r,y,a_s,a_r) \sim \train\}} \left[-\ln P_\mess(y|s,r,a_s,a_r,x_s)\right]$$
 }
+
+
+\slide{Imitation Message Generation}
+
+
+Messages are sampled and filtered in various ways to select natural and varied messages so as to fool human players into thinking Cicero is a person.
 
 \slide{Overall Comments}
 
