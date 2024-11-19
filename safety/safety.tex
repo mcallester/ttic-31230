@@ -1,0 +1,331 @@
+\input /users/davidmcallester/icloud/tex/SlidePreamble
+\input /users/davidmcallester/icloud/tex/preamble
+
+\begin{document}
+
+{\Huge
+
+\centerline{\bf TTIC 31230, Fundamentals of Deep Learning}
+
+\bigskip
+\centerline{David McAllester, Autumn  2024}
+
+\vfill
+\centerline{AI Safety}
+
+\vfill\vfill
+
+\slide{The Alignment Problem}
+
+Giving an artificial general intelligence (AGI) a mission or purpose in alignment with human values.
+
+\vfill
+This can be phrased as finding a solution to the principal-agent problem for AGI agents.
+
+\slide{White-Hats, Black-Hats}
+
+A white-hat team designs a safety system or protocol.
+
+\vfill
+A black-hat team looks for vulnerabilities.
+
+\vfill
+We need both.
+
+\slide{White Hat: The Advobot Protocol}
+
+A personal advobot is an AI advocate for a particular person X where the advobot's fundamental goal is given as ``within the law, pursue fulfilling the expressed requests of X''.
+
+\vfill
+The advobot protocol is that AGI systems be legally limited to advobots.
+
+\vfill
+The term ``AGI'' needs to be incorporated into law and given an evolving interpretation by the judicial system.
+
+\slide{White Hat: Safety Features of the Protocol}
+
+\begin{itemize}
+\item The advobot must act within the law. Society can limit all advobots by changing the law.
+
+\vfill
+\item The advobot mission transfers moral responsibility from the advobot to its master.
+
+\vfill
+\item There is a large society of advobots --- one per person --- each with a different mission.  This limits individual power.
+
+\vfill
+\item The advobot mission seems clearer that other directives such as Asimov’s laws or Yudkowsky's coherent extrapolated volition.
+
+\vfill
+\item The advobot protocol preserves human free will.
+\end{itemize}
+
+
+\slide{Black Hat: Consider Large Language Models (LLMs)}
+
+Much of the literature on AI safety assumes that we can give an AI a goal such as ``make as many paperclips as possible''.
+
+\vfill
+But large language models (LLMs) are not even ``agentive'' (explained below).
+
+\vfill
+LLMs are trained to mimic people.  People do not have clear objectives and do not always do what they are told.
+
+\vfill
+Large language models are subject to the ``Waluigi effect'' where they flip to pursuing the very opposite of what they are told.
+
+\slide{Agentive AGI}
+
+An AGI system is ``agentive'' if it takes actions in puruit of a goal.
+
+\vfill
+Many systems can be decribed as taking actions in persuit of a goal.  But an AGI is agentive if its potential actions include
+all the kinds of actions that people can take.  For example legal filings of all kinds.
+
+\vfill
+Current LLMs are not agentive.
+
+\slide{The Waluigi Effect}
+
+Waluigi is the evil twin of Luigi in Mario Brothers.
+
+\vfill
+The Waluigi effect occurs when an LLM holds two
+interpretations of its own statements --- one genuinely cooperative
+and one deceptively cooperative.
+
+\vfill
+When modeling humans both interpretations exist.
+
+\vfill
+If the LLM reveals deception, the deception interpretation sticks.
+
+\vfill
+Every turn of the dialogue has a chance of revealing deception.
+
+
+
+\slide{White Hat: Constitutional AI}
+
+Constitutional AI is an attempt to provide a mission statement (or ``constitution'') to LLMs.
+
+\vfill
+Constitutional AI has been show to work to some extent but is not included in GPT4 which instead uses reinforcement learning with human feedback (RLHF).
+
+\vfill
+Ultimately it seems clear that we need to be able to specify missions.
+
+\centerline{\huge Constitutional AI: Harmlessness from AI Feedback}
+\centerline{\huge Bai et al ArXiv 2212.08073 [Anthropic]}
+
+\slide{A Prediction: Memory Architectures}
+
+For both safety and performance reasons I believe strong AGI systems will be based on read-write memory architectures.
+
+\vfill
+In a memory architecture a ``CPU'' works with an external memory in a manner analogous to a von Neumann machine.
+
+\vfill
+We might have a {\bf transformer CPU} where the transformer context is analogous to registers in a classical CPU.
+
+\vfill
+Items can be loaded from memory into the CPU context and written from the CPU context into memory.
+
+\slide{Read-Write Memory vs. Retrieval}
+
+There has been a fair amount of recent interest in retrieval architectures.  For Example:
+
+{\huge
+\begin{itemize}
+\item Lample et al., Large Memory Layers with Product Keys  Dec. 2019
+
+\item Lewis et al., Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (RAG), April 2021
+
+\item Improving Language Models by Retrieving from Trillions of Tokens (RETRO), December 2021
+
+\item Wu et al., Memorizing Transformers, March 2022
+
+\item Wang et al. Shall We Pretrain Autoregressive Language Models with Retrieval? A Comprehensive Study, April 2023
+\end{itemize}
+}
+
+But I have not seen proposals of architectures that read and write to a random access memory.
+
+\slide{Performance Advantages of Memory Architectures}
+
+The memory acts as an essentially infinite context with memory retrieval playing the role of the attention mechanism of a transformer
+but over all of memory.
+
+\vfill
+The memory can be directly extended. The machine can read and remember today's newspaper.
+
+\vfill
+The machine can use internal chain-of-thought processing involving reads and writes to memory.
+
+
+\slide{Safety Advantages of Memory Architectures}
+
+We want to know what an agent believes.
+
+\vfill
+We want to know the agents goals.
+
+\vfill
+We want both of these things to be visible in the memory.
+
+\slide{Interpretability (Opening the Black Box)}
+
+\vfill
+We should be able to engineer the memory such that memory entries are either literally textual statements,
+or have a rendering as text, and where the textual representation is faithful to meaning assigned by the machine.\footnote{\Large For example, the machine's notion of entailment
+between memories is in correspondence with human entailment judgements between their textual representations.}
+
+\vfill
+By observing the bandwidth to memory we can observe the ``thought process'' of the machine.
+
+\vfill
+We can also edit the memory to maintain the quality of its information, or control the beliefs of the machine.
+
+\slide{Mission Statements (Fundamental Goals)}
+
+{\bf Orthogonality:} Fundamental goals are axioms.  They do not follow from, and are independent of, world knowledge.
+
+\vfill
+An axiomatic {\bf and immutable} mission should be built into the CPU.
+
+\slide{The Advobot Protocol}
+
+A personal advobot is an advocate for a particular person X whose fundamental goal is given as ``within the law, pursue fulfilling the expressed requests of X''.
+
+\vfill
+The advobot protocol is that AGI be limited to advobots.
+
+\slide{Controlability}
+
+An advobot is controlable in three ways.
+
+\vfill
+\begin{enumerate}
+\item One specifies the advobot's fundamental goal.
+
+\vfill
+\item One can give requests to the advobot --- its fundamental goal is to purue obeying them.
+
+\vfill
+\item One can directly edit the beliefs of the advobot.  However, one might want legal protection against creating fake beliefs or
+legal guarantees that advobots use their own judgement in determining truth.(very challenging).
+\end{enumerate}
+
+\slide{Defining AGI}
+
+Legally limiting AGI to advobots requires some legal interpretation of ``AGI''.
+
+\vfill
+AGI is of course hard to define.
+
+\vfill
+However, many legal terms are hard to define.  Consider ``intent'', ``bodily harm'', or ``assault''.
+
+\vfill
+Perhaps we can simply use the term ``AGI'' in legal discourse and leave its interpretation open to an evolving legal process.
+
+\slide{Defining Truth}
+
+While it may be possible to edit the beliefs of an advobot, one might want legal protection for truth in advobot beliefs.
+
+\vfill
+This would involve the ability to legally interpret ``truth''.
+
+\vfill
+But the legal system has always had to judge truth.
+
+\slide{Additional Safety Policies}
+
+No AI agent should have legal recognition as an person --- an advobot cannot own property or enter into contracts.
+
+\vfill
+Person X should have access to the thoughts of their advobot.
+
+\vfill
+The goal structure of an advobot should be such that an advobot has no problem
+with its human master reading its thoughts.
+
+\slideplain{A Missing Secret Sauce?}
+
+To date the results with retrieval models have been limited.
+
+\vfill
+However, the virtues of belief state machines seem clear.
+
+\vfill
+Further research in the development of belief state machines seems warranted.
+
+\slide{Semantic Parsing and Class/Instance Architectures}
+
+Large language models can already do semantic parsing.
+
+\vfill
+Semantic parsing represents a sentence as a set of class instances.
+
+\vfill
+Each class instance is a belief (or at least a statement).
+
+
+\slide{Language Model Generated Semantic Parses}
+
+INPUT: Russian lawmakers Monday ratified the illegal annexation of four partially occupied Ukrainian regions.
+
+\vfill
+Output: Retrieving lexical entries for (ratifying), (annexing), and (occupying).
+
+\vfill
+(ratifying) is when (the ratifier) ratifies (the treaty).
+After (the retifying), (the treaty) is in effect.
+
+\vfill
+(the ratifier) is Russian lawmakers
+(the treaty) is the annexation of four partially occupied Ukrainian regions
+(the other party) is unknown
+
+\slide{Language Model Generated Semantic Parses}
+
+INPUT: Russian lawmakers Monday ratified the illegal annexation of four partially occupied Ukrainian regions.
+
+\vfill
+Output: Retrieving lexical entries for (ratifying), (annexing), and (occupying).
+
+\vfill
+(annexing) is when (the annexer) annexes (the territory);
+After (the occupying), (the territory) is under the control of (the annexer).
+
+\vfill
+(the annexer) is Russian lawmakers
+(the territory) is four partially occupied Ukrainian regions
+
+\slide{Language Model Generated Semantic Parses}
+
+INPUT: Russian lawmakers Monday ratified the illegal annexation of four partially occupied Ukrainian regions.
+
+\vfill
+Output: Retrieving lexical entries for (ratifying), (annexing), and (occupying).
+
+\vfill
+(occupying) is when (the occupier) occupies (the territory);
+after (the occupying), (the territory) is under the control of (the occupier).
+
+\vfill
+(the occupier) is Russian lawmakers
+(the territory) is four partially occupied Ukrainian regions
+
+\slide{Summary}
+
+{\bf Belief state machine advobots} are desirable for interpretability, controlability, and AI safety generally.
+
+\vfill
+A potential architecture for belief state machines is a retrieval-based class/instance transformer --- a retrieval transformer that retrieves from a vector database of class definitions (semantic memory)
+and vector database of class instances (episodic memory).
+
+
+\slide{END}
+
+\end{document}
