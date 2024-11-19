@@ -53,7 +53,8 @@ The hard part is ``solving'' the formal game (selecting proposed actions during 
 
 \slide{GPT-4 Cannot Play Formal Games}
 
-It is worth noting that GPT-4 cannot play chess or Diplomacy --- it seems GPT-4 cannot effectively plan actions in games defined by formal rules.
+It is worth noting that GPT-4 cannot play chess or Diplomacy --- it seems GPT-4 cannot effectively plan actions in games
+like chess, Go, shogi or Diplomacy.
 
 \slide{Game Theory: Nash Equilibria}
 
@@ -131,7 +132,7 @@ $a_j$ is the action actually taken at the end of that round by player $j$.
 If $j = i$ this is an imitation action policy for $j$.
 
 \vfill
-If $j \ne i$ this is $i$'s imitation belief about $j$ intended action.
+If $j \ne i$ this is $i$'s imitation belief about $j$'s intended action.
 
 
 \slide{Learning from Self Play}
@@ -149,7 +150,7 @@ During self-play Cicero is playing all of the players.
 
 \vfill
 Before sending each negotiation message Cicero selects 35 actions actions for each player $i$
-from a larger sample of policies from both $P_\im(a_i|x_c)$ and $P_{\mathrm{RL},i}(a_i,b)$.
+from a larger sample of policies from both $P_\im(a_i|x_i)$ and $P_{\RL,i}(a_i|b)$.
 
 \vfill
 Cicero then searches for ``equilibrium policies'' $\pi_1,\ldots \pi_n$ where each $\pi_i$ is selecting one of the 35 selected actions for that agent.
@@ -160,7 +161,7 @@ Cicero optimizes policies $\pi_1,\ldots,\pi_n$ according to a piKL best-response
 where $\pi_{-i}$ is the collection of policies other than $\pi_i$.
 
 \vfill
-$$\pi_i^* = \argmax_{\pi_i}\;V_i(\pi_i,\pi_{-i}) - \lambda KL(\pi_i,P_\im(a_i|x_c))$$
+$$\pi_i^* = \argmax_{\pi_i}\;V_{\RL,i}(\pi_i,\pi_{-i}) - \lambda KL(\pi_i,P_\im(a_i|x_i))$$
 
 \vfill
 At the end of the negotiation each player draws an action from their policy.
