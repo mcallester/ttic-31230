@@ -27,7 +27,8 @@
 
 \vfill
 
-In 2017 AlphaZero learned to play Go, chess and shogi at a superhuman level given only the rules of the game.
+In 2017 AlphaZero learned to play Go, chess and shogi at a superhuman level entirely from self play
+given only the rules of the game.
 
 \vfill
 Lots of people have wondered whether something similar might be done for mathematics.
@@ -40,25 +41,26 @@ The IMO (International Math Olypiad) is an annual mathemamtics contest for high 
 Of the six problems in July 2024 IMO, DeepMind's AlphaGeometry solved the one geometry problem and AlphaProof solved three of the remaining five.
 
 \vfill
-The solutions were worth a silver medal.  However, AlphaProof took three days rather than the 1.5 hours humans get per problem.
+The solutions were worth a silver medal.  However, AlphaProof took three days on a supercomputer rather than
+the 1.5 hours humans get per problem.
 
 \vfill
 There is a blog post with a high level description (discussed below) but no paper has yet appeared.
 
 \slide{Three Cultures}
 
-{\bf Mathematicians (users)}: Building an AI system that can learn to play chess, Go or shogi is different from playing
+{\bf Mathematicians}: Building an AI system that can learn to play chess, Go or shogi is different from playing
 chess, Go or shogi. Building a systems that can do mathematics different from doing mathematics.
 
 
 \vfill
-{\bf Deep Learning Researchers:} There is now a significant literature on using LLMs to generate formal proofs.
+{\bf AI Researchers:} There is now a significant literature on using LLMs to generate formal proofs.
 
 \vfill
 {\bf Logicians:} The developers of formal verification systems that ensure correctness
 are part of the formal methods community (programming languages, type theory, and formally sound automated reasoning).
 
-\slide{Interest From Mathematicians}
+\slide{Mathematicians}
 
 Terence Tao (Fields Medalist) organized a group effort that machine verified one of his (coauthored) recent papers. (September 2023).
 
@@ -71,8 +73,9 @@ Tim Gowers (Fields Medalist) is now focusing on improving the level of automatio
 \vfill
 Kevin Buzzard has announced a project to machine verify Fermat's last theorem.
 
-\slide{LLM Guided Provers}
+\slide{AI Researchers}
 
+\vfill
 \centerline{Generative Language Modeling for Automated Theorem Proving,}
 \centerline{Polu and Sutskever, (Sept, 2020, OpenAI)}
 %\centerline{(uses MetaMath rather than Lean)}
@@ -85,34 +88,85 @@ AlphaProof, Deep Mind, July 2024, unpublished
 \centerline{for Reinforcement Learning and Monte-Carlo Tree Search}
 \centerline{Xin, et al., August 2024}
 
-\slide{Logicians: The Lean System}
+\slide{Logicians}
 
-By far, the dominant system for ensuring correctness is Lean.
-
-\vfill
-{\bf Users:} Mathematician users, such as Terence Tao, Peter Scholze, and Kevin Buzzard, work directly in Lean with possible assistance
-from LLMs used in the same way that programmers use LLMs -- to make suggestions.
+Logicians are concerned with the formal foundations of mathematics and formal reasoning algorithms.
 
 \vfill
-{\bf Deep Learning Researchers:} Deep learning researchers are almost exclusively using Lean to ensure correctness.
+The choice of foundation is in many ways analogous to a choice of formal programming languages.  There are religious factions.
 
 \vfill
-{\bf Logicians:} I have built a system (Alfred) that is intended to be a compeitor for Lean.
+For programming the choice of language does matter --- python is better than assembler.
 
-\slide{Goals and Tactics}
-
-I will call a statement that remains to be proved a goal.
-
-\vfill
-In Lean a tactic is a function that takes a set of goals and ``backward chains'' to produce a new set of goals.
+\slide{Logicians}
+Currently the dominant system (language) is Lean.
 
 \vfill
-For a proof state $S$ and tactic $T$ we have that $T(S)$ is a new set of goals such that solving $T(S)$ solves $S$.
-
-\slide{Goals and Tactics}
+AlphaProof uses Lean to verify its formal statements.
 
 \vfill
-For set of goals $S$ and tactic $T$ we have that $T(S)$ is a new set of goals such that solving $T(S)$ solves $S$.
+I have built my own formal foundation I'm calling Alfred.
+
+\slide{AlphaProof}
+
+The blog post includes the following figure.
+
+\centerline{\includegraphics[width = 8in]{\images/AlphaProof}}
+
+
+\slide{DeepSeek Pretraining Corpus}
+
+\centerline{\includegraphics[width = 8in]{\images/DeepSeek3}}
+
+\vfill
+They collect 40B tokens of mathematical text.
+
+
+\slide{Autoformalization}
+
+{\huge
+{\bf Autoformalization with Large Language Models} (Google, May 2022)
+
+\vfill
+{\bf DeepSeek-Prover: Advancing Theorem Proving in
+LLMs through Large-Scale Synthetic Data} (DeepSeek AI, May 2024)
+}
+
+\slide{Autoformalization in DeepSeek}
+\vfill
+\centerline{\includegraphics[width = 7in]{\images/AutoForm1}}
+
+\vfill
+Autoformalization is the process of converting informal (English) statements into formal (machine readable) statements.
+
+\slide{Automatic Blueprinting}
+
+The term ``blueprint'' is used in
+software engineering and refers to specifications and dependencies for modules.
+
+\vfill
+It should be possible (??) to use autoformalization to convert a mathematics paper or textbook into a blueprint
+for verification.
+
+\vfill
+The blueprint is a partial order on formal statements where each statement is to be proved from earlier statements.
+
+\vfill
+The statements in proofs can included in the blueprint.
+
+\slide{Self Play Training of Autoformalization}
+
+\vfill
+Autoformalization can be error-prone so one can sample different possible formalizations.
+
+\vfill
+The correct formalization is one that can be proved and that is used either as a step in a correct proof or in the proof of a later theorem.
+
+
+\slide{Searching for Proofs: Goals and Tactics}
+
+\vfill
+For a set of goals $S$ and tactic $T$ we have that $T(S)$ is a new set of goals such that solving $T(S)$ solves $S$.
 
 \vfill
 Example of tactics include:
@@ -138,7 +192,7 @@ This results in an and-or search tree.  At an and node we need solve all the chi
 solve only one of the children.
 
 \vfill
-HyperTree Proof Search for Neural Theorem Proving, Lample et al., May 2022 (Meta).
+{\bf HyperTree Proof Search for Neural Theorem Proving}, Lample et al., May 2022 (Meta).
 
 
 \slide{and-or Proof Trees}
@@ -151,18 +205,13 @@ This is equivalent to min-max search where the maximizer proves and the minimize
 \vfill
 We can then use $\alpha$-$\beta$ search, or Monte-Carlo tree search, or AlphaZero.
 
-\slide{AlphaProof}
-
-The blog post includes the following figure.
-
-\centerline{\includegraphics[width = 8in]{\images/AlphaProof}}
-
 \vfill
 For now we can only be sure about published systems.
 
+
 \slide{Whole Proof Generation}
 
-Baldur: Whole-Proof Generation and Repair with Large Language Models, First et al, March 2023, (UMass Amherst, Google, UIUC).
+{\bf Baldur: Whole-Proof Generation and Repair with Large Language Models}, First et al., March 2023, (UMass Amherst, Google, UIUC).
 
 \vfill
 One can repeatedly ask the language model to generate
@@ -193,14 +242,6 @@ DeepSeek uses monte-carlo tree search with an intrinsic reward for exploration (
 
 \vfill
 DeepSeek inserts natural language comments for each tactic application which might help guide the proof.
-
-\slide{Pretraining Corpus}
-
-\centerline{\includegraphics[width = 8in]{\images/DeepSeek3}}
-
-\vfill
-They collect 40B tokens of mathematical text.
-
 
 \slide{Self Play Imitation Learning}
 
