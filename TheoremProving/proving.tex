@@ -96,13 +96,21 @@ Logicians are concerned with the formal foundations of mathematics and formal re
 The choice of foundation is in many ways analogous to a choice of formal programming languages.  There are religious factions.
 
 \vfill
+\begin{itemize}
+\item {\bf Amorphous:} Metamath
+\item {\bf ZFC:} Mizar
+\item {\bf HOL:} HOL light, Isabelle/HOL, HOL4
+\item {\bf Dependent Type Theory:} Coq, Agda, Lean, Alfred
+\end{itemize}
+
+\vfill
 For programming the choice of language does matter --- python is better than assembler.
 
 \slide{Logicians}
 Currently the dominant system (language) is Lean.
 
 \vfill
-AlphaProof uses Lean to verify its formal statements.
+AlphaProof and DeepSeek use Lean to verify formal statements.
 
 \vfill
 I have built my own formal foundation I'm calling Alfred.
@@ -113,14 +121,18 @@ The blog post includes the following figure.
 
 \centerline{\includegraphics[width = 8in]{\images/AlphaProof}}
 
-
 \slide{DeepSeek Pretraining Corpus}
 
-\centerline{\includegraphics[width = 8in]{\images/DeepSeek3}}
+Since we don't have a paper on AlphaProof I will focus on DeepSeek Prover.
 
 \vfill
-They collect 40B tokens of mathematical text.
+The DeepSeek Provers architecture seems to be consistent with what we know about AlphaProof.
 
+\vfill
+\centerline{\includegraphics[width = 6in]{\images/DeepSeek3}}
+
+\vfill
+DeepSeek collected 40B tokens of mathematical text.
 
 \slide{Autoformalization}
 
@@ -156,7 +168,6 @@ The statements in proofs can included in the blueprint.
 
 \slide{Self Play Training of Autoformalization}
 
-\vfill
 Autoformalization can be error-prone so one can sample different possible formalizations.
 
 \vfill
@@ -205,10 +216,6 @@ This is equivalent to min-max search where the maximizer proves and the minimize
 \vfill
 We can then use $\alpha$-$\beta$ search, or Monte-Carlo tree search, or AlphaZero.
 
-\vfill
-For now we can only be sure about published systems.
-
-
 \slide{Whole Proof Generation}
 
 {\bf Baldur: Whole-Proof Generation and Repair with Large Language Models}, First et al., March 2023, (UMass Amherst, Google, UIUC).
@@ -225,11 +232,13 @@ Whole proof generation is typically associated with or-branching tree search whe
 
 \slide{DeepSeek1.5}
 
-DeepSeek 1.5 appears to be the state of the art LLM-guided prover among those with a published paper.
+DeepSeek 1.5 uses whole proof generation but treats these as ``rollouts'' in an or-tree.
 
 \vfill
-It uses whole proof generation but treats these as ``rollouts'' in an or-tree.  The steps in each generated whole proof
-become new nodes in the or-tree and rollouts (whole proof generation) can be done from internal nodes.
+The steps in each generated whole proof become new nodes in an or-tree.
+
+\vfill
+Rollouts (whole proof generation) is done from internal nodes.
 
 \slide{DeepSeek 1.5}
 
@@ -251,9 +260,6 @@ used in ``imitation fine tuning''.
 \vfill
 \centerline{\includegraphics[height = 4in]{\images/DeepSeek2}}
 
-\vfill
-DeepSeek does not use tree-search bootstrapping.
-
 \slide{GRPO RL Optimization}
 
 DeepSeek uses a variant of PPO called GRPO for RL.
@@ -261,16 +267,20 @@ DeepSeek uses a variant of PPO called GRPO for RL.
 \vfill
 PPO is an advantage-actor-critic policy gradient algorithm.
 
-$$\nabla_\Theta R(\pi_\Theta) = E_{s_t,a_t}\left[(\ln \pi_\Theta(a_t)) \hat{A}(s_t,a_t)\right]$$
+$$\nabla_\Theta R(\pi_\Theta) \approx E_{s_t,a_t}\left[(\ln \pi_\Theta(a_t)) \hat{A}_\Psi(s_t,a_t)\right]$$
 
 \vfill
-For a fixed advantage $\hat{A}(s_t,a_t)$ this gradient is a nonlinear function of $\Theta$.
+For a fixed advantage $\hat{A}_\Psi(s_t,a_t)$ this gradient is a nonlinear function of $\Theta$.
 
 \vfill
 Rather than take a single linear step, PPO moves some distance along this nonlinear path.
 
 \vfill
 In AlphaZero this happens when elements of the replay buffer are reused.
+
+\vfill
+DeepSeek does not use tree-search bootstrapping.
+
 
 \slide{LLM Proofs Without Formal Verification}
 
@@ -300,11 +310,11 @@ This is also true in the game of Diplomacy where orders to generals have a fixed
 in negotiation are best viewed as proposals for orders.
 
 \vfill
-Mathematics can also be defined in terms of formal language.
+Mathematics can also be defined in terms of a formal language.
 
 \vfill
 This would suggest that English/formal translation is ultimately not difficult and the
-hard challenge is solving the game defined in the rules of the formal language.
+hard challenge is solving the game defined in the rules of formal mathematics.
 
 \slide{Formal Language vs. Natural Language}
 
@@ -321,7 +331,7 @@ What is the role of algorithms in the age of LLMs?
 It seems unlikely that LLMs will ever replace compilers which, by deep model standards, are {\bf incredibly efficient}.
 
 \vfill
-Lean includes certain decision procedures such as one for deciding whether an linear equation
+Lean includes certain decision procedures such as one for deciding whether a linear equation
 follows from a given set of linear equations and inequalities.
 
 \vfill
