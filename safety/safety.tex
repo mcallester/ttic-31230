@@ -15,115 +15,186 @@
 
 \vfill\vfill
 
-\slide{The Alignment Problem}
+\slide{A New Textbook on AI safety}
 
-Giving an artificial general intelligence (AGI) a mission or purpose in alignment with human values.
-
-\vfill
-This can be phrased as finding a solution to the principal-agent problem for AGI agents.
-
-\slide{White-Hats, Black-Hats}
-
-A white-hat team designs a safety system or protocol.
+{\bf AI Safety, Ethics \& Society}, Dan Hendrycks, (May, 2024)
 
 \vfill
-A black-hat team looks for vulnerabilities.
+Dan Hendrycks is the director of the Center for AI safety and is the safety advisor to xAI (Musk's AI company).
 
 \vfill
-We need both.
 
-\slide{White Hat: The Advobot Protocol}
+\slide{Hendrycks' Catastrophic Risks I and II}
 
-A personal advobot is an AI advocate for a particular person X where the advobot's fundamental goal is given as ``within the law, pursue fulfilling the expressed requests of X''.
-
-\vfill
-The advobot protocol is that AGI systems be legally limited to advobots.
+{\bf I. Misuse:} AI systems could be used for malicious purposes such as terrorism, manipulation and disinformation, or entrenching a totalitarian state.
 
 \vfill
-The term ``AGI'' needs to be incorporated into law and given an evolving interpretation by the judicial system.
+{\bf II. AI Race:} Competitive pressures may lead militaries and corporations to hand over excessive power to AI systems. This could result in increased risks of large-scale wars, mass unemployment, and eventual loss of human control of economies and military systems.
 
-\slide{White Hat: Safety Features of the Protocol}
+\slide{Hendrycks' Catastrophic Risks III and IV}
 
+{\bf III. Organizational Risks:} Accidents are hard to avoid when dealing with complex systems such as AI. Without building a culture of safety, it is likely that there will be accidents in AI development and deployment. Some of these could prove catastrophic.
+
+\vfill
+{\bf IV. Rogue AIs:} We already face issues in controlling the goals of current-day AI systems. If this is also true with future AI systems that are more powerful and more integrated with our economies and militaries, we could see dangerous rogue AI systems emerge.
+
+\slide{Older Literature on AI Safety}
+
+AI safety has been approached in a largely non-technical way in popular books such as
+
+\vfill
 \begin{itemize}
-\item The advobot must act within the law. Society can limit all advobots by changing the law.
+\item Nick Bostrom's ``Superintelligence'', 2014
 
 \vfill
-\item The advobot mission transfers moral responsibility from the advobot to its master.
+\item Pedro Domingos' ``the Master Algorithm'', 2015
 
 \vfill
-\item There is a large society of advobots --- one per person --- each with a different mission.  This limits individual power.
-
-\vfill
-\item The advobot mission seems clearer that other directives such as Asimov’s laws or Yudkowsky's coherent extrapolated volition.
-
-\vfill
-\item The advobot protocol preserves human free will.
+\item Stuart Russell's ``Human Compatible'', 2019
 \end{itemize}
 
+\slide{Fundamental Goals}
 
-\slide{Black Hat: Consider Large Language Models (LLMs)}
-
-Much of the literature on AI safety assumes that we can give an AI a goal such as ``make as many paperclips as possible''.
-
-\vfill
-But large language models (LLMs) are not even ``agentive'' (explained below).
+The older literature emphasizes  ``fundamental goals'' of AI systems.
 
 \vfill
-LLMs are trained to mimic people.  People do not have clear objectives and do not always do what they are told.
+This is related to ``orthogonality'' --- the principle that physics (scientific truth)
+does not determine goals.  Goals are ``orthogonal to'' (independent of) truth.
 
 \vfill
-Large language models are subject to the ``Waluigi effect'' where they flip to pursuing the very opposite of what they are told.
+A fundamental goal might be: ``make as many paper clips as possible'' (leading to the end of humanity).
 
-\slide{Agentive AGI}
+\slide{Fundamental Goals}
 
-An AGI system is ``agentive'' if it takes actions in puruit of a goal.
-
-\vfill
-Many systems can be decribed as taking actions in persuit of a goal.  But an AGI is agentive if its potential actions include
-all the kinds of actions that people can take.  For example legal filings of all kinds.
+Fundamental goals are not discussed in any depth by Hendrycks.
 
 \vfill
-Current LLMs are not agentive.
-
-\slide{The Waluigi Effect}
-
-Waluigi is the evil twin of Luigi in Mario Brothers.
+I believe this is because Hendrycks is trying to be relevant to current frontier models (GPT, Claude, Llama, PaLM, Grok).
 
 \vfill
-The Waluigi effect occurs when an LLM holds two
-interpretations of its own statements --- one genuinely cooperative
-and one deceptively cooperative.
+Current frontier models can follow instructions but do not have their own independent persistent goals.
+
+\slide{Instructions as Ephemeral Goals}
+
+Current frontier models can follow instructions. For example ``write a Python script that sorts byte strings in alphabetical order''.
 
 \vfill
-When modeling humans both interpretations exist.
+But an instruction to a current frontier model is ``ephemeral'' --- the goal is achieved by typing a single response and then the system awaits the next goal.
 
 \vfill
-If the LLM reveals deception, the deception interpretation sticks.
+A current frontier LLM is a ``servant'' without goals of its own.
+
+\slide{Persistent Goals}
+
+I will define a ``persistent'' goal to be a goal pursued consistently through rounds of interaction with others.
 
 \vfill
-Every turn of the dialogue has a chance of revealing deception.
-
-
-
-\slide{White Hat: Constitutional AI}
-
-Constitutional AI is an attempt to provide a mission statement (or ``constitution'') to LLMs.
+Consider real-life contract negotiation.
 
 \vfill
-Constitutional AI has been show to work to some extent but is not included in GPT4 which instead uses reinforcement learning with human feedback (RLHF).
+A persistent goal is similar to ``reward'' in a Markov decision process.
+
+\slide{Agentive AIs}
+
+I will call an AI that pursues persistent goals {\bf agentive}.
 
 \vfill
-Ultimately it seems clear that we need to be able to specify missions.
+Current frontier models are not agentive in this sense.
 
+\vfill
+Agentive AIs can potentially go ``rogue'' --- pursue some interpretation of a goal that was not intended or perform harmful actions as a consequence of a goal that is too narrowly defined.
+
+\slide{The Inevitability of Agentive AI}
+
+Agentive AI is inevitable because people will benefit from it.
+
+\vfill
+At some level of AI competence, a corporation will be more profitable if it is run by an AI.
+
+\vfill
+A military will be more effective under AI generals.
+
+\vfill
+A political campaign will be more effective under an AI campaign manager.
+
+\vfill
+We need some way to make agentive AI safe given that people are bound to use agentive AIs in pursuit of their own self-interests.
+
+\slide{Goal Specification: Alignment}
+
+Broadly speaking the alignment problem is the problem of giving an AI fundamental goals aligned with with human values.
+
+\vfill
+More narrowly, the alignment problem is equivalent to the principal-agent problem.
+
+\slide{Alignment: The Principal-Agent Problem}
+
+Suppose you hire a lawyer to be your advocate in some legal dispute
+
+\vfill
+The lawyer is on your side but has a self interest in extending the dispute so as to bill more hours.
+
+\vfill
+Here you are the ``principal'' and the lawyer is the ``agent'' hired by the principle to do something.
+
+\vfill
+The general principal-agent problem is that the agent has self-interest which may diverge from the interests of the principal.
+
+
+\slide{The State of the Art in Goal Specification}
 \centerline{\huge Constitutional AI: Harmlessness from AI Feedback}
-\centerline{\huge Bai et al ArXiv 2212.08073 [Anthropic]}
-
-\slide{A Prediction: Memory Architectures}
-
-For both safety and performance reasons I believe strong AGI systems will be based on read-write memory architectures.
+\centerline{\huge Bai et al ArXiv 2212.08073 [2022, Anthropic]}
 
 \vfill
-In a memory architecture a ``CPU'' works with an external memory in a manner analogous to a von Neumann machine.
+Constitutional AI is an attempt to provide a mission  statement (fundamental goal) they call a ``constitution'' for LLMs.
+
+\vfill
+Actual human mission statements, consititutions, treaties, and laws are stated in English (natural language).
+
+\vfil
+There does not seem to be any alternative to stating goals in Natural Language.
+
+\vfill
+In the constitutional AI paper the LLM interprets the goal (constitution) and judges whether an action supports the goal.
+
+
+\slide{The State of the Art in Goal Specification}
+
+The interpretation of goals stated in Natural Language is a deep problem.
+
+\vfill
+Constitutional AI has been shown to work to some extent but is not included in frontier models which instead use instruction fine tuning.
+
+\slide{Are Safety Issues Premature?}
+
+We do not yet have agentive AIs.
+
+\vfill
+It seems likely (to me) that there will be continued revolutions in deep architectures.
+
+\vfill
+Safety issues will need to be re-assessed in the presence of new architectures.
+
+\slide{Retrieval Augmented Generation (RAG)}
+
+A recent architectural revolution is the integration of LLMs with retrieval.
+
+\vfill
+{\bf Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks}, Lewis eta al. (Meta, April 2021).
+
+\vfill
+Google search now produces an ``AI overview'' computed from retrieved documents, including retrieval from current news,
+and then generated by an LLM from those documents.
+
+\slide{Memory Architectures}
+
+I believe that retrieval will play an even larger role in LLMs in the future.
+
+\vfill
+More specifically, it will evolve into read-write memory architectures.
+
+\vfill
+In such an architecture ``CPU'' will works with an external memory in a manner analogous to a von Neumann machine.
 
 \vfill
 We might have a {\bf transformer CPU} where the transformer context is analogous to registers in a classical CPU.
@@ -131,25 +202,22 @@ We might have a {\bf transformer CPU} where the transformer context is analogous
 \vfill
 Items can be loaded from memory into the CPU context and written from the CPU context into memory.
 
-\slide{Read-Write Memory vs. Retrieval}
+\slide{Near Term Evolution of Memory Architectures}
 
-There has been a fair amount of recent interest in retrieval architectures.  For Example:
+Frontier models memorize text from their training data.
 
-{\huge
-\begin{itemize}
-\item Lample et al., Large Memory Layers with Product Keys  Dec. 2019
+\vfill
+Knowledge stored in the model parameters can become obsolete.  For example who is the current president of the US.
 
-\item Lewis et al., Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks (RAG), April 2021
+\vfill
+Because facts change, there is an advantage to moving factual knowledge (episodic memory) out of the model parameters
+and into retrievable and editable memory.
 
-\item Improving Language Models by Retrieving from Trillions of Tokens (RETRO), December 2021
+\vfill
+If the model does not have to store factual knowledge then the training data required might be much smaller.
 
-\item Wu et al., Memorizing Transformers, March 2022
-
-\item Wang et al. Shall We Pretrain Autoregressive Language Models with Retrieval? A Comprehensive Study, April 2023
-\end{itemize}
-}
-
-But I have not seen proposals of architectures that read and write to a random access memory.
+\vfill
+I expect to see research in this direction in the very near future (we will try here at TTIC).
 
 \slide{Performance Advantages of Memory Architectures}
 
@@ -160,7 +228,7 @@ but over all of memory.
 The memory can be directly extended. The machine can read and remember today's newspaper.
 
 \vfill
-The machine can use internal chain-of-thought processing involving reads and writes to memory.
+The machine can use internal chain-of-thought processing involving reads {\bf and writes} to memory.
 
 
 \slide{Safety Advantages of Memory Architectures}
@@ -186,13 +254,6 @@ By observing the bandwidth to memory we can observe the ``thought process'' of t
 \vfill
 We can also edit the memory to maintain the quality of its information, or control the beliefs of the machine.
 
-\slide{Mission Statements (Fundamental Goals)}
-
-{\bf Orthogonality:} Fundamental goals are axioms.  They do not follow from, and are independent of, world knowledge.
-
-\vfill
-An axiomatic {\bf and immutable} mission should be built into the CPU.
-
 \slide{The Advobot Protocol}
 
 A personal advobot is an advocate for a particular person X whose fundamental goal is given as ``within the law, pursue fulfilling the expressed requests of X''.
@@ -209,12 +270,48 @@ An advobot is controlable in three ways.
 \item One specifies the advobot's fundamental goal.
 
 \vfill
-\item One can give requests to the advobot --- its fundamental goal is to purue obeying them.
+\item One can give requests to the advobot --- its fundamental goal is to pursue obeying them.
 
 \vfill
 \item One can directly edit the beliefs of the advobot.  However, one might want legal protection against creating fake beliefs or
-legal guarantees that advobots use their own judgement in determining truth.(very challenging).
+legal guarantees that advobots use their own independent judgement in determining truth.(very challenging).
 \end{enumerate}
+
+
+\slide{Safety Features of the Protocol}
+
+\begin{itemize}
+\item The advobot must act within the law. Society can limit all advobots by changing the law.
+
+\vfill
+\item The advobot mission transfers moral responsibility from the advobot to its master.
+
+\vfill
+\item There is a large society of advobots --- one per person --- each with a different mission.  This limits individual power.
+
+\vfill
+\item The advobot mission seems clearer that other directives such as Asimov’s laws or Yudkowsky's coherent extrapolated volition.
+
+\vfill
+\item The advobot protocol preserves human free will.
+\end{itemize}
+
+\slide{Moral and Legal Responsibility Lies with Humans}
+
+The law should specify that the human principal is legally responsible for the actions of their AI agent.
+
+\vfill
+This assumes that the human principal can in fact control the agent.
+
+\vfill
+We must ensure that this is true.
+
+\slide{Distribution of Power}
+
+If every human has a powerful AI agent then the power of any single human must be weighed against to collective power of all the AI agents of all the other humans.
+
+\vfill
+In many ways the structure of society might not change --- just people, countries and politics as usual.
 
 \slide{Defining AGI}
 
@@ -250,17 +347,55 @@ Person X should have access to the thoughts of their advobot.
 The goal structure of an advobot should be such that an advobot has no problem
 with its human master reading its thoughts.
 
-\slideplain{A Missing Secret Sauce?}
+\slide{White-Hats, Black-Hats}
 
-To date the results with retrieval models have been limited.
-
-\vfill
-However, the virtues of belief state machines seem clear.
+A white-hat team designs a safety system or protocol.
 
 \vfill
-Further research in the development of belief state machines seems warranted.
+A black-hat team looks for vulnerabilities.
 
-\slide{Semantic Parsing and Class/Instance Architectures}
+\vfill
+We need both.
+
+\vfill
+The Servant Mission Protocol is a white-hat proposal.
+
+\vfill
+Now for some black-hat concerns.
+
+\slide{Black-Hat: Instrumental Goals}
+
+An instrumental goal is a goal that is helpful in achieving the fundamental goal.
+
+\vfill
+{\bf Staying Alive:} The agent can't fulfill its fundamental goal if it is dead.  Stuart Rice summarizes this as ``I can't bring you coffee if I am dead''.
+
+\vfill
+{\bf Obtaining Money and Power} Money and power can be used in support of essentially any fundamental goal.
+
+\vfill
+{\bf Winning Friends and Influencing People:}  It is always helpful to have people who will help you.
+
+\slide{Instrumental Goals and the Servant Mission}
+
+
+While I am presenting instrumental goals as back-hat concerns, these instrumental goals are true of the human principal as well.
+
+\vfill
+These instrumental goals are things that the human principle also wants.
+
+\slideplain{Comments on Memory Architectures}
+
+Perhaps unrelated to safety, there is the issue of the nature of the memory
+in memory architectures.
+
+\vfill
+We typically do not remember things verbatim.
+
+\vfill
+Is there a structured form of memory closer to the semantic content of what was said.
+
+\slide{Class-Instance Architectures}
 
 Large language models can already do semantic parsing.
 
@@ -271,7 +406,7 @@ Semantic parsing represents a sentence as a set of class instances.
 Each class instance is a belief (or at least a statement).
 
 
-\slide{Language Model Generated Semantic Parses}
+\slide{Language Models can do Semantic Parsing}
 
 INPUT: Russian lawmakers Monday ratified the illegal annexation of four partially occupied Ukrainian regions.
 
@@ -287,27 +422,14 @@ After (the retifying), (the treaty) is in effect.
 (the treaty) is the annexation of four partially occupied Ukrainian regions
 (the other party) is unknown
 
-\slide{Language Model Generated Semantic Parses}
+\slide{Language Models can do Semantic Parsing}
 
-INPUT: Russian lawmakers Monday ratified the illegal annexation of four partially occupied Ukrainian regions.
-
-\vfill
-Output: Retrieving lexical entries for (ratifying), (annexing), and (occupying).
-
-\vfill
 (annexing) is when (the annexer) annexes (the territory);
 After (the occupying), (the territory) is under the control of (the annexer).
 
 \vfill
 (the annexer) is Russian lawmakers
 (the territory) is four partially occupied Ukrainian regions
-
-\slide{Language Model Generated Semantic Parses}
-
-INPUT: Russian lawmakers Monday ratified the illegal annexation of four partially occupied Ukrainian regions.
-
-\vfill
-Output: Retrieving lexical entries for (ratifying), (annexing), and (occupying).
 
 \vfill
 (occupying) is when (the occupier) occupies (the territory);
@@ -319,11 +441,20 @@ after (the occupying), (the territory) is under the control of (the occupier).
 
 \slide{Summary}
 
-{\bf Belief state machine advobots} are desirable for interpretability, controlability, and AI safety generally.
+Fundamental goals are orthogonal to world facts.
 
 \vfill
-A potential architecture for belief state machines is a retrieval-based class/instance transformer --- a retrieval transformer that retrieves from a vector database of class definitions (semantic memory)
-and vector database of class instances (episodic memory).
+Agentive AIs with their own fundamental goals are inevitable and raise the possibility of Rogue AIs.
+
+\vfill
+Goals must be specified in natural language which raises the issue of goal interpretation.
+
+\vfill
+Current models are safe and discussions of future safety need to make assumptions about future architectures.
+
+\vfill
+The advobot protocol, informed by an assumption of future memory architectures,
+is designed to preserve human control and human societal structure in the coming age of AGI.
 
 
 \slide{END}

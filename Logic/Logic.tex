@@ -15,35 +15,156 @@
 
 \vfill
 
-\centerline{\bf Logic}
+\centerline{\bf The Foundations of Mathematics}
 
-\slideplain{Why Does Lean Currently Dominate?}
+\slidetwo{Zermelo-Fraenkel Set Theory}{with the Axiom of Choice (ZFC)}
 
-{\bf Grammatical Functor Property}: Any well-typed (grammatically correct) definition of a mapping between classes denotes a {\bf functor between groupoids}.
+ZFC is a set of nine axioms in first order logic with equality and a single relation $\in$.
 
 \vfill
-To explain what this means, and why it is significant, I will need to develop some background in logic.
+ZFC plus a plus a large cardinal axiom defines the set of all possible mathematical theorems.
+
+\vfill
+A theorem of mathematics is a formula in the language of set theory that is provable using the nine axioms of ZFC, a large cardinal axiom,
+and the inference rules of first order logic.
 
 \slide{First Order Logic}
 
-As simple example we consider the language defined by a constant {\bf zero} and a succesor function {\bf succ}.
+A first order language is defined by the Boolean operations $\vee$, $\wedge$, $\Rightarrow$ and $\neg$ (and, or, implies and not), the quantifiers $\forall$ and $\exists$ (forall and exists) the equality
+symbol $=$, and a certain set of function and relation symbols.
 
 \vfill
-In this language we can write the following axioms.
+For example, the first order language of Peano arithmetic is defined by the constant $0$ (zero) and function $s$ (successor) of one argument.
 
-$${\color{red} \neg \exists x \;\mathrm{succ}(x) = \mathrm{zero}}$$
-$${\color{red} \forall x\; (x \neq \mathrm{zero}) \Rightarrow \exists y\; x = \mathrm{succ}(y)}$$
-$${\color{red}\forall x,y,z \;(\mathrm{succ}(y)= x \wedge \mathrm{succ}(z)= x) \Rightarrow y=z}$$
 
-\vfill
-But this does not pin down the natural numbers --- there are models of these axioms with
-elements not reachable from zero.
+\slide{First Order Logic}
 
-\slide{The Grammar of First Order Logic}
-
-A theorem proving system must manipulate data structures representing terms and formulas.
+The first order language of Peano arithmetic is defined by the constant $0$ (zero) and function $s$ (successor) of one argument.
 
 \vfill
+The axioms of Peano arithmetic are:
+
+\vfill
+\begin{enumerate}
+\item $\forall x,y \;\;s(x)=s(y) \Rightarrow x=y$
+
+\vfill
+\item $\forall x\;\;s(x) \ne 0$
+
+\vfill
+\item For any formula $\Phi[x]$:
+
+$$(\Phi[0] \wedge \forall x \;\Phi[x]\Rightarrow \Phi[s(x)]) \Rightarrow \forall x \;\Phi[x]$$
+\end{enumerate}
+
+\slide{Set Theory}
+
+In set theory we have only the single relation $\in$.
+
+\vfill
+The axioms imply that there exists an empty set $\emptyset$.
+
+$$\exists x\; \forall y \;y \not\in x$$
+
+\vfill
+For any set $x$ we have the set containing $x$.
+
+\vfill
+We also have an infinite set
+
+$$\exists x \; \emptyset\in x \wedge \forall y\; \;y \in x \Rightarrow \{y\} \in x$$
+
+\vfill
+We can define the natural numbers, the integers, the rationals, the reals and all the structures of mathematics
+as particular sets within the universe of sets.
+
+\slide{The Universe $V$}
+
+The universe of all sets is typically written as $V$.
+
+\vfill
+In the 1870s Cantor proposed to define $V$ by stating that any formula can be used to name a set.
+$$\mbox{for any formula $\Phi[y]$:}\;\;\;\exists x\;\forall y \;y \in x \Leftrightarrow \Phi[y]$$
+
+\vfill
+This is called the axiom of {\bf naive comprehension}.
+
+\vfill
+Naive comprehension leads to Russell's paradox
+
+$$\exists x\;\forall y\;\;y \in x \Leftrightarrow y \not\in y$$
+
+$$x \in x \Leftrightarrow x \not\in x$$
+
+\slide{Nine ZFC Axioms (The First Four)}
+
+{\bf Extensionality:} If two sets have the same members then they are the same set.
+
+\vfill
+{\bf Foundation:} $\in$ is a well-founded relation (every set contains a least member under the order $\in$).
+
+\vfill
+{\bf Restricted Comprehension:} For any $x \in V$, and any formula $\Phi[y]$, $V$ contains $\{y\in x:\;\Phi[y]\}$
+
+\vfill
+{\bf Infinity:} $V$ contains an infinite set:
+$$\exists x \; \emptyset\in x \wedge  \; \forall y\; \;y \in x \Rightarrow \{y\} \in x$$
+
+\slide{The Nine ZFC Axioms (The Rest)}
+
+{\bf Power Set:} For any set $x \in V$ we have that $V$ contains the set of subsets of $x$, denote ${\cal P}(x)$.
+
+\vfill
+{\bf Pairing and Union:} We can form two element sets and take the union of the elements of a set.
+
+\vfill
+{\bf Replacement:} For any set $x \in V$, and any function $f$ from $x$ into $V$, the set $\{f(y):\;y \in x\}$ is also in $V$.
+
+\vfill
+{\bf Choice:} If $(\forall x \exists y\;\Phi(x,y)) \Rightarrow \exists f \forall x \;\Phi(x,f(x))$.
+
+\slide{The Large Cardinal Axiom}
+
+A Grothendieck universe is a set $\tilde{V}$ with all the properties of $V$ but is a member of ``the real''(larger) $V$.
+
+\vfill
+The large cardinal axiom is equivalent to the statement that $V$ contains a Grothendieck universe.
+
+\vfill
+This is equivalent to the statement that large cardinals exist.
+
+\vfill
+Grothendieck assumed the existence of such a universe in proving certain classification theorems for topological spaces.
+
+\vfill
+Large cardinal theory was a major topic in set theory for many decades.
+
+\slide{What is wrong with Set Theory?}
+
+The fundamental issue with set theory is that it ignores fact that mathematical statements
+involve a notion of grammaticality.
+
+\vfill
+We can add two numbers but we cannot add a word to a number.
+
+\vfill
+The representation of the natural numbers where zero is the empty set and $s(x)$ is $\{x\}$ is completely arbitrary.
+
+\vfill
+The natural numbers (and all mathematical structures) should be defined in a way that is independent of any particular
+representation.
+
+\slide{Grammar and Isomorphism}
+
+\vfill
+The idea of isomorphic graphs seems intuitively clear.
+
+\vfill
+For any two isomorphic graphs $G$ and $G'$ and for any {\bf Grammatically Well Formed} statements $\Phi(g)$ about an arbitrary graph $g$
+we have $\Phi(G) \Leftrightarrow \Phi(G')$.
+
+\slide{General First Order Logic Provides Grammar}
+
 The first order language  of {\bf zero} and {\bf succ} has terms and formulas
 defined by the following grammar.
 
@@ -117,24 +238,30 @@ and a value for each declared symbol (consistent with the type declarations).
 \vfill
 We also have ``axioms'' which are the properties that the data must satisfy.  We assume the axioms to be grammaticaly well-formed (well typed).
 
-\slide{The Signature-Axiom Groupoid}
+\slide{Signature-Axiom Classes}
 
 Two structures of the same signature are isomorphic if there exists a system of bijections between the sorts which carry the data of one to the data of the other.
 
 \vfill
 It is straightforward to define the notion of ``carry'' for simply typed language constants.
 
-
 \vfill
 It is also straightforward to prove that
 if two models of the same signature are isomorphic then they satisfy the same (grammatical) formulas.
 
+\slide{The Set-Class Distinction}
+
+All of mathematics can be translated into set theory.  A particular graph can be represented by a set.
+
 \vfill
-We then get that every signature-axiom class defines a groupoid --- a category in which every morphism is an isomorphism.
+However, any set can be taken to be a node in a graph. There are at least as many graphs as there are sets.
 
-\slidetwo{We now have Groupoid Classes.}{What About Functors?}
+\vfill
+This implies that the collection of all graphs is not a set --- it is a {\bf proper class}, a subset of $V$ that is not a member of $V$.
 
-We want a formal language for expressing functions (functors) between groupoids.
+\slide{Functors: Functions Between Classes}
+
+We want a formal language with strict grammar that includes expressions for functions between classes.
 
 \vfill
 We want that isomorphic graphs have the same graph Laplacian because the definition of the graph Laplacian is grammatically well-formed (well typed).
@@ -142,14 +269,10 @@ We want that isomorphic graphs have the same graph Laplacian because the definit
 \vfill
 We want that isomorphic topological manifolds have isomorphic homotopy groups because the definition of the homotopy group is grammatically well-formed (well typed).
 
-\slide{Lean's Advantage}
-
-{\bf Grammatical Functor Property}: Any well-typed (grammatically correct) definition of a mapping between classes denotes a {\bf functor between groupoids}.
-
 \vfill
-This implies that one can substitute isomorphic objects into any {\bf well typed} context.
+Neither set theory (Mizar) nor higher order logic (Isabelle/HOL) support this.
 
-\vfill
+\slide{The Substitution of Isomorphics}
 
 ~ \hfill\unnamed
     {
@@ -160,9 +283,7 @@ This implies that one can substitute isomorphic objects into any {\bf well typed
       }
 \hfill ~
 
-\vfill
-
-\slidetwo{The Importance of Isomorphism:}{Classification}
+\slide{The Importance of Isomorphism:}{Classification}
 
 Classification is a central objective of mathematics.  Classifying the finite groups, or topological manifolds, or differentiable manifolds, or Lie groups.
 
@@ -208,33 +329,126 @@ If $x\!:\!\tau$ and $y\!:\!\sigma$ are $\tau$-$\sigma$-cryptomorphic then the $\
 \vfill
 If we treat cryptomorphic objects as just different expressions of ``the same data'' then an object has no natural or canonical structure beyond its symmetry group.
 
+\slide{Dependent Type Theory}
 
-\slide{The Role of Constructivism}
-
-The grammatical functor property was proved for Martin-L\"{o}f type theory, from which Lean is derived, by Hofmann and Streicher in 1995.
-
-\vfill
-But Martin-L\"{o}f type theory (1972) was motivated entirely by constructivism.
-
+For a type system to support the substitution of isomorphics we need types for signature-axiom classes.
 
 \vfill
-It turns out that there is no need for constructivism.  The success of Lean should not be viewed as a vindication of constructivism.
+While having a type ``graph'' seems natural in an object-oriented programming language, the type ``planar graph'' typically cannot be defined in the type system.
 
 \vfill
-This talk presents a dependent type system satisfying the grammatical functor property but derived as a direct generalization of the semantics of multi-sorted higher-order logic.
-
-\slidetwo{Constructive Logic:}{Propositions as Types}
-
-Constructive logics formulate propositions as the types of computer programs.
+A typical object-oriented programming language supports signatures but not statically checked (compile time checked) axioms.
 
 \vfill
-Proof checking is reduced to type checking.
+Dependent Type theory (Lean) supports statically checked signature-axiom types.
+
+\slide{Dependent Function Types}
+
+$\Pi_{x:\tau}\;\sigma[x]$ is the type of functions that maps $x$ of type $\tau$ to a value of type $\sigma[x]$.
 
 \vfill
-A proof of $P$ is a well-typed program whose type is $P$.
+$(\lambda\; \intype{x}{\mathrm{int}}\;x+5)\!:\!\Pi_{x:\mathrm{int}}\;(>(x))$
+
+\slide{Dependent Function Type Inference Rules}
+
+~ \hfill\unnamed
+    {
+      \ant{\Gamma;x\!:\!\tau \vdash e[x]\!:\!\sigma[x]}
+    }{
+      \ant{\Gamma \vdash (\lambda\;x\!:\!\tau \;e[x])\!:\! \Pi_{x:\tau}\;\sigma[x]}
+      }
+\hfill ~
+
+~ \hfill\unnamed
+    {
+      \ant{\Gamma \vdash f\!:\! \Pi_{x:\tau}\;\sigma[x]}
+      \ant{\Gamma \vdash e\!:\! \tau}
+    }{
+      \ant{\Gamma \vdash f(e)\!:\!\sigma[e]}
+      }
+\hfill ~
+
+\slide{Dependent Pair Types}
+
+$\Sigma_{x:\tau}\;\sigma[x]$ is the type of pairs $(x,y)$ with $x:\tau$ and $y:\sigma[x]$.
 
 \vfill
-Constructive logic must be extended with the excluded middle and the axiom of choice to support working mathematicians.
+For $\intype{x}{\mathrm{int}}$ we have $(x,x+5)\!:\!\Sigma_{x:\mathrm{int}}\;(>(x))$.
+
+\slide{Dependent Pair Type Inference Rules}
+
+~ \hfill\unnamed
+    {
+      \ant{\Gamma; \vdash \intype{e}{\tau}}
+      \ant{\Gamma; \vdash \intype{w}{\sigma[e]}}
+    }{
+      \ant{\Gamma \vdash (e,w)\!:\! \Sigma_{x:\tau}\;\sigma[x]}
+      }
+\hfill ~
+
+~ \hfill\unnamed
+    {
+      \ant{\Gamma \vdash e\!:\! \Sigma_{x:\tau}\;\sigma[x]}
+    }{
+      \ant{\Gamma \vdash \pi_1(e)\!:\!\tau}
+      \ant{\Gamma \vdash \pi_2(e)\!:\!\sigma[\pi_1(e)]}
+      }
+\hfill ~
+
+\slide{Propositions as Types}
+
+In Lean propositions (Boolean formulas) are represented by types.
+
+\vfill
+$\forall \intype{x}{\tau} \;\Phi[x]$ is represented by the type $\Pi_{x:\tau}\;\sigma[x]$.
+
+\vfill
+$\exists \intype{x}{\tau} \;\Phi[x]$ is represented by the type $\Sigma_{x:\tau}\;\sigma[x]$.
+
+\vfill
+Types are classified into universes $U_0$, $U_1$, $U_2$, $\ldots$ where type in $U_0$ are ``propositions'',
+types in $U_1$ are ``sets'', types in $U_2$ are ``classes'', and types $U_i$ for $i > 2$ are ever larger Grothendieck universes.
+
+\slide{Propositions as Types: the Good News}
+
+\vfill
+Reducing all of mathematics to type inference rules is extremely compact (elegant?).
+
+\vfill
+Much more compact than the inference rules of first order logic plus the nine axioms of ZFC plus a large cardinal axiom.
+
+\vfill
+It also has the effect of supporting signature-axiom classes as first class types where the axioms are statically checked (explained below).
+
+\vfill
+The validity of the substitution of isomorphics was proved for Martin-L\"{o}f type theory, from which Lean is derived, by Hofmann and Streicher in 1995.
+
+\slide{The Bad News: Constructivism}
+A proposition is a type whose elements are the proofs of the statement represented by the type.
+
+\vfill
+A proposition type is ``true'' if it is ``inhabited'' ---
+there exists an element of the type (proof of the proposition).
+
+\vfill
+The proposition $\forall\;\intype{P}{\mathrm{Prop}}\;P \vee \neg P$ (often called the ``excluded middle'') is rejected.
+
+\vfill
+Proof by contradiction is not allowed.
+
+\vfill
+The distinction between truth and provability is lost (G\"{o}del's incompleteness theorems).
+
+\slide{Getting Around Constructivism}
+
+Mathematicians that use Lean get around constructivist limitations by using extensions of constructive logic that provide
+the excluded middle and the axiom of choice.
+
+\vfill
+However, it turns out there is no need for propositions as types or constructivism.
+
+\vfill
+There is no problem with simply using Boolean propositions from the start.
 
 \slide{Semantics}
 
@@ -251,6 +465,19 @@ We write $\Sigma \models \Phi$ to mean that $\Phi$ is true in all models of $\Si
 \vfill
 We will continue to work semantically and simply generalize a little further the logic developed so far.
 
+
+\slide{Recall Multi-Sorted Logic}
+
+{\huge
+A multi-sorted signature consists of a set of ``sorts'' and a specification $f\!:\!\tau$ of a type $\tau$ for the each symbol $f$ of the language.
+
+\vfill
+A vector space has two sorts --- one for scalars and one for vectors.
+The multiplication-by-a-scalar operator has the type specification
+
+$${\color{red}\mathrm{SVProd}: \mathrm{scalar} \times \mathrm{vector} \rightarrow \mathrm{vector}}$$
+}
+
 \slide{First Class Sorts}
 
 In a programming language something is ``first class'' if it can be passed as an argument to a procedure and included as a value in data structues.
@@ -261,7 +488,7 @@ A group contains its sort as part of its data (the set of group elements).
 \vfill
 To define the type ``group'' we need sorts to be included in objects --- we need first class sorts.
 
-\slide{ Dependent Pair Types}
+\slide{Recall Dependent Pair Types}
 
 \vfill
 To support first class sorts we now include {\color{red} $\mathrm{set}$} as a type so that we can declare a sort $s$ with
@@ -272,7 +499,7 @@ We generalize {\color{red} $\sigma \times \tau$} to {\color{red} $\Sigma_{\intyp
 
 $${\color{red} \mathrm{magma}: \Sigma_{s:\mathrm{set}} [s\times s \rightarrow s]}$$
 
-\slide{Dependent Function Types}
+\slide{Recall Dependent Function Types}
 
 We generalize {\color{red} $\sigma \rightarrow \tau$} to {\color{red} $\Pi_{\intype{x\;}{\;\sigma}}\;\tau[x]$} which denotes the set of all functions $f$ such that the domain of
 $f$ is $\sigma$ and for all $x \in \sigma$ we have $f(x) \in \tau[x]$.
@@ -350,7 +577,8 @@ If the axiom-checker fails to prove that $G$ is a group we can first provide an 
 \slide{Variants of Dependent Type Theory}
 
 \vfill
-I will reserve the term ``dependent type theory'' for type system satisfying the grammatical functor property.
+I will reserve the term ``dependent type theory'' for type system supporting signature-axiom classes as types and
+supporting the substitution of isomorphics.
 
 \vfill
 In practice such a system should be given a ZFC-complete inference mechanism (rules or algorithms).
@@ -391,7 +619,7 @@ beyond its symmetry group.
 
 
 
-\slide{Summary: The Grammatical Functor Property}
+\slide{Summary: The Substitution of Isomorphics}
 
 \vspace{-.5in}
 ~ \hfill\unnamed
