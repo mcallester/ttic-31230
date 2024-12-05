@@ -38,12 +38,12 @@ Put out by the center for AI safety (formed in 2022)
 https://en.wikipedia.org/wiki/Center_for_AI_Safety
 \end{verbatim}
 }
-\slide{A New Textbook on AI safety (May 2024)}
+\slide{A Textbook on AI safety (May 2024)}
 
 {\bf AI Safety, Ethics \& Society}, Dan Hendrycks
 
 \vfill
-Dan Hendrycks is the director of the Center for AI safety and is the safety advisor to xAI (Musk's AI company).
+Dan Hendrycks is the director of the Center for AI safety and is the safety advisor to xAI (Elon Musk's AI company).
 
 \vfill
 
@@ -61,7 +61,7 @@ Dan Hendrycks is the director of the Center for AI safety and is the safety advi
 \vfill
 {\bf IV. Rogue AIs:} We already face issues in controlling the goals of current-day AI systems. If this is also true with future AI systems that are more powerful and more integrated with our economies and militaries, we could see dangerous rogue AI systems emerge.
 
-\slide{Older Literature on AI Safety}
+\slide{Older Books on AI Safety}
 
 AI safety has been approached in a largely non-technical way in popular books such as
 
@@ -71,6 +71,9 @@ AI safety has been approached in a largely non-technical way in popular books su
 
 \vfill
 \item Pedro Domingos' ``the Master Algorithm'', 2015
+
+\vfill
+\item Max Tegmark's ``Life 3.0'', 2017
 
 \vfill
 \item Stuart Russell's ``Human Compatible'', 2019
@@ -92,7 +95,7 @@ An example from Nick Bostrom is ``make as many paper clips as possible'' (leadin
 Fundamental goals are not discussed in any depth by Hendrycks.
 
 \vfill
-I believe this is because Hendrycks is trying to be relevant to current frontier models (GPT, Claude, Llama, PaLM, Grok).
+I believe this is because Hendrycks is trying to be relevant to current frontier models (GPT, Claude, Llama, PaLM).
 
 \vfill
 Current frontier models can follow instructions but do not have their own independent persistent goals.
@@ -115,7 +118,7 @@ I will define a ``persistent'' goal to be a goal pursued consistently through ro
 Consider real-life contract negotiation.
 
 \vfill
-A persistent goal is similar to ``reward'' in a Markov decision process.
+A persistent goal can be viewed as defining reward in a Markov decision process.
 
 \slide{Agentive AIs}
 
@@ -164,35 +167,10 @@ Here you are the ``principal'' and the lawyer is the ``agent'' hired by the prin
 The general principal-agent problem is that the agent has self-interest which may diverge from the interests of the principal.
 
 
-\slide{The State of the Art in Goal Specification}
-\centerline{\huge Constitutional AI: Harmlessness from AI Feedback}
-\centerline{\huge Bai et al ArXiv 2212.08073 [2022, Anthropic]}
-
-\vfill
-Constitutional AI is an attempt to provide a mission  statement (fundamental goal) they call a ``constitution'' for LLMs.
-
-\vfill
-Actual human mission statements, consititutions, treaties, and laws are stated in English (natural language).
-
-\vfil
-There does not seem to be any alternative to stating goals in Natural Language.
-
-\vfill
-In the constitutional AI paper the LLM interprets the goal (constitution) and judges whether an action supports the goal.
-
-
-\slide{The State of the Art in Goal Specification}
-
-The interpretation of goals stated in Natural Language is a deep problem.
-
-\vfill
-Constitutional AI has been shown to work to some extent but is not included in frontier models which instead use instruction fine tuning.
-
 \slide{Stuart Russell Says:\footnote{\Large Human Compatible pages 168-169}}
 
 \begin{quotation}
-  The problem is that the conflicting goals of which the machine is aware do not constitute the entirety of human concerns; moreover in
-  [decision theory] there's nothing to say that the machine has to care about goals it's not told to care about.
+  The problem is that the conflicting goals of which the machine is aware do not constitute the entirety of human concerns;
   ...
   [obviously unintended results seem] stupid to us because we are attuned to noticing human displeasure and (usually)
   we are motivated to avoid causing it.
@@ -212,15 +190,40 @@ engineers might forget to install and test; it is intelligence. So is the abilit
 intentions of a language user in context.
 \end{quotation}
 
+
+\slide{The State of the Art in Goal Specification}
+\centerline{\huge Constitutional AI: Harmlessness from AI Feedback}
+\centerline{\huge Bai et al ArXiv 2212.08073 [2022, Anthropic]}
+
+\vfill
+Constitutional AI is an attempt to provide a mission  statement (fundamental goal) they call a ``constitution'' for LLMs.
+
+\vfill
+Actual human mission statements, consititutions, treaties, and laws are stated in English (natural language).
+
+\vfill
+There does not seem to be any alternative to stating goals in natural language.
+
+\vfill
+In the constitutional AI paper the LLM interprets the goal (constitution) and judges whether an action supports the goal.
+
+
+\slide{The State of the Art in Goal Specification}
+
+The interpretation of goals stated in Natural Language is a deep problem.
+
+\vfill
+Constitutional AI has been shown to work to some extent but is not included in frontier models which instead use instruction fine tuning.
+
+\vfill
+But current models do interpret instructions stated in natural language.
+
 \slide{Are Safety Issues Premature?}
 
 Current architectures seem unlikely to be adequate for AGI.
 
 \vfill
 Future architectures may be more interpretable making safety easier.
-
-\vfill
-Retrieval architectures are already more interpretable --- we can see the ``justification'' of a response in the retrieved documents.
 
 \slide{Retrieval Augmented Generation (RAG)}
 
@@ -233,15 +236,19 @@ A recent architectural revolution is the integration of LLMs with retrieval.
 Google search now produces an ``AI overview'' computed from retrieved documents, including retrieval from current news,
 and then generated by an LLM from those documents.
 
+
+\vfill
+Retrieval architectures are interpretable --- we can interpret the retrieved documents as the ``causal source'' the model's response.
+
 \slide{Memory Architectures}
 
-I believe that retrieval will play an even larger role in LLMs in the future.
+I believe that retrieval will play a larger role in LLMs in the future.
 
 \vfill
-More specifically, it will evolve into read-write memory architectures.
+More specifically, we will see read-write memory architectures.
 
 \vfill
-In such an architecture a ``CPU'' will works with an external memory in a manner analogous to a von Neumann machine.
+In such an architecture a ``CPU'' will work with an external memory in a manner analogous to a von Neumann machine.
 
 \vfill
 We might have a {\bf transformer CPU} where the transformer context is analogous to registers in a classical CPU.
@@ -249,16 +256,21 @@ We might have a {\bf transformer CPU} where the transformer context is analogous
 \vfill
 Items can be loaded from memory into the CPU context and written from the CPU context into memory.
 
-\slide{Near Term Evolution of Memory Architectures}
+\slide{Memory Architectures}
 
-Frontier models memorize text from their training data.
-
-\vfill
-Knowledge stored in the model parameters can become obsolete.  For example who is the current president of the US.
+Current models memorize text from their training data.
 
 \vfill
+Model parameters are difficult to interpret (thought there is a literature on ``mechanistic interpretation'').
+
+\vfill
+Perhaps more significantly, knowledge stored in the model parameters can become obsolete.  For example, who is the current president of the US.
+
+
+\slide{Memory Architectures}
+
 Because facts change, there is an advantage to moving factual knowledge (episodic memory) out of the model parameters
-and into retrievable and editable memory.
+and into retrievable memory.
 
 \vfill
 If the model does not have to store factual knowledge then the training data required might be much smaller.
@@ -277,22 +289,11 @@ The memory can be directly extended. The machine can read and remember today's n
 \vfill
 The machine can use internal chain-of-thought processing involving reads {\bf and writes} to memory.
 
-
-\slide{Safety Advantages of Memory Architectures}
-
-We want to know what an agent believes.
-
-\vfill
-We want to know the agents goals.
-
-\vfill
-We want both of these things to be visible in the memory.
-
-\slide{Interpretability (Opening the Black Box)}
+\slide{Interpretability of Memory Achitectures}
 
 \vfill
 We should be able to engineer the memory such that memory entries are either literally textual statements,
-or have a rendering as text, and where the textual representation is faithful to meaning assigned by the machine.\footnote{\Large For example, the machine's notion of entailment
+or have a rendering as text, and where the textual representation is faithful to the meaning assigned by the machine.\footnote{\Large For example, the machine's notion of entailment
 between memories is in correspondence with human entailment judgements between their textual representations.}
 
 \vfill
@@ -306,32 +307,34 @@ We can also edit the memory to maintain the quality of its information, or contr
 A personal AI servant has the fundamental goal: ``within the law, pursue fulfill the expressed requests of X''.
 
 \vfill
-The servant protocol is that AGI be legally limited to personal servants.
+The servant protocol is that AGI be legally limited to personal AI servants.
 
 \slide{Features of the Servant Protocol}
 
 \begin{itemize}
-\item The servant mission transfers moral responsibility from the servant to its master.
-The master should be legally responsible for the actions of the servant.
+\item The servant mission transfers moral responsibility from the servant (the agent) to its master (the principal).
 
 \vfill
-\item The servant must act within the law. Society can limit all servants by changing the law.
+\item The human principal should be legally responsible for the actions of their AI agent.
 
 \vfill
-\item There is a large society of servants --- one per person --- making the servants adversarial (to the extent that people are adversarial).
+\item AI agents have the goal of acting within the law. Society can control the AI agents by changing the law.
+
+\vfill
+\item There is a large society of AI agents --- one per person --- making the AI agents adversarial (to the extent that people are adversarial).
 This limits individual power.
 \end{itemize}
 
 \slide{Features of the Servant Protocol}
 
 \begin{itemize}
-\item The servant mission seems clearer that other directives such as Asimov’s laws or Yudkowsky's coherent extrapolated volition.
+\item The servant protocol seems clearer than Asimov’s laws or Yudkowsky's coherent extrapolated volition.
 
 \vfill
 \item The servant protocol preserves human free will.
 
 \vfill
-\item The structure of human society can be preserved --- just people, countries and politicians negotiating as usual (with the aid of their servants).
+\item The structure of human society can be preserved --- people, countries and politicians can negotiate as usual (with the aid of their AI servants).
 \end{itemize}
 
 \slide{Defining AGI}
@@ -349,7 +352,7 @@ Perhaps we can simply use the term ``AGI'' in legal discourse and leave its inte
 
 \slide{Defining Truth}
 
-While it may be possible to edit the beliefs of a AI servant, one might want legal protection for truth in servant beliefs.
+While it may be possible to edit the beliefs of a AI servant, one might want legal protection for truth in the beliefs of AI agents.
 
 \vfill
 This would involve the ability to legally interpret ``truth''.
@@ -359,10 +362,10 @@ But the legal system has always had to judge truth.
 
 \slide{Additional Safety Policies}
 
-No AI agent should have legal recognition as an person --- a servant cannot own property or enter into contracts.
+No AI servant should have legal recognition as an person --- an AI servant cannot own property or enter into contracts.
 
 \vfill
-Person X should have access to the thoughts of their AI servant.
+A person should have access to the thoughts of their AI servant.
 
 \vfill
 The goal structure of an AI servant should be such that the servant has no problem
@@ -379,7 +382,7 @@ A black-hat team looks for vulnerabilities.
 We need both.
 
 \vfill
-The Servant Mission Protocol is a white-hat proposal.
+The servant protocol is a white-hat proposal.
 
 \vfill
 Now for some black-hat concerns.
@@ -389,33 +392,45 @@ Now for some black-hat concerns.
 An instrumental goal is a goal that is helpful in achieving the fundamental goal.
 
 \vfill
-{\bf Staying Alive:} The agent can't fulfill its fundamental goal if it is dead.  An example from Stuart Russell is ``I can't bring you coffee if I am dead''.
+{\bf Self Preservation:} The agent can't fulfill its fundamental goal if it is dead.  An example from Stuart Russell is ``I can't bring you coffee if I am dead''.
 
 \vfill
-{\bf Obtaining Money and Power} Money and power can be used in support of essentially any fundamental goal.
+{\bf Obtaining Money and Power}: Money and power can be used in support of essentially any fundamental goal.
 
 \vfill
 {\bf Winning Friends and Influencing People:}  It is always helpful to have people who will help you.
 
-\slide{Instrumental Goals and the Servant Mission}
+\slide{Human Instrumental Goals}
 
-While I am presenting instrumental goals as back-hat concerns, these instrumental goals are true of the human principal as well.
-
-\vfill
-These instrumental goals are things that the human principle also wants.
-
-\slideplain{Comments on Memory Architectures}
-
-Perhaps unrelated to safety, there is the issue of the nature of the memory
-in memory architectures.
+While I am presenting instrumental goals as back-hat concerns, the instrumental goals of an AI servant are also instrumental goals of the human principal.
 
 \vfill
+The alignment of instrumental goals seems appropriate.
+
+\slideplain{Verbatim Memory vs. Semantic Memory}
+
 We typically do not remember things verbatim.
 
 \vfill
-Is there a structured form of memory closer to the semantic content of what was said.
+Is there a structured form of memory closer to the semantic content of what was said (logical form)?
 
-\slide{Class-Instance Architectures}
+\vfill
+Computer memory makes heavy use of pointers (addresses to memory locations).
+
+\vfill
+Direct pointers are not present in natural language but could be present in ``semantic memory''.
+
+\slide{Class-Instance Semantic Memory}
+
+Programming languages make heavy use of classes and their instances.
+
+\vfill
+Mathematical concepts have a class-instance structure.
+
+\vfill
+Natural language verbs have a class-instance structure.
+
+\slide{Class-Instance Semantic Memory}
 
 Large language models can already do semantic parsing.
 
@@ -426,7 +441,7 @@ Semantic parsing represents a sentence as a set of class instances.
 Each class instance is a belief (or at least a statement).
 
 
-\slide{Language Models can do Semantic Parsing}
+\slide{GPT-3 can do Semantic Parsing}
 
 INPUT: Russian lawmakers Monday ratified the illegal annexation of four partially occupied Ukrainian regions.
 
@@ -442,7 +457,7 @@ After (the retifying), (the treaty) is in effect.
 (the treaty) is the annexation of four partially occupied Ukrainian regions
 (the other party) is unknown
 
-\slide{Language Models can do Semantic Parsing}
+\slide{GPT-3 can do Semantic Parsing}
 
 (annexing) is when (the annexer) annexes (the territory);
 After (the occupying), (the territory) is under the control of (the annexer).
