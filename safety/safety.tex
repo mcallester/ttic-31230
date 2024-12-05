@@ -188,15 +188,39 @@ The interpretation of goals stated in Natural Language is a deep problem.
 \vfill
 Constitutional AI has been shown to work to some extent but is not included in frontier models which instead use instruction fine tuning.
 
+\slide{Stuart Russell Says:\footnote{\Large Human Compatible pages 168-169}}
+
+\begin{quotation}
+  The problem is that the conflicting goals of which the machine is aware do not constitute the entirety of human concerns; moreover in
+  [decision theory] there's nothing to say that the machine has to care about goals it's not told to care about.
+  ...
+  [obviously unintended results seem] stupid to us because we are attuned to noticing human displeasure and (usually)
+  we are motivated to avoid causing it.
+  ...
+  We humans (1) care about the preferences of other people and (2) know
+  that we don't know what all those preferences are.
+\end{quotation}
+
+\slide{Stephen Pinker Counters:\footnote{\Large in the collection ``Possible Minds: 25 ways of looking at AI'', Brockman Editor}}
+
+\begin{quotation}
+Fortunately, these [misinterpretation] scenarios are self-refuting. They depend on the premise that
+the AI would be [superintelligent] yet so imbecilic
+that it would wreak havoc based on elementary blunders of misunderstanding. The ability to
+choose an action that best satisfies conflicting goals is not an add-on to intelligence that
+engineers might forget to install and test; it is intelligence. So is the ability to interpret the
+intentions of a language user in context.
+\end{quotation}
+
 \slide{Are Safety Issues Premature?}
 
-We do not yet have agentive AIs.
+Current architectures seem unlikely to be adequate for AGI.
 
 \vfill
-It seems likely (to me) that there will be continued revolutions in deep architectures.
+Future architectures may be more interpretable making safety easier.
 
 \vfill
-Safety issues will need to be re-assessed in the presence of new architectures.
+Retrieval architectures are already more interpretable --- we can see the ``justification'' of a response in the retrieved documents.
 
 \slide{Retrieval Augmented Generation (RAG)}
 
@@ -217,7 +241,7 @@ I believe that retrieval will play an even larger role in LLMs in the future.
 More specifically, it will evolve into read-write memory architectures.
 
 \vfill
-In such an architecture ``CPU'' will works with an external memory in a manner analogous to a von Neumann machine.
+In such an architecture a ``CPU'' will works with an external memory in a manner analogous to a von Neumann machine.
 
 \vfill
 We might have a {\bf transformer CPU} where the transformer context is analogous to registers in a classical CPU.
@@ -277,68 +301,42 @@ By observing the bandwidth to memory we can observe the ``thought process'' of t
 \vfill
 We can also edit the memory to maintain the quality of its information, or control the beliefs of the machine.
 
-\slide{The Advobot Protocol}
+\slide{The Servant Protocol}
 
-A personal advobot is an advocate for a particular person X whose fundamental goal is given as ``within the law, pursue fulfilling the expressed requests of X''.
-
-\vfill
-The advobot protocol is that AGI be limited to advobots.
-
-\slide{Controlability}
-
-An advobot is controlable in three ways.
+A personal AI servant has the fundamental goal: ``within the law, pursue fulfill the expressed requests of X''.
 
 \vfill
-\begin{enumerate}
-\item One specifies the advobot's fundamental goal.
+The servant protocol is that AGI be legally limited to personal servants.
 
-\vfill
-\item One can give requests to the advobot --- its fundamental goal is to pursue obeying them.
-
-\vfill
-\item One can directly edit the beliefs of the advobot.  However, one might want legal protection against creating fake beliefs or
-legal guarantees that advobots use their own independent judgement in determining truth.(very challenging).
-\end{enumerate}
-
-
-\slide{Safety Features of the Protocol}
+\slide{Features of the Servant Protocol}
 
 \begin{itemize}
-\item The advobot must act within the law. Society can limit all advobots by changing the law.
+\item The servant mission transfers moral responsibility from the servant to its master.
+The master should be legally responsible for the actions of the servant.
 
 \vfill
-\item The advobot mission transfers moral responsibility from the advobot to its master.
+\item The servant must act within the law. Society can limit all servants by changing the law.
 
 \vfill
-\item There is a large society of advobots --- one per person --- each with a different mission.  This limits individual power.
-
-\vfill
-\item The advobot mission seems clearer that other directives such as Asimov’s laws or Yudkowsky's coherent extrapolated volition.
-
-\vfill
-\item The advobot protocol preserves human free will.
+\item There is a large society of servants --- one per person --- making the servants adversarial (to the extent that people are adversarial).
+This limits individual power.
 \end{itemize}
 
-\slide{Moral and Legal Responsibility Lies with Humans}
+\slide{Features of the Servant Protocol}
 
-The law should specify that the human principal is legally responsible for the actions of their AI agent.
-
-\vfill
-This assumes that the human principal can in fact control the agent.
+\begin{itemize}
+\item The servant mission seems clearer that other directives such as Asimov’s laws or Yudkowsky's coherent extrapolated volition.
 
 \vfill
-We must ensure that this is true.
-
-\slide{Distribution of Power}
-
-If every human has a powerful AI agent then the power of any single human must be weighed against to collective power of all the AI agents of all the other humans.
+\item The servant protocol preserves human free will.
 
 \vfill
-In many ways the structure of society might not change --- just people, countries and politics as usual.
+\item The structure of human society can be preserved --- just people, countries and politicians negotiating as usual (with the aid of their servants).
+\end{itemize}
 
 \slide{Defining AGI}
 
-Legally limiting AGI to advobots requires some legal interpretation of ``AGI''.
+Legally limiting AGI to servants requires some legal interpretation of ``AGI''.
 
 \vfill
 AGI is of course hard to define.
@@ -351,7 +349,7 @@ Perhaps we can simply use the term ``AGI'' in legal discourse and leave its inte
 
 \slide{Defining Truth}
 
-While it may be possible to edit the beliefs of an advobot, one might want legal protection for truth in advobot beliefs.
+While it may be possible to edit the beliefs of a AI servant, one might want legal protection for truth in servant beliefs.
 
 \vfill
 This would involve the ability to legally interpret ``truth''.
@@ -361,13 +359,13 @@ But the legal system has always had to judge truth.
 
 \slide{Additional Safety Policies}
 
-No AI agent should have legal recognition as an person --- an advobot cannot own property or enter into contracts.
+No AI agent should have legal recognition as an person --- a servant cannot own property or enter into contracts.
 
 \vfill
-Person X should have access to the thoughts of their advobot.
+Person X should have access to the thoughts of their AI servant.
 
 \vfill
-The goal structure of an advobot should be such that an advobot has no problem
+The goal structure of an AI servant should be such that the servant has no problem
 with its human master reading its thoughts.
 
 \slide{White-Hats, Black-Hats}
@@ -475,7 +473,7 @@ Goals must be specified in natural language which raises the issue of goal inter
 Current models are safe and discussions of future safety need to make assumptions about future architectures.
 
 \vfill
-The advobot protocol, informed by an assumption of future memory architectures,
+The servant protocol, informed by an assumption of future memory architectures,
 is designed to preserve human control and human societal structure in the coming age of AGI.
 
 
